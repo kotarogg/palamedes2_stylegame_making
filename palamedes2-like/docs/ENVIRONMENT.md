@@ -35,7 +35,7 @@
 README.md の「セットアップと起動」を参照。検証時の実行結果：
 
 - `npm run typecheck`：エラー0
-- `npm test`：111/111 PASS
+- `npm test`：114/114 PASS
 - `npm run build`：成功（`dist/` 約0.8MB、JS 約100KB）
 - `npm run e2e`：32/32 PASS（Chromium、1280×720・2倍表示、コンソール/ネットワークエラー0）
 - `npm audit`：脆弱性0件

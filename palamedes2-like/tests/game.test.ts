@@ -245,12 +245,12 @@ describe('不成立宣言（確定）', () => {
     p.chainCount = 1;
     p.chainRemaining = 100;
     p.streakCount = 2;
-    p.lastSuccessTick = g.tick;
+    p.streakRemaining = 1000;
     stepUntil(g, g.playStartTick + 50);
     const riseDue = g.tick + p.riseCountdown;
     g.step([cmd(0, 'declare')]);
     const chain0 = p.chainRemaining;
-    p.lastSuccessTick = g.tick - g.ticks(2000) + 10; // 連続取得の受付があと10tick
+    p.streakRemaining = 10; // 連続取得の受付があと10tick
     stepN(g, 20);
     expect(p.chainRemaining).toBe(chain0 - 20);
     expect(g.isLocked(p)).toBe(true);
@@ -331,6 +331,19 @@ describe('役宣言の処理フェーズ（確定）', () => {
     expect(a.tick).toBe(lc[3].tick + per);
     expect(evs(g.events, 'roleEnd')[0].tick).toBe(a.tick + g.ticks(T.roleOutroMs));
     expect(g.players[0].board.height()).toBe(1);
+  });
+
+  it('各列の個数[4,5,4,4,3,5]で2ライン消去すると[2,3,2,2,1,3]（共有ノート12・13）', () => {
+    const counts = [4, 5, 4, 4, 3, 5];
+    const b: Record<number, string[]> = {};
+    counts.forEach((n, c) => (b[c] = Array.from({ length: n }, () => '5c')));
+    const g = makeGame({ boards: { 0: b } });
+    toPlay(g);
+    setStock(g, 0, '1s', '1c', '1s', '1c'); // フォーカード1＋同色統一1＝2翻 → 2ライン
+    g.step([cmd(0, 'declare')]);
+    stepN(g, 300);
+    expect(evs(g.events, 'lineClear')).toHaveLength(2);
+    expect(g.players[0].board.cols.map((c) => c.length)).toEqual([2, 3, 2, 2, 1, 3]);
   });
 
   it('盤面が空になったら消去を打ち切って後続へ進み、基本攻撃量は減らさない', () => {
@@ -427,6 +440,43 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     const slow = run(130);
     expect(slow.d.streakPercent).toBe(100);
     expect(slow.a.breakdown.power).toBe(4);
+  });
+
+  it('連続取得の受付時間は自分の成立役の処理中は停止し、宣言で連続取得状態をリセットしない（共有ノート17）', () => {
+    const g = makeGame({ boards: { 0: rows(6), 1: EMPTY } });
+    setStock(g, 0, '1s', '2s', '3s', '4s');
+    toPlay(g);
+    const p = g.players[0];
+    p.streakCount = 4;
+    p.streakRemaining = 30;
+    g.step([cmd(0, 'declare')]);
+    expect(evs(g.events, 'declare')[0]).toMatchObject({ streak: 4, streakPercent: 125 });
+    stepN(g, 100); // 役処理中（30tickを超えても切れない）
+    expect(p.role).not.toBeNull();
+    expect([p.streakCount, p.streakRemaining]).toEqual([4, 30]); // 宣言tickから停止
+    while (p.role) g.step();
+    stepN(g, 28);
+    expect(g.streakActive(p)).toBe(true);
+    stepN(g, 2);
+    expect(g.streakActive(p)).toBe(false);
+  });
+
+  it('計算順の例（共有ノート18）：基本3×1.5→4、3連鎖目+2で攻撃力6。待機1なら1を相殺に使い5を送る', () => {
+    const b = computeAttack(4, 150, 3);
+    expect(b.power).toBe(6);
+    expect(resolveCounter(b.power, 1)).toMatchObject({ usedPower: 1, sent: 5 });
+    // 共有ノート16の表（A=3）
+    expect([0, 1, 2, 3, 6, 7].map((r) => {
+      const c = resolveCounter(3, r);
+      return [c.usedPower, c.canceled, r - c.canceled, c.sent];
+    })).toEqual([
+      [0, 0, 0, 3],
+      [1, 1, 0, 2],
+      [1, 2, 0, 2],
+      [2, 3, 0, 1],
+      [3, 6, 0, 0],
+      [3, 6, 1, 0],
+    ]);
   });
 
   it('役連鎖：成立ごとに8秒の受付を更新、処理中は停止。2連鎖目+1。不成立は更新・加算しない', () => {

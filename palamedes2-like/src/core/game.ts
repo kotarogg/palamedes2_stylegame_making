@@ -3,7 +3,7 @@
 // 1tick内の処理順：
 //   1. 基準到達（到達tick昇順、同一tickは1P優先）  2. 帰還完了
 //   3. 役処理フェーズの進行（攻撃送信は双方の相殺計算後にまとめて反映）
-//   4. 入力（1P→2P。移動終了時の保持入力を先に処理）  5. 役連鎖タイマー
+//   4. 入力（1P→2P。移動終了時の保持入力を先に処理）  5. 連続取得・役連鎖タイマー
 //   6. 自然上昇・危険猶予  7. 攻撃波  8. 敗北判定（同一tickの両者敗北は引分け）
 import { addAttackLines, computeAttack, resolveCounter, waveLines, type AttackBreakdown, type CounterResult } from './attack';
 import { Board } from './board';
@@ -141,7 +141,8 @@ export interface PlayerState {
   /** 危険猶予の残りtick（null＝猶予中でない） */
   graceRemaining: number | null;
   streakCount: number;
-  lastSuccessTick: number | null;
+  /** 連続取得の受付残りtick（成功取得で2秒に更新。自分の成立役の処理中は停止） */
+  streakRemaining: number;
   chainCount: number;
   /** 役連鎖の受付残りtick（自分の成立役の処理中は停止） */
   chainRemaining: number;
@@ -228,7 +229,7 @@ export class Game {
       manualRiseEndTick: 0,
       graceRemaining: null,
       streakCount: 0,
-      lastSuccessTick: null,
+      streakRemaining: 0,
       chainCount: 0,
       chainRemaining: 0,
       nextWaveTick: null,
@@ -252,7 +253,7 @@ export class Game {
 
   /** 連続取得が受付時間内か */
   streakActive(p: PlayerState): boolean {
-    return p.lastSuccessTick !== null && this.tick - p.lastSuccessTick <= this.ticks(this.config.streakWindowMs);
+    return p.streakRemaining > 0;
   }
 
   /** 現在の連続取得の攻撃倍率×100（受付時間切れなら×1.0） */
@@ -273,7 +274,12 @@ export class Game {
       const mine = commands.filter((c) => c.player === p.id);
       this.processInputs(p, mine);
     }
-    for (const p of this.players) if (!p.role && p.chainRemaining > 0) p.chainRemaining--;
+    // 連続取得・役連鎖の受付時間：自分の成立役の処理中は停止（不成立ペナルティ中は継続）
+    for (const p of this.players) {
+      if (p.role) continue;
+      if (p.chainRemaining > 0) p.chainRemaining--;
+      if (p.streakRemaining > 0) p.streakRemaining--;
+    }
     for (const p of this.players) this.processRise(p);
     for (const p of this.players) this.processAttackWave(p);
     this.resolveDefeat();
@@ -574,7 +580,7 @@ export class Game {
         discarded = r.discarded;
         // 連続取得：成功取得から次の成功取得まで2秒以内なら継続（失敗では更新・リセットしない）
         p.streakCount = this.streakActive(p) ? p.streakCount + 1 : 1;
-        p.lastSuccessTick = this.tick;
+        p.streakRemaining = this.ticks(this.config.streakWindowMs);
         p.board.releaseReservation(f.col, f.piece.id);
         packedIds = p.board.cols[f.col].map((s) => (s.kind === 'piece' ? s.piece.id : s.pieceId));
         packEndTick = this.tick + this.t.packMs;
@@ -633,7 +639,7 @@ export class Game {
           role: p.role ? [p.role.stage, p.role.stageEnd, p.role.linesCleared] : null,
           rise: p.riseCountdown,
           grace: p.graceRemaining,
-          streak: [p.streakCount, p.lastSuccessTick],
+          streak: [p.streakCount, p.streakRemaining],
           chain: [p.chainCount, p.chainRemaining],
           wave: p.nextWaveTick,
         };
