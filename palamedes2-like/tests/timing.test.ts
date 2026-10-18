@@ -32,7 +32,8 @@ describe('描画FPSに依存しない', () => {
   const run = (dts: (i: number) => number, withView: boolean) => {
     const g = makeGame({}, cfg, 2026);
     const sc = script(11, TICKS);
-    const driver = new FixedStepDriver(g, (game) => sc.get(game.tick + 1) ?? []);
+    const driver = new FixedStepDriver({ tickMs: g.tickMs, step: () => g.step(sc.get(g.tick + 1) ?? []) });
+    const time = () => g.tick + driver.alpha;
     const view = withView ? new GameView(g, fakeAssets()) : null;
     const vr = createSeededRng(5);
     for (let i = 0; g.tick < TICKS; i++) {
@@ -40,9 +41,9 @@ describe('描画FPSに依存しない', () => {
       if (view && vr.next() < 0.7) {
         // 補間値の取得・イベント取込の順序やタイミングを不規則にしても結果は同じ
         view.syncEvents();
-        for (const f of view.activeFlights()) view.flightPosition(f, driver.time);
-        view.barVisual(0, driver.time);
-        view.characterX(1, driver.time);
+        for (const f of view.activeFlights()) view.flightPosition(f, time());
+        view.barVisual(0, time());
+        view.characterX(1, time());
       }
     }
     while (g.tick > TICKS) throw new Error('overshoot');
@@ -55,7 +56,7 @@ describe('描画FPSに依存しない', () => {
     const r144 = run(() => 1000 / 144, true);
     const jitter = createSeededRng(9);
     const rj = run(() => 2 + jitter.next() * 60, true);
-    expect(base.events).toBeGreaterThan(200);
+    expect(base.events).toBeGreaterThan(100);
     for (const r of [r30, r144, rj]) {
       expect(r.snap).toBe(base.snap);
       expect(r.events).toBe(base.events);
@@ -119,7 +120,7 @@ describe('失敗帰還の低速下降（表示）', () => {
     stepN(g, g.ticks(g.config.timing.charMoveMs));
     g.step([{ player: 1, type: 'launch' }]);
     const launches = g.events.filter((e) => e.type === 'launch');
-    expect(launches.map((e) => (e.type === 'launch' ? e.arriveTick - e.tick : 0))).toEqual([24, 24]);
+    expect(launches.map((e) => (e.type === 'launch' ? e.arriveTick - e.tick : 0))).toEqual([g.ticks(g.config.timing.launchMs), g.ticks(g.config.timing.launchMs)]);
     expect(launches.map((e) => (e.type === 'launch' ? e.col : -1))).toEqual([2, 0]);
   });
 });

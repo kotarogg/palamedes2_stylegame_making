@@ -25,11 +25,16 @@ export interface ManifestFrame {
   role_index?: number;
   role_name?: string;
   frame?: 'A' | 'B' | 'C';
+  /** v2.1：役成立光の対象領域（フレーム内の原点オフセット） */
+  target_rect?: { x: number; y: number; w: number; h: number };
 }
 
 export interface SpriteManifest {
   schema: string;
   version: string;
+  /** v2.1：読み込み許可リストのファイル名 */
+  asset_loading_policy?: string;
+  role_glow?: { frame_duration_ms: number; period_ms: number; target_pitch_px: number; draw_order: string[] };
   sheets: SheetInfo[];
   frames: ManifestFrame[];
   animations: Record<string, string[]>;
@@ -63,6 +68,25 @@ export interface ScreenLayout {
     small_offsets: [number, number][];
   };
   layers: { z: number; content: string }[];
+}
+
+/** asset_loading_policy.json（明示許可リスト。再帰収集しない） */
+export interface AssetLoadingPolicy {
+  schema: string;
+  mode: 'allowlist_only';
+  recursive_discovery: boolean;
+  sheets: string[];
+  optional_standalone_directory?: string;
+  exclude_directories?: string[];
+}
+
+/** マニフェストの7シートが許可リストに含まれ、許可リスト外を読まないことを検査し、読み込むシートを返す */
+export function sheetsToLoad(manifest: SpriteManifest, policy: AssetLoadingPolicy): SheetInfo[] {
+  if (policy.mode !== 'allowlist_only' || policy.recursive_discovery) throw new Error('asset policy must be allowlist_only without recursive discovery');
+  const allowed = new Set(policy.sheets);
+  for (const s of manifest.sheets) if (!allowed.has(s.file)) throw new Error(`sheet not in allowlist: ${s.file}`);
+  // アトラス方式のみ使用（個別PNG role_glow_frames は読み込まない＝二重読み込みしない）
+  return manifest.sheets;
 }
 
 export class SpriteAtlas {

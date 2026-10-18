@@ -1,0 +1,21 @@
+{
+  "schema": "explicit_asset_allowlist_v1",
+  "mode": "allowlist_only",
+  "recursive_discovery": false,
+  "sheets": [
+    "player_p1_bluegothic_sheet.png",
+    "player_p2_akane_sheet.png",
+    "mascot_cat_sheet.png",
+    "pieces_and_smallpieces_sheet.png",
+    "ui_common_sheet.png",
+    "effects_sheet.png",
+    "role_name_sheet.png"
+  ],
+  "optional_standalone_directory": "role_glow_frames",
+  "exclude_directories": [
+    "旧版・補完",
+    "90_旧版・保管",
+    "03_画像制作途中・確認用"
+  ],
+  "note": "Load atlas OR individual frames. Do not recursively scan image root. Archives are never inputs."
+}

@@ -22,15 +22,15 @@ describe('仮スプライトシート7枚とマニフェスト', () => {
     }
   });
 
-  it('286矩形がすべてシート内に収まり、シート内で重複しない', () => {
-    expect(m.frames).toHaveLength(286);
+  it('302矩形（v2.1：役成立光16追加）がすべてシート内に収まり、シート内で重複しない', () => {
+    expect(m.frames).toHaveLength(302);
     const counts: Record<string, number> = {};
     for (const f of m.frames) {
       const s = m.sheets.find((x) => x.id === f.sheet)!;
       expect(f.x >= 0 && f.y >= 0 && f.x + f.w <= s.width && f.y + f.h <= s.height, `${f.sheet}/${f.id}`).toBe(true);
       counts[f.sheet] = (counts[f.sheet] ?? 0) + 1;
     }
-    expect(counts).toEqual({ S1: 30, S2: 30, S3: 25, S4: 48, S5: 69, S6: 36, S7: 48 });
+    expect(counts).toEqual({ S1: 30, S2: 30, S3: 25, S4: 48, S5: 69, S6: 52, S7: 48 });
     for (const sheet of Object.keys(counts)) {
       const fs = m.frames.filter((f) => f.sheet === sheet);
       for (let i = 0; i < fs.length; i++)
@@ -128,7 +128,7 @@ describe('画面座標（screen_layout_v2.json revision 2.1）', () => {
     expect(L.pRect(1, 'role_logo')).toMatchObject({ x: 360, y: 34, w: 160, h: 64 });
   });
 
-  it('描画レイヤー値が画面JSONと一致し、キャラ/役名＜帰還＜打上げ、B暗色＜通常、ストック50＜背面光55＜キャラ60＜前面光65', () => {
+  it('描画レイヤー値が画面JSONと一致し、キャラ/役名＜帰還＜打上げ、B暗色＜通常、UI50＜背面光55＜キャラ60＜前面光65', () => {
     const zs = layoutData().layers.map((l) => l.z);
     expect(Object.values(Z).sort((a, b) => a - b)).toEqual([...zs].sort((a, b) => a - b));
     expect(Z.character < Z.returning && Z.roleName < Z.returning && Z.returning < Z.launching).toBe(true);

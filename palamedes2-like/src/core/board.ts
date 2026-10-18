@@ -68,6 +68,27 @@ export class Board {
     row.forEach((p, i) => this.cols[i].push({ kind: 'piece', piece: p }));
   }
 
+  /** 役宣言の消去：上側の横1ライン（各列の最上段）を取り除き、残りを上へ詰める */
+  removeTopRow(): Array<{ col: number; piece: Piece }> {
+    const removed: Array<{ col: number; piece: Piece }> = [];
+    this.cols.forEach((c, col) => {
+      const s = c[0];
+      if (!s) return;
+      if (s.kind !== 'piece') throw new Error(`column ${col} top is reserved during line clear`);
+      c.shift();
+      removed.push({ col, piece: s.piece });
+    });
+    return removed;
+  }
+
+  isEmpty(): boolean {
+    return this.cols.every((c) => c.length === 0);
+  }
+
+  hasReservation(col: number): boolean {
+    return this.cols[col].some((s) => s.kind === 'reserved');
+  }
+
   /** 盤面上の全ピースID（予約は pieceId として含む） */
   allIds(): number[] {
     return this.cols.flatMap((c) => c.map((s) => (s.kind === 'piece' ? s.piece.id : s.pieceId)));

@@ -1,10 +1,12 @@
 // 素材確認画面（全PNG切出し・主要モーション・役名16×3フレーム・攻撃表示0〜29）
 import { layoutAttackIcons } from '../core/attack';
 import { DEFAULT_VIEW_CONFIG } from '../core/config';
+import { glowSegments } from '../core/roles';
+import { SUITS } from '../core/types';
 import { drawFrame, type Assets } from './assets';
 import type { ManifestFrame } from './data';
 
-export const VIEWER_PAGES = ['キャラ・猫モーション', '役名16種×A/B/C', 'S4ピース（通常・小型・B暗色）', 'S6エフェクト', 'S5 UI', '攻撃表示 0〜29'] as const;
+export const VIEWER_PAGES = ['キャラ・猫モーション', '役名16種×A/B/C', 'S4ピース（通常・小型・B暗色）', 'S6エフェクト', 'S5 UI', '攻撃表示 0〜29', '役成立光 v2.1（共有時計）'] as const;
 
 export class AssetViewer {
   page = 0;
@@ -19,7 +21,7 @@ export class AssetViewer {
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = '#14142a';
     ctx.fillRect(0, 0, 640, 360);
-    [this.motions, this.roles, this.pieces, this.effects, this.ui, this.attack][this.page].call(this, ctx, ms);
+    [this.motions, this.roles, this.pieces, this.effects, this.ui, this.attack, this.glow][this.page].call(this, ctx, ms);
     this.label(ctx, `素材確認 ${this.page + 1}/${VIEWER_PAGES.length}：${VIEWER_PAGES[this.page]}（←→で切替 / Vで戻る）`, 4, 348);
   }
 
@@ -119,5 +121,32 @@ export class AssetViewer {
       icons.big.forEach((b) => drawFrame(ctx, this.assets, big, b.x, b.y));
       icons.small.forEach((s) => drawFrame(ctx, this.assets, small, s.x, s.y));
     }
+  }
+
+  /** 1〜6枠×背面/前面を共有時計（phase=floor(ms/250)%2）で同期再生。12234 の2区間例も表示 */
+  private glow(ctx: CanvasRenderingContext2D, ms: number): void {
+    const A = this.assets.atlas;
+    const phase = Math.floor(ms / DEFAULT_VIEW_CONFIG.glowFrameMs) % 2 === 0 ? 'a' : 'b';
+    const piece = (i: number) => A.piece((i % 6) + 1, SUITS[i % 4], true);
+    const row = (x0: number, y0: number, indices: number[], count: number, label: string) => {
+      for (const s of glowSegments(indices)) {
+        const back = A.frame('S6', `role_glow_${s.length}_back_${phase}`);
+        const tr = back.target_rect ?? { x: 0, y: 0 };
+        drawFrame(ctx, this.assets, back, x0 + 24 * s.start - tr.x, y0 - tr.y);
+      }
+      for (let i = 0; i < count; i++) drawFrame(ctx, this.assets, piece(i), x0 + 24 * i, y0);
+      for (const s of glowSegments(indices)) {
+        const front = A.frame('S6', `role_glow_${s.length}_front_${phase}`);
+        const tr = front.target_rect ?? { x: 0, y: 0 };
+        drawFrame(ctx, this.assets, front, x0 + 24 * s.start - tr.x, y0 - tr.y);
+      }
+      this.label(ctx, label, x0 + 24 * 6 + 12, y0 + 8, '#c0d8ff');
+    };
+    for (let n = 1; n <= 6; n++) row(16, 20 + (n - 1) * 44, Array.from({ length: n }, (_, i) => i), 6, `role_glow_${n}（${24 * n}px幅）`);
+    row(330, 20, [0, 1, 3, 4], 5, '12234 の採用位置1・2・4・5');
+    row(330, 64, [0, 2, 3, 5], 6, '離れた区間（1＋2＋1）');
+    this.label(ctx, `共有時計 phase=${phase.toUpperCase()}（A/B 各250ms・周期500ms、全サイズ・全区間・前面/背面で同期）`, 330, 120, '#ffd060');
+    this.label(ctx, '描画順：背面光 → ピース → 前面光。対象左上から原点オフセットを引いて配置', 330, 134, '#9aa4c0');
+    this.label(ctx, 'role_glow_6_spark は常時囲み光に含めない', 330, 148, '#9aa4c0');
   }
 }

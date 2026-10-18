@@ -1,5 +1,5 @@
 // ブラウザでの素材読込。PNG・JSONは public/ 配下から実行時に取得する。
-import { Layout, SpriteAtlas, type ManifestFrame, type ScreenLayout, type SpriteManifest } from './data';
+import { Layout, sheetsToLoad, SpriteAtlas, type AssetLoadingPolicy, type ManifestFrame, type ScreenLayout, type SpriteManifest } from './data';
 
 export interface Assets {
   atlas: SpriteAtlas;
@@ -42,9 +42,10 @@ export async function loadAssets(baseUrl: string, darkAlpha: number): Promise<As
     loadJson<SpriteManifest>(`${baseUrl}data/sprite_manifest_v2.json`),
     loadJson<ScreenLayout>(`${baseUrl}data/screen_layout_v2.json`),
   ]);
+  const policy = await loadJson<AssetLoadingPolicy>(`${baseUrl}data/${manifest.asset_loading_policy ?? 'asset_loading_policy.json'}`);
   const images = new Map<string, HTMLImageElement>();
   await Promise.all(
-    manifest.sheets.map(async (s) => {
+    sheetsToLoad(manifest, policy).map(async (s) => {
       const img = await loadImage(`${baseUrl}assets/sprites/${s.file}`);
       if (img.width !== s.width || img.height !== s.height)
         throw new Error(`${s.file}: size ${img.width}x${img.height} != manifest ${s.width}x${s.height}`);

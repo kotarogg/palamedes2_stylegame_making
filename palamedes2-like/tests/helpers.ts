@@ -66,6 +66,20 @@ export const top = (g: Game, p: PlayerId, col: number): Piece | null => {
 
 export const label = (p: { n: number; suit: Suit }) => `${p.n}${p.suit[0]}`;
 
+/** 役ストックを差し替える（コード列 '1s' など） */
+export function setStock(g: Game, p: PlayerId, ...codes: string[]): void {
+  g.players[p].roleStock = codes.map((c) => g.factory.make(kind(c).n, kind(c).suit));
+}
+
+/** 全列を同じ段数のピースで埋めた盤面指定（上から） */
+export function rows(n: number, code = '5c'): Record<number, string[]> {
+  const out: Record<number, string[]> = {};
+  for (let c = 0; c < 6; c++) out[c] = Array.from({ length: n }, () => code);
+  return out;
+}
+
+export const EMPTY: Record<number, string[]> = rows(0);
+
 /** 盤面・移動中のピースIDがすべて一意か */
 export function allPieceIds(g: Game): number[] {
   const ids: number[] = [];

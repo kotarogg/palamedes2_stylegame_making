@@ -1,4 +1,4 @@
-// 役判定（統合仕様 第6〜7章）。翻数は攻撃量換算とは別物（換算式は未確定 G01）。
+// 役判定（統合仕様 第6〜7章＋2026-10-18確定の同点採択）。翻数＝消去ライン数、攻撃量は attack.ts。
 import { isRed, SUITS, type Piece } from './types';
 
 export type NumberRole =
@@ -27,6 +27,8 @@ export const SUIT_ROLE_HAN: Record<SuitRole, number> = { same_color: 1, all_mark
 export interface RoleResult {
   /** 採択した部分集合（4個または6個） */
   subset: Piece[];
+  /** 採択したピースの役ストック上の位置（昇順）。成立光の区間に使う */
+  indices: number[];
   size: 4 | 6;
   numberRole: NumberRole | null;
   suitRole: SuitRole | null;
@@ -34,14 +36,14 @@ export interface RoleResult {
   color: 'red' | 'black' | null;
   /** 数字役＋属性役（最強1種）の翻数合計。複合表示名で二重加算しない */
   han: number;
+  /** 数字役の翻数（同点時の採択に使う） */
+  numberHan: number;
 }
 
 export type StockEvaluation =
   | { kind: 'too_few' }
-  /** 4個以上あるが役が成立しない。無役宣言の扱いは未確定（G04） */
+  /** 4個以上あるが役が成立しない */
   | { kind: 'no_role' }
-  /** 最強候補が同翻数で複数種類。同点役の優先順位は未確定（G04） */
-  | { kind: 'tie'; candidates: RoleResult[] }
   | { kind: 'ok'; result: RoleResult };
 
 function counts(ps: readonly Piece[]): number[] {
@@ -83,18 +85,21 @@ export function strongestSuitRole(ps: readonly Piece[]): { role: SuitRole; color
 }
 
 /** 1つの部分集合を数字役・属性役とも同じ集合で評価する */
-export function evaluateSubset(subset: Piece[]): RoleResult {
+export function evaluateSubset(subset: Piece[], indices: number[] = subset.map((_, i) => i)): RoleResult {
   const size = subset.length as 4 | 6;
   const nr = size === 6 ? numberRole6(subset) : numberRole4(subset);
   const sr = strongestSuitRole(subset);
-  const han = (nr ? NUMBER_ROLE_HAN[nr] : 0) + (sr ? SUIT_ROLE_HAN[sr.role] : 0);
+  const numberHan = nr ? NUMBER_ROLE_HAN[nr] : 0;
+  const han = numberHan + (sr ? SUIT_ROLE_HAN[sr.role] : 0);
   return {
     subset,
+    indices,
     size,
     numberRole: nr,
     suitRole: sr ? sr.role : null,
     color: sr && sr.role === 'same_color' ? sr.color : null,
     han,
+    numberHan,
   };
 }
 
@@ -107,30 +112,69 @@ export function fourSubsets<T>(items: readonly T[]): T[][] {
   return out;
 }
 
-const signature = (r: RoleResult) => `${r.size}:${r.numberRole ?? '-'}:${r.suitRole ?? '-'}:${r.color ?? '-'}`;
+/** 役一覧（統合仕様7.4 R01〜R16）の掲載順。同点時の最終採択に使う */
+const NUMBER_ORDER: readonly NumberRole[] = [
+  'four_card',
+  'nikoniko',
+  'straight',
+  'high_straight',
+  'full_card',
+  'nikoniko_niko',
+  'super_straight',
+];
 
-function pickStrongest(candidates: RoleResult[]): StockEvaluation {
-  const valid = candidates.filter((r) => r.han > 0);
-  if (valid.length === 0) return { kind: 'no_role' };
-  const max = Math.max(...valid.map((r) => r.han));
-  const bySig = new Map<string, RoleResult>();
-  for (const r of valid) if (r.han === max && !bySig.has(signature(r))) bySig.set(signature(r), r);
-  const top = [...bySig.values()];
-  return top.length === 1 ? { kind: 'ok', result: top[0] } : { kind: 'tie', candidates: top };
+function suitOrder(r: RoleResult): number {
+  if (r.suitRole === 'same_color') return r.color === 'black' ? 0 : 1; // R08/R10 黒 → R09/R11 赤
+  if (r.suitRole === 'all_mark') return 2;
+  if (r.suitRole === 'flush') return 3;
+  return 4;
 }
 
 /**
- * 役ストック（最大6個）の評価。
+ * 同じ選択段階の候補比較（確定）：合計翻数 → 数字役の翻数 → 役一覧の掲載順。
+ * 負なら a を採択。完全に同じ役なら列挙順（先に見つかった部分集合）を保つ。
+ */
+export function compareCandidates(a: RoleResult, b: RoleResult): number {
+  if (a.han !== b.han) return b.han - a.han;
+  if (a.numberHan !== b.numberHan) return b.numberHan - a.numberHan;
+  const na = a.numberRole ? NUMBER_ORDER.indexOf(a.numberRole) : NUMBER_ORDER.length;
+  const nb = b.numberRole ? NUMBER_ORDER.indexOf(b.numberRole) : NUMBER_ORDER.length;
+  if (na !== nb) return na - nb;
+  return suitOrder(a) - suitOrder(b);
+}
+
+function pickStrongest(candidates: RoleResult[]): StockEvaluation {
+  let best: RoleResult | null = null;
+  for (const r of candidates) if (r.han > 0 && (!best || compareCandidates(r, best) < 0)) best = r;
+  return best ? { kind: 'ok', result: best } : { kind: 'no_role' };
+}
+
+/**
+ * 役ストック（最大6個）の評価。並びが連続している必要はない（全組合せ評価）。
  * 4個：その4個。5個：5通りの4個部分集合から最強。
  * 6個：6個全体で成立する役（6個役）を優先。無ければ15通りの4個部分集合から最強。
+ * 同点は compareCandidates で自動採択する（選択UIなし）。
  */
 export function evaluateStock(stock: readonly Piece[]): StockEvaluation {
   if (stock.length < 4) return { kind: 'too_few' };
   if (stock.length === 6) {
-    const whole = evaluateSubset([...stock]);
+    const whole = evaluateSubset([...stock], [0, 1, 2, 3, 4, 5]);
     if (whole.han > 0) return { kind: 'ok', result: whole };
   }
-  return pickStrongest(fourSubsets(stock).map(evaluateSubset));
+  const idx = stock.map((_, i) => i);
+  return pickStrongest(fourSubsets(idx).map((ix) => evaluateSubset(ix.map((i) => stock[i]), ix)));
+}
+
+/** 採択位置を連続区間に分割（成立光の囲み単位）。例 [0,1,3,4] → [[0,2],[3,2]]（開始位置・長さ） */
+export function glowSegments(indices: readonly number[]): Array<{ start: number; length: number }> {
+  const sorted = [...indices].sort((a, b) => a - b);
+  const out: Array<{ start: number; length: number }> = [];
+  for (const i of sorted) {
+    const last = out[out.length - 1];
+    if (last && last.start + last.length === i) last.length++;
+    else out.push({ start: i, length: 1 });
+  }
+  return out;
 }
 
 const NUMBER_LOGO: Record<NumberRole, number> = {
@@ -146,7 +190,7 @@ const NUMBER_LOGO: Record<NumberRole, number> = {
 /**
  * 表示する役名ロゴ（S7 role_index = R番号-1）の列。
  * 判定（翻数）とは分離した表示名の対応。R08〜R11・R16 は暫定名。
- * 名称の決まっていない複合（例：フォーカード＋同色統一）は数字役→属性役の順に表示する（表示上の技術選択）。
+ * 専用ロゴがあるストレートフラッシュ系（R14〜R16）は専用ロゴだけ。それ以外の複合は数字役→属性役の順（確定）。
  */
 export function roleLogoIndices(r: RoleResult): number[] {
   const flush = r.suitRole === 'flush';

@@ -1,4 +1,4 @@
-# 環境記録（2026-10-18 初回）
+# 環境記録（2026-10-18 初回作成、v0.2.0 で更新）
 
 ## 実行環境（実際に確認した値）
 
@@ -35,9 +35,10 @@
 README.md の「セットアップと起動」を参照。検証時の実行結果：
 
 - `npm run typecheck`：エラー0
-- `npm test`：66/66 PASS
-- `npm run build`：成功（`dist/` 約0.8MB、JS 53KB）
-- `npm run e2e`：24/24 PASS（Chromium、1280×720・2倍表示、コンソール/ネットワークエラー0）
+- `npm test`：111/111 PASS
+- `npm run build`：成功（`dist/` 約0.8MB、JS 約100KB）
+- `npm run e2e`：32/32 PASS（Chromium、1280×720・2倍表示、コンソール/ネットワークエラー0）
+- `npm audit`：脆弱性0件
 
 開発サーバー：127.0.0.1:5173（`npm run dev`）、プレビュー：127.0.0.1:4173、配布用サーバー：127.0.0.1:8080（`node serve.mjs`）。いずれも Ctrl+C で停止。
 
@@ -48,7 +49,8 @@ README.md の「セットアップと起動」を参照。検証時の実行結�
 | 接続手段 | Claude 側の Google Drive コネクタ（認証済み）。ChatGPT 側の接続は使用していない |
 | 一覧取得 | 可（共有ルート・各サブフォルダを列挙） |
 | 全文取得 | 可。仕様書・JSON・CSVを全文取得し、サイズがDriveの記録と一致することを確認 |
-| PNG取得 | 可。7枚を取得し、マニフェスト記載の SHA-256 と全一致 |
+| PNG取得 | 可。7枚を取得し、マニフェスト記載の SHA-256 と全一致（v0.2.0 では v2.1 の effects_sheet.png を再取得し、新マニフェストの SHA-256 と一致） |
+| v2.1 追加資料 | sprite_manifest_v2.json（内部version 2.1）、asset_loading_policy.json、03_sprite_addresses_v2.md、sprite_rectangles_v2.csv、役成立光の納品記録・検証JSONを取得。旧版・確認用フォルダは読んでいない |
 | コンテナからDriveへの直接HTTP | 不可（プロキシが drive.google.com を拒否、403） |
 | 新規保存 | 可。テキストはコネクタで作成、PNG/JSON原本はDrive内でサーバー側コピー |
 | バイナリ（ZIP・スクリーンショットPNG）の保存 | **不可（実用上）**：コネクタは内容をツール呼出しの本文として渡す方式のため、ZIP/PNGの大きなバイナリを正確に転送できない（試行時に転記誤りを検出）。ZIPはコンテナ内で作成・展開検証のみ実施 |

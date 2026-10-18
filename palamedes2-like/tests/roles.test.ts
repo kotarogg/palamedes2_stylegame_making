@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { evaluateStock, evaluateSubset, fourSubsets, roleLogoIndices, type StockEvaluation } from '../src/core/roles';
+import { compareCandidates, evaluateStock, evaluateSubset, fourSubsets, glowSegments, roleLogoIndices, type StockEvaluation } from '../src/core/roles';
 import { pushRoleStock, ROLE_STOCK_MAX } from '../src/core/stock';
 import type { Piece } from '../src/core/types';
 import { kind } from './helpers';
@@ -85,7 +85,7 @@ describe('複合役（翻数加算・二重加算禁止）', () => {
     expect(roleLogoIndices(r)).toEqual(logos);
   });
 
-  it('名称未定の複合は数字役→属性役の順で表示', () => {
+  it('専用ロゴのない複合は数字役→属性役の順で表示（確定）', () => {
     const r = ok(evaluateStock(ps('3s', '3c', '3s', '3c')));
     expect(r).toMatchObject({ numberRole: 'four_card', suitRole: 'same_color', color: 'black', han: 2 });
     expect(roleLogoIndices(r)).toEqual([0, 7]);
@@ -128,7 +128,7 @@ describe('部分集合評価', () => {
     expect(Math.max(...fourSubsets(stock).map((s) => evaluateSubset(s).han))).toBe(3);
   });
 
-  it('6個：6個全体で成立する役を優先（解釈：4個部分集合の方が翻数が高くても6個役。要確認として報告）', () => {
+  it('6個：6個全体で成立する役を優先（確定：4個部分集合の方が翻数が高くても6個役）', () => {
     // 全体：オールブラック(同色統一1翻)。4個部分集合 {1s,1c,1s,1c} はフォーカード＋同色2翻だが6個役を優先
     const r = ok(evaluateStock(ps('1s', '1c', '1s', '1c', '1s', '2c')));
     expect(r.size).toBe(6);
@@ -141,17 +141,51 @@ describe('部分集合評価', () => {
     expect(r.han).toBe(5);
   });
 
-  it('未確定(G04)：無役・同点役は ok を返さない', () => {
+  it('無役は no_role', () => {
     expect(evaluateStock(ps('1s', '1d', '2s', '4d')).kind).toBe('no_role');
-    // {1s,1s,1d,1d}=フォーカード1翻 と {1s,1s,3s,5c}=フォーブラック1翻 が同点（6個全体は役なし）
-    const tie = evaluateStock(ps('1s', '1s', '1d', '1d', '3s', '5c'));
-    expect(tie.kind).toBe('tie');
-    if (tie.kind === 'tie') {
-      expect(tie.candidates.map((c) => c.han)).toEqual([1, 1]);
-      expect(tie.candidates.map((c) => c.numberRole ?? c.suitRole).sort()).toEqual(['four_card', 'same_color']);
-    }
-    // 同じ役が別の部分集合で並ぶだけなら同点扱いしない
-    expect(evaluateStock(ps('1s', '2s', '3c', '4c', '2c')).kind).toBe('ok');
+  });
+
+  it('同点（確定）：合計翻数が同じなら数字役の翻数が高い候補を採択', () => {
+    // {1s,1s,1d,1d}=フォーカード1翻（数字1） と {1s,1s,3s,5c}=フォーブラック1翻（数字0）
+    const r = ok(evaluateStock(ps('1s', '1s', '1d', '1d', '3s', '5c')));
+    expect(r).toMatchObject({ numberRole: 'four_card', suitRole: null, han: 1 });
+    expect(r.indices).toEqual([0, 1, 2, 3]);
+  });
+
+  it('同点（確定）：数字役の翻数も同じなら役一覧の掲載順（R01フォーカード→R02ニコニコ）', () => {
+    // 6個全体は役なし。{1,1,1,1}=フォーカード1翻 と {1,1,2,2}=ニコニコ1翻
+    const r = ok(evaluateStock(ps('1s', '1d', '2s', '1s', '1d', '2d')));
+    expect(r.numberRole).toBe('four_card');
+    expect(r.indices).toEqual([0, 1, 3, 4]);
+  });
+
+  it('同点（確定）：属性役どうしは掲載順（同色統一 黒R08→赤R09→オールマーク→フラッシュ）', () => {
+    const black = evaluateSubset(ps('1s', '3c', '5s', '6c'));
+    const red = evaluateSubset(ps('1d', '3h', '5d', '6h'));
+    expect(black.han).toBe(red.han);
+    expect(compareCandidates(black, red)).toBeLessThan(0);
+    expect(compareCandidates(red, black)).toBeGreaterThan(0);
+  });
+
+  it('全組合せ評価：採択する4個はストック上で連続している必要がない', () => {
+    // 1234ストレート＋同色統一（黒）を飛び飛びの位置から採択
+    const r = ok(evaluateStock(ps('1s', '6d', '2c', '3s', '4c')));
+    expect(r.numberRole).toBe('straight');
+    expect(r.indices).toEqual([0, 2, 3, 4]);
+  });
+
+  it('成立光の区間：採択位置を連続区間に分割（12234 の位置1・2・4・5 → 開始1と4の2枠用×2）', () => {
+    // 「12234」は 1始まりの位置表記。内部は0始まり [0,1,3,4]
+    expect(glowSegments([0, 1, 3, 4])).toEqual([
+      { start: 0, length: 2 },
+      { start: 3, length: 2 },
+    ]);
+    expect(glowSegments([0, 1, 2, 3, 4, 5])).toEqual([{ start: 0, length: 6 }]);
+    expect(glowSegments([5, 0, 2, 4])).toEqual([
+      { start: 0, length: 1 },
+      { start: 2, length: 1 },
+      { start: 4, length: 2 },
+    ]);
   });
 
   it('4個未満は宣言不可', () => {
