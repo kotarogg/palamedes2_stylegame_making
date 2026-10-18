@@ -1,0 +1,1330 @@
+{
+  "schema": "palamedes_like_screen_v2",
+  "canvas": {
+    "w": 640,
+    "h": 360
+  },
+  "coordinate_system": "top-left; logical px; half-open rectangles",
+  "status": "LATEST_COORDINATES_INTEGRATED_WITH_LISTED_EXCEPTIONS",
+  "objects": [
+    {
+      "id": "p1_board",
+      "x": 64,
+      "y": 128,
+      "w": 192,
+      "h": 224,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p1_cell_r0_c0",
+      "x": 64,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r0_c1",
+      "x": 96,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r0_c2",
+      "x": 128,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r0_c3",
+      "x": 160,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r0_c4",
+      "x": 192,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r0_c5",
+      "x": 224,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r1_c0",
+      "x": 64,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r1_c1",
+      "x": 96,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r1_c2",
+      "x": 128,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r1_c3",
+      "x": 160,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r1_c4",
+      "x": 192,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r1_c5",
+      "x": 224,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r2_c0",
+      "x": 64,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r2_c1",
+      "x": 96,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r2_c2",
+      "x": 128,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r2_c3",
+      "x": 160,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r2_c4",
+      "x": 192,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r2_c5",
+      "x": 224,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r3_c0",
+      "x": 64,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r3_c1",
+      "x": 96,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r3_c2",
+      "x": 128,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r3_c3",
+      "x": 160,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r3_c4",
+      "x": 192,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r3_c5",
+      "x": 224,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r4_c0",
+      "x": 64,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r4_c1",
+      "x": 96,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r4_c2",
+      "x": 128,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r4_c3",
+      "x": 160,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r4_c4",
+      "x": 192,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r4_c5",
+      "x": 224,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r5_c0",
+      "x": 64,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r5_c1",
+      "x": 96,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r5_c2",
+      "x": 128,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r5_c3",
+      "x": 160,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r5_c4",
+      "x": 192,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r5_c5",
+      "x": 224,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r6_c0",
+      "x": 64,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r6_c1",
+      "x": 96,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r6_c2",
+      "x": 128,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r6_c3",
+      "x": 160,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r6_c4",
+      "x": 192,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_cell_r6_c5",
+      "x": 224,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p1_stock_0",
+      "x": 66,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p1_stock_1",
+      "x": 90,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p1_stock_2",
+      "x": 114,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p1_stock_3",
+      "x": 138,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p1_stock_4",
+      "x": 162,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p1_stock_5",
+      "x": 186,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_board",
+      "x": 384,
+      "y": 128,
+      "w": 192,
+      "h": 224,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_cell_r0_c0",
+      "x": 384,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r0_c1",
+      "x": 416,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r0_c2",
+      "x": 448,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r0_c3",
+      "x": 480,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r0_c4",
+      "x": 512,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r0_c5",
+      "x": 544,
+      "y": 128,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r1_c0",
+      "x": 384,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r1_c1",
+      "x": 416,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r1_c2",
+      "x": 448,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r1_c3",
+      "x": 480,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r1_c4",
+      "x": 512,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r1_c5",
+      "x": 544,
+      "y": 160,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r2_c0",
+      "x": 384,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r2_c1",
+      "x": 416,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r2_c2",
+      "x": 448,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r2_c3",
+      "x": 480,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r2_c4",
+      "x": 512,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r2_c5",
+      "x": 544,
+      "y": 192,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r3_c0",
+      "x": 384,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r3_c1",
+      "x": 416,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r3_c2",
+      "x": 448,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r3_c3",
+      "x": 480,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r3_c4",
+      "x": 512,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r3_c5",
+      "x": 544,
+      "y": 224,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r4_c0",
+      "x": 384,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r4_c1",
+      "x": 416,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r4_c2",
+      "x": 448,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r4_c3",
+      "x": 480,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r4_c4",
+      "x": 512,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r4_c5",
+      "x": 544,
+      "y": 256,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r5_c0",
+      "x": 384,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r5_c1",
+      "x": 416,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r5_c2",
+      "x": 448,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r5_c3",
+      "x": 480,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r5_c4",
+      "x": 512,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r5_c5",
+      "x": 544,
+      "y": 288,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r6_c0",
+      "x": 384,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r6_c1",
+      "x": 416,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r6_c2",
+      "x": 448,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r6_c3",
+      "x": 480,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r6_c4",
+      "x": 512,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_cell_r6_c5",
+      "x": 544,
+      "y": 320,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "固定グリッド番地。論理占有や上昇途中の描画座標ではない"
+    },
+    {
+      "id": "p2_stock_0",
+      "x": 386,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_stock_1",
+      "x": 410,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_stock_2",
+      "x": 434,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_stock_3",
+      "x": 458,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_stock_4",
+      "x": 482,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_stock_5",
+      "x": 506,
+      "y": 36,
+      "w": 24,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "base_piece",
+      "x": 302,
+      "y": 48,
+      "w": 32,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "受領仕様第12章"
+    },
+    {
+      "id": "base_frame",
+      "x": 294,
+      "y": 40,
+      "w": 48,
+      "h": 48,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": "受領仕様第12章"
+    },
+    {
+      "id": "p1_role_logo",
+      "x": 120,
+      "y": 34,
+      "w": 160,
+      "h": 64,
+      "status": "source_rect",
+      "anchor": "top_left",
+      "note": "受領資料の矩形位置・160x64。追加拡大は未指定"
+    },
+    {
+      "id": "p2_role_logo",
+      "x": 360,
+      "y": 34,
+      "w": 160,
+      "h": 64,
+      "status": "source_rect",
+      "anchor": "top_left",
+      "note": "受領資料の矩形位置・160x64。追加拡大は未指定"
+    },
+    {
+      "id": "p1_movement_guide",
+      "x": 64,
+      "y": 64,
+      "w": 192,
+      "h": 64,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p1_stock_background",
+      "x": 64,
+      "y": 32,
+      "w": 192,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p1_multiplier",
+      "x": 0,
+      "y": 96,
+      "w": 64,
+      "h": 40,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p1_chain_gauge",
+      "x": 32,
+      "y": 160,
+      "w": 24,
+      "h": 112,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p1_win_counter",
+      "x": 256,
+      "y": 96,
+      "w": 64,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p1_win_lose_banner",
+      "x": 116,
+      "y": 148,
+      "w": 96,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_movement_guide",
+      "x": 384,
+      "y": 64,
+      "w": 192,
+      "h": 64,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_stock_background",
+      "x": 384,
+      "y": 32,
+      "w": 192,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_multiplier",
+      "x": 576,
+      "y": 96,
+      "w": 64,
+      "h": 40,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_chain_gauge",
+      "x": 576,
+      "y": 160,
+      "w": 24,
+      "h": 112,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_win_counter",
+      "x": 320,
+      "y": 96,
+      "w": 64,
+      "h": 24,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "p2_win_lose_banner",
+      "x": 436,
+      "y": 148,
+      "w": 96,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "mascot",
+      "x": 298,
+      "y": 296,
+      "w": 48,
+      "h": 48,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "ready_banner",
+      "x": 272,
+      "y": 144,
+      "w": 96,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    },
+    {
+      "id": "go_banner",
+      "x": 288,
+      "y": 144,
+      "w": 64,
+      "h": 32,
+      "status": "confirmed",
+      "anchor": "top_left",
+      "note": ""
+    }
+  ],
+  "dynamic": {
+    "character": {
+      "size": [
+        48,
+        56
+      ],
+      "anchor": "feet_center",
+      "column_center_formula": "boardX + 16 + 32*column (column=0..5)",
+      "feet_y": "盤面最高列上端。盤面の全列で共通。空盤面時は未確認"
+    },
+    "failure_return": "予約セルIDを保持し、最新board変換から目標Y算出"
+  },
+  "pending": [
+    "役光の表示高さ48pxと旧40px案の扱い",
+    "ゲージfill内部配置・減少方向",
+    "勝利カウンタ内3枠のローカル座標",
+    "COUNTER/PAUSE等、指定のないバナー座標",
+    "空盤面キャラ足元Y",
+    "共通の場の背景範囲"
+  ],
+  "revision": "2.1",
+  "source": "00_game_spec_integrated_v1.0.md chapters 9,12,13; user supplied 2026-10-18",
+  "attack_stock": {
+    "max_lines": 29,
+    "big_lines": 10,
+    "big_max": 2,
+    "big_size": [
+      24,
+      24
+    ],
+    "small_lines": 1,
+    "small_max": 9,
+    "small_size": [
+      16,
+      16
+    ],
+    "origins": {
+      "p1": [
+        256,
+        128
+      ],
+      "p2": [
+        352,
+        128
+      ]
+    },
+    "big_pitch_y": 32,
+    "small_start_y": "128 + 32 * floor(lines/10)",
+    "small_columns": [
+      5,
+      4
+    ],
+    "small_offsets": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        16
+      ],
+      [
+        0,
+        32
+      ],
+      [
+        0,
+        48
+      ],
+      [
+        0,
+        64
+      ],
+      [
+        16,
+        0
+      ],
+      [
+        16,
+        16
+      ],
+      [
+        16,
+        32
+      ],
+      [
+        16,
+        48
+      ]
+    ]
+  },
+  "layers": [
+    {
+      "z": 0,
+      "content": "背景"
+    },
+    {
+      "z": 10,
+      "content": "フィールド・固定枠"
+    },
+    {
+      "z": 30,
+      "content": "B暗色ピース"
+    },
+    {
+      "z": 40,
+      "content": "通常フィールドピース"
+    },
+    {
+      "z": 50,
+      "content": "基準ピース・役ストック・通常UI"
+    },
+    {
+      "z": 55,
+      "content": "役成立背面発光"
+    },
+    {
+      "z": 60,
+      "content": "キャラクター・マスコット"
+    },
+    {
+      "z": 65,
+      "content": "役成立前面発光"
+    },
+    {
+      "z": 70,
+      "content": "役名"
+    },
+    {
+      "z": 80,
+      "content": "失敗帰還ピース"
+    },
+    {
+      "z": 90,
+      "content": "打ち上げ中ピース"
+    },
+    {
+      "z": 95,
+      "content": "接触・反発"
+    },
+    {
+      "z": 100,
+      "content": "WIN/LOSE・COUNTER"
+    },
+    {
+      "z": 110,
+      "content": "READY/GO・終了"
+    }
+  ]
+}
