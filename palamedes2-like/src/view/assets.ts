@@ -43,6 +43,7 @@ export async function loadAssets(baseUrl: string, darkAlpha: number): Promise<As
     loadJson<ScreenLayout>(`${baseUrl}data/screen_layout_v2.json`),
   ]);
   const policy = await loadJson<AssetLoadingPolicy>(`${baseUrl}data/${manifest.asset_loading_policy ?? 'asset_loading_policy.json'}`);
+  // 13PNG（12シート＋背景）。読み込み失敗は素材名を示して起動を止める
   const images = new Map<string, HTMLImageElement>();
   await Promise.all(
     sheetsToLoad(manifest, policy).map(async (s) => {

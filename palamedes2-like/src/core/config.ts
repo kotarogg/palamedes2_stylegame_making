@@ -72,6 +72,8 @@ export interface GameConfig {
   riseMinGapMs: number;
   /** 攻撃波の間隔（確定：2秒） */
   waveIntervalMs: number;
+  /** 1波内の段の間隔（確定：1段目0ms・2段目200ms・3段目400ms）。保留後の再開もこの間隔以上 */
+  attackStepMs: number;
   /** 最初の攻撃受信から第1波まで（確定：2秒） */
   firstWaveDelayMs: number;
   /** MATCH初期配置の段数（確定：下側3段＝18個） */
@@ -128,6 +130,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   naturalRiseIntervalMs: NATURAL_RISE_MS.normal,
   riseMinGapMs: 200,
   waveIntervalMs: 2000,
+  attackStepMs: 200,
   firstWaveDelayMs: 2000,
   initialRows: 3,
   manualRiseMaxHeight: 7,
@@ -144,6 +147,16 @@ export const DEFAULT_CONFIG: GameConfig = {
   releaseExecutesHeldRise: true,
 };
 
+/** MODE2の設定（初期盤面42個は数値設計JSONの mode2_initial_pieces。カウント3・2・1各1秒は設計補完の初期値） */
+export interface Mode2Config {
+  /** カウントダウンの開始数（3→2→1） */
+  countdownFrom: number;
+  /** カウント1つの長さ（音声の長さで変えない） */
+  countdownStepMs: number;
+}
+
+export const DEFAULT_MODE2_CONFIG: Mode2Config = { countdownFrom: 3, countdownStepMs: 1000 };
+
 /** 表示側の調整値（ゲーム結果に影響しない） */
 export interface ViewConfig {
   arcEndY: number; // 山なり到達点Y（画面設計の暫定値 76。ピース左上）
@@ -155,8 +168,6 @@ export interface ViewConfig {
   /** 役成立光 A/B 各フレーム（確定：250ms、周期500ms、共有時計） */
   glowFrameMs: number;
   bPoseSlotId: string; // S1/S2 attack_00〜03 のどれを使うか
-  /** 不成立モーション（専用素材が無いため暫定：待機枠を左右に揺らす量px） */
-  failShakePx: number;
 }
 
 export const DEFAULT_VIEW_CONFIG: ViewConfig = {
@@ -168,23 +179,7 @@ export const DEFAULT_VIEW_CONFIG: ViewConfig = {
   roleFrameMs: 90,
   glowFrameMs: 250,
   bPoseSlotId: 'attack_01',
-  failShakePx: 2,
 };
-
-/**
- * まだ仕様が無い・解釈が分かれる箇所に対して、検証版が採っている扱い（画面のF1とREADMEに明示）。
- */
-export const PROVISIONAL_HANDLING = [
-  ['得点', '得点倍率表は保持のみ（MATCH画面に得点表示が無いため計算・表示しない）'],
-  ['4個未満の宣言', '不成立として扱う（硬直0.5秒）。要確認'],
-  ['猶予解除時の保留上昇', '保留していた自然上昇を解除時に実行。要確認'],
-  ['移動中の手動上昇', '保持対象外のため即時実行（移動を妨げない）。要確認'],
-  ['取得倍率パネル', '連続取得の「攻撃倍率」を表示（得点倍率は表示しない）。要確認'],
-  ['難易度・機器の初期値', '自然上昇は中級（5秒）、1P/2Pともキーボード。初期値の指定なし'],
-  ['役ストックの描画層', '成立光の「背面→ピース→前面」を守るため、ストックのピースを背面光55とキャラ60の間（56）に描画。要確認'],
-  ['効果音', '音素材が未納品のため、仮の電子音で代用（Mで消音）'],
-  ['不成立モーション', '専用素材が無いため、待機枠を短く揺らして代用'],
-] as const;
 
 export const msToTicks = (ms: number, tickRate: number): number => Math.max(1, Math.round((ms * tickRate) / 1000));
 

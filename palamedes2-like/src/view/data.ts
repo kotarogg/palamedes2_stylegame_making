@@ -27,6 +27,21 @@ export interface ManifestFrame {
   frame?: 'A' | 'B' | 'C';
   /** v2.1：役成立光の対象領域（フレーム内の原点オフセット） */
   target_rect?: { x: number; y: number; w: number; h: number };
+  origin?: [number, number];
+  recommended_ms?: number;
+}
+
+export interface BackgroundInfo {
+  id: string;
+  file: string;
+  width: number;
+  height: number;
+}
+
+export interface DisplayFontMetric {
+  id_prefix: string;
+  ink_box: [number, number, number, number];
+  advance: number;
 }
 
 export interface SpriteManifest {
@@ -38,6 +53,12 @@ export interface SpriteManifest {
   sheets: SheetInfo[];
   frames: ManifestFrame[];
   animations: Record<string, string[]>;
+  /** v2.3：640×360共通背景 */
+  backgrounds?: BackgroundInfo[];
+  /** v2.3：S12の枠なし数字（倍率・残数・得点の合成） */
+  display_font?: { sheet: string; metrics: Record<string, DisplayFontMetric>; line_height: number; phase_period_ms: number };
+  legacy_aliases?: Record<string, string>;
+  recommended_timing?: Record<string, { durations_ms?: number[]; frame_ms?: number }>;
 }
 
 export interface LayoutObject {
@@ -68,25 +89,38 @@ export interface ScreenLayout {
     small_offsets: [number, number][];
   };
   layers: { z: number; content: string }[];
+  /** v2.3：シングル右側の情報欄・枠の組み立て */
+  graphic_mode_rules?: { single_info_rect: [number, number, number, number] };
 }
 
-/** asset_loading_policy.json（明示許可リスト。再帰収集しない） */
+/** asset_loading_policy.json（v2.3：明示許可リスト13PNG。旧版・プレビュー・ZIPを再帰収集しない） */
 export interface AssetLoadingPolicy {
-  schema: string;
-  mode: 'allowlist_only';
-  recursive_discovery: boolean;
-  sheets: string[];
-  optional_standalone_directory?: string;
-  exclude_directories?: string[];
+  mode: 'explicit_allowlist';
+  files: string[];
+  exclude?: string[];
+  no_recursive_discovery: boolean;
 }
 
-/** マニフェストの7シートが許可リストに含まれ、許可リスト外を読まないことを検査し、読み込むシートを返す */
-export function sheetsToLoad(manifest: SpriteManifest, policy: AssetLoadingPolicy): SheetInfo[] {
-  if (policy.mode !== 'allowlist_only' || policy.recursive_discovery) throw new Error('asset policy must be allowlist_only without recursive discovery');
-  const allowed = new Set(policy.sheets);
-  for (const s of manifest.sheets) if (!allowed.has(s.file)) throw new Error(`sheet not in allowlist: ${s.file}`);
-  // アトラス方式のみ使用（個別PNG role_glow_frames は読み込まない＝二重読み込みしない）
-  return manifest.sheets;
+export interface LoadTarget {
+  id: string;
+  file: string;
+  width: number;
+  height: number;
+}
+
+/**
+ * 読み込むPNG＝マニフェストの12シート＋背景。すべて許可リストに含まれることを検査し、許可リスト外は読まない。
+ * アトラス方式のみ使用（個別PNG role_glow_frames は読み込まない＝二重読み込みしない）。
+ */
+export function sheetsToLoad(manifest: SpriteManifest, policy: AssetLoadingPolicy): LoadTarget[] {
+  if (policy.mode !== 'explicit_allowlist' || !policy.no_recursive_discovery) throw new Error('asset policy must be explicit_allowlist without recursive discovery');
+  const allowed = new Set(policy.files);
+  const targets: LoadTarget[] = [
+    ...manifest.sheets.map((s) => ({ id: s.id, file: s.file, width: s.width, height: s.height })),
+    ...(manifest.backgrounds ?? []).map((b) => ({ id: b.id, file: b.file, width: b.width, height: b.height })),
+  ];
+  for (const t of targets) if (!allowed.has(t.file)) throw new Error(`sheet not in allowlist: ${t.file}`);
+  return targets;
 }
 
 export class SpriteAtlas {

@@ -10,27 +10,32 @@ function pngSize(buf: Buffer): [number, number] {
   return [buf.readUInt32BE(16), buf.readUInt32BE(20)];
 }
 
-describe('仮スプライトシート7枚とマニフェスト', () => {
+describe('採用グラフィック v2.3（12シート＋メニュー背景）とマニフェスト', () => {
   const m = manifest();
 
-  it('7枚の実PNGがマニフェストの寸法・SHA-256と一致', () => {
-    expect(m.sheets.map((s) => s.id)).toEqual(['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7']);
+  it('13枚の実PNG（12シート＋BG_MENU）がマニフェストの寸法・SHA-256と一致', () => {
+    expect(m.version).toBe('2.3');
+    expect(m.sheets.map((s) => s.id)).toEqual(['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'S10', 'S11', 'S12']);
     for (const s of m.sheets) {
       const buf = readFileSync(new URL(`public/assets/sprites/${s.file}`, ROOT));
       expect(pngSize(buf), s.file).toEqual([s.width, s.height]);
       expect(createHash('sha256').update(buf).digest('hex'), s.file).toBe(s.sha256);
     }
+    const bg = readFileSync(new URL('public/assets/sprites/menu_background.png', ROOT));
+    expect(pngSize(bg)).toEqual([640, 360]);
+    // 採用資料 asset_inventory_graphics_v1.json 記載値
+    expect(createHash('sha256').update(bg).digest('hex')).toBe('ca9c269216a61ddeea0c4040e01448968f990402342cfa1820a07e51c17dae97');
   });
 
-  it('302矩形（v2.1：役成立光16追加）がすべてシート内に収まり、シート内で重複しない', () => {
-    expect(m.frames).toHaveLength(302);
+  it('454矩形（v2.3）がすべてシート内に収まり、シート内で重複しない', () => {
+    expect(m.frames).toHaveLength(454);
     const counts: Record<string, number> = {};
     for (const f of m.frames) {
       const s = m.sheets.find((x) => x.id === f.sheet)!;
       expect(f.x >= 0 && f.y >= 0 && f.x + f.w <= s.width && f.y + f.h <= s.height, `${f.sheet}/${f.id}`).toBe(true);
       counts[f.sheet] = (counts[f.sheet] ?? 0) + 1;
     }
-    expect(counts).toEqual({ S1: 30, S2: 30, S3: 25, S4: 48, S5: 69, S6: 52, S7: 48 });
+    expect(counts).toEqual({ S1: 30, S2: 30, S3: 25, S4: 48, S5: 69, S6: 52, S7: 48, S8: 28, S9: 72, S10: 10, S11: 6, S12: 36 });
     for (const sheet of Object.keys(counts)) {
       const fs = m.frames.filter((f) => f.sheet === sheet);
       for (let i = 0; i < fs.length; i++)
@@ -52,7 +57,6 @@ describe('仮スプライトシート7枚とマニフェスト', () => {
       for (const name of ['idle', 'walk', 'launch', 'attack', 'win', 'lose_fall'])
         expect(A.animation(sheet, name).every((f) => !f.reserved)).toBe(true);
       expect(A.animation(sheet, 'attack').map((f) => f.slot)).toEqual([12, 13, 14, 15]);
-      expect(A.animation(sheet, 'reserved')).toEqual([]);
     }
   });
 
@@ -83,14 +87,22 @@ describe('仮スプライトシート7枚とマニフェスト', () => {
     for (const size of [4, 6]) for (const k of ['back', 'front']) for (const ab of ['a', 'b']) s6.push(`role_glow_${size}_${k}_${ab}`);
     for (const id of s6) expect(() => A.frame('S6', id)).not.toThrow();
     for (const name of ['idle', 'ready', 'start', 'joy', 'panic']) expect(A.animation('S3', name).length).toBeGreaterThan(0);
+    // 第1版で追加したS8〜S12
+    const s8 = ['settings_panel', 'help_panel', 'field_frame', 'result_panel', 'info_panel', 'confirmation_panel', 'mode_count_panel', 'menu_item_normal', 'menu_item_selected', 'role_stock_frame', 'focus_ring', 'mode_badge', 'keycap_wide', 'keycap', 'pad_button', 'slider_knob', 'slider_rail', 'slider_fill', 'arrow_left', 'arrow_right', 'selection_cursor'];
+    for (const id of s8) expect(() => A.frame('S8', id)).not.toThrow();
+    const banners = ['ready', 'go', 'win', 'lose', 'draw', 'result', 'game_over', 'stage_clear', 'all_clear', 'level_up', 'max', 'all_stages_complete', 'countdown_3', 'countdown_2', 'countdown_1'];
+    for (const b of banners) for (const ph of ['A', 'B', 'C']) expect(() => A.frame('S9', `show_${b}_${ph}`)).not.toThrow();
+    for (const name of ['card_refresh', 'line_clear', 'danger_border']) expect(A.animation('S10', name).length).toBeGreaterThan(0);
+    for (const id of ['player_frame_p1', 'player_frame_p2', 'center_info_frame', 'timer_fill_safe', 'timer_fill_warn', 'timer_fill_danger']) expect(() => A.frame('S11', id)).not.toThrow();
+    for (const ph of ['A', 'B', 'C']) for (const ch of ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'times', 'dot']) expect(() => A.frame('S12', `display_${ch}_${ph}`)).not.toThrow();
   });
 });
 
-describe('画面座標（screen_layout_v2.json revision 2.1）', () => {
+describe('画面座標（screen_layout_v2.json graphics-v1-r2）', () => {
   const L = layout();
 
   it('論理640×360、盤面6列×7段・32pxセル', () => {
-    expect(layoutData().revision).toBe('2.1');
+    expect(layoutData().revision).toBe('graphics-v1-r2-20261019');
     expect(layoutData().canvas).toEqual({ w: 640, h: 360 });
     for (const p of [0, 1] as const) {
       const b = L.pRect(p, 'board');
@@ -118,8 +130,9 @@ describe('画面座標（screen_layout_v2.json revision 2.1）', () => {
     expect(L.rect('base_frame')).toMatchObject({ x: 294, y: 40, w: 48, h: 48 });
     expect(L.rect('base_piece')).toMatchObject({ x: 302, y: 48, w: 32, h: 32 });
     expect(L.rect('mascot')).toMatchObject({ x: 298, y: 296 });
-    expect(L.rect('ready_banner')).toMatchObject({ x: 272, y: 144, w: 96, h: 32 });
-    expect(L.rect('go_banner')).toMatchObject({ x: 288, y: 144, w: 64, h: 32 });
+    // v2.3：S9正式演出を原寸160×64で表示
+    expect(L.rect('ready_banner')).toMatchObject({ x: 240, y: 144, w: 160, h: 64 });
+    expect(L.rect('go_banner')).toMatchObject({ x: 240, y: 144, w: 160, h: 64 });
     for (let i = 0; i < 6; i++) {
       expect(L.pRect(0, `stock_${i}`)).toMatchObject({ x: 66 + 24 * i, y: 36, w: 24, h: 24 });
       expect(L.pRect(1, `stock_${i}`)).toMatchObject({ x: 386 + 24 * i, y: 36, w: 24, h: 24 });

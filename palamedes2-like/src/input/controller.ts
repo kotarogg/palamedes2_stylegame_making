@@ -1,11 +1,12 @@
 // 1P/2P・CPUが共通で使う入力窓口。キーボード・ゲームパッドとも割当変更可能（確定）。
-import type { Action, Command, Game } from '../core/game';
+import type { Action, Command } from '../core/game';
+import type { AnyGame } from '../core/match';
 import type { PlayerId } from '../core/types';
 
 export interface Controller {
   readonly player: PlayerId;
   /** 次のtickで適用するコマンドを返す（呼ばれるたびに消費） */
-  poll(game: Game): Command[];
+  poll(game: AnyGame): Command[];
 }
 
 export const ACTIONS: readonly Action[] = ['left', 'right', 'launch', 'rotate', 'declare', 'manualRise'];
@@ -260,7 +261,7 @@ export class ScriptedController implements Controller {
     private readonly script: ReadonlyMap<number, Action[]>,
   ) {}
 
-  poll(game: Game): Command[] {
+  poll(game: AnyGame): Command[] {
     return (this.script.get(game.tick + 1) ?? []).map((type) => ({ player: this.player, type }));
   }
 }

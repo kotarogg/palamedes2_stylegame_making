@@ -1045,27 +1045,48 @@
       "h": 32,
       "status": "confirmed",
       "anchor": "top_left",
-      "note": ""
+      "note": "",
+      "mode_switch": "MODE1 stock / MODE2 remaining count",
+      "shared_region": true
     },
     {
       "id": "p1_multiplier",
-      "x": 0,
-      "y": 96,
-      "w": 64,
-      "h": 40,
+      "x": 24,
+      "y": 94,
+      "w": 120,
+      "h": 34,
       "status": "confirmed",
       "anchor": "top_left",
-      "note": ""
+      "note": "枠なし数字合成。顔の保護領域より下。整数・小数を任意に表示。",
+      "previous_display_rect": [
+        0,
+        82,
+        64,
+        36
+      ],
+      "sprite": "S12/runtime_composition",
+      "draw_panel": false,
+      "face_overlap": false
     },
     {
       "id": "p1_chain_gauge",
-      "x": 32,
-      "y": 160,
-      "w": 24,
-      "h": 112,
+      "x": 52,
+      "y": 168,
+      "w": 8,
+      "h": 96,
       "status": "confirmed",
       "anchor": "top_left",
-      "note": ""
+      "note": "graphics-v1表示更新。盤面/論理セルの座標は変更しない。",
+      "previous_display_rect": [
+        32,
+        160,
+        24,
+        112
+      ],
+      "frame_embedded": true,
+      "draw_separate_frame": false,
+      "sprite": "S11/timer_fill_safe",
+      "mode": "MODE1"
     },
     {
       "id": "p1_win_counter",
@@ -1079,13 +1100,20 @@
     },
     {
       "id": "p1_win_lose_banner",
-      "x": 116,
+      "x": 80,
       "y": 148,
-      "w": 96,
-      "h": 32,
+      "w": 160,
+      "h": 64,
       "status": "confirmed",
       "anchor": "top_left",
-      "note": ""
+      "note": "S9正式演出の160x64。S5旧互換バナーも同じ造形へ更新。",
+      "previous_display_rect": [
+        116,
+        148,
+        96,
+        32
+      ],
+      "sprite": "S9/show_win_A or show_lose_A"
     },
     {
       "id": "p2_movement_guide",
@@ -1105,27 +1133,48 @@
       "h": 32,
       "status": "confirmed",
       "anchor": "top_left",
-      "note": ""
+      "note": "",
+      "mode_switch": "MODE1 stock / MODE2 remaining count",
+      "shared_region": true
     },
     {
       "id": "p2_multiplier",
-      "x": 576,
-      "y": 96,
-      "w": 64,
-      "h": 40,
+      "x": 496,
+      "y": 94,
+      "w": 120,
+      "h": 34,
       "status": "confirmed",
       "anchor": "top_left",
-      "note": ""
+      "note": "枠なし数字合成。顔の保護領域より下。整数・小数を任意に表示。",
+      "previous_display_rect": [
+        576,
+        82,
+        64,
+        36
+      ],
+      "sprite": "S12/runtime_composition",
+      "draw_panel": false,
+      "face_overlap": false
     },
     {
       "id": "p2_chain_gauge",
-      "x": 576,
-      "y": 160,
-      "w": 24,
-      "h": 112,
+      "x": 580,
+      "y": 168,
+      "w": 8,
+      "h": 96,
       "status": "confirmed",
       "anchor": "top_left",
-      "note": ""
+      "note": "graphics-v1表示更新。盤面/論理セルの座標は変更しない。",
+      "previous_display_rect": [
+        576,
+        160,
+        24,
+        112
+      ],
+      "frame_embedded": true,
+      "draw_separate_frame": false,
+      "sprite": "S11/timer_fill_safe",
+      "mode": "MODE1"
     },
     {
       "id": "p2_win_counter",
@@ -1139,13 +1188,20 @@
     },
     {
       "id": "p2_win_lose_banner",
-      "x": 436,
+      "x": 400,
       "y": 148,
-      "w": 96,
-      "h": 32,
+      "w": 160,
+      "h": 64,
       "status": "confirmed",
       "anchor": "top_left",
-      "note": ""
+      "note": "S9正式演出の160x64。S5旧互換バナーも同じ造形へ更新。",
+      "previous_display_rect": [
+        436,
+        148,
+        96,
+        32
+      ],
+      "sprite": "S9/show_win_A or show_lose_A"
     },
     {
       "id": "mascot",
@@ -1159,23 +1215,99 @@
     },
     {
       "id": "ready_banner",
-      "x": 272,
+      "x": 240,
       "y": 144,
-      "w": 96,
-      "h": 32,
+      "w": 160,
+      "h": 64,
       "status": "confirmed",
       "anchor": "top_left",
-      "note": ""
+      "note": "S9正式演出を原寸表示。",
+      "previous_display_rect": [
+        272,
+        144,
+        96,
+        32
+      ],
+      "sprite": "S9/show_ready_A or show_go_A"
     },
     {
       "id": "go_banner",
-      "x": 288,
+      "x": 240,
       "y": 144,
-      "w": 64,
-      "h": 32,
+      "w": 160,
+      "h": 64,
       "status": "confirmed",
       "anchor": "top_left",
-      "note": ""
+      "note": "S9正式演出を原寸表示。",
+      "previous_display_rect": [
+        288,
+        144,
+        64,
+        32
+      ],
+      "sprite": "S9/show_ready_A or show_go_A"
+    },
+    {
+      "id": "p1_visual_frame",
+      "x": 48,
+      "y": 120,
+      "w": 216,
+      "h": 240,
+      "anchor": "top_left",
+      "status": "graphics-v1",
+      "sprite": "S11/player_frame_p1"
+    },
+    {
+      "id": "p2_visual_frame",
+      "x": 376,
+      "y": 120,
+      "w": 216,
+      "h": 240,
+      "anchor": "top_left",
+      "status": "graphics-v1",
+      "sprite": "S11/player_frame_p2"
+    },
+    {
+      "id": "central_visual_frame",
+      "x": 264,
+      "y": 128,
+      "w": 112,
+      "h": 224,
+      "anchor": "top_left",
+      "status": "graphics-v1",
+      "sprite": "S11/center_info_frame"
+    },
+    {
+      "id": "p1_remaining_count",
+      "x": 64,
+      "y": 32,
+      "w": 192,
+      "h": 32,
+      "sprite": "S8/mode_count_panel + program text",
+      "mode": "MODE2",
+      "status": "graphics-v1-r2",
+      "note": "手役ストックと同一領域。装飾・文字もこの矩形内。シングルは1Pのみ。"
+    },
+    {
+      "id": "p2_remaining_count",
+      "x": 384,
+      "y": 32,
+      "w": 192,
+      "h": 32,
+      "sprite": "S8/mode_count_panel + program text",
+      "mode": "MODE2",
+      "status": "graphics-v1-r2",
+      "note": "手役ストックと同一領域。装飾・文字もこの矩形内。シングルは1Pのみ。"
+    },
+    {
+      "id": "countdown",
+      "x": 240,
+      "y": 152,
+      "w": 160,
+      "h": 64,
+      "sprite": "S9/show_countdown_{3,2,1}_{A,B,C}",
+      "status": "graphics-v1-r2",
+      "note": "文字のみ。プログラムでY=-6→0→+6pxとalphaを制御。枠・窓は描かない。"
     }
   ],
   "dynamic": {
@@ -1198,8 +1330,8 @@
     "空盤面キャラ足元Y",
     "共通の場の背景範囲"
   ],
-  "revision": "2.1",
-  "source": "00_game_spec_integrated_v1.0.md chapters 9,12,13; user supplied 2026-10-18",
+  "revision": "graphics-v1-r2-20261019",
+  "source": "第1版グラフィック修正指示：演出統一・共通残数領域・枠なし倍率・文字のみカウントダウン",
   "attack_stock": {
     "max_lines": 29,
     "big_lines": 10,
@@ -1326,5 +1458,247 @@
       "z": 110,
       "content": "READY/GO・終了"
     }
-  ]
+  ],
+  "graphic_mode_rules": {
+    "single_info_rect": [
+      384,
+      128,
+      192,
+      224
+    ],
+    "MODE1_single_hide_attack_stock": true,
+    "MODE2_no_timer_well": true,
+    "frame_assembly": {
+      "reference": "ぷよぷよ通.png: framing/organization only; artwork original Pop Gothic Carnival",
+      "p1": {
+        "frame": [
+          48,
+          120,
+          216,
+          240
+        ],
+        "board": [
+          64,
+          128,
+          192,
+          224
+        ],
+        "timer_fill": [
+          52,
+          168,
+          8,
+          96
+        ]
+      },
+      "p2": {
+        "frame": [
+          376,
+          120,
+          216,
+          240
+        ],
+        "board": [
+          384,
+          128,
+          192,
+          224
+        ],
+        "timer_fill": [
+          580,
+          168,
+          8,
+          96
+        ]
+      },
+      "legacy_standalone_timer_hidden": true,
+      "mode2": "use S8/field_frame without timer well",
+      "no_game_rule_change": true
+    }
+  },
+  "shared_stock_count_regions": {
+    "p1": [
+      64,
+      32,
+      192,
+      32
+    ],
+    "p2": [
+      384,
+      32,
+      192,
+      32
+    ],
+    "MODE1": "S8/role_stock_frame + 24px pieces",
+    "MODE2": "S8/mode_count_panel + runtime remaining count",
+    "both_single_and_versus": true,
+    "character_top_at_full_board": 68
+  },
+  "countdown_motion": {
+    "implementation": "program; no motion baked in PNG",
+    "window_or_frame": false,
+    "origin": "S9 center (80,32)",
+    "translation_y_px": [
+      -6,
+      0,
+      6
+    ],
+    "segments": [
+      "enter from above and fade in",
+      "hold at 0",
+      "exit below and fade out"
+    ],
+    "sample_only_duration_ms": 1000,
+    "sample_segment_ratios": [
+      0.18,
+      0.64,
+      0.18
+    ],
+    "game_countdown_timing_unchanged": true
+  },
+  "multiplier_rules": {
+    "sheet": "S12",
+    "characters": "0123456789×.",
+    "metrics": {
+      "0": {
+        "id_prefix": "display_0_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          32
+        ],
+        "advance": 32
+      },
+      "1": {
+        "id_prefix": "display_1_",
+        "ink_box": [
+          5,
+          0,
+          31,
+          34
+        ],
+        "advance": 24
+      },
+      "2": {
+        "id_prefix": "display_2_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          34
+        ],
+        "advance": 32
+      },
+      "3": {
+        "id_prefix": "display_3_",
+        "ink_box": [
+          1,
+          0,
+          34,
+          34
+        ],
+        "advance": 31
+      },
+      "4": {
+        "id_prefix": "display_4_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          32
+        ],
+        "advance": 32
+      },
+      "5": {
+        "id_prefix": "display_5_",
+        "ink_box": [
+          1,
+          0,
+          34,
+          34
+        ],
+        "advance": 31
+      },
+      "6": {
+        "id_prefix": "display_6_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          33
+        ],
+        "advance": 32
+      },
+      "7": {
+        "id_prefix": "display_7_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          34
+        ],
+        "advance": 32
+      },
+      "8": {
+        "id_prefix": "display_8_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          33
+        ],
+        "advance": 32
+      },
+      "9": {
+        "id_prefix": "display_9_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          33
+        ],
+        "advance": 32
+      },
+      "×": {
+        "id_prefix": "display_times_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          33
+        ],
+        "advance": 32
+      },
+      ".": {
+        "id_prefix": "display_dot_",
+        "ink_box": [
+          11,
+          22,
+          24,
+          34
+        ],
+        "advance": 11
+      }
+    },
+    "line_height": 34,
+    "phase_period_ms": 90,
+    "multiplier_rects": {
+      "p1": [
+        24,
+        94,
+        120,
+        34
+      ],
+      "p2": [
+        496,
+        94,
+        120,
+        34
+      ]
+    },
+    "no_panel": true,
+    "format": "×{value}; decimal point is a separate glyph; do not quantize the game value",
+    "numeric_limit": null,
+    "overflow": "fit glyph composition within display area; no numeric truncation"
+  }
 }

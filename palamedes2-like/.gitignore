@@ -5,3 +5,6 @@ test-results/
 *.log
 .DS_Store
 .vite/
+
+# BGM（大容量。README参照）
+public/assets/audio/bgm/*.wav

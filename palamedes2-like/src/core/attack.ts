@@ -18,11 +18,16 @@ export interface WaveRules {
 export const WAVE_RULES: WaveRules = { maxPerWave: 3, maxHeightByAttack: 6 };
 
 /**
- * 今回の波で適用できるライン数。入りきらない分は保持（呼び出し側でストックに残す）。
- * height は予約空白を含む最長列の段数。
+ * 波の開始時に予約するライン数（2026-10-20確定：1波最大3段）。
+ * 予約した段は 0/200/400ms に1段ずつ適用し、その時点で入りきらない段は破棄する（後続波の分は破棄しない）。
  */
-export function waveLines(stock: number, height: number, rules: WaveRules = WAVE_RULES): number {
-  return Math.max(0, Math.min(rules.maxPerWave, stock, rules.maxHeightByAttack - height));
+export function waveReserve(stock: number, rules: WaveRules = WAVE_RULES): number {
+  return Math.max(0, Math.min(rules.maxPerWave, stock));
+}
+
+/** 1段を適用できるか（予約空白を含む最長列の段数で判定） */
+export function stepFits(height: number, rules: WaveRules = WAVE_RULES): boolean {
+  return height < rules.maxHeightByAttack;
 }
 
 export interface AttackBreakdown {

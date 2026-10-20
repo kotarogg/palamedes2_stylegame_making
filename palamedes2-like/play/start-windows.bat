@@ -1,6 +1,13 @@
 @echo off
-rem palamedes2-like test build: start local HTTP server and open browser (Node.js 18+ required)
+rem palamedes2-like first edition RC: start a local HTTP server and open the browser (Node.js 18+ required).
+rem If port 8080 is busy, the next free port (8081-8090) is used automatically.
 cd /d "%~dp0"
-start "" http://127.0.0.1:8080/
-node serve.mjs . 8080
+where node >nul 2>nul
+if errorlevel 1 (
+  echo Node.js was not found. Install the LTS version from https://nodejs.org/ and run this file again.
+  pause
+  exit /b 1
+)
+echo Starting the game server. Keep this window open while playing. Close it to stop.
+node serve.mjs . 8080 --open
 pause

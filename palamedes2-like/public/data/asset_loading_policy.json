@@ -1,21 +1,32 @@
 {
-  "schema": "explicit_asset_allowlist_v1",
-  "mode": "allowlist_only",
-  "recursive_discovery": false,
-  "sheets": [
+  "mode": "explicit_allowlist",
+  "files": [
     "player_p1_bluegothic_sheet.png",
     "player_p2_akane_sheet.png",
     "mascot_cat_sheet.png",
     "pieces_and_smallpieces_sheet.png",
     "ui_common_sheet.png",
     "effects_sheet.png",
-    "role_name_sheet.png"
+    "role_name_sheet.png",
+    "ui_theme_sheet.png",
+    "announcements_sheet.png",
+    "mode_effects_sheet.png",
+    "menu_background.png",
+    "gameplay_frames_sheet.png",
+    "display_numeric_sheet.png"
   ],
-  "optional_standalone_directory": "role_glow_frames",
-  "exclude_directories": [
-    "旧版・補完",
-    "90_旧版・保管",
-    "03_画像制作途中・確認用"
+  "exclude": [
+    "旧版・補完/**",
+    "90_旧版・保管/**",
+    "review/**",
+    "previews/**",
+    "previews_graphics_v1/**",
+    "*.zip",
+    "*_overview.png",
+    "graphics_preview.html",
+    "修正確認/**",
+    "*_r2_overview.png"
   ],
-  "note": "Load atlas OR individual frames. Do not recursively scan image root. Archives are never inputs."
+  "no_recursive_discovery": true,
+  "standalone_role_glow": "optional role_glow_frames preserve the S6 rectangles and decoded RGBA; PNG encoding may differ"
 }

@@ -1,8 +1,8 @@
 {
   "name": "palamedes2-like",
-  "version": "0.2.0",
+  "version": "1.0.0-rc.1",
   "private": true,
-  "description": "パラメデス２風ブラウザ対戦パズル 対戦検証版",
+  "description": "パラメデス２風ブラウザパズル 第1版統合候補",
   "type": "module",
   "engines": {
     "node": ">=22.12"

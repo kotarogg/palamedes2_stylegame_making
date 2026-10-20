@@ -1,0 +1,266 @@
+{
+  "schema": "mode1_first_edition_balance_v1",
+  "date": "2026-10-20",
+  "status": "ユーザーの数値再設計委任に基づく第1版実装値。旧承認表を復元した値とは扱わない。",
+  "units": {
+    "launch_success_clears": 1,
+    "actual_line_clear_event_clears": 6
+  },
+  "mode1_initial_pieces": 18,
+  "stages": [
+    {
+      "stage": 1,
+      "quota": 30,
+      "natural_rise_ms": 7000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 1000
+    },
+    {
+      "stage": 2,
+      "quota": 40,
+      "natural_rise_ms": 7000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 2000
+    },
+    {
+      "stage": 3,
+      "quota": 50,
+      "natural_rise_ms": 6000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 3000
+    },
+    {
+      "stage": 4,
+      "quota": 60,
+      "natural_rise_ms": 6000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 4000
+    },
+    {
+      "stage": 5,
+      "quota": 70,
+      "natural_rise_ms": 5000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 5000
+    },
+    {
+      "stage": 6,
+      "quota": 90,
+      "natural_rise_ms": 5000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 6000
+    },
+    {
+      "stage": 7,
+      "quota": 110,
+      "natural_rise_ms": 4000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 7000
+    },
+    {
+      "stage": 8,
+      "quota": 130,
+      "natural_rise_ms": 4000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 8000
+    },
+    {
+      "stage": 9,
+      "quota": 150,
+      "natural_rise_ms": 3000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 9000
+    },
+    {
+      "stage": 10,
+      "quota": 180,
+      "natural_rise_ms": 3000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 10000
+    }
+  ],
+  "endless": {
+    "max_level": 20,
+    "carry_excess_clear_units": true,
+    "restart_natural_period_on_level_up": true,
+    "levels": [
+      {
+        "level": 1,
+        "required_clears_to_next": 30,
+        "cumulative_clears_to_enter": 0,
+        "natural_rise_ms": 7000,
+        "max_level": false
+      },
+      {
+        "level": 2,
+        "required_clears_to_next": 40,
+        "cumulative_clears_to_enter": 30,
+        "natural_rise_ms": 7000,
+        "max_level": false
+      },
+      {
+        "level": 3,
+        "required_clears_to_next": 50,
+        "cumulative_clears_to_enter": 70,
+        "natural_rise_ms": 6000,
+        "max_level": false
+      },
+      {
+        "level": 4,
+        "required_clears_to_next": 60,
+        "cumulative_clears_to_enter": 120,
+        "natural_rise_ms": 6000,
+        "max_level": false
+      },
+      {
+        "level": 5,
+        "required_clears_to_next": 70,
+        "cumulative_clears_to_enter": 180,
+        "natural_rise_ms": 5000,
+        "max_level": false
+      },
+      {
+        "level": 6,
+        "required_clears_to_next": 90,
+        "cumulative_clears_to_enter": 250,
+        "natural_rise_ms": 5000,
+        "max_level": false
+      },
+      {
+        "level": 7,
+        "required_clears_to_next": 110,
+        "cumulative_clears_to_enter": 340,
+        "natural_rise_ms": 4000,
+        "max_level": false
+      },
+      {
+        "level": 8,
+        "required_clears_to_next": 130,
+        "cumulative_clears_to_enter": 450,
+        "natural_rise_ms": 4000,
+        "max_level": false
+      },
+      {
+        "level": 9,
+        "required_clears_to_next": 150,
+        "cumulative_clears_to_enter": 580,
+        "natural_rise_ms": 3000,
+        "max_level": false
+      },
+      {
+        "level": 10,
+        "required_clears_to_next": 180,
+        "cumulative_clears_to_enter": 730,
+        "natural_rise_ms": 3000,
+        "max_level": false
+      },
+      {
+        "level": 11,
+        "required_clears_to_next": 60,
+        "cumulative_clears_to_enter": 910,
+        "natural_rise_ms": 7000,
+        "max_level": false
+      },
+      {
+        "level": 12,
+        "required_clears_to_next": 80,
+        "cumulative_clears_to_enter": 970,
+        "natural_rise_ms": 7000,
+        "max_level": false
+      },
+      {
+        "level": 13,
+        "required_clears_to_next": 100,
+        "cumulative_clears_to_enter": 1050,
+        "natural_rise_ms": 6000,
+        "max_level": false
+      },
+      {
+        "level": 14,
+        "required_clears_to_next": 120,
+        "cumulative_clears_to_enter": 1150,
+        "natural_rise_ms": 6000,
+        "max_level": false
+      },
+      {
+        "level": 15,
+        "required_clears_to_next": 140,
+        "cumulative_clears_to_enter": 1270,
+        "natural_rise_ms": 5000,
+        "max_level": false
+      },
+      {
+        "level": 16,
+        "required_clears_to_next": 180,
+        "cumulative_clears_to_enter": 1410,
+        "natural_rise_ms": 5000,
+        "max_level": false
+      },
+      {
+        "level": 17,
+        "required_clears_to_next": 220,
+        "cumulative_clears_to_enter": 1590,
+        "natural_rise_ms": 4000,
+        "max_level": false
+      },
+      {
+        "level": 18,
+        "required_clears_to_next": 260,
+        "cumulative_clears_to_enter": 1810,
+        "natural_rise_ms": 4000,
+        "max_level": false
+      },
+      {
+        "level": 19,
+        "required_clears_to_next": 300,
+        "cumulative_clears_to_enter": 2070,
+        "natural_rise_ms": 3000,
+        "max_level": false
+      },
+      {
+        "level": 20,
+        "required_clears_to_next": null,
+        "cumulative_clears_to_enter": 2370,
+        "natural_rise_ms": 3000,
+        "max_level": true
+      }
+    ]
+  },
+  "scoring": {
+    "successful_launch_base": 10,
+    "actual_line_clear_base": 100,
+    "streak_thresholds": [
+      1,
+      3,
+      5,
+      7
+    ],
+    "streak_multiplier_numerators": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "streak_multiplier_denominator": 2,
+    "line_score_uses_declaration_snapshot": true,
+    "stage_clear_bonus_base": 1000,
+    "stage_clear_bonus_times_stage_number": true,
+    "all_clear_bonus": 500,
+    "bonuses_use_multiplier": false,
+    "extra_final_stage_bonus": 0
+  },
+  "stage_transition": {
+    "carry_score": true,
+    "carry_streak_count": true,
+    "carry_role_chain_count": true,
+    "restore_streak_remaining_ms": 2000,
+    "restore_chain_remaining_ms": 8000,
+    "clear_danger_active": true,
+    "danger_grace_max_ms": 3000,
+    "carry_excess_clear_units": false,
+    "reset_stock_and_return_reservations": true,
+    "initial_pieces_next_stage": 18,
+    "intermission_freezes_game_timers": true
+  },
+  "mode2_initial_pieces": 42
+}

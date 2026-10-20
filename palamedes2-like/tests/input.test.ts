@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { createSeededRng } from '../src/core/rng';
 import { Match } from '../src/core/match';
-import type { Command } from '../src/core/game';
+import type { Command, Game } from '../src/core/game';
 import type { PlayerId } from '../src/core/types';
 import {
   assignKey,
@@ -124,11 +124,11 @@ describe('CPU（確定：初級・中級・上級、見える情報だけで判�
       const cpu = new CpuController(0, level, 5);
       let tenth = -1;
       for (let i = 0; i < 6000 && m.state === 'round' && tenth < 0; i++) {
-        m.step(cpu.poll(m.game));
-        const ok = m.game.events.filter((e) => e.type === 'arrive' && e.player === 0 && e.success).length;
-        if (ok >= 10) tenth = m.game.tick;
+        m.step(cpu.poll((m.game as Game)));
+        const ok = (m.game as Game).events.filter((e) => e.type === 'arrive' && e.player === 0 && e.success).length;
+        if (ok >= 10) tenth = (m.game as Game).tick;
       }
-      const fails = m.game.events.filter((e) => e.type === 'declareFail').length;
+      const fails = (m.game as Game).events.filter((e) => e.type === 'declareFail').length;
       return { tenth, fails };
     };
     const easy = run('easy');
@@ -141,12 +141,12 @@ describe('CPU（確定：初級・中級・上級、見える情報だけで判�
   it('CPU同士の対戦で宣言・消去・攻撃・相殺が発生し、CPU対操作なしの試合は試合結果まで進行する', () => {
     const m = new Match({ firstTo: 1, difficulty: 'hard', seed: 8 });
     const cpus = [new CpuController(0, 'hard', 1), new CpuController(1, 'normal', 2)];
-    for (let i = 0; i < 6000 && m.state === 'round'; i++) m.step(cpus.flatMap((c) => c.poll(m.game)));
-    const seen = new Set<string>(m.game.events.map((e) => e.type));
+    for (let i = 0; i < 6000 && m.state === 'round'; i++) m.step(cpus.flatMap((c) => c.poll((m.game as Game))));
+    const seen = new Set<string>((m.game as Game).events.map((e) => e.type));
     for (const t of ['declare', 'lineClear', 'attack', 'attackStock']) expect(seen.has(t), t).toBe(true);
     const solo = new Match({ firstTo: 2, difficulty: 'hard', seed: 9 });
     const cpu = new CpuController(1, 'hard', 3);
-    for (let i = 0; i < 40000 && solo.state !== 'matchResult'; i++) solo.step(solo.state === 'round' ? cpu.poll(solo.game) : [], solo.canConfirm);
+    for (let i = 0; i < 40000 && solo.state !== 'matchResult'; i++) solo.step(solo.state === 'round' ? cpu.poll((solo.game as Game)) : [], solo.canConfirm);
     expect(solo.state).toBe('matchResult');
     expect(solo.matchWinner).toBe(1 as PlayerId);
   });

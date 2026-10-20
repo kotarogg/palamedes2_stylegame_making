@@ -1,32 +1,42 @@
-// ゲーム画面の描画。ロジックのイベント列を読み、時間補間だけを行う（ロジックへ書き戻さない）。
-import { layoutAttackIcons } from '../core/attack';
+// ゲーム画面の描画（MODE1対戦／MODE1シングル／MODE2対戦／MODE2シングル）。採用グラフィック graphics_v1_r2（マニフェスト2.3）。
+// ロジックのイベント列を読み、時間補間だけを行う（ロジックへ書き戻さない）。盤面の固定グリッド・論理座標は変更しない。
+import { ATTACK_MAX } from '../core/attack';
+import { levelDef } from '../core/balance';
 import { DEFAULT_VIEW_CONFIG, type ViewConfig } from '../core/config';
-import type { Game, GameEvent } from '../core/game';
+import type { Game, GameEvent, PlayerState } from '../core/game';
+import type { AnyGame } from '../core/match';
+import type { Mode2Event, Mode2Game } from '../core/mode2';
 import { evaluateStock, glowSegments } from '../core/roles';
-import { PLAYERS, type Piece, type PlayerId } from '../core/types';
+import type { Piece, PlayerId } from '../core/types';
 import { drawFrame, type Assets } from './assets';
 import type { ManifestFrame } from './data';
-import {
-  arcPoint,
-  barY,
-  CELL,
-  cellX,
-  columnCenterX,
-  descentY,
-  easeInOutSine,
-  easeOutQuad,
-  lerp,
-  progress,
-  Z,
-  type BoardRect,
-} from './geometry';
-import type { SoundBus } from './sound';
+import { arcPoint, barY, CELL, cellX, columnCenterX, descentY, easeInOutSine, easeOutQuad, lerp, progress, Z, type BoardRect } from './geometry';
+import { characterPose, type ResultPlan } from './presentation';
+import { drawNumeric, drawText, formatTime, multiplierText, numericPhase } from './text';
 
 /**
- * 役ストックのピースの描画レイヤー。役成立光は「背面→ピース→前面」（確定）だが、
- * 画面JSONのレイヤー表では役ストック50＜背面光55 のため、ストックのピースを背面光とキャラの間に置く（要確認として報告）。
+ * 役ストックのピースの描画レイヤー。役成立光は「背面→ピース→前面」（確定）のため、
+ * ストックのピースを背面光55とキャラ60の間（56）に置く（N1：既存の相対描画順を維持）。
  */
 export const STOCK_PIECE_Z = Z.glowBack + 1;
+
+/** 表示の調整値（ゲーム結果に影響しない） */
+export interface PlayViewConfig {
+  /** カウントダウン数字の出入り（設計補完：−4→0→＋4論理px、各150ms。枠なし） */
+  countdownOffsetPx: number;
+  countdownFadeMs: number;
+  /** 一時的な演出バナー（LEVEL UP 等）の表示時間 */
+  noticeMs: number;
+  /** 攻撃ストック枠の位置（画面見本 mode1_versus の配置） */
+  attackPanel: Record<PlayerId, [number, number]>;
+}
+
+export const DEFAULT_PLAY_VIEW: PlayViewConfig = {
+  countdownOffsetPx: 4,
+  countdownFadeMs: 150,
+  noticeMs: 1100,
+  attackPanel: { 0: [4, 207], 1: [592, 207] },
+};
 
 interface BarTween {
   start: number;
@@ -44,7 +54,7 @@ interface LocalTween {
   dark: boolean;
 }
 
-interface FlightVis {
+export interface FlightVis {
   piece: Piece;
   player: PlayerId;
   col: number;
@@ -67,6 +77,7 @@ interface FxVis {
 
 interface VanishVis {
   piece: Piece;
+  player: PlayerId;
   x: number;
   y: number;
   start: number;
@@ -83,6 +94,13 @@ interface RoleVis {
   indices: number[];
 }
 
+interface Notice {
+  /** S9 の演出ID（show_level_up 等） */
+  id: string;
+  start: number;
+  end: number;
+}
+
 interface PlayerVis {
   height: number;
   barTweens: BarTween[];
@@ -92,7 +110,6 @@ interface PlayerVis {
   role: RoleVis | null;
   fail: { start: number; end: number } | null;
   grace: { start: number; end: number } | null;
-  notices: { text: string; start: number }[];
 }
 
 interface DrawItem {
@@ -101,62 +118,64 @@ interface DrawItem {
   draw: (ctx: CanvasRenderingContext2D) => void;
 }
 
-/** 試合進行の表示用情報（main から毎フレーム渡す） */
-export interface MatchInfo {
-  wins: readonly [number, number];
-  firstTo: number;
-  state: 'round' | 'roundResult' | 'matchResult';
-  canConfirm: boolean;
-  round: number;
-  paused: boolean;
-  labels: readonly [string, string];
+/** 画面の外から渡す試合情報（勝利数・先取・ラベル・結果演出） */
+export interface HudInfo {
+  wins?: readonly [number, number];
+  firstTo?: number;
+  round?: number;
+  labels?: readonly [string, string];
+  result?: ResultPlan | null;
+  matchOver?: boolean;
 }
 
 export class GameView {
   private cursor = 0;
-  private readonly pv: Record<PlayerId, PlayerVis>;
+  private pv: PlayerVis[] = [];
   private readonly localTweens = new Map<number, LocalTween>();
   private readonly flights = new Map<number, FlightVis>();
   private fx: FxVis[] = [];
   private vanish: VanishVis[] = [];
+  private lineFx: { player: PlayerId; y: number; start: number }[] = [];
+  private notices: Notice[] = [];
+  private countdown: { value: number; start: number; end: number } | null = null;
+  private refreshFx: number | null = null;
   private staticLayer: HTMLCanvasElement | null = null;
+  private staticKey = '';
   private readonly boards: Record<PlayerId, BoardRect>;
   private readonly basePos: [number, number];
-  private readonly vt: Record<'launchPose' | 'bPose' | 'role' | 'idle' | 'walk' | 'launch' | 'attack' | 'win' | 'lose', number>;
   /** 役成立光の共有時計：ラウンドを跨いでも巻き戻さない（ms） */
   private clockBaseMs = 0;
-  private stockCache: { key: string; indices: number[] | null } = { key: '', indices: null };
-  showHud = true;
-  match: MatchInfo | null = null;
+  private stockCache = { key: '', indices: null as number[] | null };
+  hud: HudInfo = {};
 
   constructor(
-    private game: Game,
+    private game: AnyGame,
     private readonly assets: Assets,
     private readonly vc: ViewConfig = DEFAULT_VIEW_CONFIG,
-    private readonly sound: SoundBus | null = null,
+    readonly pvc: PlayViewConfig = DEFAULT_PLAY_VIEW,
   ) {
     const L = assets.layout;
     this.boards = { 0: L.pRect(0, 'board'), 1: L.pRect(1, 'board') };
     const b = L.rect('base_piece');
     this.basePos = [b.x, b.y];
-    const tk = (ms: number) => (ms * game.config.tickRate) / 1000;
-    this.vt = {
-      launchPose: tk(game.config.timing.launchMs),
-      bPose: tk(game.config.timing.bPoseMs),
-      role: tk(vc.roleFrameMs),
-      idle: tk(vc.charFrameMs.idle),
-      walk: tk(vc.charFrameMs.walk),
-      launch: tk(vc.charFrameMs.launch),
-      attack: tk(vc.charFrameMs.attack),
-      win: tk(vc.charFrameMs.win),
-      lose: tk(vc.charFrameMs.lose),
-    };
-    this.pv = { 0: this.newPlayerVis(0), 1: this.newPlayerVis(1) };
+    this.resetVis();
   }
 
-  private newPlayerVis(id: PlayerId): PlayerVis {
-    return {
-      height: this.game.players[id].board.height(),
+  get currentGame(): AnyGame {
+    return this.game;
+  }
+
+  private get mode1(): Game | null {
+    return this.game.mode === 'mode1' ? this.game : null;
+  }
+
+  private get isSingle(): boolean {
+    return this.game.kind === 'single';
+  }
+
+  private resetVis(): void {
+    this.pv = this.game.players.map((p) => ({
+      height: p.board.height(),
       barTweens: [],
       move: null,
       launchPoseStart: -1e9,
@@ -164,12 +183,11 @@ export class GameView {
       role: null,
       fail: null,
       grace: null,
-      notices: [],
-    };
+    }));
   }
 
-  /** 新しいラウンド（ゲーム）へ差し替え */
-  reset(game: Game): void {
+  /** 新しいラウンド（ゲーム）へ差し替え。前ラウンドの演出を持ち越さない */
+  reset(game: AnyGame): void {
     this.clockBaseMs += this.game.tick * this.game.tickMs;
     this.game = game;
     this.cursor = 0;
@@ -177,8 +195,16 @@ export class GameView {
     this.flights.clear();
     this.fx = [];
     this.vanish = [];
-    this.pv[0] = this.newPlayerVis(0);
-    this.pv[1] = this.newPlayerVis(1);
+    this.lineFx = [];
+    this.notices = [];
+    this.countdown = null;
+    this.refreshFx = null;
+    this.stockCache = { key: '', indices: null };
+    this.resetVis();
+  }
+
+  private ticksOf(ms: number): number {
+    return (ms * this.game.config.tickRate) / 1000;
   }
 
   /** 役成立光の共有時計（ms） */
@@ -226,7 +252,7 @@ export class GameView {
     return columnCenterX(board, this.game.players[p].selectedCol);
   }
 
-  /** 帰還ピースの描画位置（テスト・検証用に公開） */
+  /** 打ち上げ・帰還ピースの描画位置（テスト・検証用に公開） */
   flightPosition(f: FlightVis, t: number): { x: number; y: number; z: number } {
     const [bx, by] = this.basePos;
     if (!f.failed || t < f.arriveTick) {
@@ -243,7 +269,7 @@ export class GameView {
   }
 
   /** 最新の予約空白のY（盤面上昇に追従） */
-  private reservedSlotY(f: FlightVis, t: number): number {
+  reservedSlotY(f: FlightVis, t: number): number {
     const col = this.game.players[f.player].board.cols[f.col];
     const idx = Math.max(0, col.findIndex((s) => s.kind === 'reserved' && s.pieceId === f.piece.id));
     return this.pieceBar(f.player, t) + CELL * idx;
@@ -258,10 +284,12 @@ export class GameView {
    * 宣言直後の役名表示中は、消費したストックを採用位置ごと表示し続ける。
    */
   glowTargets(p: PlayerId, t: number): { pieces: Piece[]; indices: number[] } | null {
+    const g = this.mode1;
+    if (!g) return null;
     const r = this.pv[p].role;
     if (r && t < r.introEnd) return { pieces: r.consumed, indices: r.indices };
-    const stock = this.game.players[p].roleStock;
-    const key = stock.map((x) => x.id).join(',');
+    const stock = g.players[p].roleStock;
+    const key = `${p}:${stock.map((x) => x.id).join(',')}`;
     if (key !== this.stockCache.key) {
       const ev = evaluateStock(stock);
       this.stockCache = { key, indices: ev.kind === 'ok' ? ev.result.indices : null };
@@ -270,7 +298,7 @@ export class GameView {
   }
 
   /** 成立光の配置（区間ごとの素材と左上座標）。テスト・検証用に公開 */
-  glowPlacements(p: PlayerId, indices: readonly number[], phase: 'a' | 'b'): Array<{ back: ManifestFrame; front: ManifestFrame; x: number; y: number }> {
+  glowPlacements(p: PlayerId, indices: readonly number[], phase: 'a' | 'b') {
     const L = this.assets.layout;
     return glowSegments(indices).map((s) => {
       const slot = L.pRect(p, `stock_${s.start}`);
@@ -285,7 +313,7 @@ export class GameView {
 
   /** ロジックのイベント列を取り込む（描画前に呼ぶ。テストからも利用） */
   syncEvents(): void {
-    const ev = this.game.events;
+    const ev = this.game.events as ReadonlyArray<GameEvent | Mode2Event>;
     while (this.cursor < ev.length) this.onEvent(ev[this.cursor++]);
   }
 
@@ -293,15 +321,34 @@ export class GameView {
     return ids.map((id) => this.assets.atlas.frame('S6', id));
   }
 
-  private se(code: Parameters<SoundBus['play']>[0], atTick: number, now: number): void {
-    this.sound?.play(code, (atTick - now) * this.game.tickMs);
+  private notice(id: string, t: number): void {
+    this.notices = this.notices.filter((n) => n.id !== id);
+    this.notices.push({ id, start: t, end: t + this.ticksOf(this.pvc.noticeMs) });
   }
 
-  private onEvent(e: GameEvent): void {
-    if (e.type === 'roundEnd') {
-      this.se('win', e.tick, e.tick);
-      return;
+  private onEvent(e: GameEvent | Mode2Event): void {
+    switch (e.type) {
+      case 'roundEnd':
+      case 'stuck':
+      case 'remaining':
+        return;
+      case 'countdown':
+        this.countdown = { value: e.value, start: e.tick, end: e.endTick };
+        return;
+      case 'cardRefresh':
+        this.countdown = null;
+        this.refreshFx = e.tick;
+        return;
+      case 'levelUp':
+        this.notice(e.max ? 'show_max' : 'show_level_up', e.tick);
+        return;
+      case 'allClear':
+        this.notice('show_all_clear', e.tick);
+        return;
+      default:
+        break;
     }
+    if (!('player' in e)) return;
     const v = this.pv[e.player];
     const board = this.boards[e.player];
     switch (e.type) {
@@ -310,21 +357,9 @@ export class GameView {
         break;
       case 'launch': {
         const start: [number, number] = [cellX(board, e.col), this.pieceBar(e.player, e.tick)];
-        this.flights.set(e.piece.id, {
-          piece: e.piece,
-          player: e.player,
-          col: e.col,
-          launchTick: e.tick,
-          arriveTick: e.arriveTick,
-          start,
-          failed: false,
-          arcStart: 0,
-          arcEnd: 0,
-          returnEnd: 0,
-        });
+        this.flights.set(e.piece.id, { piece: e.piece, player: e.player, col: e.col, launchTick: e.tick, arriveTick: e.arriveTick, start, failed: false, arcStart: 0, arcEnd: 0, returnEnd: 0 });
         v.launchPoseStart = e.tick;
         this.fx.push({ frames: this.fxFrames('launch_fx_1', 'launch_fx_2', 'launch_fx_3', 'launch_fx_4'), x: start[0], y: start[1] - 8, start: e.tick, frameTicks: 3 });
-        this.se('launch', e.tick, e.tick);
         break;
       }
       case 'arrive': {
@@ -337,27 +372,23 @@ export class GameView {
             v.height = e.heightAfter;
           }
           this.fx.push({ frames: this.fxFrames('hit_base_fx_1', 'hit_base_fx_2'), x: bx, y: by, start: e.tick, frameTicks: 5 });
-          this.se('hit', e.tick, e.tick);
         } else {
           const f = this.flights.get(e.piece.id);
           if (f) Object.assign(f, { failed: true, arcStart: e.arcStartTick, arcEnd: e.arcEndTick, returnEnd: e.returnEndTick });
           const n = Math.max(1, Math.round((e.arcStartTick - e.tick) / 3));
           this.fx.push({ frames: this.fxFrames('bounce_fx_1', 'bounce_fx_2', 'bounce_fx_3'), x: bx, y: by, start: e.tick, frameTicks: n });
-          this.se('bounce', e.tick, e.tick);
         }
         break;
       }
-      case 'returned': {
+      case 'returned':
         this.flights.delete(e.piece.id);
         this.fx.push({ frames: this.fxFrames('return_fx_1', 'return_fx_2'), x: cellX(board, e.col), y: this.pieceBar(e.player, e.tick), start: e.tick, frameTicks: 4 });
         break;
-      }
-      case 'rotate': {
+      case 'rotate':
         this.retarget(e.movedId, 0, e.otherIds.length, e.tick, e.endTick, true);
         e.otherIds.forEach((id, i) => this.retarget(id, i + 1, i, e.tick, e.endTick, false));
         v.bPoseStart = e.tick;
         break;
-      }
       case 'rise':
         if (e.kind !== 'attack') v.barTweens.push({ start: e.tick, end: e.endTick, offset: (e.heightAfter - e.heightBefore) * CELL, piecesFollow: true });
         v.height = e.heightAfter;
@@ -365,31 +396,27 @@ export class GameView {
       case 'declare':
         v.role = { start: e.tick, introEnd: e.introEndTick, attackTick: null, logos: e.logos, consumed: e.consumed, indices: e.result.indices };
         v.fail = null;
-        this.se('declareOk', e.tick, e.tick);
         break;
       case 'declareFail':
-        v.fail = { start: e.tick, end: e.lockEnd };
-        v.notices.push({ text: '不成立', start: e.tick });
-        this.se('declareFail', e.tick, e.tick);
+        v.fail = { start: e.tick, end: e.tick + this.ticksOf(this.failAnimMs()) };
         break;
       case 'lineClear': {
-        // 消去中は元の位置で消える演出 → 処理効果音 → 足場・キャラだけ段数TWEEN（ピースは動かない）
         const y = this.pieceBar(e.player, e.tick);
-        for (const r of e.removed) this.vanish.push({ piece: r.piece, x: cellX(board, r.col), y, start: e.tick, end: e.clearEnd });
+        for (const r of e.removed) this.vanish.push({ piece: r.piece, player: e.player, x: cellX(board, r.col), y, start: e.tick, end: e.clearEnd });
+        this.lineFx.push({ player: e.player, y, start: e.tick });
         if (e.heightAfter !== e.heightBefore) {
           v.barTweens.push({ start: e.clearEnd, end: e.shiftEnd, offset: (e.heightAfter - e.heightBefore) * CELL, piecesFollow: false });
           v.height = e.heightAfter;
         }
-        this.se('lineClear', e.clearEnd, e.tick);
         break;
       }
       case 'attack': {
         if (v.role) v.role.attackTick = e.tick;
-        const L = this.assets.layout;
-        const [ox, oy] = L.attackOrigin(e.player);
+        if (this.isSingle) break;
+        const [ox, oy] = this.attackIconOrigin(e.player);
         if (e.counter.canceled > 0) this.fx.push({ frames: this.fxFrames('counter_fx_1', 'counter_fx_2'), x: ox - 12, y: oy - 8, start: e.tick, frameTicks: 8 });
         if (e.counter.sent > 0) {
-          const [tx, ty] = L.attackOrigin((1 - e.player) as PlayerId);
+          const [tx, ty] = this.attackIconOrigin((1 - e.player) as PlayerId);
           this.fx.push({ frames: this.fxFrames('line_send_fx_1', 'line_send_fx_2', 'line_send_fx_3'), x: tx - 12, y: ty - 8, start: e.tick, frameTicks: 6 });
         }
         break;
@@ -398,14 +425,16 @@ export class GameView {
         v.role = null;
         break;
       case 'danger':
-        if (e.state === 'grace') {
-          v.grace = { start: e.tick, end: e.graceEnd };
-          this.se('danger', e.tick, e.tick);
-        } else v.grace = null;
+        v.grace = e.state === 'grace' ? { start: e.tick, end: e.graceEnd } : null;
         break;
       default:
         break;
     }
+  }
+
+  private failAnimMs(): number {
+    const t = this.assets.atlas.manifest.recommended_timing?.['S1/fail_declare']?.durations_ms;
+    return t ? t.reduce((a, b) => a + b, 0) : 560;
   }
 
   /** 列内の位置TWEENを（現在の見た目位置から）張り直す */
@@ -419,14 +448,18 @@ export class GameView {
   render(ctx: CanvasRenderingContext2D, t: number): void {
     this.syncEvents();
     ctx.imageSmoothingEnabled = false;
-    if (!this.staticLayer) this.staticLayer = this.buildStaticLayer();
+    const key = `${this.game.mode}:${this.game.kind}:${this.hud.firstTo ?? 0}`;
+    if (!this.staticLayer || key !== this.staticKey) {
+      this.staticLayer = this.buildStaticLayer();
+      this.staticKey = key;
+    }
     ctx.drawImage(this.staticLayer, 0, 0);
     const items: DrawItem[] = [];
-    for (const p of PLAYERS) this.collectPlayer(items, p, t);
+    this.game.players.forEach((_, i) => this.collectPlayer(items, i as PlayerId, t));
     this.collectCenter(items, t);
     this.collectFlights(items, t);
     this.collectFx(items, t);
-    items.sort((a, b) => a.z - b.z); // 安定ソート：同一Zは追加順
+    items.sort((a, b) => a.z - b.z);
     for (const it of items) {
       if (it.clip) {
         ctx.save();
@@ -437,15 +470,15 @@ export class GameView {
         ctx.restore();
       } else it.draw(ctx);
     }
-    if (this.showHud) this.drawHud(ctx, t);
+    this.drawHud(ctx, t);
     this.prune(t);
   }
 
-  private frame(sheet: string, id: string): ManifestFrame {
+  frame(sheet: string, id: string): ManifestFrame {
     return this.assets.atlas.frame(sheet, id);
   }
 
-  private put(items: DrawItem[], z: number, f: ManifestFrame, x: number, y: number, opts: { dark?: boolean; clip?: BoardRect; alpha?: number } = {}): void {
+  private put(items: DrawItem[], z: number, f: ManifestFrame, x: number, y: number, opts: { dark?: boolean; alpha?: number; clip?: BoardRect } = {}): void {
     items.push({ z, clip: opts.clip, draw: (ctx) => drawFrame(ctx, this.assets, f, x, y, { dark: opts.dark, alpha: opts.alpha }) });
   }
 
@@ -456,37 +489,45 @@ export class GameView {
     c.height = L.data.canvas.h;
     const g = c.getContext('2d')!;
     g.imageSmoothingEnabled = false;
-    g.fillStyle = '#0b0b1c';
-    g.fillRect(0, 0, c.width, c.height);
-    const tile = (id: string, x: number, y: number) => drawFrame(g, this.assets, this.frame('S5', id), x, y);
-    const panel = (r: BoardRect, fill: string) => {
-      for (let y = r.y; y < r.y + r.h; y += 8) for (let x = r.x; x < r.x + r.w; x += 8) tile(fill, x, y);
-      for (let x = r.x + 8; x < r.x + r.w - 8; x += 8) {
-        tile('panel_edge_h', x, r.y);
-        tile('panel_edge_h', x, r.y + r.h - 8);
-      }
-      for (let y = r.y + 8; y < r.y + r.h - 8; y += 8) {
-        tile('panel_edge_v', r.x, y);
-        tile('panel_edge_v', r.x + r.w - 8, y);
-      }
-      tile('panel_corner_tl', r.x, r.y);
-      tile('panel_corner_tr', r.x + r.w - 8, r.y);
-      tile('panel_corner_bl', r.x, r.y + r.h - 8);
-      tile('panel_corner_br', r.x + r.w - 8, r.y + r.h - 8);
-    };
-    for (const p of PLAYERS) {
-      const board = this.boards[p];
-      for (let y = board.y; y < board.y + board.h; y += 8) for (let x = board.x; x < board.x + board.w; x += 8) tile('panel_fill_dark', x, y);
-      panel(L.pRect(p, 'stock_background'), 'panel_fill_dark');
-      const at = (id: string, r: BoardRect) => drawFrame(g, this.assets, this.frame('S5', id), r.x, r.y);
-      at('multiplier_panel', L.pRect(p, 'multiplier'));
-      at('chain_bar_frame', L.pRect(p, 'chain_gauge'));
-      at('win_count_frame_3', L.pRect(p, 'win_counter'));
-      const badge = L.pRect(p, 'movement_guide');
-      drawFrame(g, this.assets, this.frame('S5', p === 0 ? 'p1_badge' : 'p2_badge'), badge.x + 2, badge.y + 2);
+    const bg = this.assets.images.get('BG_MENU');
+    if (bg) g.drawImage(bg, 0, 0);
+    else {
+      g.fillStyle = '#0b0b1c';
+      g.fillRect(0, 0, c.width, c.height);
     }
+    const at = (sheet: string, id: string, x: number, y: number) => drawFrame(g, this.assets, this.frame(sheet, id), x, y);
+    const mode2 = this.game.mode === 'mode2';
+    this.game.players.forEach((_, i) => {
+      const p = i as PlayerId;
+      const board = this.boards[p];
+      // 盤面の下地（論理グリッドの範囲だけ。座標は変えない）
+      g.fillStyle = 'rgba(10,8,30,0.82)';
+      g.fillRect(board.x, board.y, board.w, board.h);
+      if (mode2) at('S8', 'field_frame', board.x - 8, board.y - 8);
+      else {
+        const vf = L.rect(`p${p + 1}_visual_frame`);
+        at('S11', `player_frame_p${p + 1}`, vf.x, vf.y);
+      }
+      const sb = L.pRect(p, 'stock_background');
+      at('S8', mode2 ? 'mode_count_panel' : 'role_stock_frame', sb.x, sb.y);
+      if (!mode2 && !this.isSingle) {
+        const [ax, ay] = this.pvc.attackPanel[p];
+        at('S5', 'attack_stock_frame', ax, ay);
+      }
+      if (!this.isSingle) {
+        const wc = L.pRect(p, 'win_counter');
+        at('S5', 'win_count_frame_3', wc.x, wc.y);
+      }
+    });
+    if (this.isSingle) {
+      const r = L.data.graphic_mode_rules?.single_info_rect ?? [384, 128, 192, 224];
+      at('S8', 'info_panel', r[0], r[1]);
+    }
+    const cf = L.rect('central_visual_frame');
+    at('S11', 'center_info_frame', cf.x, cf.y);
     const bf = L.rect('base_frame');
-    drawFrame(g, this.assets, this.frame('S5', 'base_piece_frame'), bf.x, bf.y);
+    at('S5', 'base_piece_frame', bf.x, bf.y);
+    at('S8', 'mode_badge', 276, 5);
     return c;
   }
 
@@ -502,30 +543,38 @@ export class GameView {
     const sheet = p === 0 ? 'S1' : 'S2';
     const v = this.pv[p];
     const A = this.assets.atlas;
-    const r = this.game.result;
-    if (r && t >= r.tick) {
-      if (r.winner === p) return this.loop(A.animation(sheet, 'win'), t - r.tick, this.vt.win);
-      return this.once(A.animation(sheet, 'lose_fall'), t - r.tick, this.vt.lose);
+    const tk = (ms: number) => this.ticksOf(ms);
+    const pose = characterPose(this.hud.result ?? null, p, t);
+    const r = this.hud.result;
+    if (pose.anim === 'win' && r) return this.loop(A.animation(sheet, 'win'), t - (r.winnerTick ?? r.startTick), tk(this.vc.charFrameMs.win));
+    if (pose.anim === 'lose_fall' && r) return this.once(A.animation(sheet, 'lose_fall'), t - r.startTick, tk(this.vc.charFrameMs.lose));
+    if (v.role && (v.role.attackTick === null || t < v.role.attackTick)) return this.loop(A.animation(sheet, 'attack'), t - v.role.start, tk(this.vc.charFrameMs.attack));
+    if (v.fail && t < v.fail.end) {
+      // 不成立モーション（採用済み fail_declare 4枠、推奨時間 110/120/180/150ms）
+      const frames = A.animation(sheet, 'fail_declare');
+      const d = A.manifest.recommended_timing?.[`${sheet}/fail_declare`]?.durations_ms ?? [110, 120, 180, 150];
+      let el = (t - v.fail.start) * this.game.tickMs;
+      for (let i = 0; i < frames.length; i++) {
+        if (el < d[i]) return frames[i];
+        el -= d[i];
+      }
+      return frames[frames.length - 1];
     }
-    // 役処理：キャラモーション切替（攻撃）→ 攻撃処理でモーション戻し
-    if (v.role && (v.role.attackTick === null || t < v.role.attackTick)) return this.loop(A.animation(sheet, 'attack'), t - v.role.start, this.vt.attack);
-    if (t - v.bPoseStart < this.vt.bPose) return A.frame(sheet, this.vc.bPoseSlotId);
-    if (t - v.launchPoseStart < this.vt.launchPose) return this.once(A.animation(sheet, 'launch'), t - v.launchPoseStart, this.vt.launch);
-    if (v.move && t < v.move.end) return this.loop(A.animation(sheet, 'walk'), t - v.move.start, this.vt.walk);
-    return this.loop(A.animation(sheet, 'idle'), t, this.vt.idle);
+    if (t - v.bPoseStart < tk(this.game.config.timing.bPoseMs)) return A.frame(sheet, this.vc.bPoseSlotId);
+    if (t - v.launchPoseStart < tk(this.game.config.timing.launchMs)) return this.once(A.animation(sheet, 'launch'), t - v.launchPoseStart, tk(this.vc.charFrameMs.launch));
+    if (v.move && t < v.move.end) return this.loop(A.animation(sheet, 'walk'), t - v.move.start, tk(this.vc.charFrameMs.walk));
+    return this.loop(A.animation(sheet, 'idle'), t, tk(this.vc.charFrameMs.idle));
   }
 
   private collectPlayer(items: DrawItem[], p: PlayerId, t: number): void {
     const L = this.assets.layout;
     const st = this.game.players[p];
     const board = this.boards[p];
-    const v = this.pv[p];
     const pieceBar = this.pieceBar(p, t);
     const bar = this.barVisual(p, t);
-    // 盤面ピース（論理配列＋列内TWEEN＋盤面TWEEN）
     st.board.cols.forEach((col, c) => {
       col.forEach((slot, i) => {
-        if (slot.kind !== 'piece') return; // 予約空白は帰還ピース側で描く（二重実体化しない）
+        if (slot.kind !== 'piece') return;
         const { k, tw } = this.localK(slot.piece.id, i, t);
         const dark = !!tw?.dark;
         const u = tw ? progress(t, tw.start, tw.end) : 0;
@@ -533,29 +582,56 @@ export class GameView {
         this.put(items, dark ? Z.darkPiece : Z.piece, this.assets.atlas.piece(slot.piece.n, slot.piece.suit), x, pieceBar + CELL * k, { dark, clip: board });
       });
     });
-    // ライン消去中のピース（元の位置で点滅→消滅エフェクト）
     for (const e of this.vanish) {
-      if (!this.boardOf(e, p) || t < e.start || t >= e.end) continue;
+      if (e.player !== p || t < e.start || t >= e.end) continue;
       const u = progress(t, e.start, e.end);
       if (u < 0.5 && Math.floor((t - e.start) / 2) % 2 === 0) this.put(items, Z.piece, this.assets.atlas.piece(e.piece.n, e.piece.suit), e.x, e.y, { clip: board });
       const fr = this.fxFrames('vanish_fx_1', 'vanish_fx_2');
       this.put(items, Z.contact, fr[u < 0.5 ? 0 : 1], e.x, e.y, { clip: board });
     }
-    // 足場
+    // 1ライン消去の演出（S10 line_clear 60ms×4）
+    const lineFrames = this.assets.atlas.animation('S10', 'line_clear');
+    for (const e of this.lineFx) {
+      if (e.player !== p) continue;
+      const i = Math.floor((t - e.start) / this.ticksOf(60));
+      if (i >= 0 && i < lineFrames.length) this.put(items, Z.contact, lineFrames[i], board.x, e.y, { clip: board });
+    }
+    // 足場の線（キャラの足元）
     items.push({
       z: Z.piece,
       draw: (ctx) => {
-        ctx.fillStyle = '#7fb4f0';
-        ctx.fillRect(board.x, Math.round(bar) - 3, board.w, 2);
-        ctx.fillStyle = '#2b4a8a';
-        ctx.fillRect(board.x, Math.round(bar) - 1, board.w, 1);
+        ctx.fillStyle = 'rgba(127,180,240,0.85)';
+        ctx.fillRect(board.x, Math.round(bar) - 2, board.w, 2);
       },
     });
-    // キャラクター（足元中央アンカー）。不成立モーションは専用素材が無いため待機枠を揺らして代用
-    const cf = this.characterFrame(p, t);
-    const shake = v.fail && t < v.fail.end ? Math.round(Math.sin((t - v.fail.start) * 1.6) * this.vc.failShakePx) : 0;
-    this.put(items, Z.character, cf, this.characterX(p, t) - cf.w / 2 + shake, bar - cf.h);
-    // 役ストック（SNAP）と役成立光（背面→ピース→前面、共有時計で同期）
+    // キャラクター（結果の落下は画面外まで）
+    const pose = characterPose(this.hud.result ?? null, p, t);
+    if (!pose.gone) {
+      const cf = this.characterFrame(p, t);
+      const fallDist = 360 + 8 - (bar - cf.h);
+      const dy = pose.fall > 0 ? fallDist * pose.fall * pose.fall : 0;
+      this.put(items, Z.character, cf, this.characterX(p, t) - cf.w / 2, bar - cf.h + dy);
+    }
+    // 危険枠（S10 danger_border 250ms）
+    if (this.game.mode === 'mode1' && st.board.height() >= this.game.config.dangerHeight) {
+      const fr = this.assets.atlas.animation('S10', 'danger_border');
+      this.put(items, Z.ui, this.loop(fr, t, this.ticksOf(250)), board.x - 8, board.y - 8);
+    }
+    if (this.game.mode === 'mode1') this.collectMode1Player(items, p, t);
+    // 勝敗表示（S9 160×64）：勝敗ありの対戦のみ。勝利数加算と同時に表示
+    const r = this.hud.result;
+    if (r && r.kind === 'versus' && t >= r.startTick) {
+      const b = L.pRect(p, 'win_lose_banner');
+      const phase = this.s9Phase(t);
+      this.put(items, Z.result, this.frame('S9', `show_${r.winner === p ? 'win' : 'lose'}_${phase}`), b.x, b.y);
+    }
+  }
+
+  private collectMode1Player(items: DrawItem[], p: PlayerId, t: number): void {
+    const g = this.mode1!;
+    const L = this.assets.layout;
+    const v = this.pv[p];
+    const st = g.players[p] as PlayerState;
     const glow = this.glowTargets(p, t);
     const shown = glow?.pieces ?? st.roleStock;
     shown.forEach((pc, i) => {
@@ -563,86 +639,41 @@ export class GameView {
       this.put(items, STOCK_PIECE_Z, this.assets.atlas.piece(pc.n, pc.suit, true), r.x, r.y);
     });
     if (glow) {
-      for (const g of this.glowPlacements(p, glow.indices, this.glowPhase(t))) {
-        this.put(items, Z.glowBack, g.back, g.x, g.y);
-        this.put(items, Z.glowFront, g.front, g.x, g.y);
+      for (const gp of this.glowPlacements(p, glow.indices, this.glowPhase(t))) {
+        this.put(items, Z.glowBack, gp.back, gp.x, gp.y);
+        this.put(items, Z.glowFront, gp.front, gp.x, gp.y);
       }
     }
-    // 攻撃ストック表示
-    const icons = layoutAttackIcons(st.attackStock, L.attackOrigin(p), L.attackRules());
-    for (const b of icons.big) this.put(items, Z.ui, this.frame('S5', 'attack_icon_big'), b.x, b.y);
-    for (const s of icons.small) this.put(items, Z.ui, this.frame('S5', 'attack_icon_small'), s.x, s.y);
-    // 連続取得の攻撃倍率・役連鎖ゲージ・勝利数
-    this.collectMultiplier(items, p);
-    this.collectChainGauge(items, p);
-    this.collectWins(items, p, t);
-    // 役名（役処理中は表示し続ける）
+    if (!this.isSingle) this.collectAttackIcons(items, p, st.attackStock);
+    // 役名ロゴ（S7 A/B/C）
     const role = v.role;
     if (role) {
       const r = L.pRect(p, 'role_logo');
       const dur = Math.max(1, (role.attackTick ?? t + 1) - role.start);
       const logo = role.logos[Math.min(role.logos.length - 1, Math.floor(((t - role.start) / dur) * role.logos.length))];
-      const letter = (['A', 'B', 'C'] as const)[Math.floor((t - role.start) / this.vt.role) % 3];
+      const letter = (['A', 'B', 'C'] as const)[Math.floor((t - role.start) / this.ticksOf(this.vc.roleFrameMs)) % 3];
       this.put(items, Z.roleName, this.assets.atlas.role(logo, letter), r.x, r.y);
     }
-    // 勝敗バナー
-    const res = this.game.result;
-    if (res && t >= res.tick && res.winner !== null) {
-      const r = L.pRect(p, 'win_lose_banner');
-      this.put(items, Z.result, this.frame('S5', res.winner === p ? 'banner_win' : 'banner_lose'), r.x, r.y);
-    }
   }
 
-  private boardOf(e: VanishVis, p: PlayerId): boolean {
-    const b = this.boards[p];
-    return e.x >= b.x && e.x < b.x + b.w;
+  /** 攻撃ストック（画面見本の枠内：大＝10ライン×最大2、小＝1ライン×最大9） */
+  private attackIconOrigin(p: PlayerId): [number, number] {
+    const [ax, ay] = this.pvc.attackPanel[p];
+    return [ax + 12, ay + 13];
   }
 
-  private digits(items: DrawItem[], text: string, x: number, y: number, big: boolean): number {
-    for (const ch of text) {
-      const id = ch === '.' ? (big ? 'big_dot' : 'sm_dot') : ch === 'x' ? (big ? 'big_x' : 'sm_x') : ch === '+' ? (big ? 'big_plus' : 'sm_plus') : `${big ? 'big' : 'sm'}_${ch}`;
-      const f = this.frame('S5', id);
-      this.put(items, Z.ui, f, x, y);
-      x += f.w;
-    }
-    return x;
+  private collectAttackIcons(items: DrawItem[], p: PlayerId, lines: number): void {
+    const n = Math.max(0, Math.min(ATTACK_MAX, lines));
+    const big = Math.min(2, Math.floor(n / 10));
+    const small = Math.min(9, n - big * 10);
+    const [ox, oy] = this.attackIconOrigin(p);
+    for (let i = 0; i < big; i++) this.put(items, Z.ui, this.frame('S5', 'attack_icon_big'), ox, oy + 28 * i);
+    const sy = oy + 28 * big;
+    for (let i = 0; i < small; i++) this.put(items, Z.ui, this.frame('S5', 'attack_icon_small'), ox - 4 + 16 * Math.floor(i / 5), sy + 14 * (i % 5));
   }
 
-  private collectMultiplier(items: DrawItem[], p: PlayerId): void {
-    const r = this.assets.layout.pRect(p, 'multiplier');
-    const pct = this.game.currentStreakPercent(this.game.players[p]);
-    const int = Math.floor(pct / 100);
-    const dec = String(pct % 100).padStart(2, '0');
-    // 整数部は大きい数字、小数部は小さい数字（下揃え）。表示位置は暫定
-    const x = this.digits(items, `x${int}`, r.x + 6, r.y + 8, true);
-    this.digits(items, `.${dec}`, x + 1, r.y + 24, false);
-  }
-
-  private collectChainGauge(items: DrawItem[], p: PlayerId): void {
-    const st = this.game.players[p];
-    if (st.chainRemaining <= 0) return;
-    const r = this.assets.layout.pRect(p, 'chain_gauge');
-    const ratio = st.chainRemaining / this.game.ticks(this.game.config.chainWindowMs);
-    const id = ratio > 0.5 ? 'chain_bar_fill_safe' : ratio > 0.25 ? 'chain_bar_fill_warn' : 'chain_bar_fill_danger';
-    const f = this.frame('S5', id);
-    const h = Math.max(1, Math.round(f.h * ratio));
-    const x = r.x + (r.w - f.w) / 2;
-    const y = r.y + 8 + (f.h - h);
-    items.push({
-      z: Z.ui,
-      draw: (ctx) => ctx.drawImage(this.assets.images.get('S5')!, f.x, f.y + (f.h - h), f.w, h, x, y, f.w, h),
-    });
-  }
-
-  private collectWins(items: DrawItem[], p: PlayerId, t: number): void {
-    const m = this.match;
-    if (!m) return;
-    const r = this.assets.layout.pRect(p, 'win_counter');
-    for (let i = 0; i < m.firstTo; i++) {
-      const won = i < m.wins[p];
-      const fresh = won && i === m.wins[p] - 1 && m.state !== 'round' && Math.floor(t / 8) % 2 === 0;
-      this.put(items, Z.ui, this.frame('S5', fresh ? 'win_count_slot_flash' : won ? 'win_count_slot_fill' : 'win_count_slot_empty'), r.x + 4 + 20 * i, r.y + 4);
-    }
+  private s9Phase(t: number): 'A' | 'B' | 'C' {
+    return (['A', 'B', 'C'] as const)[Math.floor(t / this.ticksOf(90)) % 3];
   }
 
   private collectCenter(items: DrawItem[], t: number): void {
@@ -650,29 +681,65 @@ export class GameView {
     const g = this.game;
     const bp = L.rect('base_piece');
     this.put(items, Z.ui, this.assets.atlas.piece(g.base.n, g.base.suit), bp.x, bp.y);
-    // マスコット
+    if (this.refreshFx !== null) {
+      const fr = this.assets.atlas.animation('S10', 'card_refresh');
+      const i = Math.floor((t - this.refreshFx) / this.ticksOf(90));
+      if (i >= 0 && i < fr.length) this.put(items, Z.contact, fr[i], bp.x + 16 - 24, bp.y + 16 - 24);
+    }
     const m = L.rect('mascot');
     const A = this.assets.atlas;
     const goEnd = g.playStartTick + g.ticks(g.config.timing.goMs);
     let anim = 'idle';
-    if (g.result) anim = g.result.winner === null ? 'sad' : 'cracker';
+    const anyGrace = g.mode === 'mode1' && this.pv.some((v) => v.grace);
+    const anyRole = this.pv.some((v) => v.role);
+    if (g.result) anim = g.result.outcome === 'draw' || g.result.outcome === 'gameOver' ? 'sad' : 'cracker';
     else if (t < g.playStartTick) anim = 'ready';
     else if (t < goEnd) anim = 'start';
-    else if (PLAYERS.some((p) => this.pv[p].grace)) anim = 'panic';
-    else if (PLAYERS.some((p) => this.pv[p].role)) anim = 'joy';
-    else if (PLAYERS.some((p) => this.pv[p].fail && t < this.pv[p].fail!.end)) anim = 'surprise';
-    this.put(items, Z.character, this.loop(A.animation('S3', anim), t, this.vt.idle), m.x, m.y);
-    // READY / GO / 引分け / 試合結果 / 一時停止
-    const banner = (id: string, rectId: string) => {
+    else if (anyGrace) anim = 'panic';
+    else if (anyRole) anim = 'joy';
+    else if (this.pv.some((v) => v.fail && t < v.fail.end)) anim = 'surprise';
+    this.put(items, Z.character, this.loop(A.animation('S3', anim), t, this.ticksOf(this.vc.charFrameMs.idle)), m.x, m.y);
+    const phase = this.s9Phase(t);
+    const banner = (id: string, rectId = 'ready_banner', dy = 0, alpha?: number) => {
       const r = L.rect(rectId);
-      const f = this.frame('S5', id);
-      this.put(items, Z.banner, f, r.x + (r.w - f.w) / 2, r.y);
+      this.put(items, Z.banner, this.frame('S9', `${id}_${phase}`), r.x, r.y + dy, { alpha });
     };
-    if (this.match?.paused) banner('banner_pause', 'ready_banner');
-    else if (g.result && this.match?.state === 'matchResult') banner('banner_result', 'ready_banner');
-    else if (g.result && g.result.winner === null) banner('banner_draw', 'ready_banner');
-    else if (t < g.playStartTick) banner('banner_ready', 'ready_banner');
-    else if (t < goEnd && !g.result) banner('banner_go', 'go_banner');
+    const r = this.hud.result;
+    if (r && t >= r.startTick) {
+      if (r.kind === 'draw') banner('show_draw');
+      else if (r.kind === 'gameOver') banner('show_game_over');
+      else if (r.kind === 'stageClear') banner('show_stage_clear');
+      else if (r.kind === 'allStagesClear') banner('show_all_stages_complete');
+      else if (r.kind === 'clear') banner('show_all_clear');
+      else if (this.hud.matchOver) banner('show_result');
+    } else if (t < g.playStartTick) banner('show_ready');
+    else if (t < goEnd && !g.result) banner('show_go', 'go_banner');
+    // MODE2 カウントダウン：数字のみ（枠・窓なし）。上から出現→停止→下へ消える。動きはコード側
+    const cd = this.countdown;
+    if (cd && !g.result && t >= cd.start && t < cd.end) {
+      const el = (t - cd.start) * g.tickMs;
+      const total = (cd.end - cd.start) * g.tickMs;
+      const fade = this.pvc.countdownFadeMs;
+      const off = this.pvc.countdownOffsetPx;
+      let dy = 0;
+      let alpha = 1;
+      if (el < fade) {
+        const a = el / fade;
+        dy = Math.round(-off * (1 - a));
+        alpha = a;
+      } else if (el > total - fade) {
+        const a = (el - (total - fade)) / fade;
+        dy = Math.round(off * a);
+        alpha = 1 - a;
+      }
+      banner(`show_countdown_${cd.value}`, 'countdown', dy, Math.max(0, Math.min(1, alpha)));
+    }
+    // 一時演出（LEVEL UP／MAX／全消し）
+    for (const n of this.notices) {
+      if (t < n.start || t >= n.end) continue;
+      const rr = L.rect('ready_banner');
+      this.put(items, Z.banner, this.frame('S9', `${n.id}_${phase}`), rr.x, rr.y - 60);
+    }
   }
 
   private collectFlights(items: DrawItem[], t: number): void {
@@ -692,52 +759,109 @@ export class GameView {
   private prune(t: number): void {
     this.fx = this.fx.filter((e) => t - e.start < e.frames.length * e.frameTicks);
     this.vanish = this.vanish.filter((e) => t < e.end);
+    this.lineFx = this.lineFx.filter((e) => t - e.start < this.ticksOf(60) * 4);
+    this.notices = this.notices.filter((n) => t < n.end);
+    if (this.refreshFx !== null && t - this.refreshFx > this.ticksOf(400)) this.refreshFx = null;
     for (const [id, tw] of this.localTweens) if (t >= tw.end) this.localTweens.delete(id);
-    for (const p of PLAYERS) {
-      const v = this.pv[p];
+    for (const v of this.pv) {
       v.barTweens = v.barTweens.filter((tw) => t < tw.end);
-      v.notices = v.notices.filter((n) => t - n.start < 60);
       if (v.fail && t >= v.fail.end) v.fail = null;
     }
   }
 
+  // ---- 文字・数値 ----
+
   private drawHud(ctx: CanvasRenderingContext2D, t: number): void {
-    ctx.save();
-    ctx.font = '10px "Noto Sans CJK JP", "Yu Gothic", "Meiryo", sans-serif';
-    ctx.textBaseline = 'top';
-    const text = (s: string, x: number, y: number, color = '#ffffff', align: CanvasTextAlign = 'left', box = false) => {
-      ctx.textAlign = align;
-      if (box) {
-        const w = ctx.measureText(s).width + 6;
-        const bx = align === 'center' ? x - w / 2 : align === 'right' ? x - w + 3 : x - 3;
-        ctx.fillStyle = 'rgba(0,0,16,0.75)';
-        ctx.fillRect(Math.round(bx), y - 2, Math.ceil(w), 14);
-      }
-      ctx.fillStyle = '#000000';
-      ctx.fillText(s, x + 1, y + 1);
-      ctx.fillStyle = color;
-      ctx.fillText(s, x, y);
-    };
-    for (const p of PLAYERS) {
+    const L = this.assets.layout;
+    const g = this.game;
+    const ms = this.glowClockMs(t);
+    drawText(ctx, g.mode === 'mode1' ? 'MODE1' : 'MODE2', 320, 12, { align: 'center', size: 11, bold: true, color: '#fff3c8' });
+    g.players.forEach((_, i) => {
+      const p = i as PlayerId;
       const board = this.boards[p];
-      const st = this.game.players[p];
-      const v = this.pv[p];
-      v.notices.forEach((n, i) => text(n.text, board.x + board.w / 2, board.y + 40 + 14 * i, '#ffd060', 'center', true));
-      if (st.board.height() >= this.game.config.dangerHeight && Math.floor(t / 15) % 2 === 0) text('DANGER', board.x + board.w - 4, board.y + board.h - 16, '#ff6060', 'right', true);
-      if (v.grace) text(`危険猶予 ${(Math.max(0, v.grace.end - t) * this.game.tickMs / 1000).toFixed(1)}秒`, board.x + 4, board.y + board.h - 16, '#ff9090', 'left', true);
-      const gx = this.assets.layout.pRect(p, 'chain_gauge');
-      if (st.chainRemaining > 0 && st.chainCount > 0) text(`連鎖${st.chainCount}`, gx.x + gx.w / 2, gx.y + gx.h + 2, '#c0ffd0', 'center');
-      const sx = p === 0 ? 2 : 598;
-      text(`ATK ${st.attackStock}`, sx, 140, '#c0d8ff');
-      if (this.game.streakActive(st)) text(`連続${st.streakCount}`, p === 0 ? 2 : 578, 84, '#ffe0a0');
-      // 使用機器（役名ロゴ・キャラと重ならない画面端）
-      if (this.match) text(this.match.labels[p], p === 0 ? 2 : 638, 150, '#9aa4c0', p === 0 ? 'left' : 'right');
+      if (g.mode === 'mode1') {
+        const st = (g as Game).players[p];
+        // 倍率（S12枠なし数字）：対戦＝攻撃倍率、シングル＝得点倍率
+        const mr = L.pRect(p, 'multiplier');
+        const txt = this.isSingle
+          ? (() => {
+              const m = (g as Game).currentScoreMultiplier(st);
+              return multiplierText(m.num, m.den);
+            })()
+          : multiplierText((g as Game).currentStreakPercent(st), 100);
+        drawNumeric(ctx, this.assets, txt, mr.x, mr.y, mr.w, numericPhase(ms));
+        drawText(ctx, this.isSingle ? '得点倍率' : '攻撃倍率', mr.x + mr.w / 2, mr.y + 33, { align: 'center', size: 8, color: '#c9d6ff' });
+        this.drawChainGauge(ctx, p, st);
+        const v = this.pv[p];
+        if (v.grace) drawText(ctx, `危険 ${((Math.max(0, v.grace.end - t) * g.tickMs) / 1000).toFixed(1)}秒`, board.x + board.w / 2, board.y + 4, { align: 'center', size: 10, bold: true, color: '#ff8a8a', box: true });
+        if (!this.isSingle) drawText(ctx, `${st.attackStock}`, this.pvc.attackPanel[p][0] + 24, this.pvc.attackPanel[p][1] - 12, { align: 'center', size: 9, color: '#ffd6d6' });
+      } else {
+        // MODE2：役・攻撃の要素は出さない。手役ストックと同じ領域に残りピース数
+        const m2 = g as Mode2Game;
+        const sb = L.pRect(p, 'stock_background');
+        drawText(ctx, `のこり ${m2.remaining(m2.players[p])}`, sb.x + sb.w / 2, sb.y + 8, { align: 'center', size: 14, bold: true, color: '#fff7d0' });
+      }
+      if (!this.isSingle && this.hud.wins) this.drawWins(ctx, p, t);
+      if (this.hud.labels && !this.isSingle) drawText(ctx, this.hud.labels[p], p === 0 ? 4 : 636, 4, { align: p === 0 ? 'left' : 'right', size: 8, color: '#b8c0e0' });
+    });
+    if (this.isSingle) this.drawSingleInfo(ctx);
+    else if (this.hud.firstTo) drawText(ctx, `${this.hud.firstTo}本先取 R${this.hud.round ?? 1}`, 320, 134, { align: 'center', size: 9, color: '#dfe6ff' });
+  }
+
+  private drawChainGauge(ctx: CanvasRenderingContext2D, p: PlayerId, st: PlayerState): void {
+    if (st.chainRemaining <= 0) return;
+    const g = this.mode1!;
+    const r = this.assets.layout.pRect(p, 'chain_gauge');
+    const ratio = Math.min(1, st.chainRemaining / g.ticks(g.config.chainWindowMs));
+    const id = ratio > 0.5 ? 'timer_fill_safe' : ratio > 0.25 ? 'timer_fill_warn' : 'timer_fill_danger';
+    const f = this.frame('S11', id);
+    const h = Math.max(1, Math.round(f.h * ratio));
+    ctx.drawImage(this.assets.images.get('S11')!, f.x, f.y + (f.h - h), f.w, h, r.x, r.y + (r.h - h), f.w, h);
+    if (st.chainCount > 0) drawText(ctx, `連鎖${st.chainCount}`, r.x + r.w / 2, r.y + r.h + 2, { align: 'center', size: 8, color: '#c0ffd0' });
+  }
+
+  private drawWins(ctx: CanvasRenderingContext2D, p: PlayerId, t: number): void {
+    const wins = this.hud.wins!;
+    const r = this.assets.layout.pRect(p, 'win_counter');
+    const firstTo = this.hud.firstTo ?? 2;
+    for (let i = 0; i < firstTo; i++) {
+      const won = i < wins[p];
+      const fresh = won && i === wins[p] - 1 && !!this.hud.result && Math.floor(t / 8) % 2 === 0;
+      drawFrame(ctx, this.assets, this.frame('S5', fresh ? 'win_count_slot_flash' : won ? 'win_count_slot_fill' : 'win_count_slot_empty'), r.x + 4 + 20 * i, r.y + 4);
     }
-    const m = this.match;
-    if (m && m.state !== 'round' && m.canConfirm) text('決定（Enter / Space / 発射キー / Ⓐ）で次へ', 320, 186, '#ffffff', 'center', true);
-    if (m) text(`${m.firstTo}本先取  ROUND ${m.round}`, 320, 4, '#9aa4c0', 'center');
-    ctx.font = '9px "Noto Sans CJK JP", "Yu Gothic", "Meiryo", sans-serif';
-    text('F1:説明 F2:設定 Esc:停止', 320, 349, '#6a7490', 'center'); // 盤面に重ならない中央列
-    ctx.restore();
+  }
+
+  /** シングルの右側：2P盤面の代わりの情報欄（得点・Lv／次まで、またはステージ／ノルマ。MODE2は経過時間・残り） */
+  private drawSingleInfo(ctx: CanvasRenderingContext2D): void {
+    const r = this.assets.layout.data.graphic_mode_rules?.single_info_rect ?? [384, 128, 192, 224];
+    const x = r[0] + 16;
+    let y = r[1] + 18;
+    const line = (label: string, value: string, big = false) => {
+      drawText(ctx, label, x, y, { size: 9, color: '#c9d6ff' });
+      y += 12;
+      drawText(ctx, value, x + 4, y, { size: big ? 18 : 13, bold: true, color: '#fff7d0' });
+      y += big ? 26 : 20;
+    };
+    const g = this.game;
+    if (g.mode === 'mode2') {
+      const m2 = g as Mode2Game;
+      line('MODE2 シングル', '');
+      y -= 14;
+      line('経過時間', formatTime(m2.elapsedMs()), true);
+      line('のこりピース', String(m2.remaining(m2.players[0])), true);
+      return;
+    }
+    const s = (g as Game).single!;
+    line(s.kind === 'endless' ? 'ひたすら' : 'ステージクリア', '');
+    y -= 14;
+    line('得点', s.score.toLocaleString('ja-JP'), true);
+    if (s.kind === 'endless') {
+      const req = levelDef(s.level).required_clears_to_next;
+      line('レベル', req === null ? `Lv${s.level} MAX` : `Lv${s.level}`);
+      line('次のLvまで', req === null ? 'MAX' : `あと ${Math.max(0, req - s.levelProgress)}`);
+    } else {
+      line('ステージ', `${s.stage} / 10`);
+      line('ノルマ', `${Math.min(s.progress, s.quota)} / ${s.quota}`);
+    }
   }
 }

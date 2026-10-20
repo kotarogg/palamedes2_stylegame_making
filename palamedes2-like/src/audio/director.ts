@@ -1,0 +1,124 @@
+// ロジックのイベント列から効果音・ボイスを鳴らす（描画フレームやボタン押下ではなく、成立した論理イベントから1回だけ）。
+// 音はゲーム進行に影響しない。勝敗確定後は新しいプレイ音を鳴らさない（結果の音は演出側が鳴らす）。
+import type { GameEvent } from '../core/game';
+import type { AnyGame } from '../core/match';
+import type { Mode2Event } from '../core/mode2';
+import type { PlayerId } from '../core/types';
+import type { AudioBus } from './audioBus';
+import { PLAYER_CHARACTER, roleVoiceLine, VOICE_PRIORITY, type Character } from './audioMap';
+
+export interface DirectorOptions {
+  /** 2回目以降の連鎖成立で成立音を連鎖音に置換する（調整可能な演出補完） */
+  chainReplacesRoleSuccess: boolean;
+}
+
+export const DEFAULT_DIRECTOR_OPTIONS: DirectorOptions = { chainReplacesRoleSuccess: true };
+
+export class SoundDirector {
+  private cursor = 0;
+  private ended = false;
+
+  constructor(
+    private readonly bus: AudioBus,
+    private game: AnyGame,
+    private readonly opts: DirectorOptions = DEFAULT_DIRECTOR_OPTIONS,
+    private readonly characters: readonly Character[] = PLAYER_CHARACTER,
+  ) {}
+
+  reset(game: AnyGame): void {
+    this.game = game;
+    this.cursor = 0;
+    this.ended = false;
+  }
+
+  private char(p: PlayerId): Character {
+    return this.characters[p];
+  }
+
+  /** 新しいイベントを処理する（毎フレーム、描画前に呼ぶ） */
+  sync(): void {
+    const ev = this.game.events as ReadonlyArray<GameEvent | Mode2Event>;
+    while (this.cursor < ev.length) this.onEvent(ev[this.cursor++]);
+    this.updateDanger();
+  }
+
+  private onEvent(e: GameEvent | Mode2Event): void {
+    if (this.ended) return;
+    const b = this.bus;
+    switch (e.type) {
+      case 'launch':
+        b.playSfx('piece_launch');
+        return;
+      case 'arrive':
+        b.playSfx(e.success ? 'piece_success' : 'piece_reject');
+        return;
+      case 'returned':
+        if (!e.instant) b.playSfx('piece_return'); // 役成立による一括SNAP帰還では鳴らさない
+        return;
+      case 'rotate':
+        b.playSfx('column_swap');
+        return;
+      case 'rise':
+        if (e.kind !== 'attack') b.playSfx('field_rise'); // 攻撃による段は attackRow で1段ずつ
+        return;
+      case 'roleAvailable':
+        b.playSfx('role_available');
+        return;
+      case 'declare': {
+        b.playSfx(this.opts.chainReplacesRoleSuccess && e.chainCount >= 2 ? 'chain' : 'role_success');
+        // 役名ボイスは表示順で最初の役だけ（専用複合ロゴならその1本）
+        if (e.logos.length > 0) b.playVoice(this.char(e.player), roleVoiceLine(e.logos[0]), VOICE_PRIORITY.role);
+        return;
+      }
+      case 'declareFail':
+        b.playSfx('role_fail');
+        b.playVoice(this.char(e.player), 'role_fail', VOICE_PRIORITY.fail);
+        return;
+      case 'lineClear':
+        b.playSfx('line_clear');
+        return;
+      case 'attack':
+        if (e.counter.canceled > 0) b.playSfx('counter');
+        if (e.counter.sent > 0) {
+          b.playSfx('attack_send');
+          b.playVoice(this.char(e.player), 'attack', VOICE_PRIORITY.attack);
+        }
+        return;
+      case 'attackRow':
+        if (!e.applied) return; // 破棄された段は無音
+        b.playSfx('attack_row');
+        if (e.firstApplied) b.playVoice(this.char(e.player), 'damage', VOICE_PRIORITY.attack); // 実適用された波の初段だけ
+        return;
+      case 'danger':
+        if (e.state === 'grace') b.playSfx('danger');
+        return;
+      case 'levelUp':
+        b.playSfx('level_up');
+        return;
+      case 'allClear':
+        b.playSfx('all_clear');
+        return;
+      case 'stageClear':
+        b.playSfx(e.final ? 'all_stages_clear' : 'stage_clear');
+        return;
+      case 'countdown':
+        b.playSfx('countdown'); // 数字の切替ごとに1回（上下移動では鳴らさない）
+        return;
+      case 'cardRefresh':
+        b.playSfx('card_refresh');
+        return;
+      case 'roundEnd':
+        this.ended = true;
+        b.stopPlaySounds();
+        return;
+      default:
+        return;
+    }
+  }
+
+  /** 危険猶予中は警告音を最短1000ms間隔で繰り返す（解除・終了で停止） */
+  private updateDanger(): void {
+    if (this.ended || this.game.mode !== 'mode1' || !this.game.playing) return;
+    if (this.game.players.some((p) => p.graceRemaining !== null && !p.defeated)) this.bus.playSfx('danger');
+  }
+}

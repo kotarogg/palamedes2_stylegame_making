@@ -72,7 +72,7 @@ describe('役成立光 v2.1（確定）', () => {
   it('旧来の role_glow_6_spark は常時囲み光のアニメーションに含めない', () => {
     const anims = manifest().animations;
     for (const [k, ids] of Object.entries(anims)) if (k.startsWith('S6/role_glow')) expect(ids).not.toContain('role_glow_6_spark');
-    expect(manifest().version).toBe('2.1');
+    expect(manifest().version).toBe('2.3');
   });
 });
 
@@ -100,13 +100,16 @@ describe('ライン消去後の段数推移（表示）', () => {
   });
 });
 
-describe('読み込み許可リスト（asset_loading_policy.json）', () => {
-  it('7シートだけを明示許可リストで読み込み、再帰収集しない。許可外のシートはエラー', () => {
+describe('読み込み許可リスト（asset_loading_policy.json v2.3）', () => {
+  it('12シート＋背景の13PNGだけを明示許可リストで読み込み、再帰収集しない。許可外・旧版はエラー', () => {
     const policy = readJson<AssetLoadingPolicy>('public/data/asset_loading_policy.json');
     const m = manifest();
-    expect(policy).toMatchObject({ mode: 'allowlist_only', recursive_discovery: false });
-    expect(sheetsToLoad(m, policy).map((s) => s.file).sort()).toEqual([...policy.sheets].sort());
+    expect(policy).toMatchObject({ mode: 'explicit_allowlist', no_recursive_discovery: true });
+    const files = sheetsToLoad(m, policy).map((s) => s.file).sort();
+    expect(files).toEqual([...policy.files].sort());
+    expect(files).toHaveLength(13);
+    expect(policy.exclude).toEqual(expect.arrayContaining(['*.zip', 'previews/**', 'graphics_preview.html']));
     expect(() => sheetsToLoad({ ...m, sheets: [...m.sheets, { id: 'X', file: 'old.png', width: 1, height: 1, sha256: '' }] }, policy)).toThrow(/allowlist/);
-    expect(() => sheetsToLoad(m, { ...policy, recursive_discovery: true })).toThrow();
+    expect(() => sheetsToLoad(m, { ...policy, no_recursive_discovery: false })).toThrow();
   });
 });
