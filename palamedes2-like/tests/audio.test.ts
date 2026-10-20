@@ -10,7 +10,7 @@ import { chooseScale } from '../src/view/scale';
 import { ROOT } from './helpers';
 
 describe('音声素材の一覧（必須79本）', () => {
-  it('BGM3・SE30・ボイス46。効果音とボイスは配信物に実在する', () => {
+  it('BGM3・SE30・ボイス46の一覧。リポジトリには効果音とボイスが実在する（BGMを含む必須79本の実在は納品検査 check-release／e2e が担う）', () => {
     const files = allAudioFiles();
     expect(files).toHaveLength(79);
     expect(new Set(files).size).toBe(79);

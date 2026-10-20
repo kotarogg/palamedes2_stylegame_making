@@ -2,7 +2,7 @@
 // 同一イベントの重複抑制、声の優先度を管理する。素材の再ノーマライズ・ピーク最大化・リミッターは行わない。
 // ブラウザが再生を拒否しても例外を出さず無音で続行する（ゲーム進行は音に依存しない）。
 // AudioContext はユーザー操作（最初のキー・クリック・ボタン）で作成する。
-import { BGM_FILES, sfxFile, SFX_MIN_INTERVAL_MS, voiceFile, type BgmId, type Character, type SfxId, type VoiceLine } from './audioMap';
+import { BGM_FILES, RESULT_SFX, sfxFile, SFX_MIN_INTERVAL_MS, voiceFile, type BgmId, type Character, type SfxId, type VoiceLine } from './audioMap';
 
 export interface AudioVolumes {
   /** 0〜100（100＝素材そのまま＝カテゴリゲイン0dB。再ノーマライズの意味ではない） */
@@ -62,18 +62,35 @@ export function wavDurationMs(buf: ArrayBuffer): number | null {
   return null;
 }
 
+/** 実際に作成した再生ノードの記録（自動検証用）。時刻は AudioContext の秒 */
+export interface AudioNodeRecord {
+  id: string;
+  kind: 'bgm' | 'sfx' | 'voice';
+  start: number;
+  /** 素材の長さ（秒） */
+  duration: number;
+  loop: boolean;
+  /** 途中停止を要求した時刻（終端まで鳴った・停止要求なしは null） */
+  stoppedAt: number | null;
+}
+
 interface Playing {
   id: string;
   prio: number;
   endT: number;
   src: AudioBufferSourceNode | null;
   gain: GainNode | null;
+  rec?: AudioNodeRecord;
+  protected?: boolean;
 }
 
 export class AudioBus {
   ctx: AudioContext | null = null;
   readonly log: AudioLogEntry[] = [];
   readonly missing = new Set<string>();
+  readonly nodes: AudioNodeRecord[] = [];
+  /** unlock を一度でも試みたか（ブラウザが再生を拒否した状態との区別に使う） */
+  unlockAttempted = false;
   private readonly raw = new Map<string, ArrayBuffer>();
   private readonly buffers = new Map<string, AudioBuffer>();
   private master: GainNode | null = null;
@@ -81,7 +98,7 @@ export class AudioBus {
   private duck: GainNode | null = null;
   private volumes: AudioVolumes = { ...DEFAULT_VOLUMES };
   private bgmId: BgmId | null = null;
-  private bgmSrc: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private bgmSrc: { src: AudioBufferSourceNode; gain: GainNode; rec: AudioNodeRecord } | null = null;
   private readonly lastSfx = new Map<SfxId, number>();
   private sfxPlaying: Playing[] = [];
   private readonly voices: Record<VoiceChannel, Playing[]> = { main: [], announce: [], result: [] };
@@ -95,6 +112,13 @@ export class AudioBus {
   ) {}
 
   /** 記録（自動検証用。最新2000件まで） */
+  private recordNode(id: string, kind: AudioNodeRecord['kind'], buf: AudioBuffer, loop: boolean, start: number): AudioNodeRecord {
+    const r: AudioNodeRecord = { id, kind, start, duration: buf.duration, loop, stoppedAt: null };
+    this.nodes.push(r);
+    if (this.nodes.length > 500) this.nodes.splice(0, this.nodes.length - 500);
+    return r;
+  }
+
   private record(e: AudioLogEntry): void {
     this.log.push(e);
     if (this.log.length > 2000) this.log.splice(0, this.log.length - 2000);
@@ -102,6 +126,11 @@ export class AudioBus {
 
   get unlocked(): boolean {
     return this.ctx !== null && this.ctx.state === 'running';
+  }
+
+  /** デコード済みの素材数（自動検証用） */
+  get decodedCount(): number {
+    return this.buffers.size;
   }
 
   get currentBgm(): BgmId | null {
@@ -137,6 +166,7 @@ export class AudioBus {
 
   /** ユーザー操作の中から呼ぶ。AudioContext を作成・再開し、取得済み素材をデコードする */
   unlock(): Promise<void> {
+    this.unlockAttempted = true;
     if (this.unlocking) {
       if (this.ctx && this.ctx.state === 'suspended') void this.ctx.resume().catch(() => undefined);
       return this.unlocking;
@@ -220,7 +250,7 @@ export class AudioBus {
       gain.gain.linearRampToValueAtTime(1, t + this.mix.bgmFadeMs / 1000);
       src.connect(gain).connect(this.bus.bgm);
       src.start();
-      this.bgmSrc = { src, gain };
+      this.bgmSrc = { src, gain, rec: this.recordNode(id, 'bgm', buf, true, t) };
     } catch {
       this.bgmSrc = null;
     }
@@ -241,6 +271,7 @@ export class AudioBus {
       old.gain.gain.setValueAtTime(old.gain.gain.value, t);
       old.gain.gain.linearRampToValueAtTime(0, t + this.mix.bgmFadeMs / 1000);
       old.src.stop(t + this.mix.bgmFadeMs / 1000 + 0.05);
+      old.rec.stoppedAt = t;
     } catch {
       /* 既に停止 */
     }
@@ -264,8 +295,8 @@ export class AudioBus {
     }
     this.lastSfx.set(id, t);
     const file = sfxFile(id);
-    const p = this.start(file, 'sfx', delayMs);
-    this.sfxPlaying.push({ id, prio: 0, endT: t + (this.durationMs(file) ?? 200), src: p?.src ?? null, gain: p?.gain ?? null });
+    const p = this.start(id, file, 'sfx', delayMs);
+    this.sfxPlaying.push({ id, prio: 0, endT: t + (this.durationMs(file) ?? 200), src: p?.src ?? null, gain: p?.gain ?? null, rec: p?.rec, protected: RESULT_SFX.has(id) });
     this.record({ t, kind: 'sfx', id, skipped: p || !this.ctx ? undefined : this.skipReason(file) });
     return true;
   }
@@ -293,9 +324,9 @@ export class AudioBus {
     if (channel !== 'result') this.stopChannel(channel);
     if (channel === 'result') this.stopChannel('main');
     const file = voiceFile(c, line);
-    const p = this.start(file, 'voice', delayMs);
+    const p = this.start(id, file, 'voice', delayMs);
     const dur = this.durationMs(file) ?? 600;
-    this.voices[channel].push({ id, prio, endT: t + dur, src: p?.src ?? null, gain: p?.gain ?? null });
+    this.voices[channel].push({ id, prio, endT: t + dur, src: p?.src ?? null, gain: p?.gain ?? null, rec: p?.rec });
     this.record({ t, kind: 'voice', id, channel, skipped: p || !this.ctx ? undefined : this.skipReason(file) });
     this.updateDuck(t, dur);
     return true;
@@ -309,11 +340,15 @@ export class AudioBus {
     this.updateDuck(this.now(), 0);
   }
 
-  /** 結果へ遷移する時：プレイ中の声（main）と鳴り残りのSEを止める */
+  /** 結果へ遷移する時：プレイ中の声（main）と鳴り残りのSEを止める。結果・クリアのSE（RESULT_SFX）は止めない */
   stopPlaySounds(): void {
     this.stopChannel('main');
-    for (const p of this.sfxPlaying) this.stopNode(p);
-    this.sfxPlaying = [];
+    const t = this.now();
+    this.sfxPlaying = this.sfxPlaying.filter((p) => {
+      if (p.protected && p.endT > t) return true;
+      this.stopNode(p);
+      return false;
+    });
   }
 
   voicesPlaying(channel?: VoiceChannel): string[] {
@@ -331,6 +366,7 @@ export class AudioBus {
     if (!p.src || !this.ctx || !p.gain) return;
     try {
       const t = this.ctx.currentTime;
+      if (p.rec && p.rec.stoppedAt === null && t < p.rec.start + p.rec.duration) p.rec.stoppedAt = t;
       p.gain.gain.setTargetAtTime(0, t, 0.01);
       p.src.stop(t + 0.05);
     } catch {
@@ -359,7 +395,7 @@ export class AudioBus {
     }
   }
 
-  private start(file: string, cat: 'sfx' | 'voice', delayMs: number): { src: AudioBufferSourceNode; gain: GainNode } | null {
+  private start(id: string, file: string, cat: 'sfx' | 'voice', delayMs: number): { src: AudioBufferSourceNode; gain: GainNode; rec: AudioNodeRecord } | null {
     const ctx = this.ctx;
     const buf = this.buffers.get(file);
     if (!ctx || !this.bus || !buf) {
@@ -372,8 +408,9 @@ export class AudioBus {
       src.buffer = buf;
       const gain = ctx.createGain();
       src.connect(gain).connect(this.bus[cat]);
-      src.start(ctx.currentTime + Math.max(0, delayMs) / 1000);
-      return { src, gain };
+      const at = ctx.currentTime + Math.max(0, delayMs) / 1000;
+      src.start(at);
+      return { src, gain, rec: this.recordNode(id, cat, buf, false, at) };
     } catch {
       return null;
     }

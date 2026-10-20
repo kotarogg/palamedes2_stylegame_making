@@ -48,12 +48,15 @@ npm run dev        # 開発サーバー http://127.0.0.1:5173/ （開発ビル�
 | `npm run typecheck` | TypeScript 型検査 |
 | `npm test` | 自動テスト（Vitest：ルール・段階攻撃・シングル・MODE2・音声・演出・データ） |
 | `npm run build` | 型検査＋本番ビルド → `dist/` |
-| `npm run e2e` | ブラウザ確認（Chromium、ビルド済み dist）。結果は `test-results/e2e/` |
-| `npm run verify` | 型検査→テスト→ビルド→ブラウザ確認 |
+| `npm run e2e` | ブラウザ確認・**納品検査**（必須79本の取得・デコード、実再生ノード、R1〜R3 の回帰）。結果は `test-results/e2e/` |
+| `npm run e2e:fallback` | 開発用のフォールバック検査（BGM 3本の未配置だけを許容。納品合格ではない） |
+| `node scripts/check-release.mjs <プレイ版フォルダ>` | 配布物の納品検査（素材95件のサイズ・SHA-256・WAVヘッダ、JS参照、起動ファイル） |
+| `npm run verify` | 型検査→テスト→ビルド→納品検査（BGM を `public/assets/audio/bgm/` に置いた環境で実行） |
+| `npm run verify:fallback` | 同上のフォールバック版（BGM なしの開発環境用） |
 | `npm run serve:dist` | `dist/` を http://127.0.0.1:8080/ で配信 |
 
 BGM 3本（各12〜16.7MB）はリポジトリに含めていません（`public/assets/audio/bgm/README.md` 参照）。
-BGM が無くても無音で動きます。e2e では、その3件の404だけを素材未配置として許容します。
+BGM が無くても無音で動きます。ただし納品検査は BGM の欠落を不合格にします。BGM を許容するのは、明示したフォールバック検査だけです。
 
 ## 構成
 

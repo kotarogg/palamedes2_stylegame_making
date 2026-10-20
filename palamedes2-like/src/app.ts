@@ -106,12 +106,34 @@ export class App {
     return this.menuInput.onKey(code, repeat);
   }
 
+  private padHeld = false;
+
+  /**
+   * ゲームパッドのボタンを押した瞬間にも音声の有効化を試みる（キー・クリックと同じ unlock）。
+   * 押しっぱなしで毎フレーム呼ばない。ブラウザがパッド操作を再生許可の操作と認めない場合は、
+   * AudioContext が suspended のまま残るので、画面上部の案内でキー／クリックを促す。
+   */
+  private pollPadActivation(): void {
+    if (this.bus.unlocked) return;
+    let any = false;
+    for (let i = 0; i < 4 && !any; i++) any = !!this.deps.pads(i)?.buttons.some((b) => b?.pressed);
+    if (any && !this.padHeld) void this.bus.unlock();
+    this.padHeld = any;
+  }
+
   frame(dtMs: number, ms: number, ctx: CanvasRenderingContext2D): void {
+    this.pollPadActivation();
     this.menuInput.pollPads();
     for (const ev of this.menuInput.drain()) this.scene.onNav(ev);
     this.scene.update(dtMs);
     this.scene.render(ctx, ms);
-    if (!this.bus.unlocked) drawText(ctx, '音を出すには、キーボードのキーかマウスのクリックで一度操作してください', 320, 6, { align: 'center', size: 9, color: '#ffe0a0', box: true });
+    if (!this.bus.unlocked) {
+      // 未試行＝最初の操作待ち。試行済みで止まっている＝ブラウザが再生を許可していない（パッド操作は許可対象外のブラウザがある）
+      const msg = this.bus.unlockAttempted && this.bus.ctx
+        ? 'ブラウザが音の再生を止めています。キーを1回押すか、画面をクリックしてください'
+        : '最初の操作で音が出ます（キー・クリック・ゲームパッド）';
+      drawText(ctx, msg, 320, 6, { align: 'center', size: 9, color: '#ffe0a0', box: true });
+    }
   }
 
   // ---- 試合開始 ----
@@ -809,13 +831,31 @@ export class GameScene implements Scene {
     if (this.app.deps.dev && this.devKey(code)) return true;
     const owner = this.keyboardOwner();
     const dlg = owner !== null ? this.quit.find((q) => q.source === 'keyboard') : undefined;
-    // 終了確認（キーボード）
+    // 終了確認（キーボード）：確認を開いたプレイヤーの割当キーと、他のキーボード操作者に割り当てていない共有キー（←→・Esc・Enter・Backspace）
+    // だけを確認へ振り分ける。相手の割当キーは相手のコントローラーへ渡す（共有キーボードでも相手の操作を奪わない）
     if (dlg) {
-      const kb = this.keyboards[dlg.player];
-      const act = kb?.actionOf(code);
-      if (code === 'Escape' || code === 'Backspace') this.closeDialog(dlg);
-      else if (act === 'left' || act === 'right' || code === 'ArrowLeft' || code === 'ArrowRight') this.moveDialog(dlg);
-      else if (!repeat && (code === 'Enter' || code === 'NumpadEnter' || act === 'launch')) this.decideDialog(dlg);
+      const act = this.keyboards[dlg.player]?.actionOf(code);
+      const otherOwns = this.keyboards.some((k, i) => i !== dlg.player && k?.actionOf(code));
+      if (act) {
+        if (act === 'left' || act === 'right') this.moveDialog(dlg);
+        else if (act === 'launch' && !repeat) this.decideDialog(dlg);
+        return true; // 確認中の本人のプレイ操作は捨てる
+      }
+      if (!otherOwns) {
+        if (code === 'ArrowLeft' || code === 'ArrowRight') {
+          this.moveDialog(dlg);
+          return true;
+        }
+        if (code === 'Escape' || code === 'Backspace') {
+          if (!repeat) this.closeDialog(dlg);
+          return true;
+        }
+        if (code === 'Enter' || code === 'NumpadEnter') {
+          if (!repeat) this.decideDialog(dlg);
+          return true;
+        }
+      }
+      for (const k of this.keyboards) if (k && k.player !== dlg.player && k.handleKey(code, repeat)) return true;
       return true;
     }
     if (code === 'Escape') {

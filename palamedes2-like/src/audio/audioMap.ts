@@ -46,6 +46,12 @@ export type SfxId = (typeof SFX_IDS)[number];
 
 export const sfxFile = (id: SfxId): string => `sfx/sfx_${id}.wav`;
 
+/**
+ * 結果・クリアの効果音。ゲーム終了時の「鳴り残りの停止」（AudioBus.stopPlaySounds）の対象外とし、終端まで鳴らす。
+ * 次ラウンド・再戦・メニュー復帰（stopEffects）では止める。
+ */
+export const RESULT_SFX: ReadonlySet<SfxId> = new Set<SfxId>(['stage_clear', 'all_stages_clear', 'all_clear', 'win', 'lose']);
+
 /** 効果音ごとの最短再発音間隔（ms）。同じイベントIDの同一フレーム重複は AudioBus 側で1回にまとめる */
 export const SFX_MIN_INTERVAL_MS: Partial<Record<SfxId, number>> = {
   ui_adjust: 60,

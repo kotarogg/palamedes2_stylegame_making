@@ -102,8 +102,8 @@ export function drawOptionPanel(ctx: CanvasRenderingContext2D, assets: Assets, t
 /** 確認ダイアログ（S8 confirmation_panel 280×120） */
 export function drawConfirm(ctx: CanvasRenderingContext2D, assets: Assets, title: string, choices: readonly string[], cursor: number, x = 180, y = 110, sub = ''): void {
   drawPanel(ctx, assets, 'confirmation_panel', x, y);
-  drawText(ctx, title, x + 140, y + 22, { align: 'center', size: 12, bold: true, color: '#fff3c8', maxWidth: 260 });
-  if (sub) drawText(ctx, sub, x + 140, y + 42, { align: 'center', size: 9, color: '#c9d6ff', maxWidth: 260 });
+  drawText(ctx, title, x + 140, y + 28, { align: 'center', size: 12, bold: true, color: '#fff3c8', maxWidth: 240 });
+  if (sub) drawText(ctx, sub, x + 140, y + 48, { align: 'center', size: 9, color: '#c9d6ff', maxWidth: 260 });
   const w = 110;
   choices.forEach((c, i) => {
     const cx = x + 140 + (i - (choices.length - 1) / 2) * (w + 10);

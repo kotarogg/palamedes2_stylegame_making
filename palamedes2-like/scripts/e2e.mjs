@@ -1,7 +1,8 @@
 // ブラウザ実機確認（ビルド済み dist を配信し、Chromiumで操作・画素照合・音声ログ・スクリーンショット・エラー収集）
 // 使い方: npm run build && npm run e2e
 //   E2E_ROOT=<展開した配布物のwww> で配布物そのものを検証できる。
-//   BGM（3曲）が配信物に無い環境では、その3件の404だけを「素材未配置」として許容し、結果に明記する。
+//   既定は「納品検査」：必須79本（BGM3・SE30・ボイス46）の HTTP200・デコード成功・欠落なしを必須とする。
+//   E2E_MODE=fallback は開発用の「フォールバック検査」：BGM 3本の未配置（404・無音で継続）だけを許容し、結果にその旨を明記する。
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -15,6 +16,9 @@ mkdirSync(OUT, { recursive: true });
 
 const BGM = ['bgm_menu.wav', 'bgm_puzzle_single.wav', 'bgm_puzzle_versus.wav'];
 const bgmPresent = BGM.filter((f) => existsSync(join(ROOT, 'assets/audio/bgm', f)));
+const MODE = process.env.E2E_MODE === 'fallback' || process.argv.includes('--fallback') ? 'fallback' : 'release';
+const allowMissingBgm = MODE === 'fallback';
+console.log(MODE === 'release' ? '== 納品検査（必須79音源）==' : '== フォールバック検査（BGM未配置を許容。納品合格ではない）==');
 
 const server = spawn(process.execPath, ['scripts/serve.mjs', ROOT, String(PORT)], { stdio: ['ignore', 'pipe', 'inherit'] });
 await new Promise((ok, ng) => {
@@ -34,8 +38,10 @@ const context = await browser.newContext({ viewport: { width: 1280, height: 720 
 await context.addInitScript(() => {
   const mk = () => ({ id: 'mock pad', index: 0, connected: true, buttons: Array.from({ length: 17 }, () => ({ pressed: false, value: 0 })), axes: [0, 0, 0, 0] });
   window.__pad = mk();
+  window.__pad2 = { ...mk(), index: 1 };
   window.__padOn = false;
-  navigator.getGamepads = () => [window.__padOn ? window.__pad : null, null, null, null];
+  window.__pad2On = false;
+  navigator.getGamepads = () => [window.__padOn ? window.__pad : null, window.__pad2On ? window.__pad2 : null, null, null];
 });
 const page = await context.newPage();
 const consoleErrors = [];
@@ -117,17 +123,46 @@ try {
   );
   const wavs = ok('.wav');
   check('音声：効果音30＋ボイス46（計76）を取得', wavs.filter((p) => !p.includes('/bgm/')).length === 76, `wav200=${wavs.length}`);
-  check(
-    `BGM 3曲（配信物に存在${bgmPresent.length}曲）`,
-    bgmPresent.length === 3 ? wavs.filter((p) => p.includes('/bgm/')).length === 3 : true,
-    bgmPresent.length === 3 ? 'BGM取得' : `未配置${3 - bgmPresent.length}曲は404を許容（無音で継続）`,
-  );
+  const bgm200 = wavs.filter((p) => p.includes('/bgm/')).length;
+  if (allowMissingBgm) check(`［フォールバック］BGM 3曲（配信物に存在${bgmPresent.length}曲）`, bgm200 === bgmPresent.length, `未配置${3 - bgmPresent.length}曲は404を許容（無音で継続）`);
+  else check('［納品］BGM 3曲を HTTP200 で取得（必須79本＝BGM3・SE30・ボイス46）', bgm200 === 3 && wavs.length === 79, `bgm200=${bgm200} wav200=${wavs.length}`);
   const ver = await ev(() => window.__p2like.app.assets.atlas.manifest.version);
   check('マニフェスト内部version 2.3', ver === '2.3', ver);
   const size = await ev(() => [document.getElementById('screen').style.width, document.getElementById('screen').width]);
   check('論理640×360を整数倍(2倍)で表示', size[0] === '1280px' && size[1] === 640, size.join(' / '));
   const rendering = await ev(() => getComputedStyle(document.getElementById('screen')).imageRendering);
   check('拡大時にドットを滲ませない(image-rendering)', rendering === 'pixelated', rendering);
+
+  // ---- R1：キー・マウスに触れず、ゲームパッドだけで最初の操作 → 音声有効化 → CPU対戦の READY／GO ----
+  const pad = async (btn, ms = 120) => {
+    await ev((b) => (window.__pad.buttons[b].pressed = true), btn);
+    await wait(80);
+    await ev((b) => (window.__pad.buttons[b].pressed = false), btn);
+    await wait(ms);
+  };
+  const before = await ev(() => ({ ctx: !!window.__p2like.bus.ctx, attempted: window.__p2like.bus.unlockAttempted }));
+  await ev(() => (window.__padOn = true));
+  await pad(0, 400); // A → MODE1
+  const afterPad = await ev(() => ({ ctx: window.__p2like.bus.ctx?.state ?? null, attempted: window.__p2like.bus.unlockAttempted, depth: window.__p2like.scene().stack?.length }));
+  check(
+    'R1：パッドだけの初回操作で音声の有効化を試み、AudioContext が running になる（キー・マウス未使用）',
+    !before.ctx && !before.attempted && afterPad.attempted && afterPad.ctx === 'running' && afterPad.depth === 2,
+    `before=${JSON.stringify(before)} after=${JSON.stringify(afterPad)}`,
+  );
+  await pad(13); // ↓ CPU対戦
+  await pad(0, 300);
+  await page.waitForFunction(() => window.__p2like.game()?.playing, null, { timeout: 8000 });
+  await wait(300);
+  const padNodes = await ev(() => ({ state: window.__p2like.bus.ctx.state, nodes: window.__p2like.bus.nodes.map((n) => ({ ...n })), t: window.__p2like.bus.ctx.currentTime }));
+  const readyNode = padNodes.nodes.find((n) => n.id === 'akane_ready');
+  const goNode = padNodes.nodes.find((n) => n.id === 'akane_go');
+  check(
+    'R1：パッド操作だけで開始した CPU対戦で READY／GO のボイスが実ノードとして再生開始（途中停止なし）',
+    padNodes.state === 'running' && readyNode && goNode && readyNode.stoppedAt === null && goNode.stoppedAt === null,
+    JSON.stringify({ state: padNodes.state, readyNode, goNode, sfx: padNodes.nodes.filter((n) => n.kind === 'sfx').map((n) => n.id).join(',') }),
+  );
+  await ev(() => (window.__padOn = false));
+  await toMenu();
 
   // ---- メニュー（キーボード） ----
   await wait(200);
@@ -158,12 +193,6 @@ try {
 
   // ---- ゲームパッド模擬でメニュー操作 ----
   await ev(() => (window.__padOn = true));
-  const pad = async (btn, ms = 120) => {
-    await ev((b) => (window.__pad.buttons[b].pressed = true), btn);
-    await wait(80);
-    await ev((b) => (window.__pad.buttons[b].pressed = false), btn);
-    await wait(ms);
-  };
   await pad(13); // 十字下 → MODE2
   await pad(0); // A → MODE2 サブメニュー
   await pad(1); // B → 戻る
@@ -283,6 +312,54 @@ try {
     return { kind: g.single?.kind, stage: g.single?.stage, quota: g.single?.quota };
   });
   check('ステージクリア：ステージ1・ノルマ30', st.kind === 'stage' && st.stage === 1 && st.quota === 30, JSON.stringify(st));
+
+  // R3：ノルマ直前から成功1個を通常の時間進行で打ち上げ、クリアSEが実ノードとして終端まで鳴る（直後に止めない）
+  const clearRun = async (finalStage) => {
+    await page.waitForFunction(() => window.__p2like.game().playing, null, { timeout: 8000 });
+    const prep = await ev((finalStage) => {
+      const g = window.__p2like.game();
+      const s = g.single;
+      const p = g.players[0];
+      if (finalStage) {
+        s.stage = 10;
+        s.quota = 180;
+      }
+      s.progress = s.quota - 1;
+      const col = p.board.cols[p.selectedCol];
+      const top = col.find((c) => c.kind === 'piece');
+      if (finalStage) p.board.cols.forEach((c, i) => (p.board.cols[i] = i === p.selectedCol ? [top] : [])); // 全消しと同時のクリア
+      g.base = g.factory.make(top.piece.n, top.piece.suit);
+      return { stage: s.stage, n: window.__p2like.bus.nodes.length };
+    }, finalStage);
+    await key('KeyF', 3200);
+    return ev(
+      ([n]) => {
+        const bus = window.__p2like.bus;
+        const g = window.__p2like.game();
+        return { outcome: g.result?.outcome, now: bus.ctx.currentTime, nodes: bus.nodes.slice(n).map((x) => ({ ...x })) };
+      },
+      [prep.n],
+    );
+  };
+  const endedIntact = (r, id) => {
+    const x = r.nodes.find((n) => n.id === id);
+    return !!x && x.stoppedAt === null && r.now >= x.start + x.duration;
+  };
+  const r3a = await clearRun(false);
+  check(
+    'R3：ステージクリア（stageClear→roundEnd 同時）で sfx_stage_clear が途中停止せず終端まで再生',
+    r3a.outcome === 'stageClear' && endedIntact(r3a, 'stage_clear'),
+    JSON.stringify({ outcome: r3a.outcome, now: r3a.now, nodes: r3a.nodes.filter((n) => n.kind === 'sfx').map((n) => [n.id, +n.start.toFixed(2), +n.duration.toFixed(2), n.stoppedAt]) }),
+  );
+  await toMenu();
+  await ev(() => window.__p2like.app.startGame('mode1', 'single', 'stage'));
+  const r3b = await clearRun(true);
+  check(
+    'R3：最終面クリア＋全消し同時で sfx_all_stages_clear・sfx_all_clear とも途中停止せず終端まで再生',
+    r3b.outcome === 'allStagesClear' && endedIntact(r3b, 'all_stages_clear') && endedIntact(r3b, 'all_clear'),
+    JSON.stringify({ outcome: r3b.outcome, now: r3b.now, nodes: r3b.nodes.filter((n) => n.kind === 'sfx').map((n) => [n.id, +n.start.toFixed(2), +n.duration.toFixed(2), n.stoppedAt]) }),
+  );
+  await shot('single_all_stages_clear');
   await toMenu();
 
   // ---- MODE2 シングル／CPU ----
@@ -316,6 +393,96 @@ try {
   const sel1 = await ev(() => window.__p2like.game().players.map((p) => p.selectedCol));
   check('2P対戦：1P(D)と2P(←)が別々に操作できる', sel1[0] === sel0[0] + 1 && sel1[1] === sel0[1] - 1, `${sel0} → ${sel1}`);
   await shot('versus_2p');
+
+  // R2：両者キーボード。1Pが終了確認を開いても、2Pの移動・発射は2Pへ届き、1Pの確認カーソルは動かない
+  await wait(400);
+  await key('Escape', 150);
+  const q0 = await ev(() => {
+    const sc = window.__p2like.gameScene();
+    const g = sc.game;
+    return { dlg: sc.quit.map((q) => [q.player, q.cursor]), sel2: g.players[1].selectedCol, tick: g.tick, n: g.events.length };
+  });
+  await key('ArrowLeft', 400); // 2P 移動
+  await key('Comma', 500); // 2P 発射
+  const q1 = await ev((n) => {
+    const sc = window.__p2like.gameScene();
+    const g = sc.game;
+    return { dlg: sc.quit.map((q) => [q.player, q.cursor]), sel2: g.players[1].selectedCol, tick: g.tick, launch2: g.events.slice(n).some((e) => e.type === 'launch' && e.player === 1) };
+  }, q0.n);
+  await shot('versus_2p_quit_dialog');
+  check(
+    'R2：1P終了確認中も 2P（←・,）の移動と発射は 2P へ届き、1P の確認カーソルは動かない。ゲームは進行',
+    JSON.stringify(q0.dlg) === '[[0,0]]' && JSON.stringify(q1.dlg) === '[[0,0]]' && q1.sel2 === q0.sel2 - 1 && q1.launch2 && q1.tick > q0.tick,
+    `${JSON.stringify(q0)} → ${JSON.stringify(q1)}`,
+  );
+  await key('KeyD'); // 1P の右 → 確認カーソル「終了する」
+  const c1 = await ev(() => window.__p2like.gameScene().quit.map((q) => q.cursor));
+  await key('KeyA');
+  await key('Escape', 150); // 1P（共有Esc の所有者）が閉じる
+  const c2 = await ev(() => window.__p2like.gameScene().quit.length);
+  check('R2：確認の操作は開いた 1P の割当キー（A/D・F）と共有の Esc／Enter だけ', c1.join() === '1' && c2 === 0, `cursor=${c1} after=${c2}`);
+  await toMenu();
+
+  // R2：キーボード（1P）＋パッド（2P）、パッド2台。片側の確認中も相手は移動・発射でき、確認は開いた側の入力だけで操作
+  const press = async (which, btn, ms = 150) => {
+    await ev(([w, b]) => (window[w].buttons[b].pressed = true), [which, btn]);
+    await wait(80);
+    await ev(([w, b]) => (window[w].buttons[b].pressed = false), [which, btn]);
+    await wait(ms);
+  };
+  const snap = (n = 0) =>
+    ev((n) => {
+      const sc = window.__p2like.gameScene();
+      const g = sc.game;
+      return { dlg: sc.quit.map((q) => [q.player, q.cursor]), sel: g.players.map((p) => p.selectedCol), tick: g.tick, n: g.events.length, launch: [0, 1].map((pl) => g.events.slice(n).some((e) => e.type === 'launch' && e.player === pl)) };
+    }, n);
+  const startWith = async (devices) => {
+    await ev((d) => {
+      const a = window.__p2like.app;
+      a.settings.devices = d;
+      a.startGame('mode1', '2p');
+    }, devices);
+    await page.waitForFunction(() => window.__p2like.game().playing, null, { timeout: 8000 });
+    await wait(300);
+  };
+  const saveDevices = await ev(() => JSON.parse(JSON.stringify(window.__p2like.app.settings.devices)));
+  await ev(() => ((window.__padOn = true), (window.__pad2On = true)));
+  // キーボード＋パッド：1P がキーボードで確認、2P はパッドで移動・発射
+  await startWith([{ kind: 'keyboard' }, { kind: 'gamepad', index: 0 }]);
+  await key('Escape', 150);
+  const k0 = await snap();
+  await press('__pad', 14, 400); // 2P 十字左
+  await press('__pad', 0, 500); // 2P A＝発射
+  const k1 = await snap(k0.n);
+  // パッド（2P）が START で確認、1P はキーボードで移動
+  await key('Escape', 150); // 1P の確認を閉じる
+  await press('__pad', 9, 150); // 2P START
+  const k2 = await snap();
+  await key('KeyD', 400);
+  await press('__pad', 15, 150); // 2P 確認のカーソル
+  const k3 = await snap(k2.n);
+  check(
+    'R2：キーボード＋パッド：1P確認中に2P（パッド）が移動・発射、2P確認中に1P（キー）が移動。確認は開いた側だけで操作',
+    JSON.stringify(k1.dlg) === '[[0,0]]' && k1.sel[1] === k0.sel[1] - 1 && k1.launch[1] && JSON.stringify(k2.dlg) === '[[1,0]]' && k3.sel[0] === k2.sel[0] + 1 && JSON.stringify(k3.dlg) === '[[1,1]]',
+    JSON.stringify({ k0, k1, k2, k3 }),
+  );
+  await press('__pad', 1, 150); // 2P B で閉じる
+  await toMenu();
+  // パッド2台：1P（パッド1）の確認中に 2P（パッド2）が移動・発射
+  await startWith([{ kind: 'gamepad', index: 0 }, { kind: 'gamepad', index: 1 }]);
+  await press('__pad', 9, 150); // 1P START
+  const p0 = await snap();
+  await press('__pad2', 14, 400);
+  await press('__pad2', 0, 500);
+  const p1 = await snap(p0.n);
+  check(
+    'R2：パッド2台：1P確認中も 2P のパッドで移動・発射でき、1P の確認は動かない',
+    JSON.stringify(p1.dlg) === '[[0,0]]' && p1.sel[1] === p0.sel[1] - 1 && p1.launch[1] && p1.tick > p0.tick,
+    JSON.stringify({ p0, p1 }),
+  );
+  await press('__pad', 1, 150);
+  await ev(() => ((window.__padOn = false), (window.__pad2On = false)));
+  await ev((d) => (window.__p2like.app.settings.devices = d), saveDevices);
   await toMenu();
 
   // ---- 遊び方 ----
@@ -346,25 +513,25 @@ try {
       }),
   );
   check('描画ループ稼働', fps > 20, `fps≒${fps}`);
-  const missing = await ev(() => [...window.__p2like.bus.missing]);
-  check(
-    '音声：未配置はBGMのみ（効果音・ボイスの欠落なし）',
-    missing.every((f) => f.startsWith('bgm/')) && missing.length === 3 - bgmPresent.length,
-    missing.join(',') || 'なし',
-  );
+  const au = await ev(() => ({ missing: [...window.__p2like.bus.missing], decoded: window.__p2like.bus.decodedCount, state: window.__p2like.bus.ctx?.state, bgmNodes: window.__p2like.bus.nodes.filter((n) => n.kind === 'bgm').map((n) => [n.id, n.loop]) }));
+  if (allowMissingBgm)
+    check('［フォールバック］音声：未配置はBGMのみ、SE・ボイス76本はデコード成功', au.missing.every((f) => f.startsWith('bgm/')) && au.missing.length === 3 - bgmPresent.length && au.decoded === 76 + bgmPresent.length, JSON.stringify(au));
+  else
+    check('［納品］音声：必須79本すべてデコード成功・欠落なし、BGMは実ノードでループ再生', au.missing.length === 0 && au.decoded === 79 && au.state === 'running' && au.bgmNodes.length > 0 && au.bgmNodes.every(([, loop]) => loop), JSON.stringify(au));
 } catch (e) {
   check('E2E実行', false, String(e?.stack ?? e));
 }
 
-const allowed404 = (p) => BGM.some((f) => p.endsWith(`/assets/audio/bgm/${f}`)) && bgmPresent.length < 3;
+const allowed404 = (p) => allowMissingBgm && BGM.some((f) => p.endsWith(`/assets/audio/bgm/${f}`));
 const bad = responses.filter(([s, p]) => s >= 400 && !allowed404(p));
-const errs = consoleErrors.filter((m) => !(m.includes('404') && bgmPresent.length < 3));
-check('コンソールエラー/警告なし（BGM未配置の404を除く）', errs.length === 0, errs.join(' | '));
-check('ネットワーク失敗・4xx/5xxなし（BGM未配置の404を除く）', failedRequests.length === 0 && bad.length === 0, [...failedRequests, ...bad.map((r) => r.join(' '))].join(' | '));
+const errs = consoleErrors.filter((m) => !(allowMissingBgm && m.includes('404')));
+const sfxName = allowMissingBgm ? '（フォールバック：BGM未配置の404を除く）' : '';
+check(`コンソールエラー/警告なし${sfxName}`, errs.length === 0, errs.join(' | '));
+check(`ネットワーク失敗・4xx/5xxなし${sfxName}`, failedRequests.length === 0 && bad.length === 0, [...failedRequests, ...bad.map((r) => r.join(' '))].join(' | '));
 
-writeFileSync(new URL('report.json', OUT), JSON.stringify({ date: new Date().toISOString(), root: ROOT, bgmPresent, results }, null, 2));
+writeFileSync(new URL('report.json', OUT), JSON.stringify({ date: new Date().toISOString(), mode: MODE, root: ROOT, bgmPresent, results }, null, 2));
 await browser.close();
 server.kill();
 const failed = results.filter((r) => !r.pass);
-console.log(`\n${results.length - failed.length}/${results.length} PASS`);
+console.log(`\n[${MODE === 'release' ? '納品検査' : 'フォールバック検査（納品合格ではない）'}] ${results.length - failed.length}/${results.length} PASS`);
 process.exit(failed.length ? 1 : 0);

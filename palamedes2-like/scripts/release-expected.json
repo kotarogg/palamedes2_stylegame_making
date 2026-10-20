@@ -1,0 +1,483 @@
+{
+ "about": "プレイ版の必須素材（画像13・JSON3・音声79）。scripts/check-release.mjs が照合する",
+ "files": [
+  {
+   "path": "assets/sprites/announcements_sheet.png",
+   "size": 117431,
+   "sha256": "acd728bac72d496734a8a98e67707562e16c665a6f51312b1b79c60f5a26fb45"
+  },
+  {
+   "path": "assets/sprites/display_numeric_sheet.png",
+   "size": 11926,
+   "sha256": "7a7586a355fb6fb3d53c806477702fc3273b0162f5e166b827d3c75fa0aa52aa"
+  },
+  {
+   "path": "assets/sprites/effects_sheet.png",
+   "size": 21142,
+   "sha256": "eab8e0b7a5c44b9e95ac2dd22d41576be9e61145c0efc544356b009553fd19c6"
+  },
+  {
+   "path": "assets/sprites/gameplay_frames_sheet.png",
+   "size": 53266,
+   "sha256": "ae89e2cc0075b45e5ad39caf6798f1d983e9b1529982ae3787dfbd601cfc40c9"
+  },
+  {
+   "path": "assets/sprites/mascot_cat_sheet.png",
+   "size": 62065,
+   "sha256": "a4120dafbf9afbd717fc27f7e4229a12e783145b4a945893eabcb9b9c4e57b72"
+  },
+  {
+   "path": "assets/sprites/menu_background.png",
+   "size": 289347,
+   "sha256": "ca9c269216a61ddeea0c4040e01448968f990402342cfa1820a07e51c17dae97"
+  },
+  {
+   "path": "assets/sprites/mode_effects_sheet.png",
+   "size": 12925,
+   "sha256": "6bc8456cbe99b3cb52f0881ed518b07638ad541c9364ae90a247a371c2d10805"
+  },
+  {
+   "path": "assets/sprites/pieces_and_smallpieces_sheet.png",
+   "size": 49123,
+   "sha256": "60df1bbea86ec1ccf4f2e36c896687372a9edb79603421f98a499f7ce4d5a758"
+  },
+  {
+   "path": "assets/sprites/player_p1_bluegothic_sheet.png",
+   "size": 95650,
+   "sha256": "088b1111f95c9fe2db526fe2cdd44abd665fee2ba666347ec207314c7a310777"
+  },
+  {
+   "path": "assets/sprites/player_p2_akane_sheet.png",
+   "size": 127084,
+   "sha256": "30d6992e652930b6d838a7447c6cddde3ba927a379d6a510fc1cb7d9ef4c2f43"
+  },
+  {
+   "path": "assets/sprites/role_name_sheet.png",
+   "size": 88716,
+   "sha256": "d43012d7440fc95f1605b44560ef19f5190641c3539f7c8ad82b0f3d20cb394a"
+  },
+  {
+   "path": "assets/sprites/ui_common_sheet.png",
+   "size": 23214,
+   "sha256": "6a637ca1b6b0ba575f0340c7070d3846ae198431d868563f019034293c30d161"
+  },
+  {
+   "path": "assets/sprites/ui_theme_sheet.png",
+   "size": 455385,
+   "sha256": "a9d50a097faacc00875deb23f940f1d0d6c61a868db61ae736eafef08d8d027e"
+  },
+  {
+   "path": "data/asset_loading_policy.json",
+   "size": 860,
+   "sha256": "80c15ae839897246380d9af5a2bf9a902b4e74edb955bc00907e8ce5272ffead"
+  },
+  {
+   "path": "data/screen_layout_v2.json",
+   "size": 38750,
+   "sha256": "912f6f5454a292ccd687382e515ad46aa3f34848927d96e3fa06d01590732f24"
+  },
+  {
+   "path": "data/sprite_manifest_v2.json",
+   "size": 128578,
+   "sha256": "6a8a8d84e5a435db791f39e40c6cae572a2bb94c3b9aa02d1529579c5b0ff1f4"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_all_clear.wav",
+   "size": 69164,
+   "sha256": "a94086f49e8e2fdc663866004b343d3f2104d9a17d1d0101ca50daacdc7702a2"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_all_stages_clear.wav",
+   "size": 207404,
+   "sha256": "48d0c3247bec8040579961f9a50ce23730aec0ffeb0a9d5f603ba644396cd8e2"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_attack_row.wav",
+   "size": 11084,
+   "sha256": "5aa0f360294e34677d26194546d10d987b93abcac75f18c6fc18476d5f91a42c"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_attack_send.wav",
+   "size": 23084,
+   "sha256": "fce7b60a8d8b8abb12c1658ff5e252a1da04c0113b16750029cb12e0e3ee72ef"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_card_refresh.wav",
+   "size": 25004,
+   "sha256": "97ba500d9abefb200cee8bbed2abf5b0ad7fa79937ec2506c024d099a5de1916"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_chain.wav",
+   "size": 36524,
+   "sha256": "0feb54c22b3b6ebdbfcf054902dd4acefd41536f2f46954ddb43c55929d2e396"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_column_swap.wav",
+   "size": 15404,
+   "sha256": "964d71c98ab55e9f23a8901ef0a3c0ca9a83e6d42d928958a687c2ee40d1879e"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_countdown.wav",
+   "size": 10604,
+   "sha256": "32f85b616f9a49e6bc27b7db6a9a2dc16bf3fc686ec56edd487808b414f0bfff"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_counter.wav",
+   "size": 22124,
+   "sha256": "ed99d7df063b93b3b735cfe576cc6f297d5fd7a298c72e8ed425b0668cde83f0"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_danger.wav",
+   "size": 21164,
+   "sha256": "491ff2758b67588e501f2d9baee77abe6385496fea0c627fd2c21493b0db9992"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_field_rise.wav",
+   "size": 15404,
+   "sha256": "de2402fc258c4b5ad422e1d0185f7c525479c5d55e3950b632feb360201529fa"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_go.wav",
+   "size": 22124,
+   "sha256": "fbff40fc8f0f5254e6c5bdb146ab2f412ed26cc764e605ba54f110c008f3f458"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_level_up.wav",
+   "size": 61484,
+   "sha256": "3a30184a35a74e5bd6e01ec2e73cc5ccb843c488a5c4982887419959f7ce0482"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_line_clear.wav",
+   "size": 11564,
+   "sha256": "f5b90dcb423573c8cf18fcc526fbb5bfc96edf8a990d63ab14a5f713b3edd9a4"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_lose.wav",
+   "size": 119084,
+   "sha256": "2a68b37b72cdbb2a2b6b0d0e86968b48057ca557bbec56b8610de4ee392768c0"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_piece_launch.wav",
+   "size": 11564,
+   "sha256": "17e0394a104f21e61301340080018911548e0329ddeaca1871cd16288636f892"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_piece_reject.wav",
+   "size": 15404,
+   "sha256": "4f9f2835d4cbd9cf1a660b09dc02095677c1529cbd62a15eaf681cb7e04f6a05"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_piece_return.wav",
+   "size": 8204,
+   "sha256": "2b4ff2075ddba57dcbee932fcf87e54fbc8e23bfbaf84644f4af0b182a2e6693"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_piece_success.wav",
+   "size": 17324,
+   "sha256": "a666633799942af1c3bd325038ec705c9285dc4160d58640a3305fe63c53340a"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_ready.wav",
+   "size": 28844,
+   "sha256": "e76e56d827b41c063d11da5236bc3e21420d7fd1d97f051caa8e4c54fe17a834"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_role_available.wav",
+   "size": 23084,
+   "sha256": "ef95725458a0a2c8ca82c74cbd91f98440e16bfb07f70ff999acb9ded746caca"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_role_fail.wav",
+   "size": 26924,
+   "sha256": "b5c9855b7c6d7652377f9f87a8b28adcc81e1e9c012ae7273673956bdf4c0af5"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_role_success.wav",
+   "size": 33644,
+   "sha256": "5a4b45572f5310d1909a9bf37d50f4694092533d4f2eb78426b2a9c684ccfac4"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_stage_clear.wav",
+   "size": 107564,
+   "sha256": "208df5dc803a12131ab63e7b6014c86aa268274ed6c9446e1fc156eeb4b24ce7"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_ui_adjust.wav",
+   "size": 4364,
+   "sha256": "a75181a2c925b5b18360230087356382515aad929e8fc8499ad2022e1f98ccfb"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_ui_cancel.wav",
+   "size": 13484,
+   "sha256": "984c3403aada6de303873f240a1983e4a4c05c803ff38aaecdcadaf0a698e6e0"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_ui_confirm.wav",
+   "size": 16364,
+   "sha256": "f7511e178a87bfd32063f3c4cc41edd083f221834ccb24af9a41f95a6323f311"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_ui_invalid.wav",
+   "size": 15404,
+   "sha256": "60170f674cbdbacb153eb32dbc78f9230b64800c1c5b931cae5815ca7acc66f6"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_ui_move.wav",
+   "size": 6284,
+   "sha256": "1799d18f04c21724c5bf72db1c34238ac2dc15ecc482b0dd22547baae320b2d8"
+  },
+  {
+   "path": "assets/audio/sfx/sfx_win.wav",
+   "size": 169004,
+   "sha256": "82c1fd2e0427427994e7fbad76161b7e095ac56b70ea22414b7a4bf79c12a2a5"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_attack.wav",
+   "size": 53290,
+   "sha256": "b7be587390bb886e37ebefd4c5e67cfaa07ef5443787244cd5e574418d8a54b8"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_damage.wav",
+   "size": 27058,
+   "sha256": "6fe27f872aec745f73315106094f92091c89efca52fca3672878752776a7867b"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_go.wav",
+   "size": 38702,
+   "sha256": "585af57099b9c76fc90a8217d30c80a56b5a0e0a8929698ce4429fd016b21b97"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_lose.wav",
+   "size": 119666,
+   "sha256": "c292ad76a5e7273dae06fe4c21c73dc2384e658ac160a5590ed8532147f0fd3c"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_ready.wav",
+   "size": 49022,
+   "sha256": "4c450fae84604b4dd6d3188d8b7b6b68498b81e915f06fdf30ef8cdd5f4313cb"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_01.wav",
+   "size": 80592,
+   "sha256": "b53ae123324b661f5d5e8c18d0555ebe99e0b6f0ce9a5c51cd053dc7a5053da4"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_02.wav",
+   "size": 74864,
+   "sha256": "0eddb04f0259571ce28d895ee7a646a347b7d3d7bc5601570852d24dec8b3ba0"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_03.wav",
+   "size": 82130,
+   "sha256": "75299101b264ba6fdf9d2a3aa1f81f8893ce1a592319b6460f1ac711ad8670ed"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_04.wav",
+   "size": 102798,
+   "sha256": "76d63a35ee23882b50869cabf6f71691fb21427848bc5beab46ee91c5034753f"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_05.wav",
+   "size": 82404,
+   "sha256": "a2f0c59f60b18e11f9eca1990af62cf82b659193bb846113e313048a7b834bb2"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_06.wav",
+   "size": 102578,
+   "sha256": "3fa97131bb0a43025c46d894e30af9676aa2160e010f7c3189d889fd77863090"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_07.wav",
+   "size": 126408,
+   "sha256": "2f9152c766f07cacf14889bebaa7d43eaea665e6db84671b20944c374cd7a71e"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_08.wav",
+   "size": 92874,
+   "sha256": "76c3e6b45249741142f630dfe7e4c0711a5b6f6fad7ca09f94a3b059177ed09f"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_09.wav",
+   "size": 77040,
+   "sha256": "56684082c27f5721e9acf42bc828e7c97e05e0a2dcd1d1e57bad3c0df53a3bc8"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_10.wav",
+   "size": 99722,
+   "sha256": "b2469285618cd9142a671e76d6eb850fe7355ef4f58d1815c23cd74212c62272"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_11.wav",
+   "size": 83046,
+   "sha256": "beb2b0c4bb8efafb27fd86dce6ba7fb9d2718139359d6879cb6947fe54d08828"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_12.wav",
+   "size": 83052,
+   "sha256": "bba1cf9f52cbc9320e9870832bbcaa5f8902ed42ad35269b1aa0b7809dd6859c"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_13.wav",
+   "size": 76898,
+   "sha256": "5c8608f3bb6171278c03c5d8ddbed6c3f1de37d04895c829eea8ce86f1d75d90"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_14.wav",
+   "size": 130732,
+   "sha256": "7660ccb6483669b64ed959e75a37f2b95abf1c0acefbe0db68c7bc2164fa2e2b"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_15.wav",
+   "size": 147828,
+   "sha256": "8769e8c61818cfd60c7dab9a9a63b57a75ef13365c765ed0626404b73656edf1"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_16.wav",
+   "size": 171942,
+   "sha256": "3478414ab3608daa606d1d0dde88265ef62af4e538090346a77937dc579c23f5"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_role_fail.wav",
+   "size": 44888,
+   "sha256": "7a395f4032060b9264ea5cd3a00c20676ccf7897d1ef12f6dc9fb51497568a62"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_win.wav",
+   "size": 67964,
+   "sha256": "359bfcb7f31fdcec66b8f8c836723438a8402f7a22f19f50490ccd2306dd2c15"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_attack.wav",
+   "size": 92298,
+   "sha256": "e00433e6d34b61b07544198150e704655d0f0f75a784bfedb683caca7e09c5bb"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_damage.wav",
+   "size": 144254,
+   "sha256": "bf59e9f09bb54968e6c5b85c06907fb43fec27fe97dc9b41451acd162e1b8a8c"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_go.wav",
+   "size": 63174,
+   "sha256": "11559255b688c74b3e27439c37a3e47899054a18555f3be119974ac9ef708cea"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_lose.wav",
+   "size": 200658,
+   "sha256": "e0fd3ecbf96d80c707cc89432dafc9d7eae13ef5baaac7c870f9dbe194031a8b"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_ready.wav",
+   "size": 145712,
+   "sha256": "b605155828c6b7e727b5dd3ea5e5b67b8242ac591d1f8c9a9d58d567d5d2e686"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_01.wav",
+   "size": 186216,
+   "sha256": "dcb1f98fc7e1cc9bf74cc6019ba7d6e6ed4deffcc230648df47525b590b3bc25"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_02.wav",
+   "size": 92900,
+   "sha256": "adf16cbbf721788b198f0d568c384af54fc0c7a63ad22ba6e0eef5623223a7e3"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_03.wav",
+   "size": 95348,
+   "sha256": "6f282ae37662910e27e2edde64f54bcf0ef03af1109cd28fe2a31720c163edb4"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_04.wav",
+   "size": 125034,
+   "sha256": "6b381fe8f13364128c2105d605f61bedd160bd6cf860f45c26f7580adcaf9429"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_05.wav",
+   "size": 98866,
+   "sha256": "d4464690cd420d273c8757c3a77764d98d10d2efc9dd7e3142a7729f4aafc297"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_06.wav",
+   "size": 137988,
+   "sha256": "b51c11b73bf197b6ea2523e9d2ced9f2ac8771b326789ebb2b0e385455938207"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_07.wav",
+   "size": 231798,
+   "sha256": "935565b317e6d5a0f09a8790866d084af8e8d35f109e567d787657b5ba3c7e51"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_08.wav",
+   "size": 122190,
+   "sha256": "ac7f31fbc5618fe4e16c1e0ecf8e81d4bec0a3f32fb831802064e9270ed02ab6"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_09.wav",
+   "size": 95410,
+   "sha256": "77bf4e7b2375f13e3fcf2e369dd19df1fd5badc2dda9368d8c72c217657f5cab"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_10.wav",
+   "size": 131056,
+   "sha256": "8ec9191c9cb6a2c4fe7d40f520cc0f0fc257df44b6864dc2506086cf7b97b1c4"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_11.wav",
+   "size": 187036,
+   "sha256": "c7132b08a484dfebd5c95ea887077ffa608167df808a5a53369a597e0e7efa1b"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_12.wav",
+   "size": 133282,
+   "sha256": "c153c56f76ae264e92f2d49fdf92a7a12a41ae27cf067d8c7520c82b72bca391"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_13.wav",
+   "size": 121424,
+   "sha256": "7b995ad05279bc6d8bb566b2673aeb3ffe5aee7d3a22e9826c7330f83d38b6fc"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_14.wav",
+   "size": 219358,
+   "sha256": "2e63c0824c51733ef13064f8ed284821261a46275a6894e085568cc247e730c9"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_15.wav",
+   "size": 241806,
+   "sha256": "d047dc89efb0fdbeeb9d1a2f1adf6eee104317c8b6814dddf29b940f0388c283"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_16.wav",
+   "size": 307916,
+   "sha256": "09e1a8c49090759d51b2194cc644c237d1a9da9e39356e267e1e30e95baa5990"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_role_fail.wav",
+   "size": 70532,
+   "sha256": "20d30b6930a1e75c5727f26ad6562893acbeea2cce3fb580410f1cdc69e3f6bf"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_win.wav",
+   "size": 200476,
+   "sha256": "13507ed5080bad0ee6d071c57299019840243cb3095830d7038a12245612d28e"
+  },
+  {
+   "path": "assets/audio/bgm/bgm_menu.wav",
+   "size": 12053804,
+   "sha256": null,
+   "note": "BGM原本（共有ドライブ）のファイルサイズ。SHA-256は作業環境で取得できないため未記載"
+  },
+  {
+   "path": "assets/audio/bgm/bgm_puzzle_single.wav",
+   "size": 16588844,
+   "sha256": null,
+   "note": "BGM原本（共有ドライブ）のファイルサイズ。SHA-256は作業環境で取得できないため未記載"
+  },
+  {
+   "path": "assets/audio/bgm/bgm_puzzle_versus.wav",
+   "size": 16750124,
+   "sha256": null,
+   "note": "BGM原本（共有ドライブ）のファイルサイズ。SHA-256は作業環境で取得できないため未記載"
+  }
+ ]
+}

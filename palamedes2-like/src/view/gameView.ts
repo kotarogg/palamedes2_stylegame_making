@@ -835,11 +835,12 @@ export class GameView {
   private drawSingleInfo(ctx: CanvasRenderingContext2D): void {
     const r = this.assets.layout.data.graphic_mode_rules?.single_info_rect ?? [384, 128, 192, 224];
     const x = r[0] + 16;
-    let y = r[1] + 18;
+    let y = r[1] + 28; // 上端の装飾を避ける
+    // 情報欄（S8 info_panel）は明るいクリーム地のため、文字は濃紺・影なし（視認性）
     const line = (label: string, value: string, big = false) => {
-      drawText(ctx, label, x, y, { size: 9, color: '#c9d6ff' });
+      drawText(ctx, label, x, y, { size: 9, bold: true, color: '#3a4a7c', shadow: false });
       y += 12;
-      drawText(ctx, value, x + 4, y, { size: big ? 18 : 13, bold: true, color: '#fff7d0' });
+      drawText(ctx, value, x + 4, y, { size: big ? 18 : 13, bold: true, color: '#14204a', shadow: false });
       y += big ? 26 : 20;
     };
     const g = this.game;

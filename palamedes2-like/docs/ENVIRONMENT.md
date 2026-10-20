@@ -35,9 +35,10 @@
 README.md の「セットアップと検証」を参照。v1.0.0-rc1 の実行結果：
 
 - `npm run typecheck`：エラー0
-- `npm test`：151/151 PASS
+- `npm test`：155/155 PASS
 - `npm run build`：成功（JS 約172KB／gzip 約50KB）
-- `npm run e2e`：38/38 PASS（`dist/`、および組み立てたプレイ版フォルダの単独配信の両方）
+- `npm run e2e:fallback`：46/46 PASS（`dist/`、組み立てたプレイ版フォルダの両方。BGM未配置を許容する開発用検査）
+- `npm run e2e`（納品検査）：42/46。不合格4件は BGM 3本を作業環境に取得できないことによる（下記）
 - `npm audit`：脆弱性0件
 
 使用するポートは次のとおりです。いずれも Ctrl+C で停止します。
