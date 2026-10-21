@@ -251,11 +251,11 @@
 
 ## ブラウザ確認（Chromium・ビルド済み dist）
 
-実行日時 2026-10-21T13:33:05.677Z：70/70 PASS
+実行日時 2026-10-21T13:42:45.573Z：71/71 PASS
 
 | 結果 | 確認項目 | 詳細 |
 |---|---|---|
-| PASS | 起動（画像49・JSON5・フォント・音声読込）→タイトル | 648ms |
+| PASS | 起動（画像49・JSON5・フォント・音声読込）→タイトル | 657ms |
 | PASS | 明示読込一覧の49PNGだけを取得（旧版・見本・previews を読まない）、JSON5件 | png=49 json=credits_text.json,font_styles.json,game_loading_list.json,graphics_manifest_v3.json,screen_layout_v2.json |
 | PASS | 音声：SE39＋ボイス72（計111）を HTTP200 で取得 | wav200=111 |
 | PASS | ［フォールバック］BGM 3曲（配信物に存在0曲） | 未配置3曲は404を許容（無音で継続） |
@@ -268,13 +268,13 @@
 | PASS | R1・S01：パッドAだけで音声有効化を試み running、タイトル→メインメニュー。その入力はメニューへ渡らない（MODE1を開かない） | before={"ctx":false,"attempted":false} after={"ctx":"running","attempted":true,"scene":"MenuScene","depth":1,"cursor":0} |
 | PASS | タイトルはメニュー曲（自動再生を強制せず、有効化後に開始）。タイトル→メニューで再始動しない | [] |
 | PASS | メインメニュー（MODE1／MODE2／オプション／遊び方）：両脇の menu_kotaro・menu_akane を原寸・原点どおりに描画（画素一致） | [{"opaque":6879,"bad":0},{"opaque":9800,"bad":0}] |
-| PASS | パッドだけで MODE1 CPU対戦を開始：1Pコタロー対アカネ、READY／GO の担当はアカネ（同じ話者）・実ノードで再生開始 | {"padStart":{"chars":["kotaro","akane"],"ann":"akane"},"readyNode":{"id":"akane_ready","kind":"voice","start":1.581859410430839,"duration":0.5098185941043084,"loop":false,"stoppedAt":null},"goNode":{"id":"akane_go","kind":"voice","start":2.780589569160998,"duration":0.402312925170068,"loop":false,"s |
+| PASS | パッドだけで MODE1 CPU対戦を開始：1Pコタロー対アカネ、READY／GO の担当はアカネ（同じ話者）・実ノードで再生開始 | {"padStart":{"chars":["kotaro","akane"],"ann":"akane"},"readyNode":{"id":"akane_ready","kind":"voice","start":1.5528344671201815,"duration":0.5098185941043084,"loop":false,"stoppedAt":null},"goNode":{"id":"akane_go","kind":"voice","start":2.75156462585034,"duration":0.402312925170068,"loop":false,"s |
 | PASS | 対戦BGM（versus）を要求 |  |
 | PASS | 受攻撃ストック：処理中ブロック（上）と nextPending（下）を混ぜず表示。予約高さ維持 | {"v":{"blockLines":6,"pendingLines":12,"blockY":228,"pendingY":266,"reservedPx":32},"evs":[["blockStart",211,7],["waveStart",211,3],["attackRow",211,6]]} |
-| PASS | 役宣言：代表役（先頭ロゴ）と代表役ボイスを同時開始。役宣言SEは連鎖段階 se_role_declare_0N、旧成立音・連鎖音を鳴らさない | {"decl":{"tick":237,"logos":[15],"chain":1},"roleShow":{"logo":15,"since":237},"roleVoice":{"t":4912.899999999907,"kind":"voice","id":"kotaro_role_16","channel":"main"},"declSfx":["attack_row","role_declare_1"]} |
+| PASS | 役宣言：代表役（先頭ロゴ）と代表役ボイスを同時開始。役宣言SEは連鎖段階 se_role_declare_0N、旧成立音・連鎖音を鳴らさない | {"decl":{"tick":237,"logos":[15],"chain":1},"roleShow":{"logo":15,"since":237},"roleVoice":{"t":4910.299999999814,"kind":"voice","id":"kotaro_role_16","channel":"main"},"declSfx":["attack_row","role_declare_1"]} |
 | PASS | Esc：終了確認ダイアログ（dialog_panel）、確認中もゲームは進行（一時停止なし） | dialog=1 tick 264→294 |
 | PASS | 「続ける」でダイアログを閉じる |  |
-| PASS | 勝敗演出：勝利SE＋敗者ボイス→（640ms）落下開始で se_character_fall→（700ms＋200ms）勝者ボイスとクラッカーSEが同時。敗者ボイスの終了は待たない | {"order":[0,0,616,1516,1516],"plan1":{"kind":"versus","winner":0,"loser":1,"startTick":311,"fallStartTick":349,"fallEndTick":391,"winnerTick":403,"crackerTick":403,"crackerToward":0,"acceptTick":421}} |
+| PASS | 勝敗演出：勝利SE＋敗者ボイス→（640ms）落下開始で se_character_fall→（700ms＋200ms）勝者ボイスとクラッカーSEが同時。敗者ボイスの終了は待たない | {"order":[0,0,617,1517,1517],"plan1":{"kind":"versus","winner":0,"loser":1,"startTick":311,"fallStartTick":349,"fallEndTick":391,"winnerTick":403,"crackerTick":403,"crackerToward":0,"acceptTick":421}} |
 | PASS | 接着音 sfx_attack_row：実適用1ラインにつき1回（実ノード） | rows=2 log=2 nodes=2 |
 | PASS | クラッカーは1回だけ（勝者＝1P・左側へ向けて左右反転） |  |
 | PASS | 勝者演出の開始後に決定入力を受付 |  |
@@ -298,11 +298,12 @@
 | PASS | シングル：READY担当はコタロー、BGM single | single,single,ready,kotaro_ready,go,kotaro_go |
 | PASS | 打ち上げ成功SE：連続取得1→2で se_launch_success_01→02。旧成功音なし | piece_launch,launch_success_1,piece_launch,launch_success_2 |
 | PASS | ゲームオーバー：結果パネル（再挑戦／メニューへ）、クラッカーなし | {"outcome":"gameOver","cracker":null,"choices":["再挑戦","メニューへ"]} |
-| PASS | R3：ステージクリアで sfx_stage_clear が途中停止せず終端まで再生。シングル成功はクラッカーあり | {"outcome":"stageClear","plan":{"kind":"stageClear","winner":0,"loser":null,"startTick":133,"fallStartTick":133,"fallEndTick":133,"winnerTick":133,"crackerTick":133,"crackerToward":0,"acceptTick":193}} |
+| PASS | R3：ステージクリアで sfx_stage_clear が途中停止せず終端まで再生。シングル成功はクラッカーあり | {"outcome":"stageClear","plan":{"kind":"stageClear","winner":0,"loser":null,"startTick":134,"fallStartTick":134,"fallEndTick":134,"winnerTick":134,"crackerTick":134,"crackerToward":0,"acceptTick":194}} |
 | PASS | R3：最終面クリア＋全消し同時で sfx_all_stages_clear・sfx_all_clear とも終端まで再生 | allStagesClear |
 | PASS | MODE2 シングル：42個から開始 | {"mode":"mode2","remaining":42,"n":1} |
 | PASS | MODE2 シングル：盤面を空にしてクリア |  |
-| PASS | MODE2 CPU対戦：CPUが打ち上げて残数が減る | {"mode":"mode2","r":[42,9]} |
+| PASS | MODE2 CPU対戦：CPUが打ち上げて残数が減る | {"mode":"mode2","r":[42,13]} |
+| PASS | MODE2：両者（シングルは本人）が出せないと 3・2・1 のカウントダウン | [3] |
 | PASS | MODE2 に MODE1 専用の処理・音（役・攻撃・相殺・危険・段階2以上の成功音）が混入しない |  |
 | PASS | オプション：音／操作／対戦／表示／クレジット／設定初期化／戻る |  |
 | PASS | 音量変更（BGM 100→90）が設定に保存される | 90 |
@@ -320,7 +321,7 @@
 | PASS | DPR変更（1→2）を検知して実画素倍率を選び直す（収まる最大＝4倍・CSS 1280px） | {"n":4,"mode":"fit","bufW":2560,"cssW":1280,"dpr":2,"setting":0} |
 | PASS | 1倍も収まらない時だけ緊急縮小（通知あり） | {"n":1,"mode":"emergency","bufW":640,"cssW":500,"dpr":1,"setting":0} |
 | PASS | 全画面の切替（ヘッドレスでの要求・解除と倍率再計算。実機の全画面表示は未検証） | {"on":true,"off":true,"mode":"fit"} |
-| PASS | 描画ループ稼働 | fps≒61 |
+| PASS | 描画ループ稼働 | fps≒54 |
 | PASS | ［フォールバック］音声：未配置はBGMのみ、SE・ボイス111本はデコード成功 | {"missing":["bgm/bgm_menu.wav","bgm/bgm_puzzle_single.wav","bgm/bgm_puzzle_versus.wav"],"decoded":111,"state":"running"} |
 | PASS | 旧成功音・旧成立音・連鎖音は一度も要求されない（新旧SEの二重発音なし） |  |
 | PASS | コンソールエラー/警告なし（フォールバック：BGM・フォント未配置の404を除く） |  |

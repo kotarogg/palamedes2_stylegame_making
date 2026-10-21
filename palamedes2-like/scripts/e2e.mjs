@@ -593,11 +593,26 @@ try {
   await shot('S10_mode2_versus');
   const m2c = await ev(() => ({ mode: window.__p2like.game().mode, r: window.__p2like.game().players.map((p) => window.__p2like.game().remaining(p)) }));
   check('MODE2 CPU対戦：CPUが打ち上げて残数が減る', m2c.mode === 'mode2' && m2c.r[1] < 42, JSON.stringify(m2c));
-  // 出せるピースがなくなるまで進めてカウントダウン
-  await steps(60 * 600, "sc.game.events.some((e) => e.type === 'countdown' && e.endTick > sc.game.tick + 20) || sc.game.result");
-  await wait(150);
-  await shot('S12_countdown');
   const m2log = await logSince(t0);
+  // 出せるピースがない状態を作ってカウントダウン（3・2・1）を表示（検査用の盤面操作）
+  await ev(() => window.__p2like.app.startGame('mode2', 'single', 'mode2'));
+  await waitPlaying();
+  await wait(1200); // GO の表示が終わってから
+  const cdStart = await ev(() => {
+    const sc = window.__p2like.gameScene();
+    const g = sc.game;
+    const p = g.players[0];
+    p.board.cols.forEach((c, i) => (p.board.cols[i] = [{ kind: 'piece', piece: g.factory.make(1, 'spade') }, { kind: 'piece', piece: g.factory.make(2, 'spade') }]));
+    g.base = g.factory.make(4, 'heart');
+    for (let i = 0; i < 600; i++) {
+      sc.step();
+      if (g.events.some((e) => e.type === 'countdown')) break;
+    }
+    return g.events.filter((e) => e.type === 'countdown').map((e) => e.value);
+  });
+  await wait(200);
+  await shot('S12_countdown');
+  check('MODE2：両者（シングルは本人）が出せないと 3・2・1 のカウントダウン', cdStart.length > 0, JSON.stringify(cdStart));
   const mode1Only = m2log.filter((e) => /^(role_|launch_success_[2-5]|counter|attack_|danger|line_clear|level_up)|_role_|_damage$|_attack$/.test(e.id));
   check('MODE2 に MODE1 専用の処理・音（役・攻撃・相殺・危険・段階2以上の成功音）が混入しない', mode1Only.length === 0, mode1Only.map((e) => e.id).join(','));
   await toMenu();

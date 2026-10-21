@@ -1,0 +1,408 @@
+{
+  "date": "2026-10-21T13:44:39.503Z",
+  "mode": "fallback",
+  "root": "/tmp/claude-0/-home-user-palamedes2-stylegame-making/2b6abd4e-7fcf-58ad-8259-78b499d3afaa/scratchpad/play_v3",
+  "bgmPresent": [],
+  "fontPresent": false,
+  "fontStandin": false,
+  "simulatedInputOnly": true,
+  "results": [
+    {
+      "name": "起動（画像49・JSON5・フォント・音声読込）→タイトル",
+      "pass": true,
+      "detail": "492ms"
+    },
+    {
+      "name": "明示読込一覧の49PNGだけを取得（旧版・見本・previews を読まない）、JSON5件",
+      "pass": true,
+      "detail": "png=49 json=credits_text.json,font_styles.json,game_loading_list.json,graphics_manifest_v3.json,screen_layout_v2.json"
+    },
+    {
+      "name": "音声：SE39＋ボイス72（計111）を HTTP200 で取得",
+      "pass": true,
+      "detail": "wav200=111"
+    },
+    {
+      "name": "［フォールバック］BGM 3曲（配信物に存在0曲）",
+      "pass": true,
+      "detail": "未配置3曲は404を許容（無音で継続）"
+    },
+    {
+      "name": "旧音（sfx_piece_success／role_success／chain／旧 sfx_field_rise）を取得しない",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "［フォールバック］採用フォント未配置：画面上部に警告を常時表示（黙って退避しない）",
+      "pass": true,
+      "detail": "{\"loaded\":false,\"check\":true}"
+    },
+    {
+      "name": "マニフェスト graphics-v3",
+      "pass": true,
+      "detail": "graphics-v3-delivery-r1-20261021"
+    },
+    {
+      "name": "DPR1・1280×720：収まる最大＝実画素2倍（描画バッファ1280、CSS 1280px）",
+      "pass": true,
+      "detail": "{\"css\":\"1280px\",\"buf\":1280,\"mode\":\"fit\"}"
+    },
+    {
+      "name": "拡大時にドットを滲ませない(image-rendering)",
+      "pass": true,
+      "detail": "pixelated"
+    },
+    {
+      "name": "タイトル：title_logo を原寸で描画（画素一致）",
+      "pass": true,
+      "detail": "{\"opaque\":39100,\"bad\":0}"
+    },
+    {
+      "name": "R1・S01：パッドAだけで音声有効化を試み running、タイトル→メインメニュー。その入力はメニューへ渡らない（MODE1を開かない）",
+      "pass": true,
+      "detail": "before={\"ctx\":false,\"attempted\":false} after={\"ctx\":\"running\",\"attempted\":true,\"scene\":\"MenuScene\",\"depth\":1,\"cursor\":0}"
+    },
+    {
+      "name": "タイトルはメニュー曲（自動再生を強制せず、有効化後に開始）。タイトル→メニューで再始動しない",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "メインメニュー（MODE1／MODE2／オプション／遊び方）：両脇の menu_kotaro・menu_akane を原寸・原点どおりに描画（画素一致）",
+      "pass": true,
+      "detail": "[{\"opaque\":6879,\"bad\":0},{\"opaque\":9800,\"bad\":0}]"
+    },
+    {
+      "name": "パッドだけで MODE1 CPU対戦を開始：1Pコタロー対アカネ、READY／GO の担当はアカネ（同じ話者）・実ノードで再生開始",
+      "pass": true,
+      "detail": "{\"padStart\":{\"chars\":[\"kotaro\",\"akane\"],\"ann\":\"akane\"},\"readyNode\":{\"id\":\"akane_ready\",\"kind\":\"voice\",\"start\":1.6718367346938776,\"duration\":0.5098185941043084,\"loop\":false,\"stoppedAt\":null},\"goNode\":{\"id\":\"akane_go\",\"kind\":\"voice\",\"start\":2.8705668934240363,\"duration\":0.402312925170068,\"loop\":false,\"stoppedAt\":null}}"
+    },
+    {
+      "name": "対戦BGM（versus）を要求",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "受攻撃ストック：処理中ブロック（上）と nextPending（下）を混ぜず表示。予約高さ維持",
+      "pass": true,
+      "detail": "{\"v\":{\"blockLines\":6,\"pendingLines\":12,\"blockY\":228,\"pendingY\":266,\"reservedPx\":32},\"evs\":[[\"blockStart\",211,7],[\"waveStart\",211,3],[\"attackRow\",211,6]]}"
+    },
+    {
+      "name": "役宣言：代表役（先頭ロゴ）と代表役ボイスを同時開始。役宣言SEは連鎖段階 se_role_declare_0N、旧成立音・連鎖音を鳴らさない",
+      "pass": true,
+      "detail": "{\"decl\":{\"tick\":236,\"logos\":[15],\"chain\":1},\"roleShow\":{\"logo\":15,\"since\":236},\"roleVoice\":{\"t\":4854.100000000093,\"kind\":\"voice\",\"id\":\"kotaro_role_16\",\"channel\":\"main\"},\"declSfx\":[\"attack_row\",\"role_declare_1\"]}"
+    },
+    {
+      "name": "Esc：終了確認ダイアログ（dialog_panel）、確認中もゲームは進行（一時停止なし）",
+      "pass": true,
+      "detail": "dialog=1 tick 264→295"
+    },
+    {
+      "name": "「続ける」でダイアログを閉じる",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "勝敗演出：勝利SE＋敗者ボイス→（640ms）落下開始で se_character_fall→（700ms＋200ms）勝者ボイスとクラッカーSEが同時。敗者ボイスの終了は待たない",
+      "pass": true,
+      "detail": "{\"order\":[0,0,617,1516,1517],\"plan1\":{\"kind\":\"versus\",\"winner\":0,\"loser\":1,\"startTick\":311,\"fallStartTick\":349,\"fallEndTick\":391,\"winnerTick\":403,\"crackerTick\":403,\"crackerToward\":0,\"acceptTick\":421}}"
+    },
+    {
+      "name": "接着音 sfx_attack_row：実適用1ラインにつき1回（実ノード）",
+      "pass": true,
+      "detail": "rows=2 log=2 nodes=2"
+    },
+    {
+      "name": "クラッカーは1回だけ（勝者＝1P・左側へ向けて左右反転）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "勝者演出の開始後に決定入力を受付",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "B1：CPU対戦の第2ラウンドでも CPU が開始直後から操作（1.5秒以内）",
+      "pass": true,
+      "detail": "{\"round\":2,\"wins\":[1,0],\"firstCpuCmd\":1}"
+    },
+    {
+      "name": "CPU対戦で勝利：次の相手へ／同じ相手と再戦／メニューへ",
+      "pass": true,
+      "detail": "{\"state\":\"matchResult\",\"choices\":[\"次の相手へ\",\"同じ相手と再戦\",\"メニューへ\"]}"
+    },
+    {
+      "name": "「次の相手へ」：相手が東北ずん子に進み、勝利数0から。READY担当は相手（ずん子）",
+      "pass": true,
+      "detail": "{\"chars\":[\"kotaro\",\"zunko\"],\"wins\":[0,0],\"opp\":\"zunko\",\"ann\":\"zunko\"}"
+    },
+    {
+      "name": "キャラ別モーションシート：コタローS1・ずん子S13",
+      "pass": true,
+      "detail": "S1,S13"
+    },
+    {
+      "name": "CPU対戦で敗北：同じ相手に再挑戦／メニューへ",
+      "pass": true,
+      "detail": "同じ相手に再挑戦,メニューへ"
+    },
+    {
+      "name": "再挑戦：同じ相手（ずん子）のまま、勝利数0から。前の結果の声・SEを持ち越さない",
+      "pass": true,
+      "detail": "{\"re\":{\"chars\":[\"kotaro\",\"zunko\"],\"wins\":[0,0],\"opp\":\"zunko\"},\"leftovers\":[]}"
+    },
+    {
+      "name": "メインメニューへ戻ると CPU の相手順はアカネへ戻る（保存しない）",
+      "pass": true,
+      "detail": "akane"
+    },
+    {
+      "name": "MODE1 › 2P対戦 → キャラクター選択",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "同じフレームの入力は 1P→2P の順：1Pはアカネを飛ばしてずん子、2Pはずん子を飛ばしてコタロー（カーソル重複なし）",
+      "pass": true,
+      "detail": "2,0"
+    },
+    {
+      "name": "決定済みカーソルは固定、戻るは自分の決定だけ取消。決定ボイス（select）は決定時に1回",
+      "pass": true,
+      "detail": "{\"cs2\":{\"c\":[2,0],\"l\":[true,false]},\"cs3\":[false,false],\"voices\":[\"zunko_select\",\"zunko_select\",\"kotaro_select\"]}"
+    },
+    {
+      "name": "両者決定で 2P対戦開始（1P ずん子・2P コタロー）。READY担当は両者のどちらか",
+      "pass": true,
+      "detail": "{\"scene\":\"GameScene\",\"chars\":[\"zunko\",\"kotaro\"],\"ann\":\"zunko\"}"
+    },
+    {
+      "name": "R2：1P終了確認中も 2P（←・,）の移動と発射は 2P へ届き、1P の確認カーソルは動かない",
+      "pass": true,
+      "detail": "{\"q0\":{\"dlg\":[[0,0]],\"sel2\":2,\"n\":0},\"q1\":{\"dlg\":[[0,0]],\"sel2\":1,\"launch2\":true}}"
+    },
+    {
+      "name": "2P対戦の終了：同じキャラで再戦／キャラ選択へ／メニューへ",
+      "pass": true,
+      "detail": "同じキャラで再戦,キャラ選択へ,メニューへ"
+    },
+    {
+      "name": "「キャラ選択へ」→ 両者未決定の戻るで前のメニュー（MODE1）へ",
+      "pass": true,
+      "detail": "{\"back\":\"CharacterSelectScene\",\"back2\":{\"scene\":\"MenuScene\",\"title\":\"MODE1\"}}"
+    },
+    {
+      "name": "パッド2台だけでキャラ選択→2P対戦（1P ずん子・2P コタロー）",
+      "pass": true,
+      "detail": "zunko,kotaro"
+    },
+    {
+      "name": "R2：パッド2台：1P確認中も 2P のパッドで移動・発射、1P の確認は動かない",
+      "pass": true,
+      "detail": "{\"pq0\":{\"dlg\":[[0,0]],\"sel\":2,\"n\":0},\"pq1\":{\"dlg\":[[0,0]],\"sel\":1,\"launch\":true}}"
+    },
+    {
+      "name": "パッドだけで終了確認「終了する」→メニュー",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "シングル：READY担当はコタロー、BGM single",
+      "pass": true,
+      "detail": "single,single,ready,kotaro_ready,go,kotaro_go"
+    },
+    {
+      "name": "打ち上げ成功SE：連続取得1→2で se_launch_success_01→02。旧成功音なし",
+      "pass": true,
+      "detail": "piece_launch,launch_success_1,piece_launch,launch_success_2"
+    },
+    {
+      "name": "ゲームオーバー：結果パネル（再挑戦／メニューへ）、クラッカーなし",
+      "pass": true,
+      "detail": "{\"outcome\":\"gameOver\",\"cracker\":null,\"choices\":[\"再挑戦\",\"メニューへ\"]}"
+    },
+    {
+      "name": "R3：ステージクリアで sfx_stage_clear が途中停止せず終端まで再生。シングル成功はクラッカーあり",
+      "pass": true,
+      "detail": "{\"outcome\":\"stageClear\",\"plan\":{\"kind\":\"stageClear\",\"winner\":0,\"loser\":null,\"startTick\":133,\"fallStartTick\":133,\"fallEndTick\":133,\"winnerTick\":133,\"crackerTick\":133,\"crackerToward\":0,\"acceptTick\":193}}"
+    },
+    {
+      "name": "R3：最終面クリア＋全消し同時で sfx_all_stages_clear・sfx_all_clear とも終端まで再生",
+      "pass": true,
+      "detail": "allStagesClear"
+    },
+    {
+      "name": "MODE2 シングル：42個から開始",
+      "pass": true,
+      "detail": "{\"mode\":\"mode2\",\"remaining\":42,\"n\":1}"
+    },
+    {
+      "name": "MODE2 シングル：盤面を空にしてクリア",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "MODE2 CPU対戦：CPUが打ち上げて残数が減る",
+      "pass": true,
+      "detail": "{\"mode\":\"mode2\",\"r\":[42,19]}"
+    },
+    {
+      "name": "MODE2：両者（シングルは本人）が出せないと 3・2・1 のカウントダウン",
+      "pass": true,
+      "detail": "[3]"
+    },
+    {
+      "name": "MODE2 に MODE1 専用の処理・音（役・攻撃・相殺・危険・段階2以上の成功音）が混入しない",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "オプション：音／操作／対戦／表示／クレジット／設定初期化／戻る",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "音量変更（BGM 100→90）が設定に保存される",
+      "pass": true,
+      "detail": "90"
+    },
+    {
+      "name": "声の再生中は BGM を −4dB 減衰し、終了後に戻す（ゲイン値の検査）",
+      "pass": true,
+      "detail": "{\"during\":0.6309573650360107,\"after\":1}"
+    },
+    {
+      "name": "表示設定：「収まる最大」と固定倍率。収まらない倍率は無効（選択不可）と表示",
+      "pass": true,
+      "detail": "画面表示倍率:収まる最大:false | ×3・×4・×5・×6（現在無効）:選択不可:true | 全画面:オフ:false | 戻る:undefined:false"
+    },
+    {
+      "name": "クレジット画面へ",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "クレジット：左右でページ切替、URLを選んで決定で外部ブラウザ（window.open）、ページ位置を維持",
+      "pass": true,
+      "detail": "{\"urls\":[\"https://x.com/Vno_kotaro\"],\"page\":1,\"scene\":\"CreditsScene\"}"
+    },
+    {
+      "name": "遊び方画面",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "設定初期化の確認ダイアログ",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "B6 DPR 1：収まる最大＝実画素2倍（バッファ1280・CSS 1280px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替",
+      "pass": true,
+      "detail": "{\"fit\":{\"n\":2,\"mode\":\"fit\",\"bufW\":1280,\"cssW\":1280,\"dpr\":1,\"setting\":0},\"fixed\":[[1,\"fixed\",1,1],[2,\"fixed\",2,2],[3,\"fit\",2,0],[4,\"fit\",2,0]]}"
+    },
+    {
+      "name": "B6 DPR 1.25：収まる最大＝実画素2倍（バッファ1280・CSS 1024px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替",
+      "pass": true,
+      "detail": "{\"fit\":{\"n\":2,\"mode\":\"fit\",\"bufW\":1280,\"cssW\":1024,\"dpr\":1.25,\"setting\":0},\"fixed\":[[1,\"fixed\",1,1],[2,\"fixed\",2,2],[3,\"fit\",2,0],[4,\"fit\",2,0]]}"
+    },
+    {
+      "name": "B6 DPR 1.5：収まる最大＝実画素3倍（バッファ1920・CSS 1280px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替",
+      "pass": true,
+      "detail": "{\"fit\":{\"n\":3,\"mode\":\"fit\",\"bufW\":1920,\"cssW\":1280,\"dpr\":1.5,\"setting\":0},\"fixed\":[[1,\"fixed\",1,1],[2,\"fixed\",2,2],[3,\"fixed\",3,3],[4,\"fit\",3,0]]}"
+    },
+    {
+      "name": "B6 DPR 2：収まる最大＝実画素4倍（バッファ2560・CSS 1280px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替",
+      "pass": true,
+      "detail": "{\"fit\":{\"n\":4,\"mode\":\"fit\",\"bufW\":2560,\"cssW\":1280,\"dpr\":2,\"setting\":0},\"fixed\":[[1,\"fixed\",1,1],[2,\"fixed\",2,2],[3,\"fixed\",3,3],[4,\"fixed\",4,4]]}"
+    },
+    {
+      "name": "ウィンドウ縮小で固定3倍が収まらなくなると「収まる最大」（2倍）へ切替え、設定も0へ（スクロールなし）",
+      "pass": true,
+      "detail": "{\"big\":{\"n\":3,\"mode\":\"fixed\",\"bufW\":1920,\"cssW\":1920,\"dpr\":1,\"setting\":3},\"shrunk\":{\"n\":2,\"mode\":\"fit\",\"bufW\":1280,\"cssW\":1280,\"dpr\":1,\"setting\":0}}"
+    },
+    {
+      "name": "DPR変更（1→2）を検知して実画素倍率を選び直す（収まる最大＝4倍・CSS 1280px）",
+      "pass": true,
+      "detail": "{\"n\":4,\"mode\":\"fit\",\"bufW\":2560,\"cssW\":1280,\"dpr\":2,\"setting\":0}"
+    },
+    {
+      "name": "1倍も収まらない時だけ緊急縮小（通知あり）",
+      "pass": true,
+      "detail": "{\"n\":1,\"mode\":\"emergency\",\"bufW\":640,\"cssW\":500,\"dpr\":1,\"setting\":0}"
+    },
+    {
+      "name": "全画面の切替（ヘッドレスでの要求・解除と倍率再計算。実機の全画面表示は未検証）",
+      "pass": true,
+      "detail": "{\"on\":true,\"off\":true,\"mode\":\"fit\"}"
+    },
+    {
+      "name": "描画ループ稼働",
+      "pass": true,
+      "detail": "fps≒61"
+    },
+    {
+      "name": "［フォールバック］音声：未配置はBGMのみ、SE・ボイス111本はデコード成功",
+      "pass": true,
+      "detail": "{\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"decoded\":111,\"state\":\"running\"}"
+    },
+    {
+      "name": "旧成功音・旧成立音・連鎖音は一度も要求されない（新旧SEの二重発音なし）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "コンソールエラー/警告なし（フォールバック：BGM・フォント未配置の404を除く）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ネットワーク失敗・4xx/5xxなし（フォールバック：BGM・フォント未配置の404を除く）",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "screenshots": [
+    "screens/S01_title.png",
+    "screens/S02_menu.png",
+    "screens/S03_menu_mode1.png",
+    "screens/S08_versus_stock_block_and_pending.png",
+    "screens/S08_role_chain.png",
+    "screens/S26_confirm_quit.png",
+    "screens/S13_round_result_motion.png",
+    "screens/S13_round_result_fall.png",
+    "screens/S13_round_result_winner_cracker.png",
+    "screens/S14_cpu_win.png",
+    "screens/S08_versus_kotaro_zunko.png",
+    "screens/S14_cpu_lose.png",
+    "screens/S05_character_select.png",
+    "screens/S05_character_select_locked.png",
+    "screens/S11_ready.png",
+    "screens/S11_go.png",
+    "screens/S15_2p_result.png",
+    "screens/S04_menu_mode1_from_select.png",
+    "screens/S06_endless.png",
+    "screens/S17_game_over.png",
+    "screens/S07_stage_start.png",
+    "screens/S07_stage.png",
+    "screens/S16_stage_clear.png",
+    "screens/S16_all_stages.png",
+    "screens/S09_mode2_single.png",
+    "screens/S18_mode2_clear.png",
+    "screens/S10_mode2_versus.png",
+    "screens/S12_countdown.png",
+    "screens/S19_options.png",
+    "screens/S20_sound.png",
+    "screens/S21_controls.png",
+    "screens/S22_match_settings.png",
+    "screens/S23_display_settings.png",
+    "screens/S24_credits.png",
+    "screens/S24_credits_links.png",
+    "screens/S25_help.png",
+    "screens/S26_confirm_reset.png",
+    "screens/B6_dpr1.25_fixed2.png",
+    "screens/B6_switched_to_fit_notice.png",
+    "screens/B6_emergency.png"
+  ]
+}
