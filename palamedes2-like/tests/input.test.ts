@@ -143,11 +143,33 @@ describe('CPU（確定：初級・中級・上級、見える情報だけで判�
     const cpus = [new CpuController(0, 'hard', 1), new CpuController(1, 'normal', 2)];
     for (let i = 0; i < 6000 && m.state === 'round'; i++) m.step(cpus.flatMap((c) => c.poll((m.game as Game))));
     const seen = new Set<string>((m.game as Game).events.map((e) => e.type));
-    for (const t of ['declare', 'lineClear', 'attack', 'attackStock']) expect(seen.has(t), t).toBe(true);
+    for (const t of ['declare', 'lineClear', 'attack', 'attackReceive']) expect(seen.has(t), t).toBe(true);
     const solo = new Match({ firstTo: 2, difficulty: 'hard', seed: 9 });
     const cpu = new CpuController(1, 'hard', 3);
     for (let i = 0; i < 40000 && solo.state !== 'matchResult'; i++) solo.step(solo.state === 'round' ? cpu.poll((solo.game as Game)) : [], solo.canConfirm);
     expect(solo.state).toBe('matchResult');
     expect(solo.matchWinner).toBe(1 as PlayerId);
+  });
+});
+
+describe('B1：ラウンドをまたいでCPUが止まらない', () => {
+  it('前ラウンドが長くても、次ラウンドのGO直後からCPUが操作する（tick・計画を持ち越さない）', () => {
+    const m = new Match({ firstTo: 3, difficulty: 'hard', seed: 11 });
+    const cpu = new CpuController(1, 'normal', 5);
+    for (let i = 0; i < 60 * 600 && !m.game.result; i++) m.step(cpu.poll(m.game));
+    const g1 = m.game;
+    expect(g1.result).not.toBeNull();
+    expect(g1.tick).toBeGreaterThan(600); // 前ラウンドが十分長い
+    for (let i = 0; i < 60 * 30 && m.game === g1; i++) m.step([], true);
+    const g2 = m.game as Game;
+    expect(g2).not.toBe(g1);
+    let first: number | null = null;
+    for (let i = 0; i < 60 * 60 && first === null; i++) {
+      const c = cpu.poll(g2);
+      if (c.length > 0) first = g2.tick;
+      m.step(c);
+    }
+    expect(first).not.toBeNull();
+    expect(first! - g2.playStartTick).toBeLessThan(60); // GO から1秒以内に操作
   });
 });

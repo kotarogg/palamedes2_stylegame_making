@@ -46,7 +46,7 @@ describe('MODE2：独立したルール', () => {
     toPlay(g);
     stepN(g, 400, () => [cmd(0, 'rotate'), cmd(0, 'declare'), cmd(0, 'manualRise'), cmd(1, 'debugAttack')]);
     const types = new Set(g.events.map((e) => e.type));
-    for (const t of ['rotate', 'declare', 'declareFail', 'rise', 'attack', 'attackStock', 'lineClear']) expect(types.has(t as never)).toBe(false);
+    for (const t of ['rotate', 'declare', 'declareFail', 'rise', 'attack', 'attackReceive', 'attackRow', 'blockStart', 'attackCancel', 'attackPinch', 'lineClear']) expect(types.has(t as never)).toBe(false);
     for (const p of g.players) expect(p.board.allIds()).toHaveLength(42);
   });
 

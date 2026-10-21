@@ -795,6 +795,9 @@ export class GameScene implements Scene {
   }
 
   private onNewRound(): void {
+    for (const c of this.controllers) c.reset?.();
+    this.debugQueue.length = 0;
+    this.confirmQueued = false;
     this.app.bus.stopEffects();
     this.view.reset(this.game);
     this.director.reset(this.game);

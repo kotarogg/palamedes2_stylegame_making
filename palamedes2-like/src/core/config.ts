@@ -1,6 +1,6 @@
 // 調整値の集約。ルールとして確定した値と、テスト用初期値（調整用）を区別してコメントする。
 // 確定値の出典：2026-10-18 仕様確認への回答（docs/SPEC_DECISIONS_20261018.md）。
-import { WAVE_RULES, type WaveRules } from './attack';
+import { DEFAULT_INCOMING_CONFIG, type IncomingConfig } from './incoming';
 
 export interface TimingConfig {
   charMoveMs: number;
@@ -70,12 +70,8 @@ export interface GameConfig {
   naturalRiseIntervalMs: number | null;
   /** 手動上昇完了後、自然上昇までに確保する最低間隔（確定：ゲーム内0.2秒。調整用初期値） */
   riseMinGapMs: number;
-  /** 攻撃波の間隔（確定：2秒） */
-  waveIntervalMs: number;
-  /** 1波内の段の間隔（確定：1段目0ms・2段目200ms・3段目400ms）。保留後の再開もこの間隔以上 */
-  attackStepMs: number;
-  /** 最初の攻撃受信から第1波まで（確定：2秒） */
-  firstWaveDelayMs: number;
+  /** 受攻撃（第3版：受攻撃ブロック・攻撃波・上限29・ピンチ猶予）。src/core/incoming.ts */
+  incoming: IncomingConfig;
   /** MATCH初期配置の段数（確定：下側3段＝18個） */
   initialRows: number;
   /** 手動上昇の上限段数（確定：7段を超えない） */
@@ -88,13 +84,12 @@ export interface GameConfig {
   streakWindowMs: number;
   streakAttackTable: readonly StreakStep[];
   streakScoreTable: readonly StreakStep[];
-  /** 役連鎖の受付時間（確定：8秒） */
+  /** 役連鎖の受付時間（第3版 PM指定：8000ms→12000ms。ステージクリア時の最大復帰もこの値） */
   chainWindowMs: number;
   /** 役連鎖の追加攻撃の上限（確定：+4） */
   chainBonusMax: number;
   /** 通常攻撃力1ライン分で相殺できる待機攻撃ライン数（確定：2） */
   counterPerLine: number;
-  waveRules: WaveRules;
   /**
    * 要確認：ストック4個未満での宣言も「不成立」として扱う（硬直あり）か。
    * true＝不成立扱い（既定）、false＝入力を無視。
@@ -129,9 +124,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   },
   naturalRiseIntervalMs: NATURAL_RISE_MS.normal,
   riseMinGapMs: 200,
-  waveIntervalMs: 2000,
-  attackStepMs: 200,
-  firstWaveDelayMs: 2000,
+  incoming: DEFAULT_INCOMING_CONFIG,
   initialRows: 3,
   manualRiseMaxHeight: 7,
   dangerHeight: 7,
@@ -139,10 +132,9 @@ export const DEFAULT_CONFIG: GameConfig = {
   streakWindowMs: 2000,
   streakAttackTable: STREAK_ATTACK_TABLE,
   streakScoreTable: STREAK_SCORE_TABLE,
-  chainWindowMs: 8000,
+  chainWindowMs: 12000,
   chainBonusMax: 4,
   counterPerLine: 2,
-  waveRules: WAVE_RULES,
   declareBelowMinIsFailure: true,
   releaseExecutesHeldRise: true,
 };

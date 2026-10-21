@@ -1,5 +1,6 @@
 // ゲーム画面の描画（MODE1対戦／MODE1シングル／MODE2対戦／MODE2シングル）。採用グラフィック graphics_v1_r2（マニフェスト2.3）。
 // ロジックのイベント列を読み、時間補間だけを行う（ロジックへ書き戻さない）。盤面の固定グリッド・論理座標は変更しない。
+import { totalIncoming } from '../core/incoming';
 import { ATTACK_MAX } from '../core/attack';
 import { levelDef } from '../core/balance';
 import { DEFAULT_VIEW_CONFIG, type ViewConfig } from '../core/config';
@@ -644,7 +645,7 @@ export class GameView {
         this.put(items, Z.glowFront, gp.front, gp.x, gp.y);
       }
     }
-    if (!this.isSingle) this.collectAttackIcons(items, p, st.attackStock);
+    if (!this.isSingle) this.collectAttackIcons(items, p, totalIncoming(st.incoming));
     // 役名ロゴ（S7 A/B/C）
     const role = v.role;
     if (role) {
@@ -794,7 +795,7 @@ export class GameView {
         this.drawChainGauge(ctx, p, st);
         const v = this.pv[p];
         if (v.grace) drawText(ctx, `危険 ${((Math.max(0, v.grace.end - t) * g.tickMs) / 1000).toFixed(1)}秒`, board.x + board.w / 2, board.y + 4, { align: 'center', size: 10, bold: true, color: '#ff8a8a', box: true });
-        if (!this.isSingle) drawText(ctx, `${st.attackStock}`, this.pvc.attackPanel[p][0] + 24, this.pvc.attackPanel[p][1] - 12, { align: 'center', size: 9, color: '#ffd6d6' });
+        if (!this.isSingle) drawText(ctx, `${totalIncoming(st.incoming)}`, this.pvc.attackPanel[p][0] + 24, this.pvc.attackPanel[p][1] - 12, { align: 'center', size: 9, color: '#ffd6d6' });
       } else {
         // MODE2：役・攻撃の要素は出さない。手役ストックと同じ領域に残りピース数
         const m2 = g as Mode2Game;

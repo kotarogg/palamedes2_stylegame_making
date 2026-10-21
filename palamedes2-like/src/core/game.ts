@@ -4,19 +4,15 @@
 //   1. 基準到達（到達tick昇順、同一tickは1P優先）  2. 帰還完了
 //   3. 役処理フェーズの進行（攻撃送信は双方の相殺計算後にまとめて反映）  3b. シングルのステージクリア確定
 //   4. 入力（1P→2P。移動終了時の保持入力を先に処理）  5. 連続取得・役連鎖タイマー
-//   6. 自然上昇・危険猶予  7. 攻撃波（1段ずつ0/200/400ms）  8. 敗北判定（同一tickの両者敗北は引分け）
-import {
-  addAttackLines,
-  computeAttack,
-  resolveCounter,
-  stepFits,
-  waveReserve,
-  type AttackBreakdown,
-  type CounterResult,
-} from './attack';
+//   6. 攻撃ピンチ猶予の期限・解除  7. 受攻撃ブロックの開始  8. 攻撃段の適用・ピンチ判定（波内400ms周期、波間450ms）
+//   9. 自然上昇・危険猶予  10. 敗北判定（同一tickの両者敗北は引分け）
+// 攻撃の解決順（第3版 第9章）：両者の役処理で攻撃力を収集→各自の相殺（その時点の nextPending）→相殺後の送信を相手へ受信（上限29）
+//   →期限到達の敗北判定→ブロック開始→段の適用→自然上昇。同tickに相手から届いた分は、そのtickの自分の相殺対象に含めない。
+import { computeAttack, resolveCounter, type AttackBreakdown, type CounterResult } from './attack';
 import { addLevelProgress, applyMultiplier, levelDef, MODE1_BALANCE, scoreMultiplier, STAGE_COUNT, stageDef, type Mode1Balance } from './balance';
 import { Board } from './board';
 import { DEFAULT_CONFIG, msToTicks, streakPercent, type GameConfig } from './config';
+import { cancelPending, createIncoming, receive, totalIncoming, tryEndBlock, tryStartBlock, tryStartWave, type IncomingState } from './incoming';
 import { isLaunchSuccess, PieceFactory } from './pieces';
 import { evaluateStock, roleLogoIndices, type RoleResult } from './roles';
 import { createSeededRng, type Rng } from './rng';
@@ -108,11 +104,24 @@ export type GameEvent =
     }
   | { type: 'attack'; tick: number; player: PlayerId; breakdown: AttackBreakdown; counter: CounterResult; linesCleared: number }
   | { type: 'roleEnd'; tick: number; player: PlayerId }
-  | { type: 'attackStock'; tick: number; player: PlayerId; stock: number; delta: number; cause: 'receive' | 'wave' | 'counter' | 'debug' }
-  /** 攻撃波の開始（この波の段数を予約） */
-  | { type: 'waveStart'; tick: number; player: PlayerId; waveId: number; lines: number }
-  /** 波の1段：applied=false は容量不足で破棄（着弾音を鳴らさない）。firstApplied＝その波で最初に実際に追加した段 */
-  | { type: 'attackRow'; tick: number; player: PlayerId; waveId: number; step: number; applied: boolean; firstApplied: boolean }
+  /** 受信：accepted を nextPending へ。overflow は上限29の超過で破棄（相殺・ピンチ破棄とは別統計） */
+  | { type: 'attackReceive'; tick: number; player: PlayerId; accepted: number; overflow: number; total: number; cause: 'receive' | 'debug' }
+  /** 相殺：nextPending から canceled を消した（XD顔・小爆発の対象） */
+  | { type: 'attackCancel'; tick: number; player: PlayerId; canceled: number; total: number }
+  /** 受攻撃ブロックの開始：nextPending 全量を現ブロックへ確定（表示ストック数は減らない） */
+  | { type: 'blockStart'; tick: number; player: PlayerId; blockId: number; lines: number }
+  /** 攻撃波の開始：現ブロックから最大3段を割当（内部移動。表示ストック数は減らない） */
+  | { type: 'waveStart'; tick: number; player: PlayerId; blockId: number; waveId: number; lines: number }
+  /**
+   * 攻撃1段の実適用（6列へ1ライン）。表示ストック数を1減らす。
+   * firstOfWave＝その波で最初の実適用（被攻撃ボイス）。rowIds＝追加した6個のピースID（接着表示用）
+   */
+  | { type: 'attackRow'; tick: number; player: PlayerId; blockId: number; waveId: number; step: number; firstOfWave: boolean; heightBefore: number; heightAfter: number; rowIds: number[]; total: number }
+  /** ピンチライン到達で、同じ波の未適用分を破棄（相殺とは別の消失表現） */
+  | { type: 'attackDiscard'; tick: number; player: PlayerId; waveId: number; lines: number; reason: 'pinch'; total: number }
+  | { type: 'blockEnd'; tick: number; player: PlayerId; blockId: number }
+  /** 攻撃ピンチ猶予（2000ms）：grace＝開始、release＝6段以下へ下がり解除、defeat＝期限時も7段 */
+  | { type: 'attackPinch'; tick: number; player: PlayerId; state: 'grace' | 'release' | 'defeat'; graceEnd: number }
   | { type: 'danger'; tick: number; player: PlayerId; state: 'grace' | 'release' | 'defeat'; graceEnd: number }
   | { type: 'score'; tick: number; player: PlayerId; delta: number; total: number; cause: ScoreCause }
   | { type: 'progress'; tick: number; player: PlayerId; units: number; total: number }
@@ -147,23 +156,14 @@ export interface RoleProcess {
   scoreMul: { num: number; den: number };
 }
 
-/** 進行中の攻撃波（開始時に段数を予約し、1段ずつSNAP適用） */
-export interface WaveProgress {
-  id: number;
-  remaining: number;
-  nextStepTick: number;
-  step: number;
-  anyApplied: boolean;
-}
-
 export interface PlayerState {
   id: PlayerId;
   board: Board;
   roleStock: Piece[];
   /** 役ストックが宣言可能な成立状態か（音の「非成立→成立」判定用） */
   roleReady: boolean;
-  attackStock: number;
-  wave: WaveProgress | null;
+  /** 受攻撃（nextPending・blockRemaining・waveRemaining とブロック・波・ピンチ猶予の状態） */
+  incoming: IncomingState;
   selectedCol: number;
   charMoveEndTick: number;
   /** 左右移動中に保持している入力（1回分） */
@@ -187,7 +187,6 @@ export interface PlayerState {
   chainCount: number;
   /** 役連鎖の受付残りtick（自分の成立役の処理中は停止） */
   chainRemaining: number;
-  nextWaveTick: number | null;
   defeated: boolean;
   rng: Rng;
 }
@@ -260,7 +259,6 @@ export class Game {
   private readonly t: Record<keyof GameConfig['timing'], number>;
   private readonly balance: Mode1Balance;
   private pendingSends: Array<{ to: PlayerId; lines: number }> = [];
-  private waveSeq = 0;
 
   constructor(opts: GameOptions = {}) {
     this.config = opts.config ?? DEFAULT_CONFIG;
@@ -287,7 +285,8 @@ export class Game {
       p.streakCount = carry.streakCount;
       p.streakRemaining = carry.streakCount > 0 ? this.ticks(tr.restore_streak_remaining_ms) : 0;
       p.chainCount = carry.chainCount;
-      p.chainRemaining = carry.chainCount > 0 ? this.ticks(tr.restore_chain_remaining_ms) : 0;
+      // 第3版 PM指定：役連鎖の受付は12000ms。ステージクリア時の最大復帰も同じ値（数値正本JSONの8000msより本指示を優先）
+      p.chainRemaining = carry.chainCount > 0 ? this.ticks(this.config.chainWindowMs) : 0;
     }
     opts.setup?.(this);
     for (const p of this.players) p.roleReady = evaluateStock(p.roleStock).kind === 'ok';
@@ -348,8 +347,7 @@ export class Game {
       board: new Board(),
       roleStock: [],
       roleReady: false,
-      attackStock: 0,
-      wave: null,
+      incoming: createIncoming(),
       selectedCol: 2,
       charMoveEndTick: 0,
       buffered: null,
@@ -365,7 +363,6 @@ export class Game {
       streakRemaining: 0,
       chainCount: 0,
       chainRemaining: 0,
-      nextWaveTick: null,
       defeated: false,
       rng,
     };
@@ -421,8 +418,12 @@ export class Game {
         if (p.streakRemaining > 0) p.streakRemaining--;
       }
     }
+    if (!this.single) {
+      for (const p of this.players) this.processAttackPinch(p);
+      for (const p of this.players) this.startIncomingBlock(p);
+      for (const p of this.players) this.processAttackSteps(p);
+    }
     for (const p of this.players) this.processRise(p);
-    for (const p of this.players) this.processAttackWave(p);
     if (this.single && !this.players[0].board.isEmpty()) this.single.wasNonEmpty = true;
     this.resolveDefeat();
   }
@@ -614,11 +615,11 @@ export class Game {
       // シングルは送り先がない（攻撃ストック・送信なし）
       this.emit({ type: 'attack', tick: this.tick, player: p.id, breakdown, counter: { usedPower: 0, canceled: 0, sent: 0, discarded: 0 }, linesCleared: r.linesCleared });
     } else {
-      const counter = resolveCounter(breakdown.power, p.attackStock, this.config.counterPerLine);
+      // 相殺の対象は次ブロック待機分（nextPending）だけ。現ブロック未消化分・進行中の波は相殺しない
+      const counter = resolveCounter(breakdown.power, p.incoming.nextPending, this.config.counterPerLine);
       if (counter.canceled > 0) {
-        p.attackStock -= counter.canceled;
-        if (p.attackStock === 0) p.nextWaveTick = null;
-        this.emit({ type: 'attackStock', tick: this.tick, player: p.id, stock: p.attackStock, delta: -counter.canceled, cause: 'counter' });
+        cancelPending(p.incoming, counter.canceled);
+        this.emit({ type: 'attackCancel', tick: this.tick, player: p.id, canceled: counter.canceled, total: totalIncoming(p.incoming) });
       }
       if (counter.sent > 0) this.pendingSends.push({ to: (1 - p.id) as PlayerId, lines: counter.sent });
       this.emit({ type: 'attack', tick: this.tick, player: p.id, breakdown, counter, linesCleared: r.linesCleared });
@@ -634,12 +635,10 @@ export class Game {
     for (const s of sends) this.receiveAttack(this.players[s.to], s.lines, 'receive');
   }
 
-  /** 受信攻撃は役処理中でも待機ストックへ即加算。第1波は最初の受信から2秒後（追加受信で延ばさない） */
+  /** 受信は役処理中でも nextPending へ即加算（上限29。超過分は上限超過として破棄）。ブロック開始の期限は延長しない */
   private receiveAttack(p: PlayerState, lines: number, cause: 'receive' | 'debug'): void {
-    const before = p.attackStock;
-    p.attackStock = addAttackLines(p.attackStock, lines);
-    if (before === 0 && p.attackStock > 0 && p.nextWaveTick === null) p.nextWaveTick = this.tick + this.ticks(this.config.firstWaveDelayMs);
-    this.emit({ type: 'attackStock', tick: this.tick, player: p.id, stock: p.attackStock, delta: p.attackStock - before, cause });
+    const r = receive(p.incoming, lines, this.tick, (ms) => this.ticks(ms), this.config.incoming);
+    this.emit({ type: 'attackReceive', tick: this.tick, player: p.id, accepted: r.accepted, overflow: r.overflow, total: totalIncoming(p.incoming), cause });
   }
 
   // ---- シングル：消去数・得点・Lv・ステージ ----
@@ -767,50 +766,91 @@ export class Game {
     p.riseCountdown = p.riseIntervalTicks;
   }
 
-  /**
-   * 攻撃波（2026-10-20確定）：波の開始時に最大3段を予約し、1段目0ms・2段目200ms・3段目400msにSNAP適用。
-   * 各段で容量を再確認し、入りきらない段は破棄（後続波の分は保持）。
-   * 自分の役処理中は次段を保留し、終了後に200ms以上の間隔で再開（同一tickへ詰め込まない）。
-   * 波は重ねて進行させず、遅れた波を一度に追いつかせない。
-   */
-  private processAttackWave(p: PlayerState): void {
-    if (p.defeated) return;
-    if (p.wave) {
-      if (p.role) return; // 適用禁止中は保留（予約済みの段は後続受信と区別して保持）
-      if (this.tick < p.wave.nextStepTick) return;
-      this.applyWaveStep(p);
+  /** 攻撃ピンチ猶予（第8章）：6段以下へ下がれば解除。進行・停止は既存の危険猶予と同じく自分の役処理中は停止 */
+  private processAttackPinch(p: PlayerState): void {
+    const s = p.incoming;
+    if (p.defeated || s.pinchRemaining === null) return;
+    if (p.board.height() < this.config.incoming.pinchHeight) {
+      s.pinchRemaining = null;
+      this.emit({ type: 'attackPinch', tick: this.tick, player: p.id, state: 'release', graceEnd: this.tick });
       return;
     }
-    if (p.attackStock <= 0 || p.nextWaveTick === null) return;
-    if (this.tick < p.nextWaveTick) return; // 待ち時間は役処理中も経過する
-    if (p.role) return; // 盤面への適用は自分の役処理終了まで待機
-    const lines = waveReserve(p.attackStock, this.config.waveRules);
-    p.attackStock -= lines;
-    const id = ++this.waveSeq;
-    p.wave = { id, remaining: lines, nextStepTick: this.tick, step: 0, anyApplied: false };
-    this.emit({ type: 'attackStock', tick: this.tick, player: p.id, stock: p.attackStock, delta: -lines, cause: 'wave' });
-    this.emit({ type: 'waveStart', tick: this.tick, player: p.id, waveId: id, lines });
-    p.nextWaveTick = p.attackStock > 0 ? this.tick + this.ticks(this.config.waveIntervalMs) : null;
-    this.applyWaveStep(p);
+    if (p.role) return;
+    if (--s.pinchRemaining <= 0) {
+      p.defeated = true;
+      this.emit({ type: 'attackPinch', tick: this.tick, player: p.id, state: 'defeat', graceEnd: this.tick });
+    }
   }
 
-  private applyWaveStep(p: PlayerState): void {
-    const w = p.wave;
-    if (!w) return;
-    const stepTicks = this.ticks(this.config.attackStepMs);
-    const applied = stepFits(p.board.height(), this.config.waveRules);
-    if (applied) this.addRows(p, 1, 'attack');
-    const firstApplied = applied && !w.anyApplied;
-    if (applied) w.anyApplied = true;
-    this.emit({ type: 'attackRow', tick: this.tick, player: p.id, waveId: w.id, step: w.step, applied, firstApplied });
-    w.step++;
-    w.remaining--;
-    if (w.remaining > 0) {
-      w.nextStepTick = this.tick + stepTicks;
-      return;
+  /** 攻撃ピンチ猶予の開始。すでに猶予中なら期限を再設定・延長しない */
+  private startAttackPinch(p: PlayerState): void {
+    const s = p.incoming;
+    if (s.pinchRemaining !== null) return;
+    s.pinchRemaining = this.ticks(this.config.incoming.pinchGraceMs);
+    this.emit({ type: 'attackPinch', tick: this.tick, player: p.id, state: 'grace', graceEnd: this.tick + s.pinchRemaining });
+  }
+
+  /** 受攻撃ブロックの開始（第9章 手順6）：開始境界の nextPending 全量を現ブロックへ */
+  private startIncomingBlock(p: PlayerState): void {
+    if (p.defeated) return;
+    const lines = tryStartBlock(p.incoming, this.tick);
+    if (lines !== null) this.emit({ type: 'blockStart', tick: this.tick, player: p.id, blockId: p.incoming.blockId, lines });
+  }
+
+  /**
+   * 攻撃段の適用（第7・8章）：波は最大3段、波内は400ms周期（1段目0ms）、前波の最後の実適用から次波の最初まで450ms以上。
+   * 1回の呼出しで適用するのは最大1段（期限超過分を同tickにまとめない）。自分の役処理中は保留。
+   * 7段（ピンチライン）の間は新しく適用せず、攻撃ピンチ猶予を開始する（未適用分は保持）。
+   * 1段の適用で7段に達したら、同じ波の残りだけを破棄する（現ブロック残量・nextPending は保持）。
+   */
+  private processAttackSteps(p: PlayerState): void {
+    const s = p.incoming;
+    const cfg = this.config.incoming;
+    if (p.defeated) return;
+    if (s.waveRemaining === 0) {
+      const n = tryStartWave(s, cfg);
+      if (n !== null) this.emit({ type: 'waveStart', tick: this.tick, player: p.id, blockId: s.blockId, waveId: s.waveId, lines: n });
     }
-    p.wave = null;
-    if (p.nextWaveTick !== null) p.nextWaveTick = Math.max(p.nextWaveTick, this.tick + stepTicks);
+    if (s.waveRemaining > 0 && this.tick >= s.nextStepTick && !p.role) {
+      if (p.board.height() >= cfg.pinchHeight) {
+        this.startAttackPinch(p);
+      } else {
+        const heightBefore = p.board.height();
+        this.addRows(p, 1, 'attack');
+        const row = p.board.cols.map((c) => {
+          const last = c[c.length - 1];
+          return last.kind === 'piece' ? last.piece.id : last.pieceId;
+        });
+        s.waveRemaining--;
+        s.stats.applied++;
+        const step = s.waveStep++;
+        s.nextStepTick = this.tick + this.ticks(s.waveRemaining > 0 ? cfg.stepIntervalMs : cfg.waveGapMs);
+        this.emit({
+          type: 'attackRow',
+          tick: this.tick,
+          player: p.id,
+          blockId: s.blockId,
+          waveId: s.waveId,
+          step,
+          firstOfWave: step === 0,
+          heightBefore,
+          heightAfter: p.board.height(),
+          rowIds: row,
+          total: totalIncoming(s),
+        });
+        if (p.board.height() >= cfg.pinchHeight) {
+          s.stats.pinchReached++;
+          if (s.waveRemaining > 0) {
+            const lines = s.waveRemaining;
+            s.waveRemaining = 0;
+            s.stats.pinchDiscarded += lines;
+            this.emit({ type: 'attackDiscard', tick: this.tick, player: p.id, waveId: s.waveId, lines, reason: 'pinch', total: totalIncoming(s) });
+          }
+          this.startAttackPinch(p);
+        }
+      }
+    }
+    if (tryEndBlock(s, this.tick, (ms) => this.ticks(ms), cfg)) this.emit({ type: 'blockEnd', tick: this.tick, player: p.id, blockId: s.blockId });
   }
 
   private resolveDefeat(): void {
@@ -908,8 +948,7 @@ export class Game {
       players: this.players.map((p) => ({
         cols: p.board.cols.map((c) => c.map((s) => (s.kind === 'piece' ? `${s.piece.id}:${s.piece.n}${s.piece.suit[0]}` : `R${s.pieceId}`))),
         stock: p.roleStock.map((x) => x.id),
-        atk: p.attackStock,
-        wave: p.wave,
+        inc: [p.incoming.nextPending, p.incoming.blockRemaining, p.incoming.waveRemaining, p.incoming.blockActive, p.incoming.nextBlockTick, p.incoming.nextStepTick, p.incoming.pinchRemaining],
         sel: p.selectedCol,
         lock: p.lockUntil,
         role: p.role ? [p.role.stage, p.role.stageEnd, p.role.linesCleared] : null,
@@ -917,7 +956,6 @@ export class Game {
         grace: p.graceRemaining,
         streak: [p.streakCount, p.streakRemaining],
         chain: [p.chainCount, p.chainRemaining],
-        nextWave: p.nextWaveTick,
       })),
     });
   }

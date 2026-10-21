@@ -85,9 +85,9 @@ export class SoundDirector {
         }
         return;
       case 'attackRow':
-        if (!e.applied) return; // 破棄された段は無音
+        // 実適用された1ラインにつき接着音1回（破棄・未適用の段は attackRow を出さない）。被攻撃ボイスは波の最初の実適用だけ
         b.playSfx('attack_row');
-        if (e.firstApplied) b.playVoice(this.char(e.player), 'damage', VOICE_PRIORITY.attack); // 実適用された波の初段だけ
+        if (e.firstOfWave) b.playVoice(this.char(e.player), 'damage', VOICE_PRIORITY.attack);
         return;
       case 'danger':
         if (e.state === 'grace') b.playSfx('danger');

@@ -143,7 +143,7 @@ describe('MODE1シングル：ステージクリア', () => {
     expect(evs(g, 'stageClear')).toHaveLength(1);
   });
 
-  it('ステージ間：得点・連続取得数・役連鎖数を引継ぎ、受付残時間を2秒／8秒へ戻す。盤面18・進捗0・危険非発動・その面の自然上昇周期', () => {
+  it('ステージ間：得点・連続取得数・役連鎖数を引継ぎ、受付残時間を2秒／12秒（第3版）へ戻す。盤面18・進捗0・危険非発動・その面の自然上昇周期', () => {
     const s = new SingleSession({ mode: 'stage', seed: 4, config: { naturalRiseIntervalMs: 5000 } });
     const g = s.game as Game;
     toPlay(g);
@@ -170,7 +170,7 @@ describe('MODE1シングル：ステージクリア', () => {
     expect(n.players[0].streakCount).toBe(1);
     expect(n.players[0].streakRemaining).toBe(n.ticks(2000));
     expect(n.players[0].chainCount).toBe(2);
-    expect(n.players[0].chainRemaining).toBe(n.ticks(8000));
+    expect(n.players[0].chainRemaining).toBe(n.ticks(12000));
     expect(n.players[0].graceRemaining).toBeNull();
     expect(n.players[0].riseIntervalTicks).toBe(n.ticks(stageDef(2).natural_rise_ms));
     // READY中は受付時間を減らさない

@@ -39,6 +39,8 @@ type AnyPlayer = PlayerState | Mode2Player;
 export class CpuController implements Controller {
   private nextTick = 0;
   private plan: Plan | null = null;
+  /** 直前に読んだゲーム。別のゲーム（新ラウンド・再戦・次の相手）を受けたら状態を初期化する（B1） */
+  private game: AnyGame | null = null;
   private readonly rng: Rng;
 
   constructor(
@@ -50,7 +52,18 @@ export class CpuController implements Controller {
     this.rng = createSeededRng((seed * 7919 + player * 104729) >>> 0);
   }
 
+  /** 前ラウンドの tick・計画を新ゲームへ持ち越さない（B1：2ラウンド目以降に相手が動かなくなる不具合の修正） */
+  reset(): void {
+    this.nextTick = 0;
+    this.plan = null;
+    this.game = null;
+  }
+
   poll(game: AnyGame): Command[] {
+    if (game !== this.game) {
+      this.reset();
+      this.game = game;
+    }
     const p = game.players[this.player];
     if (!p || !game.playing || game.tick + 1 < this.nextTick) return [];
     if (game.mode === 'mode1' && (p as PlayerState).defeated) return [];

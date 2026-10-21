@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { computeAttack, resolveCounter } from '../src/core/attack';
 import { NATURAL_RISE_MS } from '../src/core/config';
 import type { Command, Game, GameEvent } from '../src/core/game';
+import { createIncoming } from '../src/core/incoming';
 import { Match } from '../src/core/match';
 import type { PlayerId } from '../src/core/types';
 import { allPieceIds, EMPTY, label, makeGame, rows, setStock, stepN, stepUntil, testConfig, toPlay, top } from './helpers';
@@ -356,7 +357,7 @@ describe('役宣言の処理フェーズ（確定）', () => {
     const a = evs(g.events, 'attack')[0];
     expect(a.linesCleared).toBe(1);
     expect(a.breakdown).toMatchObject({ base: 3, power: 3 });
-    expect(evs(g.events, 'attackStock').filter((e) => e.player === 1 && e.cause === 'receive').map((e) => e.delta)).toEqual([3]);
+    expect(evs(g.events, 'attackReceive').filter((e) => e.player === 1 && e.cause === 'receive').map((e) => e.accepted)).toEqual([3]);
   });
 
   it('宣言者だけ操作不能・自然上昇停止。相手は継続し、終了後に残り時間から自然上昇を再開', () => {
@@ -398,7 +399,7 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     expect(resolveCounter(4, 4)).toEqual({ usedPower: 2, canceled: 4, sent: 2, discarded: 0 });
   });
 
-  it('相殺は攻撃処理フェーズで行い、役処理の途中へ割り込ませない。処理中の受信も即加算され、相殺対象になる', () => {
+  it('相殺は攻撃処理フェーズで行い、役処理の途中へ割り込ませない。処理中の受信も即加算され、相殺対象（nextPending）になる', () => {
     const g = makeGame({ boards: { 0: rows(4) } });
     setStock(g, 0, '1s', '2s', '3s', '4s');
     toPlay(g);
@@ -406,16 +407,14 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     g.step([cmd(0, 'declare')]);
     stepN(g, 50);
     g.step([atk(0, 1)]); // 役処理中の受信：即加算
-    expect(g.players[0].attackStock).toBe(2);
-    const a0 = evs(g.events, 'attack');
-    expect(a0).toHaveLength(0);
+    expect(g.players[0].incoming.nextPending).toBe(2);
+    expect(evs(g.events, 'attack')).toHaveLength(0);
     stepN(g, 200);
     const a = evs(g.events, 'attack')[0];
     expect(a.counter).toEqual({ usedPower: 1, canceled: 2, sent: 2, discarded: 0 });
-    expect(g.players[0].attackStock).toBe(0);
-    expect(evs(g.events, 'attackStock').filter((e) => e.player === 1 && e.cause === 'receive').map((e) => [e.tick, e.delta])).toEqual([[a.tick, 2]]);
-    const st = evs(g.events, 'attackStock').filter((e) => e.cause === 'counter');
-    expect(st.map((e) => e.tick)).toEqual([a.tick]);
+    expect(g.players[0].incoming.nextPending).toBe(0);
+    expect(evs(g.events, 'attackReceive').filter((e) => e.player === 1).map((e) => [e.tick, e.accepted])).toEqual([[a.tick, 2]]);
+    expect(evs(g.events, 'attackCancel').map((e) => e.tick)).toEqual([a.tick]);
   });
 
   it('連続取得：成功取得から2秒以内の成功で継続し、宣言時の倍率に反映（5個×1.5）。受付時間切れは×1.0', () => {
@@ -479,13 +478,13 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     ]);
   });
 
-  it('役連鎖：成立ごとに8秒の受付を更新、処理中は停止。2連鎖目+1。不成立は更新・加算しない', () => {
+  it('役連鎖：成立ごとに12秒（第3版）の受付を更新、処理中は停止。2連鎖目+1。不成立は更新・加算しない', () => {
     const g = makeGame({ boards: { 0: rows(7), 1: EMPTY } });
     setStock(g, 0, '1s', '2s', '3s', '4s');
     toPlay(g);
     const p = g.players[0];
     g.step([cmd(0, 'declare')]);
-    const window = g.ticks(8000);
+    const window = g.ticks(12000);
     expect(p.chainRemaining).toBe(window);
     stepN(g, 50);
     expect(p.chainRemaining).toBe(window); // 自分の成立役の処理中は停止
@@ -502,7 +501,8 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     const atks = evs(g.events, 'attack');
     expect(atks.map((a) => a.breakdown.chainBonus)).toEqual([0, 1]);
     expect(atks[1].breakdown.power).toBe(4);
-    // 受付時間切れ後は1連鎖目に戻る
+    // 受付時間切れ後は1連鎖目に戻る（相手の受攻撃は本テストの対象外：ピンチ敗北で終わらないよう受信分を空にする）
+    g.players[1].incoming = createIncoming();
     stepN(g, window + 5);
     setStock(g, 0, '1s', '2s', '3s', '4s');
     g.step([cmd(0, 'declare')]);
@@ -524,146 +524,11 @@ describe('攻撃計算・相殺・送信（確定）', () => {
       { usedPower: 1, canceled: 1, sent: 2, discarded: 1 },
       { usedPower: 1, canceled: 1, sent: 2, discarded: 1 },
     ]);
-    const recv = evs(g.events, 'attackStock').filter((e) => e.cause === 'receive');
-    expect(recv.map((e) => [e.player, e.delta, e.stock, e.tick === a[0].tick])).toEqual([
+    const recv = evs(g.events, 'attackReceive').filter((e) => e.cause === 'receive');
+    expect(recv.map((e) => [e.player, e.accepted, e.total, e.tick === a[0].tick])).toEqual([
       [1, 2, 2, true],
       [0, 2, 2, true],
     ]);
-  });
-});
-
-describe('攻撃の受信・攻撃波（2026-10-20確定：1段ずつ0/200/400ms）', () => {
-  const attackRises = (g: Game, p: PlayerId) => evs(g.events, 'rise').filter((e) => e.kind === 'attack' && e.player === p);
-  const rowsOf = (g: Game, p: PlayerId) => evs(g.events, 'attackRow').filter((e) => e.player === p);
-
-  it('最初の受信から2秒後に第1波、以後2秒間隔。追加受信で待ち時間を延ばさない。1段目0ms・2段目200ms・3段目400msで1段ずつSNAP', () => {
-    const g = makeGame({ boards: { 0: EMPTY } });
-    toPlay(g);
-    g.step([atk(0, 2)]);
-    const t0 = g.tick;
-    stepN(g, 60);
-    g.step([atk(0, 3)]);
-    stepN(g, 300);
-    const step = g.ticks(200);
-    expect(attackRises(g, 0).map((w) => [w.tick - t0, w.rows])).toEqual([
-      [120, 1],
-      [120 + step, 1],
-      [120 + 2 * step, 1],
-      [240, 1],
-      [240 + step, 1],
-    ]);
-    expect(attackRises(g, 0).every((w) => w.endTick === w.tick)).toBe(true);
-    // 波の開始時にその波の分だけ予約し、待機ストックから引く
-    expect(evs(g.events, 'waveStart').map((w) => [w.tick - t0, w.lines])).toEqual([
-      [120, 3],
-      [240, 2],
-    ]);
-  });
-
-  it('各段で容量を再確認し、6段に達した後の段は破棄（着弾なし）。後続波の分は破棄せず保持。ストック上限29', () => {
-    const g = makeGame({ boards: { 0: rows(4) } });
-    toPlay(g);
-    g.step([atk(0, 5)]);
-    const t0 = g.tick;
-    stepN(g, 150);
-    // 第1波：4段→5→6、3段目は6段のため破棄
-    expect(rowsOf(g, 0).map((r) => [r.tick - t0, r.step, r.applied, r.firstApplied])).toEqual([
-      [120, 0, true, true],
-      [132, 1, true, false],
-      [144, 2, false, false],
-    ]);
-    expect(g.players[0].board.height()).toBe(6);
-    expect(g.players[0].attackStock).toBe(2); // 後続波の分は保持
-    stepN(g, 140);
-    expect(rowsOf(g, 0).slice(3).map((r) => r.applied)).toEqual([false, false]);
-    expect(g.players[0].attackStock).toBe(0);
-    expect(g.players[0].board.height()).toBe(6);
-    g.step([atk(1, 25)]);
-    g.step([atk(1, 10)]);
-    expect(g.players[1].attackStock).toBe(29);
-  });
-
-  it('自分の役処理中も待ち時間は経過し、波の開始は処理終了まで待機。終了時に予約して1段ずつ適用', () => {
-    const g = makeGame({ boards: { 0: rows(5), 1: EMPTY } });
-    setStock(g, 0, '1s', '2s', '3s', '4s');
-    toPlay(g);
-    g.step([atk(0, 10)]);
-    const due = g.tick + 120;
-    g.step([cmd(0, 'declare')]);
-    stepN(g, 400);
-    const end = evs(g.events, 'roleEnd')[0].tick;
-    expect(end).toBeGreaterThan(due);
-    // 相殺：攻撃力3で待機6を相殺 → 残4。消去4ラインで盤面1段 → 3段を0/200/400msで適用
-    const step = g.ticks(200);
-    expect(attackRises(g, 0).map((w) => w.tick - end)).toEqual([0, step, 2 * step, g.ticks(2000)]);
-    // 第2波は第1波の開始から2秒後（残り1段）
-    expect(g.players[0].board.height()).toBe(5);
-    expect(g.players[0].attackStock).toBe(0);
-  });
-
-  it('開始済みの波の途中で役処理が始まったら次段を保留し、終了後に200ms以上の間隔で再開（同一tickへ詰め込まない）', () => {
-    const g = makeGame({ boards: { 0: rows(2), 1: EMPTY } });
-    toPlay(g);
-    g.step([atk(0, 3)]);
-    stepN(g, 120); // 第1波の1段目が適用された直後
-    expect(rowsOf(g, 0)).toHaveLength(1);
-    setStock(g, 0, '1s', '2s', '3s', '4s');
-    g.step([cmd(0, 'declare')]);
-    stepN(g, 500);
-    const end = evs(g.events, 'roleEnd')[0].tick;
-    const rws = rowsOf(g, 0);
-    expect(rws).toHaveLength(3);
-    expect(rws[1].tick).toBeGreaterThanOrEqual(end);
-    expect(rws[2].tick - rws[1].tick).toBe(g.ticks(200));
-    expect(rws[1].tick - rws[0].tick).toBeGreaterThanOrEqual(g.ticks(200));
-    // 被攻撃の初段フラグは波につき1回
-    expect(rws.filter((r) => r.firstApplied)).toHaveLength(1);
-  });
-
-  it('波の予約後に受信した攻撃は相殺の対象（予約済みの段は相殺しない）。既存の計算順を変えない', () => {
-    const g = makeGame({ boards: { 0: rows(1), 1: EMPTY } });
-    toPlay(g);
-    g.step([atk(0, 4)]);
-    stepN(g, 120); // 第1波開始：3段予約、待機1
-    expect(g.players[0].attackStock).toBe(1);
-    expect(g.players[0].wave?.remaining).toBe(2);
-    setStock(g, 0, '1s', '2s', '3s', '4s');
-    g.step([cmd(0, 'declare')]);
-    stepN(g, 300);
-    const a = evs(g.events, 'attack')[0];
-    expect(a.counter).toEqual({ usedPower: 1, canceled: 1, sent: 2, discarded: 1 });
-    // 予約済みの残り2段は役処理後に適用される
-    expect(rowsOf(g, 0)).toHaveLength(3);
-  });
-
-  it('勝敗確定後は予約中の段・波を進めない。次のラウンドへ前ラウンドの攻撃は持ち越さない', () => {
-    const quick = { naturalRiseIntervalMs: 1000, dangerGraceMs: 200 };
-    const m = new Match({ firstTo: 2, difficulty: 'normal', seed: 5, config: quick });
-    const g0 = m.game as Game;
-    for (let i = 0; i < 300; i++) m.step(g0.playing && i === 80 ? [atk(1, 9)] : []);
-    for (let i = 0; i < 3000 && m.state === 'round'; i++) m.step(g0.playing ? [cmd(0, 'manualRise')] : []);
-    expect(m.state).toBe('roundResult');
-    const n = g0.events.length;
-    for (let i = 0; i < 200; i++) m.step([]);
-    expect(g0.events.length).toBe(n);
-    for (let i = 0; i < 60; i++) m.step([], true);
-    const g1 = m.game as Game;
-    expect(g1).not.toBe(g0);
-    expect(g1.players.map((p) => [p.attackStock, p.wave])).toEqual([
-      [0, null],
-      [0, null],
-    ]);
-  });
-
-  it('低FPS・大きいtick刻みでも段の順序と時刻は変わらない（固定ステップ）', () => {
-    const run = () => {
-      const g = makeGame({ boards: { 0: rows(2) } });
-      toPlay(g);
-      g.step([atk(0, 7)]);
-      stepN(g, 600);
-      return rowsOf(g, 0).map((r) => [r.tick, r.step, r.applied]);
-    };
-    expect(run()).toEqual(run());
   });
 });
 

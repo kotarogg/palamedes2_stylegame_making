@@ -56,7 +56,7 @@ describe('描画FPSに依存しない', () => {
     const r144 = run(() => 1000 / 144, true);
     const jitter = createSeededRng(9);
     const rj = run(() => 2 + jitter.next() * 60, true);
-    expect(base.events).toBeGreaterThan(100);
+    expect(base.events).toBeGreaterThan(50); // 実際に操作・攻撃が起きていること（件数は受攻撃イベントの再設計で変化）
     for (const r of [r30, r144, rj]) {
       expect(r.snap).toBe(base.snap);
       expect(r.events).toBe(base.events);

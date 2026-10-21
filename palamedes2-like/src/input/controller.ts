@@ -7,6 +7,8 @@ export interface Controller {
   readonly player: PlayerId;
   /** 次のtickで適用するコマンドを返す（呼ばれるたびに消費） */
   poll(game: AnyGame): Command[];
+  /** 新ラウンド・再戦・次の相手の開始時：前のゲームの入力・計画・時刻を持ち越さない（B1） */
+  reset?(): void;
 }
 
 export const ACTIONS: readonly Action[] = ['left', 'right', 'launch', 'rotate', 'declare', 'manualRise'];
@@ -169,6 +171,10 @@ export class KeyboardController implements Controller {
     this.queue = [];
   }
 
+  reset(): void {
+    this.queue = [];
+  }
+
   poll(): Command[] {
     const out = this.queue.map((type) => ({ player: this.player, type }));
     this.queue = [];
@@ -221,6 +227,17 @@ export class GamepadController implements Controller {
 
   get connected(): boolean {
     return this.source(this.padIndex) !== null;
+  }
+
+  /** 押下中のボタンは「押したまま」として扱い（新しい押下にしない）、リピートと決定・STARTの要求は持ち越さない */
+  reset(): void {
+    const t = this.now();
+    for (const a of ACTIONS) {
+      this.holdStart.set(a, t);
+      this.lastRepeat.set(a, t);
+    }
+    this.startPressed = false;
+    this.confirmPressed = false;
   }
 
   poll(): Command[] {
