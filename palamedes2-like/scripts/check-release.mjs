@@ -65,9 +65,15 @@ const extra = [...walk('gfx'), ...walk('assets/audio'), ...walk('data'), ...walk
 check('一覧外の画像・音声・フォント・JSON（旧版スプライト・旧SE・試聴音源など）を同梱しない', extra.length === 0, extra.slice(0, 8).join(', '));
 
 const html = existsSync(join(dir, 'index.html')) ? readFileSync(join(dir, 'index.html'), 'utf8') : '';
-const refs = [...html.matchAll(/src="\.?\/?(assets\/index-[\w-]+\.js)"/g)].map((m) => m[1]);
-const jsFiles = existsSync(join(dir, 'assets')) ? readdirSync(join(dir, 'assets')).filter((f) => /^index-.*\.js$/.test(f)) : [];
-check('index.html が参照するビルド済みJSが実在し、旧ハッシュのJSが残っていない', refs.length === 1 && existsSync(join(dir, refs[0])) && jsFiles.length === 1 && `assets/${jsFiles[0]}` === refs[0], `参照=${refs.join(',')} 実在=${jsFiles.join(',')}`);
+// 第3版：配布JSは圧縮・分割（入口1＋モジュール）。index.html が参照するJSがすべて実在し、参照されないJS（旧ハッシュ）が残っていない
+const refs = [...html.matchAll(/(?:src|href)="\.?\/?(assets\/[\w-]+\.js)"/g)].map((m) => m[1]);
+const entry = [...html.matchAll(/<script[^>]+src="\.?\/?(assets\/index-[\w-]+\.js)"/g)].map((m) => m[1]);
+const jsFiles = existsSync(join(dir, 'assets')) ? readdirSync(join(dir, 'assets')).filter((f) => f.endsWith('.js')).map((f) => `assets/${f}`) : [];
+check(
+  'index.html が参照するビルド済みJS（入口1＋分割モジュール）がすべて実在し、参照されないJS（旧ハッシュ）が残っていない',
+  entry.length === 1 && refs.every((r) => existsSync(join(dir, r))) && jsFiles.length === new Set(refs).size && jsFiles.every((f) => refs.includes(f)),
+  `参照=${[...new Set(refs)].join(',')} 実在=${jsFiles.join(',')}`,
+);
 const launch = ['start-windows.bat', 'serve.mjs', 'README_PLAY.md', 'start-mac-linux.sh'];
 check('起動ファイル（start-windows.bat・serve.mjs・README_PLAY.md・start-mac-linux.sh）を同梱', launch.every((f) => existsSync(join(dir, f)) && statSync(join(dir, f)).size > 0), launch.filter((f) => !existsSync(join(dir, f))).join(','));
 const bat = existsSync(join(dir, 'start-windows.bat')) ? readFileSync(join(dir, 'start-windows.bat')) : Buffer.alloc(0);
