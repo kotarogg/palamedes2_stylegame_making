@@ -1,42 +1,57 @@
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { layoutAttackIcons } from '../src/core/attack';
+import { normalizeManifest } from '../src/view/data';
 import { barY, cellX, columnCenterX, Z } from '../src/view/geometry';
-import { atlas, layout, layoutData, manifest, ROOT } from './helpers';
+import { CARGO_CHECK } from './fixtures';
+import { atlas, layout, layoutData, loadingList, manifest, rawManifest, ROOT } from './helpers';
 
 function pngSize(buf: Buffer): [number, number] {
   expect(buf.subarray(1, 4).toString('ascii')).toBe('PNG');
   return [buf.readUInt32BE(16), buf.readUInt32BE(20)];
 }
 
-describe('採用グラフィック v2.3（12シート＋メニュー背景）とマニフェスト', () => {
-  const m = manifest();
+const gfx = (rel: string) => new URL(`public/gfx/${rel}`, ROOT);
 
-  it('13枚の実PNG（12シート＋BG_MENU）がマニフェストの寸法・SHA-256と一致', () => {
-    expect(m.version).toBe('2.3');
-    expect(m.sheets.map((s) => s.id)).toEqual(['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'S10', 'S11', 'S12']);
-    for (const s of m.sheets) {
-      const buf = readFileSync(new URL(`public/assets/sprites/${s.file}`, ROOT));
-      expect(pngSize(buf), s.file).toEqual([s.width, s.height]);
-      expect(createHash('sha256').update(buf).digest('hex'), s.file).toBe(s.sha256);
+describe('第3版 採用グラフィック（graphics_manifest_v3：14シート＋単独画像35＝49PNG）', () => {
+  const raw = rawManifest();
+  const list = loadingList();
+
+  it('49枚の実PNGがマニフェストの寸法・SHA-256と一致し、明示読込一覧と過不足なく対応する', () => {
+    const entries = [
+      ...raw.sheets.map((s) => ({ file: s.file, w: s.w, h: s.h, sha: s.sha256 })),
+      ...raw.standalone_assets.map((a) => ({ file: a.file, w: a.dimensions[0], h: a.dimensions[1], sha: (a as unknown as { sha256: string }).sha256 })),
+    ];
+    expect(entries).toHaveLength(49);
+    for (const e of entries) {
+      const buf = readFileSync(gfx(e.file));
+      expect(pngSize(buf), e.file).toEqual([e.w, e.h]);
+      expect(createHash('sha256').update(buf).digest('hex'), e.file).toBe(e.sha);
     }
-    const bg = readFileSync(new URL('public/assets/sprites/menu_background.png', ROOT));
-    expect(pngSize(bg)).toEqual([640, 360]);
-    // 採用資料 asset_inventory_graphics_v1.json 記載値
-    expect(createHash('sha256').update(bg).digest('hex')).toBe('ca9c269216a61ddeea0c4040e01448968f990402342cfa1820a07e51c17dae97');
+    const pngs = list.files.filter((f) => f.endsWith('.png'));
+    expect([...pngs].sort()).toEqual(entries.map((e) => e.file).sort());
+    // 一覧外のPNGを同梱しない（旧版・見本を混ぜない）
+    const onDisk = [...readdirSync(gfx('assets')).filter((f) => f.endsWith('.png')).map((f) => `assets/${f}`), ...readdirSync(gfx('assets/legacy')).map((f) => `assets/legacy/${f}`)];
+    expect(onDisk.sort()).toEqual([...pngs].sort());
   });
 
-  it('454矩形（v2.3）がすべてシート内に収まり、シート内で重複しない', () => {
-    expect(m.frames).toHaveLength(454);
-    const counts: Record<string, number> = {};
+  it('再利用の9シート（S4〜S12）は第2.3版の採用PNGとバイト同一', () => {
+    for (const [id, sha] of Object.entries(CARGO_CHECK.legacySha256)) expect(raw.sheets.find((s) => s.id === id)?.sha256, id).toBe(sha);
+  });
+
+  it('明示読込一覧：一覧外の画像は読み込まない（エラー）。フォントは一覧に含まれる', () => {
+    expect(list.files).toContain('fonts/NotoSansJP-VF.ttf');
+    expect(list.exclude).toEqual(expect.arrayContaining(['previews/**', '*.zip']));
+    expect(() => normalizeManifest({ ...raw, sheets: [...raw.sheets, { id: 'X', file: 'assets/old.png', w: 1, h: 1, sha256: '' }] }, list)).toThrow(/loading list/);
+  });
+
+  it('全矩形がシート内に収まり、シート内で重複しない', () => {
+    const m = manifest();
     for (const f of m.frames) {
       const s = m.sheets.find((x) => x.id === f.sheet)!;
       expect(f.x >= 0 && f.y >= 0 && f.x + f.w <= s.width && f.y + f.h <= s.height, `${f.sheet}/${f.id}`).toBe(true);
-      counts[f.sheet] = (counts[f.sheet] ?? 0) + 1;
     }
-    expect(counts).toEqual({ S1: 30, S2: 30, S3: 25, S4: 48, S5: 69, S6: 52, S7: 48, S8: 28, S9: 72, S10: 10, S11: 6, S12: 36 });
-    for (const sheet of Object.keys(counts)) {
+    for (const sheet of new Set(m.frames.map((f) => f.sheet))) {
       const fs = m.frames.filter((f) => f.sheet === sheet);
       for (let i = 0; i < fs.length; i++)
         for (let j = i + 1; j < fs.length; j++) {
@@ -48,61 +63,81 @@ describe('採用グラフィック v2.3（12シート＋メニュー背景）と
     }
   });
 
-  it('S1/S2 は48×56・slot式どおり。予備枠は通常アニメーションに含めない', () => {
+  it('キャラ3人（S1 コタロー・S2 アカネ・S13 ずん子）は同じ7モーション30枠・48×56・原点(24,55)。入替ポーズ attack_01', () => {
     const A = atlas();
-    for (const sheet of ['S1', 'S2']) {
+    const m = manifest();
+    for (const sheet of ['S1', 'S2', 'S13']) {
+      expect(m.frames.filter((f) => f.sheet === sheet)).toHaveLength(30);
       for (const f of m.frames.filter((x) => x.sheet === sheet)) {
-        expect([f.x, f.y, f.w, f.h]).toEqual([(f.slot! % 5) * 48, Math.floor(f.slot! / 5) * 56, 48, 56]);
+        expect([f.w, f.h]).toEqual([48, 56]);
+        expect(f.origin).toEqual([24, 55]);
       }
-      for (const name of ['idle', 'walk', 'launch', 'attack', 'win', 'lose_fall'])
-        expect(A.animation(sheet, name).every((f) => !f.reserved)).toBe(true);
-      expect(A.animation(sheet, 'attack').map((f) => f.slot)).toEqual([12, 13, 14, 15]);
+      const counts = Object.fromEntries(['idle', 'walk', 'launch', 'attack', 'win', 'lose_fall', 'fail_declare'].map((n) => [n, A.animation(sheet, n).length]));
+      expect(counts).toEqual({ idle: 4, walk: 4, launch: 4, attack: 4, win: 6, lose_fall: 4, fail_declare: 4 });
+      expect(() => A.frame(sheet, 'attack_01')).not.toThrow();
+      // 推奨時間（マニフェスト記載）：待機220・移動90・発射70・攻撃110・勝利140・敗北160、失敗110/120/180/150
+      expect(m.recommended_timing?.[`${sheet}/lose_fall`]?.durations_ms).toEqual([160, 160, 160, 160]);
+      expect(m.recommended_timing?.[`${sheet}/fail_declare`]?.durations_ms).toEqual([110, 120, 180, 150]);
     }
+    expect((rawManifest() as unknown as { swap_pose_alias: Record<string, string> }).swap_pose_alias).toEqual({ S1: 'attack_01', S2: 'attack_01', S13: 'attack_01' });
   });
 
-  it('S4：通常32×32は(0,0)起点、小型24×24は Y=96 起点、数字昇順・♠♦♣♥', () => {
+  it('ネコタロー（S3）：8アニメーション、クラッカー4コマ×220ms', () => {
+    const A = atlas();
+    for (const name of ['idle', 'ready', 'start', 'cracker', 'joy', 'surprise', 'panic', 'sad']) expect(A.animation('S3', name).length).toBeGreaterThan(0);
+    expect(A.animation('S3', 'cracker')).toHaveLength(4);
+    expect(manifest().recommended_timing?.['S3/cracker']?.durations_ms).toEqual([220, 220, 220, 220]);
+  });
+
+  it('受攻撃ストック素材：大16×16・小8×8（XD顔あり）、処理中枠22×22、小爆発4コマ（24×24・12×12）、反射光3コマ32×32', () => {
+    const A = atlas();
+    for (const [id, w] of [['attack_stock_nekotaro_large', 16], ['attack_stock_nekotaro_large_xd', 16], ['attack_stock_nekotaro_small', 8], ['attack_stock_nekotaro_small_xd', 8], ['attack_stock_active_frame', 22], ['attack_stock_active_frame_bright', 22]] as const)
+      expect(A.frame(id, '0')).toMatchObject({ w, h: w });
+    for (let i = 0; i < 4; i++) {
+      expect(A.frame('attack_stock_cancel_burst_sheet', String(i))).toMatchObject({ x: 24 * i, w: 24, h: 24 });
+      expect(A.frame('attack_stock_cancel_burst_small_sheet', String(i))).toMatchObject({ x: 12 * i, w: 12, h: 12 });
+    }
+    for (let i = 0; i < 3; i++) expect(A.frame('role_piece_reflection_sheet', String(i))).toMatchObject({ x: 32 * i, w: 32, h: 32 });
+  });
+
+  it('描画で使う全フレームIDがマニフェストに存在する（S4〜S12の既存IDを含む）', () => {
     const A = atlas();
     let i = 0;
     for (const n of [1, 2, 3, 4, 5, 6])
       for (const suit of ['spade', 'diamond', 'club', 'heart'] as const) {
         expect(A.piece(n, suit)).toMatchObject({ x: (i % 8) * 32, y: Math.floor(i / 8) * 32, w: 32, h: 32 });
-        expect(A.piece(n, suit, true)).toMatchObject({ x: (i % 8) * 24, y: 96 + Math.floor(i / 8) * 24, w: 24, h: 24 });
+        expect(A.piece(n, suit, true)).toMatchObject({ w: 24, h: 24 });
         i++;
       }
-  });
-
-  it('S7：16役×A/B/C、1枠160×64、役ブロック式どおり', () => {
-    const A = atlas();
-    for (let i = 0; i < 16; i++)
-      (['A', 'B', 'C'] as const).forEach((fr, k) => {
-        expect(A.role(i, fr)).toMatchObject({ x: (i % 4) * 160, y: Math.floor(i / 4) * 192 + 64 * k, w: 160, h: 64 });
-      });
-  });
-
-  it('描画で使う全フレームIDがマニフェストに存在する', () => {
-    const A = atlas();
-    const s5 = ['panel_fill_dark', 'panel_edge_h', 'panel_edge_v', 'panel_corner_tl', 'panel_corner_tr', 'panel_corner_bl', 'panel_corner_br', 'multiplier_panel', 'chain_bar_frame', 'win_count_frame_3', 'p1_badge', 'p2_badge', 'base_piece_frame', 'attack_icon_big', 'attack_icon_small', 'banner_ready', 'banner_go'];
-    for (const id of s5) expect(() => A.frame('S5', id)).not.toThrow();
-    const s6 = ['launch_fx_1', 'launch_fx_4', 'hit_base_fx_1', 'hit_base_fx_2', 'bounce_fx_1', 'bounce_fx_3', 'return_fx_1', 'return_fx_2'];
-    for (const size of [4, 6]) for (const k of ['back', 'front']) for (const ab of ['a', 'b']) s6.push(`role_glow_${size}_${k}_${ab}`);
-    for (const id of s6) expect(() => A.frame('S6', id)).not.toThrow();
-    for (const name of ['idle', 'ready', 'start', 'joy', 'panic']) expect(A.animation('S3', name).length).toBeGreaterThan(0);
-    // 第1版で追加したS8〜S12
-    const s8 = ['settings_panel', 'help_panel', 'field_frame', 'result_panel', 'info_panel', 'confirmation_panel', 'mode_count_panel', 'menu_item_normal', 'menu_item_selected', 'role_stock_frame', 'focus_ring', 'mode_badge', 'keycap_wide', 'keycap', 'pad_button', 'slider_knob', 'slider_rail', 'slider_fill', 'arrow_left', 'arrow_right', 'selection_cursor'];
-    for (const id of s8) expect(() => A.frame('S8', id)).not.toThrow();
+    for (let r = 0; r < 16; r++) for (const fr of ['A', 'B', 'C'] as const) expect(A.role(r, fr)).toMatchObject({ w: 160, h: 64 });
+    for (const id of ['base_piece_frame', 'win_count_frame_3', 'win_count_slot_empty', 'win_count_slot_fill', 'win_count_slot_flash']) expect(() => A.frame('S5', id)).not.toThrow();
+    for (const id of ['launch_fx_1', 'hit_base_fx_1', 'bounce_fx_1', 'return_fx_1', 'line_send_fx_1', 'vanish_fx_1']) expect(() => A.frame('S6', id)).not.toThrow();
     const banners = ['ready', 'go', 'win', 'lose', 'draw', 'result', 'game_over', 'stage_clear', 'all_clear', 'level_up', 'max', 'all_stages_complete', 'countdown_3', 'countdown_2', 'countdown_1'];
     for (const b of banners) for (const ph of ['A', 'B', 'C']) expect(() => A.frame('S9', `show_${b}_${ph}`)).not.toThrow();
     for (const name of ['card_refresh', 'line_clear', 'danger_border']) expect(A.animation('S10', name).length).toBeGreaterThan(0);
-    for (const id of ['player_frame_p1', 'player_frame_p2', 'center_info_frame', 'timer_fill_safe', 'timer_fill_warn', 'timer_fill_danger']) expect(() => A.frame('S11', id)).not.toThrow();
+    for (const id of ['timer_fill_safe', 'timer_fill_warn', 'timer_fill_danger']) expect(() => A.frame('S11', id)).not.toThrow();
     for (const ph of ['A', 'B', 'C']) for (const ch of ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'times', 'dot']) expect(() => A.frame('S12', `display_${ch}_${ph}`)).not.toThrow();
+    for (const id of ['arrow_left', 'arrow_right', 'slider_rail', 'slider_fill', 'slider_knob', 'keycap', 'pad_button', 'dpad', 'left_stick', 'input_waiting']) expect(() => A.frame('CTRL', id)).not.toThrow();
+    const single = ['background_common', 'board_frame_mode2', 'count_panel', 'stock_frame', 'info_panel', 'player_frame_p1', 'player_frame_p2', 'reading_panel', 'dialog_panel', 'menu_item_normal', 'menu_item_selected', 'options_row_normal', 'options_row_selected', 'title_logo', 'title_kotaro_nekotaro', 'input_hint', 'cursor_1p_focus', 'cursor_2p_focus', 'selection_locked'];
+    for (const c of ['kotaro', 'akane', 'zunko']) single.push(`menu_${c}`, `icon_${c}`);
+    for (const id of single) expect(() => A.frame(id, id)).not.toThrow();
+    expect(A.frame('menu_kotaro', 'menu_kotaro').origin).toEqual([72, 167]);
+    expect(A.frame('title_kotaro_nekotaro', 'title_kotaro_nekotaro').origin).toEqual([108, 287]);
+  });
+
+  it('フォントの許諾文（OFL）とデータ（font_styles・credits_text）を同梱。フォント本体はビルド時に配置する（gitには含めない）', () => {
+    expect(existsSync(gfx('fonts/OFL.txt'))).toBe(true);
+    const fs = JSON.parse(readFileSync(gfx('data/font_styles.json'), 'utf8'));
+    expect(fs).toMatchObject({ family: 'Noto Sans JP', file: 'fonts/NotoSansJP-VF.ttf', body: { size: 12, weight: 600 }, heading: { size: 18, weight: 700 } });
+    const cr = JSON.parse(readFileSync(gfx('data/credits_text.json'), 'utf8'));
+    expect(Object.keys(cr.links)).toEqual(['YouTube', 'X', 'SUNO']);
   });
 });
 
-describe('画面座標（screen_layout_v2.json graphics-v1-r2）', () => {
+describe('画面座標（screen_layout_v2.json：盤面・ストック・UI座標は変更しない）', () => {
   const L = layout();
 
   it('論理640×360、盤面6列×7段・32pxセル', () => {
-    expect(layoutData().revision).toBe('graphics-v1-r2-20261019');
     expect(layoutData().canvas).toEqual({ w: 640, h: 360 });
     for (const p of [0, 1] as const) {
       const b = L.pRect(p, 'board');
@@ -117,6 +152,16 @@ describe('画面座標（screen_layout_v2.json graphics-v1-r2）', () => {
     expect(L.pRect(1, 'board')).toMatchObject({ x: 384, y: 128 });
   });
 
+  it('盤面枠：player_frame の内側に盤面（1P (16,8)、2P (8,8)）。MODE1役ストック／MODE2残数は (64,32)／(384,32)', () => {
+    const vf1 = L.rect('p1_visual_frame');
+    const vf2 = L.rect('p2_visual_frame');
+    expect([L.pRect(0, 'board').x - vf1.x, L.pRect(0, 'board').y - vf1.y]).toEqual([16, 8]);
+    expect([L.pRect(1, 'board').x - vf2.x, L.pRect(1, 'board').y - vf2.y]).toEqual([8, 8]);
+    expect((rawManifest() as unknown as { shared_stock_count_regions: unknown }).shared_stock_count_regions).toEqual({ p1: [64, 32, 192, 32], p2: [384, 32, 192, 32] });
+    expect(L.pRect(0, 'stock_background')).toMatchObject({ x: 64, y: 32, w: 192, h: 32 });
+    expect(L.pRect(1, 'stock_background')).toMatchObject({ x: 384, y: 32, w: 192, h: 32 });
+  });
+
   it('キャラ列中心X：1P 80〜240、2P 400〜560。足場Yは7段で盤面上端', () => {
     const b1 = L.pRect(0, 'board');
     const b2 = L.pRect(1, 'board');
@@ -126,13 +171,11 @@ describe('画面座標（screen_layout_v2.json graphics-v1-r2）', () => {
     expect(barY(b1, 7)).toBe(128);
   });
 
-  it('主要UI座標（統合仕様12.2）', () => {
+  it('主要UI座標', () => {
     expect(L.rect('base_frame')).toMatchObject({ x: 294, y: 40, w: 48, h: 48 });
     expect(L.rect('base_piece')).toMatchObject({ x: 302, y: 48, w: 32, h: 32 });
     expect(L.rect('mascot')).toMatchObject({ x: 298, y: 296 });
-    // v2.3：S9正式演出を原寸160×64で表示
     expect(L.rect('ready_banner')).toMatchObject({ x: 240, y: 144, w: 160, h: 64 });
-    expect(L.rect('go_banner')).toMatchObject({ x: 240, y: 144, w: 160, h: 64 });
     for (let i = 0; i < 6; i++) {
       expect(L.pRect(0, `stock_${i}`)).toMatchObject({ x: 66 + 24 * i, y: 36, w: 24, h: 24 });
       expect(L.pRect(1, `stock_${i}`)).toMatchObject({ x: 386 + 24 * i, y: 36, w: 24, h: 24 });
@@ -147,43 +190,5 @@ describe('画面座標（screen_layout_v2.json graphics-v1-r2）', () => {
     expect(Z.character < Z.returning && Z.roleName < Z.returning && Z.returning < Z.launching).toBe(true);
     expect(Z.darkPiece < Z.piece).toBe(true);
     expect(Z.ui < Z.glowBack && Z.glowBack < Z.character && Z.character < Z.glowFront).toBe(true);
-  });
-});
-
-describe('攻撃アイコン表示 0〜29（左5・右4、大2・小9）', () => {
-  const L = layout();
-  const rules = L.attackRules();
-
-  it('全30状態の個数・配置・下端', () => {
-    for (const p of [0, 1] as const) {
-      const [ox, oy] = L.attackOrigin(p);
-      expect([ox, oy]).toEqual(p === 0 ? [256, 128] : [352, 128]);
-      for (let n = 0; n <= 29; n++) {
-        const r = layoutAttackIcons(n, [ox, oy], rules);
-        expect(r.big).toHaveLength(Math.floor(n / 10));
-        expect(r.small).toHaveLength(n % 10);
-        r.big.forEach((b, i) => expect(b).toEqual({ x: ox, y: oy + 32 * i }));
-        r.small.forEach((s, i) => {
-          const left = i < 5;
-          expect(s.x).toBe(ox + (left ? 0 : 16));
-          expect(s.y).toBe(oy + 32 * r.big.length + 16 * (left ? i : i - 5));
-        });
-        const bottom = Math.max(oy, ...r.big.map((b) => b.y + 24), ...r.small.map((s) => s.y + 16));
-        expect(bottom).toBeLessThanOrEqual(272);
-        // 盤面と重ならない（1P盤面右端256以上、2P盤面左端384以下）
-        const right = Math.max(...r.big.map((b) => b.x + 24), ...r.small.map((s) => s.x + 16), ox);
-        expect(ox >= 256 && right <= 384).toBe(true);
-      }
-    }
-  });
-
-  it('15ラインは大1＋左列小5、29ラインは大2＋小9で下端272', () => {
-    const r15 = layoutAttackIcons(15, [256, 128], rules);
-    expect(r15.big).toHaveLength(1);
-    expect(r15.small.map((s) => s.x)).toEqual([256, 256, 256, 256, 256]);
-    const r29 = layoutAttackIcons(29, [256, 128], rules);
-    expect(r29.big).toHaveLength(2);
-    expect(r29.small).toHaveLength(9);
-    expect(Math.max(...r29.small.map((s) => s.y + 16))).toBe(272);
   });
 });

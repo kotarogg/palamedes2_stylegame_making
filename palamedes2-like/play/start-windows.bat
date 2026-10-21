@@ -1,5 +1,5 @@
 @echo off
-rem palamedes2-like first edition RC: start a local HTTP server and open the browser (Node.js 18+ required).
+rem Kotaro-kun Puzzle v3.0.0-rc1: start a local HTTP server and open the browser (Node.js 18+ required).
 rem If port 8080 is busy, the next free port (8081-8090) is used automatically.
 cd /d "%~dp0"
 where node >nul 2>nul

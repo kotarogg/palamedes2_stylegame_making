@@ -1,7 +1,7 @@
-// プレイ版フォルダの納品検査（ブラウザ不要）。必須素材（画像13・JSON3・音声79）の実在・サイズ・SHA-256・WAVヘッダ、
+// プレイ版フォルダの納品検査（ブラウザ不要）。第3版の必須素材（画像49・JSON5・フォント・音声114）の実在・サイズ・SHA-256・WAVヘッダ、
 // index.html が参照するビルド済みJSの実在、使われない旧ハッシュJSが残っていないこと、起動ファイルの同梱を確認する。
 // 使い方: node scripts/check-release.mjs <プレイ版フォルダ> [--allow-missing-bgm]
-//   --allow-missing-bgm は開発用のフォールバック検査（BGM 3本の未配置だけを許容）。納品合格の判定には使わない。
+//   --allow-missing-bgm は開発用のフォールバック検査（BGM 3本と採用フォントの未配置だけを許容）。納品合格の判定には使わない。
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -38,7 +38,7 @@ const bad = [];
 let missingBgm = 0;
 for (const f of expected) {
   const p = join(dir, f.path);
-  const isBgm = f.path.startsWith('assets/audio/bgm/');
+  const isBgm = f.path.startsWith('assets/audio/bgm/') || f.path === 'gfx/fonts/NotoSansJP-VF.ttf';
   if (!existsSync(p)) {
     if (isBgm) missingBgm++;
     if (!(isBgm && allowMissingBgm)) bad.push(`${f.path}: なし`);
@@ -54,10 +54,15 @@ for (const f of expected) {
 }
 const n = (pre) => expected.filter((f) => f.path.startsWith(pre)).length;
 check(
-  `${allowMissingBgm ? '［フォールバック］' : '［納品］'}必須素材 画像${n('assets/sprites/')}・JSON${n('data/')}・音声${n('assets/audio/')}（BGM${n('assets/audio/bgm/')}・SE${n('assets/audio/sfx/')}・ボイス${n('assets/audio/voice/')}）の実在・サイズ・SHA-256・WAVヘッダ`,
+  `${allowMissingBgm ? '［フォールバック］' : '［納品］'}必須素材 画像${n('gfx/assets/')}・JSON${expected.filter((f) => f.path.endsWith('.json')).length}・フォント1・音声${n('assets/audio/')}（BGM${n('assets/audio/bgm/')}・SE${n('assets/audio/sfx/')}・ボイス${n('assets/audio/voice/')}）の実在・サイズ・SHA-256・WAVヘッダ`,
   bad.length === 0,
-  bad.length ? bad.slice(0, 8).join(' / ') : allowMissingBgm && missingBgm ? `BGM未配置${missingBgm}本を許容` : '全件一致',
+  bad.length ? bad.slice(0, 8).join(' / ') : allowMissingBgm && missingBgm ? `BGM・フォント未配置${missingBgm}件を許容` : '全件一致',
 );
+// 旧版・試聴・原音を本番へ混ぜない：一覧にない画像・音声・フォントが無いこと
+const listed = new Set(expected.map((f) => f.path));
+const walk = (d) => (existsSync(join(dir, d)) ? readdirSync(join(dir, d), { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : [`${d}/${e.name}`])) : []);
+const extra = [...walk('gfx'), ...walk('assets/audio'), ...walk('data'), ...walk('assets/sprites')].filter((p) => /\.(png|wav|ttf|json|ogg|mp3)$/.test(p) && !listed.has(p));
+check('一覧外の画像・音声・フォント・JSON（旧版スプライト・旧SE・試聴音源など）を同梱しない', extra.length === 0, extra.slice(0, 8).join(', '));
 
 const html = existsSync(join(dir, 'index.html')) ? readFileSync(join(dir, 'index.html'), 'utf8') : '';
 const refs = [...html.matchAll(/src="\.?\/?(assets\/index-[\w-]+\.js)"/g)].map((m) => m[1]);

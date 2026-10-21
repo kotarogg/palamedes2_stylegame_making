@@ -1,75 +1,270 @@
 {
- "about": "プレイ版の必須素材（画像13・JSON3・音声79）。scripts/check-release.mjs が照合する",
+ "about": "第3版プレイ版の必須素材（画像49・JSON5・フォント・OFL・音声114）。scripts/check-release.mjs が照合する",
  "files": [
   {
-   "path": "assets/sprites/announcements_sheet.png",
+   "path": "gfx/assets/akane_sheet.png",
+   "size": 87700,
+   "sha256": "77bc79bc66d7296ce2faaac164651a1c1ffa442cbcb89e49138b42e02cb665fd"
+  },
+  {
+   "path": "gfx/assets/attack_stock_active_frame.png",
+   "size": 129,
+   "sha256": "9a99fbe69470becf3c26667567d983a3b8d46cb6f7417b68d71a39d989c93ccb"
+  },
+  {
+   "path": "gfx/assets/attack_stock_active_frame_bright.png",
+   "size": 129,
+   "sha256": "da9ac7074ece3771e2bc84a4868d0d3195686a55b66b5f0a54e95f8127b693d7"
+  },
+  {
+   "path": "gfx/assets/attack_stock_cancel_burst_sheet.png",
+   "size": 417,
+   "sha256": "d5017be8f971af8e394daf3f22fe14daf951a5cf70d79fa9a66f6bc95bae857c"
+  },
+  {
+   "path": "gfx/assets/attack_stock_cancel_burst_small_sheet.png",
+   "size": 256,
+   "sha256": "6a89802a9d25f0d6f3ff971237f55f77951265fb4588fe53126a96152213e0f5"
+  },
+  {
+   "path": "gfx/assets/attack_stock_nekotaro_large.png",
+   "size": 333,
+   "sha256": "76edadbb9a738e7cb6ae5084008762dc516981237fd76a8447bf9b6b7dc66996"
+  },
+  {
+   "path": "gfx/assets/attack_stock_nekotaro_large_xd.png",
+   "size": 334,
+   "sha256": "d910e08284958f342f64932ecd8b5a5451aa4895c74bcfe160b8e12c272c01c9"
+  },
+  {
+   "path": "gfx/assets/attack_stock_nekotaro_small.png",
+   "size": 158,
+   "sha256": "aa2b2c6b61cab351612643b91f7bfe03acd1d3b03c96e274937d0aa0ff68239e"
+  },
+  {
+   "path": "gfx/assets/attack_stock_nekotaro_small_xd.png",
+   "size": 161,
+   "sha256": "ba088f277eb9ee13a2f64bff003a346ff1606161e73153105eb422dea7f0f780"
+  },
+  {
+   "path": "gfx/assets/background_common.png",
+   "size": 59471,
+   "sha256": "e65bf513a45771788a4d7c78c55fe15eb14c9bdd8cf2cdee114c2f88deee9464"
+  },
+  {
+   "path": "gfx/assets/board_frame_mode2.png",
+   "size": 643,
+   "sha256": "301862e91640327b69b4bb4781fdbf3d943bbbc9441ab1af6079fa1adb7fc7b6"
+  },
+  {
+   "path": "gfx/assets/center_frame.png",
+   "size": 1166,
+   "sha256": "d46098deab8c1eb48fec10baf997e0c3f658ff0be36db6ec24aab45e5c70b0b7"
+  },
+  {
+   "path": "gfx/assets/controls_sheet.png",
+   "size": 844,
+   "sha256": "421ddddc697f11fbcd2704c41bcccafe64ef988929204e5cea66bb973e91e9dc"
+  },
+  {
+   "path": "gfx/assets/count_panel.png",
+   "size": 393,
+   "sha256": "96494f6b146e918ac0e9f73912943fe42649a2e29c72d8107aa342854c8a64f0"
+  },
+  {
+   "path": "gfx/assets/cursor_1p_focus.png",
+   "size": 265,
+   "sha256": "6b0eb374399fe576ac88c07892aa6b0d801be873ed7b3deb1b47a622b5abcb32"
+  },
+  {
+   "path": "gfx/assets/cursor_2p_focus.png",
+   "size": 256,
+   "sha256": "1b919841b22a792c1c31f54d342cac15e27f5baa38af8459871bd963a0a01710"
+  },
+  {
+   "path": "gfx/assets/dialog_panel.png",
+   "size": 478,
+   "sha256": "d4e14525fc1d8826274b205b0e1533076dda0e09447fa2c94dbff421c2fb054f"
+  },
+  {
+   "path": "gfx/assets/icon_akane.png",
+   "size": 4517,
+   "sha256": "c5f6a1bd8e5495eb2ed69c598d47ed65df3ea1397fd9e1197e4d0e9070f263b1"
+  },
+  {
+   "path": "gfx/assets/icon_kotaro.png",
+   "size": 3098,
+   "sha256": "37c9f4ca728b6f5d8560ade526c20b714fb296294ca38355979a6743da4e1ccd"
+  },
+  {
+   "path": "gfx/assets/icon_zunko.png",
+   "size": 3625,
+   "sha256": "2741c8a798117d8a10b6160f3540f48a915b7ddf0ce66501f5600f3e8806f76c"
+  },
+  {
+   "path": "gfx/assets/info_panel.png",
+   "size": 1476,
+   "sha256": "509732aebc94fba7be86ab36c592dee6d1e1a3f1f873aafc5fa3abb7b5242422"
+  },
+  {
+   "path": "gfx/assets/input_hint.png",
+   "size": 335,
+   "sha256": "d2db11214bd34271a8e5cee5e8998b259c2352263fcdecb91a66bb6faf7391dd"
+  },
+  {
+   "path": "gfx/assets/kotaro_sheet.png",
+   "size": 52366,
+   "sha256": "1b143f5b1ea1a3fa286ef44883d9e2df64b61b67e0cde15cc7b4e572ad94aea5"
+  },
+  {
+   "path": "gfx/assets/legacy/announcements_sheet.png",
    "size": 117431,
    "sha256": "acd728bac72d496734a8a98e67707562e16c665a6f51312b1b79c60f5a26fb45"
   },
   {
-   "path": "assets/sprites/display_numeric_sheet.png",
+   "path": "gfx/assets/legacy/display_numeric_sheet.png",
    "size": 11926,
    "sha256": "7a7586a355fb6fb3d53c806477702fc3273b0162f5e166b827d3c75fa0aa52aa"
   },
   {
-   "path": "assets/sprites/effects_sheet.png",
+   "path": "gfx/assets/legacy/effects_sheet.png",
    "size": 21142,
    "sha256": "eab8e0b7a5c44b9e95ac2dd22d41576be9e61145c0efc544356b009553fd19c6"
   },
   {
-   "path": "assets/sprites/gameplay_frames_sheet.png",
+   "path": "gfx/assets/legacy/gameplay_frames_sheet.png",
    "size": 53266,
    "sha256": "ae89e2cc0075b45e5ad39caf6798f1d983e9b1529982ae3787dfbd601cfc40c9"
   },
   {
-   "path": "assets/sprites/mascot_cat_sheet.png",
-   "size": 62065,
-   "sha256": "a4120dafbf9afbd717fc27f7e4229a12e783145b4a945893eabcb9b9c4e57b72"
-  },
-  {
-   "path": "assets/sprites/menu_background.png",
-   "size": 289347,
-   "sha256": "ca9c269216a61ddeea0c4040e01448968f990402342cfa1820a07e51c17dae97"
-  },
-  {
-   "path": "assets/sprites/mode_effects_sheet.png",
+   "path": "gfx/assets/legacy/mode_effects_sheet.png",
    "size": 12925,
    "sha256": "6bc8456cbe99b3cb52f0881ed518b07638ad541c9364ae90a247a371c2d10805"
   },
   {
-   "path": "assets/sprites/pieces_and_smallpieces_sheet.png",
+   "path": "gfx/assets/legacy/pieces_and_smallpieces_sheet.png",
    "size": 49123,
    "sha256": "60df1bbea86ec1ccf4f2e36c896687372a9edb79603421f98a499f7ce4d5a758"
   },
   {
-   "path": "assets/sprites/player_p1_bluegothic_sheet.png",
-   "size": 95650,
-   "sha256": "088b1111f95c9fe2db526fe2cdd44abd665fee2ba666347ec207314c7a310777"
-  },
-  {
-   "path": "assets/sprites/player_p2_akane_sheet.png",
-   "size": 127084,
-   "sha256": "30d6992e652930b6d838a7447c6cddde3ba927a379d6a510fc1cb7d9ef4c2f43"
-  },
-  {
-   "path": "assets/sprites/role_name_sheet.png",
+   "path": "gfx/assets/legacy/role_name_sheet.png",
    "size": 88716,
    "sha256": "d43012d7440fc95f1605b44560ef19f5190641c3539f7c8ad82b0f3d20cb394a"
   },
   {
-   "path": "assets/sprites/ui_common_sheet.png",
+   "path": "gfx/assets/legacy/ui_common_sheet.png",
    "size": 23214,
    "sha256": "6a637ca1b6b0ba575f0340c7070d3846ae198431d868563f019034293c30d161"
   },
   {
-   "path": "assets/sprites/ui_theme_sheet.png",
+   "path": "gfx/assets/legacy/ui_theme_sheet.png",
    "size": 455385,
    "sha256": "a9d50a097faacc00875deb23f940f1d0d6c61a868db61ae736eafef08d8d027e"
   },
   {
-   "path": "data/asset_loading_policy.json",
-   "size": 860,
-   "sha256": "80c15ae839897246380d9af5a2bf9a902b4e74edb955bc00907e8ce5272ffead"
+   "path": "gfx/assets/menu_akane.png",
+   "size": 13941,
+   "sha256": "8a9019a5435b59d6ed2e273c4fba000755e6cdbed99772429bfb625b7337e52c"
+  },
+  {
+   "path": "gfx/assets/menu_item_normal.png",
+   "size": 424,
+   "sha256": "1243b0f53c4006a810bf7f85b276bfcf2d77911f26b7985ef45aa91b746d086b"
+  },
+  {
+   "path": "gfx/assets/menu_item_selected.png",
+   "size": 405,
+   "sha256": "2129a6aa6ed6cf63431b5846e2dd4ad7067d735adba2b777f9a80e7528c1777b"
+  },
+  {
+   "path": "gfx/assets/menu_kotaro.png",
+   "size": 9318,
+   "sha256": "11ec4d4d68b1f213f8e69ff8b370489670ca541e7e19ab269be36578869e4059"
+  },
+  {
+   "path": "gfx/assets/menu_zunko.png",
+   "size": 12452,
+   "sha256": "6539db991f051827d3122afa9e0347fb3f1624e862110317b49ffd6bb6af2a48"
+  },
+  {
+   "path": "gfx/assets/nekotaro_sheet.png",
+   "size": 16060,
+   "sha256": "711cc650455439ae318b4aad318ff6697af1e678bacd043b182d2d3eae1e7b77"
+  },
+  {
+   "path": "gfx/assets/options_row_normal.png",
+   "size": 227,
+   "sha256": "fe8307c2e547486bb2715e89158437cf17d2ef70a56de646cce98e1015f40217"
+  },
+  {
+   "path": "gfx/assets/options_row_selected.png",
+   "size": 230,
+   "sha256": "b1bbd4230726fd66f165a465ecc079d64bb83869f3a12a5b8e690a696a619e1f"
+  },
+  {
+   "path": "gfx/assets/player_frame_p1.png",
+   "size": 1012,
+   "sha256": "0e532201eb16c9b4448877123017b71528bb3fdb0c187416c6546d2254c0758e"
+  },
+  {
+   "path": "gfx/assets/player_frame_p2.png",
+   "size": 1019,
+   "sha256": "b92519d5d2f1608ad4a3ae717ea12b48ec5ad6e8c206a55eb588ca8b3b93a81a"
+  },
+  {
+   "path": "gfx/assets/reading_panel.png",
+   "size": 3814,
+   "sha256": "b63bd6f62991af35e099268527607aad99682028850a573404e7c4f5a52269ab"
+  },
+  {
+   "path": "gfx/assets/role_piece_reflection_sheet.png",
+   "size": 199,
+   "sha256": "0d6155351321d7188cec529edd7d9ab4f8506849a4efa772f8cad3579e71cad4"
+  },
+  {
+   "path": "gfx/assets/selection_locked.png",
+   "size": 253,
+   "sha256": "9186952c97cba297c8252c4c10d2fab10e11e13f6da841b098af2ec87d37a1d9"
+  },
+  {
+   "path": "gfx/assets/stock_frame.png",
+   "size": 393,
+   "sha256": "96494f6b146e918ac0e9f73912943fe42649a2e29c72d8107aa342854c8a64f0"
+  },
+  {
+   "path": "gfx/assets/title_kotaro_nekotaro.png",
+   "size": 19746,
+   "sha256": "1542c5cab570cbf0f8ef41d87d531218ab4a9c362bf1c406de9fff198f977223"
+  },
+  {
+   "path": "gfx/assets/title_logo.png",
+   "size": 78041,
+   "sha256": "969ad5702a36176b97e8b2d3e74469a369955fec3197f16f6c7268674ef75ff8"
+  },
+  {
+   "path": "gfx/assets/zunko_sheet.png",
+   "size": 78834,
+   "sha256": "0277b9aa5c71e883d142a7633fee60a57ff15cea476fc8722cc526799705f376"
+  },
+  {
+   "path": "gfx/data/graphics_manifest_v3.json",
+   "size": 184700,
+   "sha256": "e768d0f256750317649fa8f61cc009b0346eca42ee1b171bd0ffc130f79ce449"
+  },
+  {
+   "path": "gfx/data/game_loading_list.json",
+   "size": 2144,
+   "sha256": "2774b5a811abfe452df6e6bcd6b1830f1f415e85822792d5120947f72629d8c2"
+  },
+  {
+   "path": "gfx/data/font_styles.json",
+   "size": 820,
+   "sha256": "bd93e9877ece4346a2644f73112f4e720d4a586980b52604d377a37226bd6060"
+  },
+  {
+   "path": "gfx/data/credits_text.json",
+   "size": 742,
+   "sha256": "b146592e94c9487f2f623267ce313f66e1dca8709e274d6800ff1faa995d52d6"
   },
   {
    "path": "data/screen_layout_v2.json",
@@ -77,9 +272,80 @@
    "sha256": "912f6f5454a292ccd687382e515ad46aa3f34848927d96e3fa06d01590732f24"
   },
   {
-   "path": "data/sprite_manifest_v2.json",
-   "size": 128578,
-   "sha256": "6a8a8d84e5a435db791f39e40c6cae572a2bb94c3b9aa02d1529579c5b0ff1f4"
+   "path": "gfx/fonts/OFL.txt",
+   "size": 4301,
+   "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+  },
+  {
+   "path": "gfx/fonts/NotoSansJP-VF.ttf",
+   "size": 9590732,
+   "sha256": null,
+   "note": "採用フォント原本（共有ドライブ id 1q4pf3F1sfFPhjTlfR3rvP3-sFDsmTrCh）のファイルサイズ。作業環境で取得できないためSHA-256は未記載"
+  },
+  {
+   "path": "assets/audio/sfx/se_character_fall.wav",
+   "size": 49964,
+   "sha256": "9036c0ee9f36137e187eeb224e7e65a768a0a5e599615e3f1b6f1cd48d9ad58f"
+  },
+  {
+   "path": "assets/audio/sfx/se_field_rise.wav",
+   "size": 15404,
+   "sha256": "de2402fc258c4b5ad422e1d0185f7c525479c5d55e3950b632feb360201529fa"
+  },
+  {
+   "path": "assets/audio/sfx/se_launch_success_01.wav",
+   "size": 17324,
+   "sha256": "a666633799942af1c3bd325038ec705c9285dc4160d58640a3305fe63c53340a"
+  },
+  {
+   "path": "assets/audio/sfx/se_launch_success_02.wav",
+   "size": 17324,
+   "sha256": "efad0a464021bed3f3b0a0b74f121b0d162e5732b947f55398d1b54b507716ce"
+  },
+  {
+   "path": "assets/audio/sfx/se_launch_success_03.wav",
+   "size": 17324,
+   "sha256": "5ba7a41bc9cf3a51c46abbbd2bea9d89cdcdc24018ad7f19a8cf113ed066b067"
+  },
+  {
+   "path": "assets/audio/sfx/se_launch_success_04.wav",
+   "size": 17324,
+   "sha256": "c49a11abfc49cfbb5d0ec7d6ec504b66e5d6b81b7afcd8c28d48c5c60743f4b4"
+  },
+  {
+   "path": "assets/audio/sfx/se_launch_success_05.wav",
+   "size": 17324,
+   "sha256": "d3f0df8cb43ad5b23217a547b9f73bcbf24172594dbbc8cd1d2c2286849e8c87"
+  },
+  {
+   "path": "assets/audio/sfx/se_result_cracker.wav",
+   "size": 23084,
+   "sha256": "2eb37f6403cf59757ca94e6b2b6c606fd23ebe78da72cacb2e2a23e804eacf96"
+  },
+  {
+   "path": "assets/audio/sfx/se_role_declare_01.wav",
+   "size": 33644,
+   "sha256": "5a4b45572f5310d1909a9bf37d50f4694092533d4f2eb78426b2a9c684ccfac4"
+  },
+  {
+   "path": "assets/audio/sfx/se_role_declare_02.wav",
+   "size": 33644,
+   "sha256": "926cd878af07bf62d4d7fc3c6f230e462b75af7e414702235137f584a7f4f3ba"
+  },
+  {
+   "path": "assets/audio/sfx/se_role_declare_03.wav",
+   "size": 33644,
+   "sha256": "988a066797c47669ba500e06b0194dfcf07723d29f4fc1383a9d8936050fb7db"
+  },
+  {
+   "path": "assets/audio/sfx/se_role_declare_04.wav",
+   "size": 33644,
+   "sha256": "344ef242ebc55e08365387dbabab8516d1f144e3a27e1c28bc0697933597b2fe"
+  },
+  {
+   "path": "assets/audio/sfx/se_role_declare_05.wav",
+   "size": 33644,
+   "sha256": "41f55f723f70cbb64ea05b4a5b12a8031b53da5ecb85791a48d040352c4fefac"
   },
   {
    "path": "assets/audio/sfx/sfx_all_clear.wav",
@@ -107,11 +373,6 @@
    "sha256": "97ba500d9abefb200cee8bbed2abf5b0ad7fa79937ec2506c024d099a5de1916"
   },
   {
-   "path": "assets/audio/sfx/sfx_chain.wav",
-   "size": 36524,
-   "sha256": "0feb54c22b3b6ebdbfcf054902dd4acefd41536f2f46954ddb43c55929d2e396"
-  },
-  {
    "path": "assets/audio/sfx/sfx_column_swap.wav",
    "size": 15404,
    "sha256": "964d71c98ab55e9f23a8901ef0a3c0ca9a83e6d42d928958a687c2ee40d1879e"
@@ -123,18 +384,13 @@
   },
   {
    "path": "assets/audio/sfx/sfx_counter.wav",
-   "size": 22124,
-   "sha256": "ed99d7df063b93b3b735cfe576cc6f297d5fd7a298c72e8ed425b0668cde83f0"
+   "size": 15404,
+   "sha256": "606d6ec866ef4e95c447256d73aef00c28f5bca37029e354bddb9e171408fdc8"
   },
   {
    "path": "assets/audio/sfx/sfx_danger.wav",
    "size": 21164,
    "sha256": "491ff2758b67588e501f2d9baee77abe6385496fea0c627fd2c21493b0db9992"
-  },
-  {
-   "path": "assets/audio/sfx/sfx_field_rise.wav",
-   "size": 15404,
-   "sha256": "de2402fc258c4b5ad422e1d0185f7c525479c5d55e3950b632feb360201529fa"
   },
   {
    "path": "assets/audio/sfx/sfx_go.wav",
@@ -172,11 +428,6 @@
    "sha256": "2b4ff2075ddba57dcbee932fcf87e54fbc8e23bfbaf84644f4af0b182a2e6693"
   },
   {
-   "path": "assets/audio/sfx/sfx_piece_success.wav",
-   "size": 17324,
-   "sha256": "a666633799942af1c3bd325038ec705c9285dc4160d58640a3305fe63c53340a"
-  },
-  {
    "path": "assets/audio/sfx/sfx_ready.wav",
    "size": 28844,
    "sha256": "e76e56d827b41c063d11da5236bc3e21420d7fd1d97f051caa8e4c54fe17a834"
@@ -190,11 +441,6 @@
    "path": "assets/audio/sfx/sfx_role_fail.wav",
    "size": 26924,
    "sha256": "b5c9855b7c6d7652377f9f87a8b28adcc81e1e9c012ae7273673956bdf4c0af5"
-  },
-  {
-   "path": "assets/audio/sfx/sfx_role_success.wav",
-   "size": 33644,
-   "sha256": "5a4b45572f5310d1909a9bf37d50f4694092533d4f2eb78426b2a9c684ccfac4"
   },
   {
    "path": "assets/audio/sfx/sfx_stage_clear.wav",
@@ -342,124 +588,254 @@
    "sha256": "7a395f4032060b9264ea5cd3a00c20676ccf7897d1ef12f6dc9fb51497568a62"
   },
   {
+   "path": "assets/audio/voice/voice_akane_select.wav",
+   "size": 96798,
+   "sha256": "85f0e7981497c365810945f121d497830f1386846609a701cf1fe9d62a86837b"
+  },
+  {
    "path": "assets/audio/voice/voice_akane_win.wav",
    "size": 67964,
    "sha256": "359bfcb7f31fdcec66b8f8c836723438a8402f7a22f19f50490ccd2306dd2c15"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_attack.wav",
-   "size": 92298,
-   "sha256": "e00433e6d34b61b07544198150e704655d0f0f75a784bfedb683caca7e09c5bb"
+   "size": 169964,
+   "sha256": "46d74d41337cdd6af6bec55bfad5c6ac4c675a22ca7c2b9949f962da86586959"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_damage.wav",
-   "size": 144254,
-   "sha256": "bf59e9f09bb54968e6c5b85c06907fb43fec27fe97dc9b41451acd162e1b8a8c"
+   "size": 202604,
+   "sha256": "9a6632b123f0123f2652137b54de1d547939f7ef826c4d4c8c3ae46bec9c8cb1"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_go.wav",
-   "size": 63174,
-   "sha256": "11559255b688c74b3e27439c37a3e47899054a18555f3be119974ac9ef708cea"
+   "size": 92204,
+   "sha256": "e3009d326537bda1be9f3ce10e05a730737cc7f87868eb0e793b1fd2cd3ade57"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_lose.wav",
-   "size": 200658,
-   "sha256": "e0fd3ecbf96d80c707cc89432dafc9d7eae13ef5baaac7c870f9dbe194031a8b"
+   "size": 140204,
+   "sha256": "8844fe593aea7d88f8d0533de4abde9f9ee64c8ab94595c30aacfb2ea0738530"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_ready.wav",
-   "size": 145712,
-   "sha256": "b605155828c6b7e727b5dd3ea5e5b67b8242ac591d1f8c9a9d58d567d5d2e686"
+   "size": 114284,
+   "sha256": "a050881d5a5da6394e35c60174fdd7efc0b0754a3056f5d77bb3b09b1f930a78"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_01.wav",
-   "size": 186216,
-   "sha256": "dcb1f98fc7e1cc9bf74cc6019ba7d6e6ed4deffcc230648df47525b590b3bc25"
+   "size": 125324,
+   "sha256": "760186694c0ab7956b40a00de4ed04fecd4b7330b1b071725a2c7964c0b553c0"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_02.wav",
-   "size": 92900,
-   "sha256": "adf16cbbf721788b198f0d568c384af54fc0c7a63ad22ba6e0eef5623223a7e3"
+   "size": 150572,
+   "sha256": "56378ae485646ac439d1614c9fb5bddf191f82280709a6721add2af01712d3a0"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_03.wav",
-   "size": 95348,
-   "sha256": "6f282ae37662910e27e2edde64f54bcf0ef03af1109cd28fe2a31720c163edb4"
+   "size": 149324,
+   "sha256": "6311bca68da36207ff024d9db7dc9e5d65c3c41c0f7b8cb88ce063c94aa7b55a"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_04.wav",
-   "size": 125034,
-   "sha256": "6b381fe8f13364128c2105d605f61bedd160bd6cf860f45c26f7580adcaf9429"
+   "size": 165644,
+   "sha256": "d3bbed761c965ac9febcf270e25df46a4f5e45f1b190bb2f7c8fb02241186ad3"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_05.wav",
-   "size": 98866,
-   "sha256": "d4464690cd420d273c8757c3a77764d98d10d2efc9dd7e3142a7729f4aafc297"
+   "size": 144044,
+   "sha256": "1e54cc8a09d2947c5cbfb5b3d4b97a3a5b0986555d66a54a6a1f7cb861b088a1"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_06.wav",
-   "size": 137988,
-   "sha256": "b51c11b73bf197b6ea2523e9d2ced9f2ac8771b326789ebb2b0e385455938207"
+   "size": 226124,
+   "sha256": "97a28f5a58b0605ca51cd7f8187d3a65d0d7d9e14451d9705ae5807413f481de"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_07.wav",
-   "size": 231798,
-   "sha256": "935565b317e6d5a0f09a8790866d084af8e8d35f109e567d787657b5ba3c7e51"
+   "size": 259724,
+   "sha256": "9ac3d2c19ecee8a5f76067880e046f850e50aa210153d9ae7c5f5b70f5af94ab"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_08.wav",
-   "size": 122190,
-   "sha256": "ac7f31fbc5618fe4e16c1e0ecf8e81d4bec0a3f32fb831802064e9270ed02ab6"
+   "size": 148364,
+   "sha256": "ebb581988bfde12f03cf030c031a0cfda0c9e410bd2187f081e1fabc772a20cb"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_09.wav",
-   "size": 95410,
-   "sha256": "77bf4e7b2375f13e3fcf2e369dd19df1fd5badc2dda9368d8c72c217657f5cab"
+   "size": 163244,
+   "sha256": "bb794ab4ac998856d3ad306a9f2b5029db33250716c66f25d6d1cbb51917f465"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_10.wav",
-   "size": 131056,
-   "sha256": "8ec9191c9cb6a2c4fe7d40f520cc0f0fc257df44b6864dc2506086cf7b97b1c4"
+   "size": 154604,
+   "sha256": "ee9b4ca7ca972f4a7d59f2f19a80ccf143c0a58820970f0ba26fe2f2d8b6d7b8"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_11.wav",
-   "size": 187036,
-   "sha256": "c7132b08a484dfebd5c95ea887077ffa608167df808a5a53369a597e0e7efa1b"
+   "size": 123884,
+   "sha256": "50695c05f5302e549f6656e40c213bd771d0ab8caa04d627065f2144cb480d00"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_12.wav",
-   "size": 133282,
-   "sha256": "c153c56f76ae264e92f2d49fdf92a7a12a41ae27cf067d8c7520c82b72bca391"
+   "size": 126764,
+   "sha256": "e4c337075d086325823a7361fea379d8a42f122c8ec42b8f98bcfa98ae44ef6f"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_13.wav",
-   "size": 121424,
-   "sha256": "7b995ad05279bc6d8bb566b2673aeb3ffe5aee7d3a22e9826c7330f83d38b6fc"
+   "size": 143564,
+   "sha256": "1d28d944858655ef4d0f5a7f3d78dfe8d5ce85027aa9a7d3e0f5da7ae7815c71"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_14.wav",
-   "size": 219358,
-   "sha256": "2e63c0824c51733ef13064f8ed284821261a46275a6894e085568cc247e730c9"
+   "size": 271244,
+   "sha256": "3d126ddfb3342deaf99fcfc5666fbb78c6724c999c91a3736a92b484714c9f47"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_15.wav",
-   "size": 241806,
-   "sha256": "d047dc89efb0fdbeeb9d1a2f1adf6eee104317c8b6814dddf29b940f0388c283"
+   "size": 243404,
+   "sha256": "feac2e8c0ad5e1e3ea28ee2782b0f21a4c2d2e865f81ad00b40a1370ef6d19fd"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_16.wav",
-   "size": 307916,
-   "sha256": "09e1a8c49090759d51b2194cc644c237d1a9da9e39356e267e1e30e95baa5990"
+   "size": 334124,
+   "sha256": "8f39354fb243f1ea4de5e14116c129bdacca6c802781fe037d81b729f4b93182"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_role_fail.wav",
-   "size": 70532,
-   "sha256": "20d30b6930a1e75c5727f26ad6562893acbeea2cce3fb580410f1cdc69e3f6bf"
+   "size": 88844,
+   "sha256": "08e8bbbd3373965270c61fd929ad8f4104967720f108d97158295f6f81efeca3"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_select.wav",
+   "size": 186284,
+   "sha256": "9078d290db92380941c70c7b15be9511743ef5292740c7d5f055414742a287f8"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_win.wav",
-   "size": 200476,
-   "sha256": "13507ed5080bad0ee6d071c57299019840243cb3095830d7038a12245612d28e"
+   "size": 151724,
+   "sha256": "0ac789916b80c1edaded9aace758b95ff6ac548f6dc326a35b262164eed29adc"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_attack.wav",
+   "size": 52842,
+   "sha256": "b04341cf547fb7cdf90035b9391f3e076cd971f2019bc315f8708bd2fe08f95e"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_damage.wav",
+   "size": 18082,
+   "sha256": "93d1c4edfdd0295719b9aa64c6754698312d782a7b06d50beed2577ec0e3bf09"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_go.wav",
+   "size": 37198,
+   "sha256": "a7ff505cd074a265cce7d5fc5b79cf90395f11c977c2598433465c74e718255e"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_lose.wav",
+   "size": 112590,
+   "sha256": "ff5a536175b59acf73da9076fe73b08dbb37f94f091f34935732169eb9b197ac"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_ready.wav",
+   "size": 49134,
+   "sha256": "c108577648717a5dd294481a89e8b71d2fbe274c9876da8b7baffd940aaca75c"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_01.wav",
+   "size": 74680,
+   "sha256": "d84a87166e1a7b2a9b43259f7087974656cc7fb5f695db317bd35acaf9877a4e"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_02.wav",
+   "size": 67734,
+   "sha256": "6a0bd18008c2b03c6e4b65c29b2b634492e1329e118234400ff3a0a8d81abc07"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_03.wav",
+   "size": 70308,
+   "sha256": "6450a8f7ad3bacbdc0148f5d7e7063dd431b7c9e160fe6e8e4e50daf7ec9bac8"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_04.wav",
+   "size": 91470,
+   "sha256": "6398726072f71472a08cdde8e114f8c3178372192f09b75782959c6b56e5b53e"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_05.wav",
+   "size": 73074,
+   "sha256": "b56d875b6ec07d4f3ef76957e31f5a1ae397092e6d843f40e834f7b4113b5ffd"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_06.wav",
+   "size": 92220,
+   "sha256": "377a99dbdb06536fe9cd880e63c5ab816f425052921cda7652c4540524be4f4b"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_07.wav",
+   "size": 114552,
+   "sha256": "af140ce4f66155a24a99ad7c2717d1d892cbaa1a72094178b0a2fd30c8e790da"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_08.wav",
+   "size": 77686,
+   "sha256": "b12361e3b6f46886799f1df226a2bc1ef265adac74e21effec0a2420546a0244"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_09.wav",
+   "size": 69262,
+   "sha256": "8deef64869692a137adeb03cbcd028e05590001a0a2e6b5cb88a80e8d81b116f"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_10.wav",
+   "size": 84154,
+   "sha256": "50bf87966885e4ef509a43f79ff8d91090b03d1ff5b417c5a6e13215561ee5e0"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_11.wav",
+   "size": 76564,
+   "sha256": "05a511e4bea215e81df527a06afea464d7b01a1e3b98c4ab1e7e61f0a9e676a8"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_12.wav",
+   "size": 79790,
+   "sha256": "ac839d9c39a38debdc124ae2c791add352d9e26bf1a184e1ef720f73db1e0b97"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_13.wav",
+   "size": 58954,
+   "sha256": "305fb142b0f8161e49f4fb6955f196c33d64d98e6e00b92bd566e32387e38bdd"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_14.wav",
+   "size": 110920,
+   "sha256": "4f629616208f7cf7e4681e15803a6f5656f6dd302a90c9896ac9c5f8a9b5fef3"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_15.wav",
+   "size": 127928,
+   "sha256": "1b20fda874bda8044765d679c24ea0785ae7e09a1d161f3c88aff16a1fb8c149"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_16.wav",
+   "size": 153126,
+   "sha256": "a85b6250bba3d3d37323e1f8f9a1b2157be1d8c303f2a66895430c823b6a3dae"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_role_fail.wav",
+   "size": 29360,
+   "sha256": "326194b7af7124aff364420b5d84cd552d06e35d7921d85a23064ec702d45c19"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_select.wav",
+   "size": 73436,
+   "sha256": "d86fc9cd7ddd5c76c7d82353da1e6663cd7235741064e2f11a9b1486a2d53a88"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_win.wav",
+   "size": 63394,
+   "sha256": "9e1088315c62739807ee05973a4c36b544fe2b265b1e1b899f53dfbc12919b97"
   },
   {
    "path": "assets/audio/bgm/bgm_menu.wav",

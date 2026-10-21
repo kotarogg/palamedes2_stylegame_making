@@ -1,33 +1,45 @@
-// 開始（READY→GO）と結果（勝敗・引分け・シングルの結果）の演出。ゲーム結果は変えず、ロジックのtickを時計にする。
-// 勝敗あり（確定）：勝利数加算→WIN/LOSE→結果SE→敗者モーションと敗者ボイス→画面外まで落下→微ディレイ→勝者モーションと勝者ボイス。
-//   敗者ボイスの終了は待たない（短い重なりを許容）。
-// 引分け（確定）：2人同時に敗北モーション、落下なし、ボイスなし（sfx_draw は未納品のため無音）。
-// 時間はすべて調整用初期値（docs に記録）。
+// 開始（READY→GO）・役名表示・結果（勝敗・引分け・シングルの結果）の演出。ゲーム結果は変えず、ロジックのtickを時計にする。
+// 勝敗あり（第3版 第14章）：勝敗確定→勝利数加算→WIN/LOSE・結果SE→敗者 lose_fall モーション＋敗北ボイス→モーションを最後まで再生
+//   →最終姿勢のまま画面外まで落下（落下開始で se_character_fall）→完全に画面外へ出てから200ms→勝者 win＋勝利ボイス
+//   →同時にネコタローが勝者へクラッカー1回（se_result_cracker）→結果入力。敗者ボイスの終了は待たない。
+// 引分け：2人同時に敗北モーション、落下なし、勝敗ボイス・引分けSE・クラッカーなし。
+// 役名表示（第13章 B4・B5）：宣言時に表示リスト・代表役・開始時刻を確定し、先頭ロゴと代表役ボイスを同時開始。
+// 時間はすべて設定値（PM指定初期値）。
 import type { AudioBus } from '../audio/audioBus';
-import { VOICE_PRIORITY, type Character } from '../audio/audioMap';
+import { roleVoiceLine, VOICE_PRIORITY, type Character } from '../audio/audioMap';
+import type { GameEvent } from '../core/game';
 import type { AnyGame } from '../core/match';
+import type { Mode2Event } from '../core/mode2';
 import type { PlayerId } from '../core/types';
 
 export interface PresentationConfig {
-  /** 結果効果音・敗者演出の開始から落下完了まで */
+  /** 敗者 lose_fall モーション（納品4コマ×160ms＝640ms）。落下はこの後から */
+  loserMotionMs: number;
+  /** 落下（モーション終了から、キャラの画像矩形全体が画面外へ出るまで。PM初期値700ms） */
   fallMs: number;
-  /** 落下完了から勝者モーション・勝者ボイスまでの微ディレイ */
+  /** 画面外へ出てから勝者モーション・勝者ボイスまで（PM初期値200ms） */
   winnerDelayMs: number;
   /** 勝者演出の開始から決定入力を受け付けるまで */
   acceptAfterWinnerMs: number;
   /** 引分けの受付開始 */
   drawAcceptMs: number;
-  /** シングル結果の受付開始 */
+  /** シングル成功結果の受付開始 */
   singleAcceptMs: number;
+  /** ネコタローのクラッカー1コマ（納品 220ms×4） */
+  crackerFrameMs: number;
 }
 
 export const DEFAULT_PRESENTATION: PresentationConfig = {
+  loserMotionMs: 640,
   fallMs: 700,
   winnerDelayMs: 200,
   acceptAfterWinnerMs: 300,
   drawAcceptMs: 900,
   singleAcceptMs: 1000,
+  crackerFrameMs: 220,
 };
+
+export const CRACKER_FRAMES = 4;
 
 export type ResultKind = 'versus' | 'draw' | 'gameOver' | 'stageClear' | 'allStagesClear' | 'clear';
 
@@ -36,10 +48,15 @@ export interface ResultPlan {
   winner: PlayerId | null;
   loser: PlayerId | null;
   startTick: number;
-  /** 敗者の落下が終わるtick（落下なしなら startTick） */
+  /** 敗者モーション終了＝落下開始tick（落下なしなら startTick） */
+  fallStartTick: number;
+  /** 敗者の落下が終わる（画面外）tick（落下なしなら startTick） */
   fallEndTick: number;
   /** 勝者モーション・ボイスの開始tick（勝者なしなら null） */
   winnerTick: number | null;
+  /** ネコタローのクラッカー開始tick（なしなら null）と向く側 */
+  crackerTick: number | null;
+  crackerToward: PlayerId | null;
   /** 決定入力の受付開始tick */
   acceptTick: number;
 }
@@ -52,25 +69,51 @@ export function planResult(game: AnyGame, cfg: PresentationConfig = DEFAULT_PRES
   switch (r.outcome) {
     case 'win': {
       const winner = r.winner!;
-      const fallEnd = t + ms(cfg.fallMs);
+      const fallStart = t + ms(cfg.loserMotionMs);
+      const fallEnd = fallStart + ms(cfg.fallMs);
       const winnerTick = fallEnd + ms(cfg.winnerDelayMs);
-      return { kind: 'versus', winner, loser: (1 - winner) as PlayerId, startTick: t, fallEndTick: fallEnd, winnerTick, acceptTick: winnerTick + ms(cfg.acceptAfterWinnerMs) };
+      return {
+        kind: 'versus',
+        winner,
+        loser: (1 - winner) as PlayerId,
+        startTick: t,
+        fallStartTick: fallStart,
+        fallEndTick: fallEnd,
+        winnerTick,
+        crackerTick: winnerTick,
+        crackerToward: winner,
+        acceptTick: winnerTick + ms(cfg.acceptAfterWinnerMs),
+      };
     }
     case 'draw':
-      return { kind: 'draw', winner: null, loser: null, startTick: t, fallEndTick: t, winnerTick: null, acceptTick: t + ms(cfg.drawAcceptMs) };
+      return { kind: 'draw', winner: null, loser: null, startTick: t, fallStartTick: t, fallEndTick: t, winnerTick: null, crackerTick: null, crackerToward: null, acceptTick: t + ms(cfg.drawAcceptMs) };
     case 'gameOver': {
-      const fallEnd = t + ms(cfg.fallMs);
-      return { kind: 'gameOver', winner: null, loser: 0, startTick: t, fallEndTick: fallEnd, winnerTick: null, acceptTick: fallEnd + ms(cfg.winnerDelayMs + cfg.acceptAfterWinnerMs) };
+      const fallStart = t + ms(cfg.loserMotionMs);
+      const fallEnd = fallStart + ms(cfg.fallMs);
+      return {
+        kind: 'gameOver',
+        winner: null,
+        loser: 0,
+        startTick: t,
+        fallStartTick: fallStart,
+        fallEndTick: fallEnd,
+        winnerTick: null,
+        crackerTick: null,
+        crackerToward: null,
+        acceptTick: fallEnd + ms(cfg.winnerDelayMs + cfg.acceptAfterWinnerMs),
+      };
     }
     case 'stageClear':
     case 'allStagesClear':
     case 'clear':
-      return { kind: r.outcome, winner: 0, loser: null, startTick: t, fallEndTick: t, winnerTick: t, acceptTick: t + ms(cfg.singleAcceptMs) };
+      return { kind: r.outcome, winner: 0, loser: null, startTick: t, fallStartTick: t, fallEndTick: t, winnerTick: t, crackerTick: t, crackerToward: 0, acceptTick: t + ms(cfg.singleAcceptMs) };
   }
 }
 
 export interface CharacterPose {
   anim: 'lose_fall' | 'win' | null;
+  /** lose_fall の経過（tick）。モーションは最後まで再生し、最終姿勢を維持 */
+  motionTicks: number;
   /** 0〜1：落下の進み（0＝足場、1＝画面外） */
   fall: number;
   /** 画面外まで落ちて描画しない */
@@ -79,19 +122,157 @@ export interface CharacterPose {
 
 /** 結果中のキャラクターの見た目（勝者は勝者演出の開始まで通常のまま） */
 export function characterPose(plan: ResultPlan | null, p: PlayerId, tick: number): CharacterPose {
-  if (!plan || tick < plan.startTick) return { anim: null, fall: 0, gone: false };
-  if (plan.kind === 'draw') return { anim: 'lose_fall', fall: 0, gone: false };
+  const none: CharacterPose = { anim: null, motionTicks: 0, fall: 0, gone: false };
+  if (!plan || tick < plan.startTick) return none;
+  if (plan.kind === 'draw') return { anim: 'lose_fall', motionTicks: tick - plan.startTick, fall: 0, gone: false };
   if (plan.loser === p) {
-    const span = Math.max(1, plan.fallEndTick - plan.startTick);
-    const u = Math.min(1, (tick - plan.startTick) / span);
-    return { anim: 'lose_fall', fall: u, gone: u >= 1 };
+    const span = Math.max(1, plan.fallEndTick - plan.fallStartTick);
+    const u = tick < plan.fallStartTick ? 0 : Math.min(1, (tick - plan.fallStartTick) / span);
+    return { anim: 'lose_fall', motionTicks: tick - plan.startTick, fall: u, gone: u >= 1 };
   }
-  if (plan.winner === p && plan.winnerTick !== null && tick >= plan.winnerTick) return { anim: 'win', fall: 0, gone: false };
-  return { anim: null, fall: 0, gone: false };
+  if (plan.winner === p && plan.winnerTick !== null && tick >= plan.winnerTick) return { anim: 'win', motionTicks: tick - plan.winnerTick, fall: 0, gone: false };
+  return none;
 }
 
+/** ネコタローのクラッカー：開始から4コマ×220msを1回。向き（勝者側）と経過を返す。範囲外は null */
+export function crackerPose(plan: ResultPlan | null, tick: number, tickMs: number, cfg: PresentationConfig = DEFAULT_PRESENTATION): { frame: number; toward: PlayerId } | null {
+  if (!plan || plan.crackerTick === null || plan.crackerToward === null || tick < plan.crackerTick) return null;
+  const frame = Math.floor(((tick - plan.crackerTick) * tickMs) / cfg.crackerFrameMs);
+  return frame < CRACKER_FRAMES ? { frame, toward: plan.crackerToward } : null;
+}
+
+// ---------------------------------------------------------------- 役名表示（B4・B5）
+
+export interface RoleNameConfig {
+  /** 先頭ロゴの保持時間の下限（実際は max(600ms, 代表役ボイスのファイル尺)） */
+  headMinMs: number;
+  /** 先頭ロゴを表示したままの追加待機 */
+  headWaitMs: number;
+  /** 後続ロゴ1件の表示時間 */
+  followMs: number;
+}
+
+export const DEFAULT_ROLE_NAME: RoleNameConfig = { headMinMs: 600, headWaitMs: 150, followMs: 600 };
+
+export interface RoleShow {
+  logos: number[];
+  /** 先頭ロゴ（代表役）の開始tick＝代表役ボイスの開始 */
+  headStart: number;
+  /** 先頭ロゴ＋追加待機の終了tick（ここから後続ロゴ） */
+  waitEnd: number;
+  /** 全ロゴの終了tick */
+  end: number;
+}
+
+/**
+ * 1プレイヤーの役名表示の予定。未確定の攻撃時刻から比率を毎フレーム再計算しない。
+ * - 後続ロゴ表示中の新宣言：古い後続を即中止し、新宣言の先頭ロゴと代表役ボイスを開始（古い表示は再開しない）
+ * - 先頭ロゴ保持中（＋追加待機）の新宣言：最新1件だけを表示待ちにし、先頭＋待機の終了で古い後続より優先して開始
+ */
+export class RoleNameSchedule {
+  current: RoleShow | null = null;
+  private pending: { logos: number[]; holdTicks: number } | null = null;
+
+  constructor(
+    private readonly ticks: (ms: number) => number,
+    private readonly cfg: RoleNameConfig = DEFAULT_ROLE_NAME,
+    private readonly onHeadStart: (logo: number, tick: number) => void = () => undefined,
+  ) {}
+
+  private start(logos: number[], holdTicks: number, tick: number): void {
+    const waitEnd = tick + holdTicks + this.ticks(this.cfg.headWaitMs);
+    this.current = { logos, headStart: tick, waitEnd, end: waitEnd + this.ticks(this.cfg.followMs) * Math.max(0, logos.length - 1) };
+    this.onHeadStart(logos[0], tick);
+  }
+
+  /** 宣言（logos は既存の表示順。voiceMs は代表役ボイスの取得済みファイル尺。音量0・ミュートでも同じ） */
+  declare(logos: number[], voiceMs: number | null, tick: number): void {
+    if (logos.length === 0) return;
+    const holdTicks = this.ticks(Math.max(this.cfg.headMinMs, voiceMs ?? 0));
+    if (this.current && tick < this.current.waitEnd) {
+      this.pending = { logos, holdTicks };
+      return;
+    }
+    this.pending = null;
+    this.start(logos, holdTicks, tick);
+  }
+
+  update(tick: number): void {
+    const c = this.current;
+    if (!c) return;
+    if (this.pending && tick >= c.waitEnd) {
+      const p = this.pending;
+      this.pending = null;
+      this.start(p.logos, p.holdTicks, c.waitEnd);
+      return;
+    }
+    if (tick >= c.end) this.current = null;
+  }
+
+  /** 表示中のロゴと、その表示開始tick（A/B/C の色替えの起点）。なければ null */
+  logoAt(tick: number): { logo: number; since: number } | null {
+    const c = this.current;
+    if (!c || tick < c.headStart) return null;
+    if (tick < c.waitEnd) return { logo: c.logos[0], since: c.headStart };
+    const i = 1 + Math.floor((tick - c.waitEnd) / Math.max(1, this.ticks(this.cfg.followMs)));
+    if (i >= c.logos.length) return null;
+    return { logo: c.logos[i], since: c.waitEnd + (i - 1) * this.ticks(this.cfg.followMs) };
+  }
+
+  get hasPending(): boolean {
+    return this.pending !== null;
+  }
+
+  stop(): void {
+    this.current = null;
+    this.pending = null;
+  }
+}
+
+/** 試合の役名表示：宣言イベントを読み、プレイヤーごとの予定を進め、先頭ロゴの開始と同時に代表役ボイスを鳴らす */
+export class RoleNameDirector {
+  private cursor = 0;
+  schedules: RoleNameSchedule[] = [];
+
+  constructor(
+    private game: AnyGame,
+    private readonly bus: AudioBus | null,
+    private characters: readonly Character[],
+    private readonly cfg: RoleNameConfig = DEFAULT_ROLE_NAME,
+  ) {
+    this.reset(game, characters);
+  }
+
+  reset(game: AnyGame, characters?: readonly Character[]): void {
+    this.game = game;
+    if (characters) this.characters = characters;
+    this.cursor = 0;
+    this.schedules = game.players.map((_, i) => new RoleNameSchedule((ms) => game.ticks(ms), this.cfg, (logo) => this.bus?.playVoice(this.characters[i], roleVoiceLine(logo), VOICE_PRIORITY.role)));
+  }
+
+  /** 毎フレーム（描画前）。結果へ移行したら役名表示・表示待ちを終了する */
+  update(): void {
+    const ev = this.game.events as ReadonlyArray<GameEvent | Mode2Event>;
+    while (this.cursor < ev.length) {
+      const e = ev[this.cursor++];
+      if (e.type === 'declare') {
+        const voiceMs = this.bus?.voiceDurationMs(this.characters[e.player], roleVoiceLine(e.logos[0])) ?? null;
+        this.schedules[e.player].declare(e.logos, voiceMs, e.tick);
+      } else if (e.type === 'roundEnd') for (const s of this.schedules) s.stop();
+    }
+    if (this.game.result) return;
+    for (const s of this.schedules) s.update(this.game.tick);
+  }
+
+  logoAt(p: PlayerId, tick: number): { logo: number; since: number } | null {
+    return this.game.result ? null : (this.schedules[p]?.logoAt(tick) ?? null);
+  }
+}
+
+// ---------------------------------------------------------------- 開始・結果の音声
+
 export interface StagingOptions {
-  /** READY／GOの担当：シングル＝選択キャラ、CPU対戦＝相手キャラ、2P対戦＝両者からランダム（ラウンドごとに1回） */
+  /** READY／GOの担当：シングル＝コタロー、CPU対戦＝相手キャラ、2P対戦＝両者から等確率（ラウンドごとに1回） */
   announcer: Character;
   characters: readonly Character[];
   /** 人が操作するプレイヤー（結果SEの勝敗の選択に使う） */
@@ -162,12 +343,14 @@ export class Staging {
           b?.playSfx('win');
           return;
         default:
-          return; // 引分けは無音（sfx_draw 未納品）。ステージクリアのSEはロジックのイベントで鳴る
+          return; // 引分けは無音（専用SEなし）。ステージクリアのSEはロジックのイベントで鳴る
       }
     });
-    if (plan.winnerTick !== null && g.tick >= plan.winnerTick && plan.winner !== null) {
+    if (plan.loser !== null && plan.fallEndTick > plan.fallStartTick && g.tick >= plan.fallStartTick) this.once('fall', () => b?.playSfx('character_fall'));
+    if (plan.kind === 'versus' && plan.winnerTick !== null && g.tick >= plan.winnerTick && plan.winner !== null) {
       this.once('winner', () => b?.playVoice(ch(plan.winner!), 'win', VOICE_PRIORITY.result, 'result'));
     }
+    if (plan.crackerTick !== null && g.tick >= plan.crackerTick) this.once('cracker', () => b?.playSfx('result_cracker'));
   }
 
   /** 決定入力を受け付けられるか（勝者演出の開始前の入力は捨てる） */

@@ -1,13 +1,16 @@
-// 画面遷移と入力の統合：起動→メインメニュー→（MODE1／MODE2 × シングル／CPU対戦／2P対戦、オプション、遊び方）→試合→結果→再戦／メニュー。
+// 画面遷移と入力の統合（第3版 第15・16章）：起動→タイトル→メインメニュー→（MODE1／MODE2 × シングル／CPU対戦／2P対戦、オプション、遊び方）
+// →（2P対戦はキャラクター選択）→試合→結果→次の相手／再戦／キャラ選択／メニュー。
 // 一時停止は無い。プレイ中の Esc／START は「試合を終了してメニューへ戻る」確認で、確認中もゲームは進む（そのプレイヤーの入力だけがダイアログへ）。
 import type { AudioBus } from './audio/audioBus';
-import { PLAYER_CHARACTER, type BgmId, type Character } from './audio/audioMap';
+import { VOICE_PRIORITY, type BgmId, type Character } from './audio/audioMap';
 import { SoundDirector } from './audio/director';
 import { DIFFICULTY_LABEL, type Difficulty } from './core/config';
 import { FixedStepDriver } from './core/driver';
 import type { Command, Game } from './core/game';
 import { Match, SingleSession, type AnyGame, type FirstTo, type GameMode, type SingleMode } from './core/match';
 import type { Mode2Game } from './core/mode2';
+import { RoundRecorder, type RoundMetrics } from './core/metrics';
+import { createSeededRng, type Rng } from './core/rng';
 import type { PlayerId } from './core/types';
 import {
   ACTION_LABEL,
@@ -31,11 +34,31 @@ import { CpuController } from './input/cpu';
 import { defaultSettings, DEVICE_CHOICES, deviceLabel, sameDevice, saveSettings, type AppSettings, type DeviceChoice, type DisplayScale } from './input/settings';
 import { MenuInput, type NavEvent, type NavKey } from './ui/menuInput';
 import { loadRecords, saveRecords, submitEndless, submitMode2, submitStage, type Records } from './ui/records';
-import { drawBackground, drawConfirm, drawFooter, drawMenuCharacters, drawMenuItems, drawOptionPanel, drawResultPanel, type OptionRow } from './ui/screens';
+import {
+  ACCENT,
+  CHARACTER_NAME,
+  drawBackground,
+  drawCharacterSelect,
+  drawConfirm,
+  drawCredits,
+  drawFooter,
+  drawMenuCharacters,
+  drawMenuItems,
+  drawMenuTitle,
+  MENU_ITEM,
+  drawOptionPanel,
+  drawReadingPanel,
+  drawResultPanel,
+  drawTitle,
+  SELECT_SLOTS,
+  type CreditItem,
+  type OptionRow,
+} from './ui/screens';
 import type { Assets } from './view/assets';
 import { GameView } from './view/gameView';
-import { readyDurationMs, Staging } from './view/presentation';
-import { drawPanel, drawText, formatTime } from './view/text';
+import { readyDurationMs, RoleNameDirector, Staging } from './view/presentation';
+import { fixedScaleChoices, MAX_FIXED_SCALE } from './view/scale';
+import { drawText, formatTime, TEXT_COLORS } from './view/text';
 
 export const W = 640;
 export const H = 360;
@@ -58,7 +81,19 @@ export interface AppDeps {
   /** 表示倍率・全画面の適用（main が実装） */
   applyDisplay: (s: AppSettings['display']) => void;
   requestFullscreen: (on: boolean) => void;
+  /** 現在の表示領域（CSSピクセル）と devicePixelRatio（表示倍率の選択可否に使う） */
+  viewport: () => { w: number; h: number; dpr: number };
+  /** URLを外部ブラウザ（別タブ）で開く */
+  openUrl: (url: string) => void;
   dev: boolean;
+}
+
+/** CPU対戦の相手の順（第15章）：アカネ→ずん子→アカネ… 「次の相手へ」だけで進む。保存しない */
+export const CPU_ORDER: readonly Character[] = ['akane', 'zunko'];
+
+export function nextCpuOpponent(c: Character): Character {
+  const i = CPU_ORDER.indexOf(c);
+  return CPU_ORDER[(i + 1) % CPU_ORDER.length];
 }
 
 export class App {
@@ -67,12 +102,25 @@ export class App {
   scene: Scene;
   readonly menuInput: MenuInput;
   settingsSaved = true;
+  /** CPU対戦の現在の相手（メインメニューへ戻るとアカネへ戻す。保存しない） */
+  cpuOpponent: Character = CPU_ORDER[0];
+  /** クレジットのページ位置（URLを開いて戻っても維持） */
+  creditsPage = 0;
+  /** 開発版だけ：人間のプレイの計測記録（第21章。製品画面には出さない） */
+  readonly devMetrics: (RoundMetrics & { kind: string; characters: readonly Character[]; at: string })[] = [];
+  private notice: { text: string; until: number } | null = null;
+  private nowMs = 0;
 
   constructor(readonly deps: AppDeps) {
     this.settings = deps.settings;
     this.menuInput = new MenuInput(deps.pads);
     deps.bus.setVolumes(this.settings.audio);
-    this.scene = new MenuScene(this);
+    this.scene = new TitleScene(this);
+  }
+
+  /** 画面上部の一時通知（表示倍率の切替など） */
+  showNotice(text: string, ms = 4000): void {
+    this.notice = { text, until: this.nowMs + ms };
   }
 
   get assets(): Assets {
@@ -88,10 +136,12 @@ export class App {
     this.menuInput.clear();
   }
 
-  toMenu(): void {
+  /** メインメニューへ（CPU対戦の相手順はアカネへ戻す） */
+  toMenu(openPath: readonly string[] = []): void {
     this.bus.stopEffects();
     this.bus.playBgm('menu');
-    this.setScene(new MenuScene(this));
+    this.cpuOpponent = CPU_ORDER[0];
+    this.setScene(new MenuScene(this, openPath));
   }
 
   saveSettings(): void {
@@ -122,25 +172,60 @@ export class App {
   }
 
   frame(dtMs: number, ms: number, ctx: CanvasRenderingContext2D): void {
+    this.nowMs = ms;
     this.pollPadActivation();
     this.menuInput.pollPads();
     for (const ev of this.menuInput.drain()) this.scene.onNav(ev);
     this.scene.update(dtMs);
     this.scene.render(ctx, ms);
+    let y = 6;
+    const banner = (msg: string, color: string) => {
+      drawText(ctx, msg, 320, y, { align: 'center', size: 10, color, box: true, maxWidth: 620 });
+      y += 16;
+    };
+    // 採用フォントを読めなかった場合は黙って代替フォントへ退避せず、常に明示する
+    if (!this.assets.fontLoaded) banner('採用フォント（Noto Sans JP）を読み込めませんでした。文字は代替フォントで表示しています', '#ff9a9a');
     if (!this.bus.unlocked) {
       // 未試行＝最初の操作待ち。試行済みで止まっている＝ブラウザが再生を許可していない（パッド操作は許可対象外のブラウザがある）
       const msg = this.bus.unlockAttempted && this.bus.ctx
         ? 'ブラウザが音の再生を止めています。キーを1回押すか、画面をクリックしてください'
         : '最初の操作で音が出ます（キー・クリック・ゲームパッド）';
-      drawText(ctx, msg, 320, 6, { align: 'center', size: 9, color: '#ffe0a0', box: true });
+      banner(msg, '#ffe0a0');
     }
+    if (this.notice && ms < this.notice.until) banner(this.notice.text, '#c0ffd0');
   }
 
   // ---- 試合開始 ----
 
-  startGame(mode: GameMode, kind: 'single' | 'cpu' | '2p', singleMode?: SingleMode): void {
+  /** characters：シングル＝コタロー、CPU対戦＝コタロー対現在の相手、2P対戦＝キャラ選択の結果 */
+  startGame(mode: GameMode, kind: 'single' | 'cpu' | '2p', singleMode?: SingleMode, characters?: readonly Character[]): void {
     this.bus.stopEffects();
-    this.setScene(new GameScene(this, mode, kind, singleMode));
+    const chars: readonly Character[] = kind === 'single' ? ['kotaro'] : kind === 'cpu' ? ['kotaro', this.cpuOpponent] : (characters ?? ['kotaro', 'akane']);
+    this.setScene(new GameScene(this, mode, kind, singleMode, chars));
+  }
+}
+
+// ---------------------------------------------------------------- タイトル（S01）
+
+/**
+ * タイトル：最初の決定でメインメニューへ。最初の入力で音声の有効化を試みる（その入力は次の画面へ渡さない）。
+ * BGMはメニュー曲（自動再生を強制しない。有効化後に鳴り、タイトル→メニューで再始動しない）。
+ */
+export class TitleScene implements Scene {
+  constructor(private readonly app: App) {
+    app.bus.playBgm('menu');
+  }
+
+  onNav(ev: NavEvent): void {
+    if (ev.key !== 'confirm' && ev.key !== 'start') return;
+    this.app.bus.playSfx('ui_confirm');
+    this.app.setScene(new MenuScene(this.app));
+  }
+
+  update(): void {}
+
+  render(ctx: CanvasRenderingContext2D, ms: number): void {
+    drawTitle(ctx, this.app.assets, ms);
   }
 }
 
@@ -153,10 +238,14 @@ interface MenuItem {
   run?: () => void;
 }
 
-class MenuScene implements Scene {
+export class MenuScene implements Scene {
   private stack: { title: string; items: MenuItem[]; cursor: number }[];
 
-  constructor(private readonly app: App) {
+  /** openPath：開いておくサブメニュー（例：キャラ選択から戻る＝['MODE1']） */
+  constructor(
+    private readonly app: App,
+    openPath: readonly string[] = [],
+  ) {
     const a = app;
     const root: MenuItem[] = [
       {
@@ -171,8 +260,8 @@ class MenuScene implements Scene {
               { label: 'ステージクリア', desc: '全10ステージ。各ステージの消去ノルマを達成する', run: () => a.startGame('mode1', 'single', 'stage') },
             ],
           },
-          { label: 'CPU対戦', desc: 'NPCと対戦（強さ・先取本数はオプション）', run: () => a.startGame('mode1', 'cpu') },
-          { label: '2P対戦', desc: '1台のPCで2人対戦', run: () => a.startGame('mode1', '2p') },
+          { label: 'CPU対戦', desc: 'コタローでCPUと対戦（相手はアカネ→東北ずん子の順）', run: () => a.startGame('mode1', 'cpu') },
+          { label: '2P対戦', desc: '1台のPCで2人対戦（キャラクター選択へ）', run: () => a.setScene(new CharacterSelectScene(a, 'mode1')) },
         ],
       },
       {
@@ -180,14 +269,21 @@ class MenuScene implements Scene {
         desc: '場のカードへ出せるピースを打ち上げ、先に盤面を空にする',
         children: [
           { label: 'シングル', desc: '盤面を空にするまでのタイムを競う', run: () => a.startGame('mode2', 'single', 'mode2') },
-          { label: 'CPU対戦', desc: 'NPCと対戦', run: () => a.startGame('mode2', 'cpu') },
-          { label: '2P対戦', desc: '1台のPCで2人対戦', run: () => a.startGame('mode2', '2p') },
+          { label: 'CPU対戦', desc: 'コタローでCPUと対戦（相手はアカネ→東北ずん子の順）', run: () => a.startGame('mode2', 'cpu') },
+          { label: '2P対戦', desc: '1台のPCで2人対戦（キャラクター選択へ）', run: () => a.setScene(new CharacterSelectScene(a, 'mode2')) },
         ],
       },
-      { label: 'オプション', desc: '音・操作・対戦・表示の設定', run: () => a.setScene(new OptionsScene(a)) },
+      { label: 'オプション', desc: '音・操作・対戦・表示・クレジット', run: () => a.setScene(new OptionsScene(a)) },
       { label: '遊び方', desc: '操作とルールの説明', run: () => a.setScene(new HelpScene(a)) },
     ];
     this.stack = [{ title: 'メインメニュー', items: root, cursor: 0 }];
+    for (const label of openPath) {
+      const t = this.top;
+      const i = t.items.findIndex((x) => x.label === label);
+      if (i < 0 || !t.items[i].children) break;
+      t.cursor = i;
+      this.stack.push({ title: `${t.title === 'メインメニュー' ? '' : `${t.title} › `}${label}`, items: t.items[i].children!, cursor: 0 });
+    }
     app.bus.playBgm('menu');
   }
 
@@ -228,13 +324,14 @@ class MenuScene implements Scene {
   update(): void {}
 
   render(ctx: CanvasRenderingContext2D, ms: number): void {
+    void ms;
     const A = this.app.assets;
     drawBackground(ctx, A);
-    drawMenuCharacters(ctx, A, ms);
+    drawMenuCharacters(ctx, A);
     const t = this.top;
-    drawText(ctx, t.title, 320, 70, { align: 'center', size: 13, bold: true, color: '#fff3c8' });
+    drawMenuTitle(ctx, t.title);
     drawMenuItems(ctx, A, t.items.map((i) => i.label), t.cursor);
-    drawText(ctx, t.items[t.cursor].desc, 320, 290, { align: 'center', size: 10, color: '#e8ecff', box: true, maxWidth: 420 });
+    drawText(ctx, t.items[t.cursor].desc, 320, MENU_DESC_Y(t.items.length), { align: 'center', size: 11, color: TEXT_COLORS.secondary, maxWidth: 300 });
     const r = this.app.records;
     if (t.title.endsWith('シングル')) {
       const best: string[] = [];
@@ -242,11 +339,161 @@ class MenuScene implements Scene {
         if (r.endless) best.push(`ひたすら ベスト ${r.endless.score.toLocaleString('ja-JP')}点（Lv${r.endless.level}）`);
         if (r.stage) best.push(`ステージ ベスト ${r.stage.score.toLocaleString('ja-JP')}点（最高${r.stage.maxStage}面${r.stage.completed ? '・完走' : ''}）`);
       } else if (r.mode2Single) best.push(`最短クリア ${formatTime(r.mode2Single.bestMs)}`);
-      best.forEach((b, i) => drawText(ctx, b, 320, 200 + i * 14, { align: 'center', size: 10, color: '#c0ffd0', box: true }));
+      best.forEach((b, i) => drawText(ctx, b, 320, MENU_DESC_Y(t.items.length) + 22 + i * 18, { align: 'center', size: 11, color: ACCENT, maxWidth: 300 }));
     }
     drawFooter(ctx, A);
   }
 }
+
+// ---------------------------------------------------------------- キャラクター選択（S05・2P対戦）
+
+/** キャラクター選択の状態（DOM非依存。テスト対象） */
+export class CharacterSelect {
+  /** SELECT_SLOTS の位置。初期：1P コタロー、2P アカネ */
+  cursors: [number, number] = [0, 1];
+  locked: [boolean, boolean] = [false, false];
+
+  /** 左右移動：相手のカーソル位置を飛ばして循環。決定済みは動かない。動いたら true */
+  move(p: PlayerId, dir: -1 | 1): boolean {
+    if (this.locked[p]) return false;
+    const n = SELECT_SLOTS.length;
+    let c = this.cursors[p];
+    do c = (c + dir + n) % n;
+    while (c === this.cursors[1 - p]);
+    if (c === this.cursors[p]) return false;
+    this.cursors[p] = c;
+    return true;
+  }
+
+  /** 決定：同じキャラは2人で決定できない（カーソルは常に別位置なので相手の決定と重ならない） */
+  confirm(p: PlayerId): boolean {
+    if (this.locked[p]) return false;
+    if (this.locked[1 - p] && this.cursors[1 - p] === this.cursors[p]) return false;
+    this.locked[p] = true;
+    return true;
+  }
+
+  /** 戻る：自分の決定だけを取り消す。両者とも未決定なら 'leave'（前のメニューへ） */
+  back(p: PlayerId): 'undo' | 'leave' | 'none' {
+    if (this.locked[p]) {
+      this.locked[p] = false;
+      return 'undo';
+    }
+    return this.locked[0] || this.locked[1] ? 'none' : 'leave';
+  }
+
+  get done(): boolean {
+    return this.locked[0] && this.locked[1];
+  }
+
+  characters(): [Character, Character] {
+    return [SELECT_SLOTS[this.cursors[0]], SELECT_SLOTS[this.cursors[1]]];
+  }
+}
+
+type SelectAction = 'left' | 'right' | 'confirm' | 'back';
+
+/**
+ * 2P対戦のキャラクター選択。入力機器はオプションの1P/2P設定に従う。
+ * キーボード：各プレイヤーの割当（移動・発射＝決定・B入れ替え＝戻る）。キーボードの操作者が1人なら ←→／Enter／Esc も使える。
+ * 同じフレームの入力は 1P→2P の順に処理する。両者決定後、決定ボイスを聞かせてから試合へ。
+ */
+export class CharacterSelectScene implements Scene {
+  readonly rawKeys = true;
+  readonly sel = new CharacterSelect();
+  private pending: { p: PlayerId; act: SelectAction }[] = [];
+  private keyboards: (KeyboardController | null)[];
+  private startAt: number | null = null;
+  private elapsed = 0;
+  /** 両者決定から試合開始まで（決定ボイスを切らない） */
+  static START_DELAY_MS = 900;
+
+  constructor(
+    private readonly app: App,
+    readonly mode: GameMode,
+  ) {
+    const s = app.settings;
+    this.keyboards = ([0, 1] as const).map((p) => (s.devices[p].kind === 'keyboard' ? new KeyboardController(p, s.keys[p]) : null));
+    app.bus.playBgm('menu');
+  }
+
+  private soleKeyboard(): PlayerId | null {
+    const ks = this.keyboards.map((k, i) => (k ? i : -1)).filter((i) => i >= 0);
+    return ks.length === 1 ? (ks[0] as PlayerId) : null;
+  }
+
+  onKey(code: string, repeat: boolean): boolean {
+    for (const k of this.keyboards) {
+      const a = k?.actionOf(code);
+      if (!k || !a) continue;
+      if (a === 'left' || a === 'right') this.pending.push({ p: k.player, act: a });
+      else if (!repeat && a === 'launch') this.pending.push({ p: k.player, act: 'confirm' });
+      else if (!repeat && a === 'rotate') this.pending.push({ p: k.player, act: 'back' });
+      return true;
+    }
+    const sole = this.soleKeyboard();
+    if (code === 'Escape' || code === 'Backspace') {
+      if (!repeat) {
+        if (sole !== null) this.pending.push({ p: sole, act: 'back' });
+        else if (!this.sel.locked[0] && !this.sel.locked[1]) this.leave();
+      }
+      return true;
+    }
+    if (sole === null) return false;
+    if (code === 'ArrowLeft' || code === 'ArrowRight') this.pending.push({ p: sole, act: code === 'ArrowLeft' ? 'left' : 'right' });
+    else if (!repeat && (code === 'Enter' || code === 'NumpadEnter' || code === 'Space')) this.pending.push({ p: sole, act: 'confirm' });
+    else return false;
+    return true;
+  }
+
+  onNav(ev: NavEvent): void {
+    if (ev.source.kind !== 'pad') return;
+    const idx = ev.source.index;
+    const p = this.app.settings.devices.findIndex((d) => d.kind === 'gamepad' && d.index === idx);
+    if (p < 0) return;
+    const act: SelectAction | null = ev.key === 'left' || ev.key === 'right' ? ev.key : ev.key === 'confirm' ? 'confirm' : ev.key === 'back' ? 'back' : null;
+    if (act) this.pending.push({ p: p as PlayerId, act });
+  }
+
+  private leave(): void {
+    this.app.bus.playSfx('ui_cancel');
+    this.app.toMenu([this.mode === 'mode1' ? 'MODE1' : 'MODE2']);
+  }
+
+  update(dtMs: number): void {
+    this.elapsed += dtMs;
+    // 同じフレームの入力は 1P→2P（安定ソート）
+    const acts = this.pending.splice(0).sort((a, b) => a.p - b.p);
+    const bus = this.app.bus;
+    for (const { p, act } of acts) {
+      if (act === 'left' || act === 'right') {
+        if (this.sel.move(p, act === 'left' ? -1 : 1)) bus.playSfx('ui_move');
+      } else if (act === 'confirm') {
+        if (this.sel.confirm(p)) {
+          bus.playSfx('ui_confirm');
+          bus.playVoice(this.sel.characters()[p], 'select', VOICE_PRIORITY.start, p === 0 ? 'main' : 'announce');
+        } else bus.playSfx('ui_invalid');
+      } else {
+        const r = this.sel.back(p);
+        if (r === 'undo') bus.playSfx('ui_cancel');
+        else if (r === 'leave') return this.leave();
+      }
+    }
+    if (this.sel.done) {
+      this.startAt ??= this.elapsed + CharacterSelectScene.START_DELAY_MS;
+      if (this.elapsed >= this.startAt) this.app.startGame(this.mode, '2p', undefined, this.sel.characters());
+    } else this.startAt = null;
+  }
+
+  render(ctx: CanvasRenderingContext2D, ms: number): void {
+    drawCharacterSelect(ctx, this.app.assets, this.sel.cursors, this.sel.locked, ms);
+    drawText(ctx, `${this.mode === 'mode1' ? 'MODE1' : 'MODE2'} 2P対戦`, 572, 18, { align: 'right', size: 12, color: TEXT_COLORS.secondary });
+    drawText(ctx, '左右：選択　発射キー／A：決定　B入れ替えキー／B／Esc：取消・戻る', 320, 346, { align: 'center', size: 9, color: TEXT_COLORS.secondary });
+  }
+}
+
+/** メニュー項目の下の説明文のY（項目数に合わせて項目の直下） */
+const MENU_DESC_Y = (n: number) => MENU_ITEM.y + MENU_ITEM.pitch * n + 10;
 
 // ---------------------------------------------------------------- オプション
 
@@ -272,7 +519,14 @@ class OptionsScene implements Scene {
   capturing: { player: PlayerId; action: (typeof ACTIONS)[number]; pad: boolean; baseline: PadState | null } | null = null;
   readonly rawKeys = false;
 
-  constructor(private readonly app: App) {}
+  constructor(
+    private readonly app: App,
+    page: OptPage = 'top',
+    cursor = 0,
+  ) {
+    this.page = page;
+    this.cursor = cursor;
+  }
 
   private get s(): AppSettings {
     return this.app.settings;
@@ -294,8 +548,9 @@ class OptionsScene implements Scene {
           { label: '操作', note: '1P/2Pの入力機器とキー・ゲームパッドの割当', confirm: () => this.go('controls') },
           { label: '対戦', note: '先取本数・自然上昇の速さ・NPCの強さ', confirm: () => this.go('match') },
           { label: '表示', note: '画面倍率と全画面', confirm: () => this.go('display') },
+          { label: 'クレジット', note: '制作・音声・素材・フォントの表記とリンク', confirm: () => this.app.setScene(new CreditsScene(this.app)) },
           { label: '設定初期化', note: 'すべての設定を初期値に戻します（記録は消えません）', confirm: () => (this.confirmReset = 0) },
-          { label: 'メニューへ戻る', confirm: () => this.app.toMenu() },
+          { label: '戻る', confirm: () => this.app.toMenu() },
         ];
       case 'audio': {
         const a = s.audio;
@@ -411,19 +666,27 @@ class OptionsScene implements Scene {
           },
           back,
         ];
-      case 'display':
-        return [
-          {
-            label: '画面倍率',
-            value: s.display.scale === 0 ? '自動（収まる最大）' : `${s.display.scale}倍`,
-            arrows: true,
-            note: '画面に収まらない倍率は、収まる最大の整数倍で表示します',
-            change: (d) => {
-              s.display.scale = cycle<DisplayScale>([0, 1, 2, 3, 4], s.display.scale, d);
-              this.app.deps.applyDisplay(s.display);
-              this.changed();
-            },
+      case 'display': {
+        // 第17章 B6：固定倍率は実画素の整数倍。収まらない固定倍率は選べない（無効と表示）。「収まる最大」は別の選択肢
+        const vp = this.app.deps.viewport();
+        const fixed = fixedScaleChoices(vp.w, vp.h, vp.dpr, MAX_FIXED_SCALE);
+        const choices: DisplayScale[] = [0, ...fixed.filter((f) => f.enabled).map((f) => f.n)];
+        const disabled = fixed.filter((f) => !f.enabled).map((f) => f.n);
+        const scaleRow: OptRowDef = {
+          label: '画面表示倍率',
+          value: s.display.scale === 0 ? '収まる最大' : `×${s.display.scale}`,
+          arrows: true,
+          note: `実画素の整数倍（devicePixelRatio ${vp.dpr}）。収まらない倍率は選べません`,
+          change: (d) => {
+            s.display.scale = cycle<DisplayScale>(choices, s.display.scale, d);
+            this.app.deps.applyDisplay(s.display);
+            this.changed();
           },
+        };
+        const rows: OptRowDef[] = [scaleRow];
+        if (disabled.length > 0)
+          rows.push({ label: `${disabled.map((n) => `×${n}`).join('・')}（現在無効）`, value: '選択不可', arrows: true, disabled: true, note: 'この画面の大きさでは収まらないため選べません' });
+        rows.push(
           {
             label: '全画面',
             value: s.display.fullscreen ? 'オン' : 'オフ',
@@ -433,7 +696,9 @@ class OptionsScene implements Scene {
             confirm: () => this.toggleFullscreen(),
           },
           back,
-        ];
+        );
+        return rows;
+      }
     }
   }
 
@@ -504,13 +769,16 @@ class OptionsScene implements Scene {
       case 'up':
       case 'down': {
         const n = rows.length;
-        const next = (this.cursor + (ev.key === 'up' ? n - 1 : 1)) % n;
+        let next = this.cursor;
+        do next = (next + (ev.key === 'up' ? n - 1 : 1)) % n;
+        while (rows[next].disabled && next !== this.cursor);
         if (next !== this.cursor) bus.playSfx('ui_move');
         this.cursor = next;
         return;
       }
       case 'left':
       case 'right':
+        if (rows[this.cursor].disabled) return;
         rows[this.cursor].change?.(ev.key === 'left' ? -1 : 1);
         return;
       case 'confirm': {
@@ -569,10 +837,10 @@ class OptionsScene implements Scene {
     drawBackground(ctx, A);
     const titles: Record<OptPage, string> = {
       top: 'オプション',
-      audio: 'オプション：音',
-      controls: 'オプション：操作',
-      match: 'オプション：対戦',
-      display: 'オプション：表示',
+      audio: '音',
+      controls: '操作設定',
+      match: '対戦設定',
+      display: '表示設定',
       keys0: '1P キー割当',
       keys1: '2P キー割当',
       pads0: '1P ゲームパッド割当',
@@ -581,7 +849,82 @@ class OptionsScene implements Scene {
     const extra = this.page.startsWith('keys') ? '（Esc・Enter・Tab・F1〜F12 は割当できません）' : '';
     drawOptionPanel(ctx, A, titles[this.page], this.rows(), this.cursor, this.message || extra);
     if (this.confirmReset !== null) drawConfirm(ctx, A, '設定を初期値に戻しますか？', ['いいえ', 'はい'], this.confirmReset);
-    drawFooter(ctx, A);
+    drawFooter(ctx, A, this.page === 'audio' ? '上下：項目　左右：変更　A／Enter：決定　B／Esc：戻る' : undefined);
+  }
+}
+
+// ---------------------------------------------------------------- クレジット（S24）
+
+/** クレジット本文（credits_text.json：編集可能なデータ）をページへ分ける。リンクは選択して開ける */
+export function creditPages(lines: readonly string[], links: Readonly<Record<string, string>>, perPage = 8): CreditItem[][] {
+  const pages: CreditItem[][] = [];
+  for (let i = 0; i < lines.length; i += perPage) pages.push(lines.slice(i, i + perPage).map((text) => ({ text })));
+  const linkItems = Object.entries(links).map(([k, url]) => ({ text: `${k}　${url}`, url }));
+  if (linkItems.length) pages.push(linkItems);
+  return pages.length ? pages : [[]];
+}
+
+export class CreditsScene implements Scene {
+  private readonly pages: CreditItem[][];
+  private cursor = 0;
+
+  constructor(private readonly app: App) {
+    this.pages = creditPages(app.assets.credits.lines, app.assets.credits.links);
+    app.creditsPage = Math.min(app.creditsPage, this.pages.length - 1);
+  }
+
+  private get page(): CreditItem[] {
+    return this.pages[this.app.creditsPage];
+  }
+
+  private linkIndices(): number[] {
+    return this.page.map((it, i) => (it.url ? i : -1)).filter((i) => i >= 0);
+  }
+
+  onNav(ev: NavEvent): void {
+    const bus = this.app.bus;
+    const links = this.linkIndices();
+    switch (ev.key) {
+      case 'left':
+      case 'right': {
+        const n = this.pages.length;
+        const next = (this.app.creditsPage + (ev.key === 'left' ? n - 1 : 1)) % n;
+        if (next !== this.app.creditsPage) bus.playSfx('ui_move');
+        this.app.creditsPage = next;
+        this.cursor = 0;
+        return;
+      }
+      case 'up':
+      case 'down':
+        if (links.length > 1) {
+          this.cursor = (this.cursor + (ev.key === 'up' ? links.length - 1 : 1)) % links.length;
+          bus.playSfx('ui_move');
+        }
+        return;
+      case 'confirm':
+        if (links.length) {
+          bus.playSfx('ui_confirm');
+          // 外部ブラウザで開く。ページ位置はそのまま
+          this.app.deps.openUrl(this.page[links[this.cursor]].url!);
+        }
+        return;
+      case 'back':
+        bus.playSfx('ui_cancel');
+        this.app.setScene(new OptionsScene(this.app, 'top', 4));
+        return;
+      default:
+        return;
+    }
+  }
+
+  update(): void {}
+
+  render(ctx: CanvasRenderingContext2D): void {
+    const A = this.app.assets;
+    drawBackground(ctx, A);
+    const links = this.linkIndices();
+    drawCredits(ctx, A, this.page, this.app.creditsPage, this.pages.length, links.length ? links[this.cursor] : null);
+    drawFooter(ctx, A, links.length ? '左右：ページ切替　上下：リンク選択　A／Enter：開く　B／Esc：戻る' : '左右：ページ切替　B／Esc：戻る');
   }
 }
 
@@ -608,9 +951,10 @@ const HELP_PAGES: { title: string; lines: string[] }[] = [
       '同じ数字・となりの数字（1と6もとなり）・同じマークなら成功',
       '成功したピースは役ストック（最大6個）へ。役ができると光る',
       '光っている間に役宣言：合計翻数ぶんラインを上から消す',
-      '対戦では攻撃を送る。相手の攻撃は待機して2秒ごとに最大3段せり上がる',
-      '7段のまま自然上昇の時刻になると3秒の猶予。解消できなければ負け',
-      '連続取得（2秒以内）で倍率アップ、役連鎖（8秒以内）で攻撃が増える',
+      '受けた攻撃は2秒後にまとめて処理：0.4秒ごとに1段、3段ごとに小休止',
+      '待機中（枠の下）の攻撃だけを自分の攻撃で相殺できる',
+      '7段で自然上昇の時刻→3秒、攻撃で7段→2秒の猶予。6段以下に戻せなければ負け',
+      '連続取得（2秒以内）で倍率アップ、役連鎖（12秒以内）で攻撃が増える',
     ],
   },
   {
@@ -657,12 +1001,11 @@ class HelpScene implements Scene {
   render(ctx: CanvasRenderingContext2D): void {
     const A = this.app.assets;
     drawBackground(ctx, A);
-    drawPanel(ctx, A, 'help_panel', 96, 45);
     const p = HELP_PAGES[this.page];
-    drawText(ctx, `遊び方：${p.title}（${this.page + 1}/${HELP_PAGES.length}）`, 320, 60, { align: 'center', size: 13, bold: true, color: '#fff3c8' });
-    p.lines.forEach((l, i) => drawText(ctx, l, 120, 92 + i * 22, { size: 11, maxWidth: 400 }));
-    drawText(ctx, '←→／A で次のページ', 320, 270, { align: 'center', size: 9, color: '#c9d6ff' });
-    drawFooter(ctx, A, 'ページ', '戻る');
+    drawReadingPanel(ctx, A, `遊び方：${p.title}`);
+    p.lines.forEach((l, i) => drawText(ctx, l, 72, 88 + i * 24, { size: 12, maxWidth: 496 }));
+    drawText(ctx, `${this.page + 1} / ${HELP_PAGES.length}`, 572, 282, { align: 'right', size: 11, color: TEXT_COLORS.secondary });
+    drawFooter(ctx, A, '左右／A：ページ切替　B／Esc：戻る');
   }
 }
 
@@ -680,6 +1023,7 @@ export class GameScene implements Scene {
   readonly view: GameView;
   readonly director: SoundDirector;
   readonly staging: Staging;
+  readonly roleNames: RoleNameDirector;
   readonly driver: FixedStepDriver;
   controllers: Controller[] = [];
   keyboards: (KeyboardController | null)[] = [null, null];
@@ -690,18 +1034,24 @@ export class GameScene implements Scene {
   private confirmQueued = false;
   private recorded = false;
   private nextAnnouncer: Character = 'kotaro';
+  /** 2P対戦のREADY／GO担当の抽選専用の乱数（ゲームの乱数列へ影響させない） */
+  private readonly announcerRng: Rng;
   private readonly bgm: BgmId;
   /** 自動検証用：デバッグ入力のキュー（開発ビルドのみキーで使用） */
   readonly debugQueue: Command[] = [];
+  /** 開発版だけ：MODE1 対戦の計測（受攻撃の推移を1秒ごとに標本） */
+  private recorder: RoundRecorder | null = null;
 
   constructor(
     readonly app: App,
     readonly mode: GameMode,
     readonly kind: 'single' | 'cpu' | '2p',
     readonly singleMode?: SingleMode,
+    readonly characters: readonly Character[] = kind === 'single' ? ['kotaro'] : ['kotaro', 'akane'],
   ) {
     const s = app.settings;
     const seed = (Math.random() * 4294967295) >>> 0;
+    this.announcerRng = createSeededRng((Math.random() * 4294967295) >>> 0);
     this.devices = kind === 'cpu' ? [s.devices[0], { kind: 'cpu', level: s.npcLevel }] : kind === 'single' ? [s.devices[0]] : [s.devices[0], s.devices[1]];
     const readyMsFor = () => {
       this.nextAnnouncer = this.pickAnnouncer();
@@ -717,7 +1067,8 @@ export class GameScene implements Scene {
     app.bus.playBgm(this.bgm);
     this.buildControllers();
     this.view = new GameView(this.game, app.assets);
-    this.director = new SoundDirector(app.bus, this.game);
+    this.director = new SoundDirector(app.bus, this.game, characters);
+    this.roleNames = new RoleNameDirector(this.game, app.bus, characters);
     this.staging = new Staging(this.game, app.bus, this.stagingOpts());
     this.driver = new FixedStepDriver({ tickMs: 1000 / 60, step: () => this.step() });
   }
@@ -730,15 +1081,15 @@ export class GameScene implements Scene {
     return this.devices.map((d, i) => (d.kind !== 'cpu' ? (i as PlayerId) : null)).filter((x): x is PlayerId => x !== null);
   }
 
-  /** READY／GO 担当：シングル＝選択キャラ（コタロー）、CPU対戦＝相手キャラ、2P対戦＝両者からランダム（演出用の乱数） */
+  /** READY／GO 担当（第12章）：シングル＝コタロー、CPU対戦＝相手キャラ、2P対戦＝ラウンドごとに両者から等確率（専用乱数）。READYとGOは同じ担当 */
   private pickAnnouncer(): Character {
-    if (this.kind === 'single') return PLAYER_CHARACTER[0];
-    if (this.kind === 'cpu') return PLAYER_CHARACTER[1];
-    return PLAYER_CHARACTER[Math.random() < 0.5 ? 0 : 1];
+    if (this.kind === 'single') return 'kotaro';
+    if (this.kind === 'cpu') return this.characters[1];
+    return this.characters[this.announcerRng.next() < 0.5 ? 0 : 1];
   }
 
   private stagingOpts() {
-    return { announcer: this.nextAnnouncer, characters: PLAYER_CHARACTER, humans: this.humans() };
+    return { announcer: this.nextAnnouncer, characters: this.characters, humans: this.humans() };
   }
 
   private buildControllers(): void {
@@ -792,15 +1143,32 @@ export class GameScene implements Scene {
     }
     if (s.game !== before) this.onNewRound();
     this.recordIfDone();
+    this.devMeasure();
   }
 
+  /** 開発版だけ：ラウンドごとの計測記録（window.__p2like.metrics()／F8 で保存） */
+  private devMeasure(): void {
+    if (!this.app.deps.dev || this.game.mode !== 'mode1' || this.kind === 'single' || this.recorderDone) return;
+    const g = this.game as Game;
+    this.recorder ??= new RoundRecorder(g);
+    if (!g.result) return this.recorder.sample();
+    this.app.devMetrics.push({ ...this.recorder.finish(), kind: this.kind, characters: this.characters, at: new Date().toISOString() });
+    this.recorder = null;
+    this.recorderDone = true;
+  }
+
+  private recorderDone = false;
+
   private onNewRound(): void {
+    this.recorder = null;
+    this.recorderDone = false;
     for (const c of this.controllers) c.reset?.();
     this.debugQueue.length = 0;
     this.confirmQueued = false;
     this.app.bus.stopEffects();
     this.view.reset(this.game);
     this.director.reset(this.game);
+    this.roleNames.reset(this.game);
     this.staging.reset(this.game, this.stagingOpts());
     this.finalCursor = 0;
     this.recorded = false;
@@ -873,7 +1241,7 @@ export class GameScene implements Scene {
       if (repeat) return true;
       const launchKey = this.keyboards.some((k) => k?.actionOf(code) === 'launch');
       if (this.finished) {
-        if (code === 'ArrowUp' || code === 'ArrowDown') this.moveFinal();
+        if (code === 'ArrowUp' || code === 'ArrowDown') this.moveFinal(code === 'ArrowUp' ? -1 : 1);
         else if (code === 'Enter' || code === 'NumpadEnter' || code === 'Space' || launchKey) this.decideFinal();
         return true;
       }
@@ -906,7 +1274,7 @@ export class GameScene implements Scene {
     }
     if (this.game.result) {
       if (this.finished) {
-        if (ev.key === 'up' || ev.key === 'down') this.moveFinal();
+        if (ev.key === 'up' || ev.key === 'down') this.moveFinal(ev.key === 'up' ? -1 : 1);
         else if (ev.key === 'confirm') this.decideFinal();
         else if (ev.key === 'back') this.app.toMenu();
       } else if (ev.key === 'confirm') this.queueConfirm();
@@ -940,26 +1308,66 @@ export class GameScene implements Scene {
     } else this.closeDialog(d);
   }
 
-  private finalChoices(): string[] {
-    return this.session instanceof Match ? ['再戦', 'メニューへ'] : ['もう一度', 'メニューへ'];
+  /** 試合終了後の選択肢（第15章）。CPU対戦：勝ち＝次の相手へ／同じ相手と再戦／メニュー、負け＝同じ相手に再挑戦／メニュー。2P：再戦／キャラ選択／メニュー */
+  finalChoices(): { label: string; act: 'next' | 'rematch' | 'select' | 'menu' }[] {
+    const s = this.session;
+    if (s instanceof Match) {
+      if (this.kind === 'cpu') {
+        return s.matchWinner === 0
+          ? [
+              { label: '次の相手へ', act: 'next' },
+              { label: '同じ相手と再戦', act: 'rematch' },
+              { label: 'メニューへ', act: 'menu' },
+            ]
+          : [
+              { label: '同じ相手に再挑戦', act: 'rematch' },
+              { label: 'メニューへ', act: 'menu' },
+            ];
+      }
+      return [
+        { label: '同じキャラで再戦', act: 'rematch' },
+        { label: 'キャラ選択へ', act: 'select' },
+        { label: 'メニューへ', act: 'menu' },
+      ];
+    }
+    const over = this.game.result?.outcome === 'gameOver';
+    return [
+      { label: over ? '再挑戦' : 'もう一度', act: 'rematch' },
+      { label: 'メニューへ', act: 'menu' },
+    ];
   }
 
-  private moveFinal(): void {
+  private moveFinal(dir: -1 | 1 = 1): void {
     if (!this.staging.acceptReady) return;
-    this.finalCursor = (this.finalCursor + 1) % 2;
+    const n = this.finalChoices().length;
+    this.finalCursor = (this.finalCursor + dir + n) % n;
     this.app.bus.playSfx('ui_move');
   }
 
   private decideFinal(): void {
     if (!this.staging.acceptReady) return;
     const s = this.session;
+    const choice = this.finalChoices()[Math.min(this.finalCursor, this.finalChoices().length - 1)];
     this.app.bus.playSfx('ui_confirm');
-    if (this.finalCursor === 1) return this.app.toMenu();
-    const before = s.game;
-    if (s instanceof Match) s.rematch();
-    else s.restart();
-    this.app.bus.playBgm(this.bgm);
-    if (s.game !== before) this.onNewRound();
+    switch (choice.act) {
+      case 'menu':
+        return this.app.toMenu();
+      case 'next':
+        // 「次の相手へ」だけが相手順を進める（新しい試合＝勝利数は0から）
+        this.app.cpuOpponent = nextCpuOpponent(this.app.cpuOpponent);
+        return this.app.startGame(this.mode, 'cpu');
+      case 'select':
+        this.app.bus.stopEffects();
+        return this.app.setScene(new CharacterSelectScene(this.app, this.mode));
+      case 'rematch': {
+        const before = s.game;
+        if (s instanceof Match) s.rematch();
+        else s.restart();
+        this.app.bus.playBgm(this.bgm);
+        if (s.game !== before) this.onNewRound();
+        return;
+      }
+    }
   }
 
   // ---- 進行・描画 ----
@@ -968,6 +1376,7 @@ export class GameScene implements Scene {
     // ゲームパッドの入力は毎フレーム取得（ロジックは固定ステップ）
     this.driver.advance(dtMs);
     this.director.sync();
+    this.roleNames.update();
     this.staging.update();
     // 最終結果はファンファーレ後にメニュー曲へ（同じ曲なら再始動しない）
     if (this.finished && this.staging.acceptReady) this.app.bus.playBgm('menu');
@@ -981,21 +1390,29 @@ export class GameScene implements Scene {
       wins: s instanceof Match ? s.wins : undefined,
       firstTo: s instanceof Match ? s.settings.firstTo : undefined,
       round: s instanceof Match ? s.round : undefined,
-      labels: this.devices.length === 2 ? [deviceLabel(this.devices[0]), deviceLabel(this.devices[1])] : undefined,
+      labels: this.devices.length === 2 ? [this.playerLabel(0), this.playerLabel(1)] : undefined,
       result: this.staging.plan,
       matchOver: s instanceof Match && s.state === 'matchResult',
+      characters: this.characters,
+      roleLogo: (p, tick) => this.roleNames.logoAt(p, Math.floor(tick)),
     };
     this.view.render(ctx, t);
     const A = this.app.assets;
     const phase = (['A', 'B', 'C'] as const)[Math.floor(ms / 90) % 3];
     if (g.result && this.staging.acceptReady) {
       if (this.finished || (s instanceof SingleSession && s.state === 'result')) this.drawResult(ctx, phase);
-      else drawText(ctx, '決定（A／Enter／発射）で次のラウンドへ', 320, 106, { align: 'center', size: 11, bold: true, box: true });
+      else drawText(ctx, '決定（A／Enter／発射）で次のラウンドへ', 320, 18, { align: 'center', size: 10, box: true });
     }
     for (const q of this.quit) {
-      const x = q.player === 0 ? 20 : 340;
-      drawConfirm(ctx, A, `${q.player + 1}P：試合を終了してメニューへ戻りますか？`, ['続ける', '終了する'], q.cursor, x, 110, 'ゲームは止まっていません');
+      const x = q.player === 0 ? 16 : 336;
+      drawConfirm(ctx, A, `${q.player + 1}P：メニューへ戻りますか？`, ['続ける', '終了する'], q.cursor, x, 110, 'ゲームは止まっていません');
     }
+  }
+
+  private playerLabel(p: PlayerId): string {
+    const d = this.devices[p];
+    const who = d.kind === 'cpu' ? deviceLabel(d).replace('NPC', 'CPU') : `${p + 1}P`;
+    return `${who} ${CHARACTER_NAME[this.characters[p]]}`;
   }
 
   private drawResult(ctx: CanvasRenderingContext2D, phase: 'A' | 'B' | 'C'): void {
@@ -1005,12 +1422,15 @@ export class GameScene implements Scene {
     const r = this.app.records;
     const lines: string[] = [];
     let head: string | null = 'show_result';
-    let choices = this.finalChoices();
+    let choices = this.finalChoices().map((c) => c.label);
     let hint = '';
     if (s instanceof Match) {
       const w = s.matchWinner;
-      lines.push(`${w === null ? '引分け' : `${w + 1}P の勝ち`}（${s.wins[0]} − ${s.wins[1]}）`);
-      lines.push(`${s.settings.firstTo}本先取・${this.mode === 'mode1' ? 'MODE1' : 'MODE2'}`);
+      if (this.kind === 'cpu') {
+        const opp = CHARACTER_NAME[this.characters[1]];
+        lines.push(w === 0 ? `勝利！　次の相手：${CHARACTER_NAME[nextCpuOpponent(this.app.cpuOpponent)]}` : `${w === null ? '引分け' : '敗北'}　相手：${opp}`);
+      } else lines.push(w === null ? '引分け' : `${w + 1}P WIN　${2 - w}P LOSE`);
+      lines.push(`${s.wins[0]} − ${s.wins[1]}（${s.settings.firstTo}本先取・${this.mode === 'mode1' ? 'MODE1' : 'MODE2'}）`);
     } else if (g.mode === 'mode2') {
       const m2 = g as Mode2Game;
       head = 'show_all_clear';

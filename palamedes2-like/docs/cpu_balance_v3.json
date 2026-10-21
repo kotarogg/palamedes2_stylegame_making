@@ -1,0 +1,6836 @@
+{
+ "date": "2026-10-21T13:22:36.637Z",
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20
+ ],
+ "limitTicks": 36000,
+ "results": {
+  "cpu_normal__rise_normal": [
+   {
+    "seconds": 31.55,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.345833333333333,
+      "hanAvg": 1.6,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 165,
+       "chainBonus": 10,
+       "power": 13,
+       "sent": 11,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 14,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 8,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.25,
+       "pendingMax": 4,
+       "pendingAvg": 0.75
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 7.1000000000000005,
+      "hanAvg": 3,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 12,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 6,
+       "power": 18,
+       "sent": 14,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 11,
+       "overflow": 0,
+       "canceled": 6,
+       "applied": 2,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 2
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 0,
+       "blockAvg": 0,
+       "pendingMax": 4,
+       "pendingAvg": 0.3125
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 37.11666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 7.1625,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 4,
+       "streakPercentAvg": 135,
+       "chainBonus": 10,
+       "power": 14,
+       "sent": 11,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 16,
+       "overflow": 0,
+       "canceled": 5,
+       "applied": 8,
+       "pinchDiscarded": 1,
+       "blocks": 2,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 6,
+       "blockAvg": 0.3157894736842105,
+       "pendingMax": 7,
+       "pendingAvg": 0.7368421052631579
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.703333333333333,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 14,
+       "power": 18,
+       "sent": 16,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 11,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.18421052631578946,
+       "pendingMax": 4,
+       "pendingAvg": 0.47368421052631576
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 63.28333333333333,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 10,
+      "declareIntervalSec": 6.262962962962963,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 10,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 10,
+       "streakPercentAvg": 160,
+       "chainBonus": 30,
+       "power": 40,
+       "sent": 28,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 33,
+       "overflow": 0,
+       "canceled": 20,
+       "applied": 9,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.171875,
+       "pendingMax": 5,
+       "pendingAvg": 0.953125
+      }
+     },
+     {
+      "declares": 10,
+      "declareIntervalSec": 6.0018518518518515,
+      "hanAvg": 1.6,
+      "chains": {
+       "continued": 1,
+       "max": 10,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 6,
+       "streakPercentAvg": 165,
+       "chainBonus": 30,
+       "power": 36,
+       "sent": 33,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 28,
+       "overflow": 0,
+       "canceled": 5,
+       "applied": 16,
+       "pinchDiscarded": 0,
+       "blocks": 7,
+       "waves": 9
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.265625,
+       "pendingMax": 7,
+       "pendingAvg": 0.65625
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 30,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.370833333333334,
+      "hanAvg": 1.4,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 2,
+       "multiplied": 2,
+       "streakPercentAvg": 165,
+       "chainBonus": 10,
+       "power": 12,
+       "sent": 9,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 9,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 5,
+       "pinchDiscarded": 0,
+       "blocks": 1,
+       "waves": 2
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.3,
+       "pendingMax": 5,
+       "pendingAvg": 0.43333333333333335
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 7.311111111111111,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 2,
+       "multiplied": 3,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 6,
+       "power": 9,
+       "sent": 9,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 9,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.06666666666666667,
+       "pendingMax": 3,
+       "pendingAvg": 0.5333333333333333
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 63.21666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 11,
+      "declareIntervalSec": 5.648333333333333,
+      "hanAvg": 1.7272727272727273,
+      "chains": {
+       "continued": 1,
+       "max": 11,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 8,
+       "streakPercentAvg": 163.63636363636363,
+       "chainBonus": 34,
+       "power": 42,
+       "sent": 31,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 32,
+       "overflow": 0,
+       "canceled": 20,
+       "applied": 10,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 6
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.21875,
+       "pendingMax": 5,
+       "pendingAvg": 0.4375
+      }
+     },
+     {
+      "declares": 9,
+      "declareIntervalSec": 6.720833333333333,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 9,
+       "multiplied": 12,
+       "streakPercentAvg": 158.33333333333334,
+       "chainBonus": 26,
+       "power": 38,
+       "sent": 32,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 31,
+       "overflow": 0,
+       "canceled": 10,
+       "applied": 14,
+       "pinchDiscarded": 1,
+       "blocks": 6,
+       "waves": 8
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.328125,
+       "pendingMax": 5,
+       "pendingAvg": 0.65625
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 40.36666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 5.7444444444444445,
+      "hanAvg": 1.5714285714285714,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 158.33333333333334,
+       "chainBonus": 14,
+       "power": 17,
+       "sent": 13,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 21,
+       "overflow": 0,
+       "canceled": 8,
+       "applied": 9,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.43902439024390244,
+       "pendingMax": 5,
+       "pendingAvg": 0.6341463414634146
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 6.466666666666667,
+      "hanAvg": 2.1666666666666665,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 7,
+       "multiplied": 8,
+       "streakPercentAvg": 145.83333333333334,
+       "chainBonus": 14,
+       "power": 22,
+       "sent": 21,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 13,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 12,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.2682926829268293,
+       "pendingMax": 5,
+       "pendingAvg": 0.6341463414634146
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 58.21666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 9,
+      "declareIntervalSec": 6.089583333333334,
+      "hanAvg": 1.8888888888888888,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 9,
+       "streakPercentAvg": 163.88888888888889,
+       "chainBonus": 26,
+       "power": 35,
+       "sent": 25,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 30,
+       "overflow": 0,
+       "canceled": 16,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 6
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 6,
+       "blockAvg": 0.4915254237288136,
+       "pendingMax": 7,
+       "pendingAvg": 0.7966101694915254
+      }
+     },
+     {
+      "declares": 9,
+      "declareIntervalSec": 6.447916666666667,
+      "hanAvg": 1.7777777777777777,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 7,
+       "multiplied": 9,
+       "streakPercentAvg": 158.33333333333334,
+       "chainBonus": 26,
+       "power": 35,
+       "sent": 30,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 25,
+       "overflow": 0,
+       "canceled": 9,
+       "applied": 15,
+       "pinchDiscarded": 1,
+       "blocks": 5,
+       "waves": 7
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.4406779661016949,
+       "pendingMax": 5,
+       "pendingAvg": 0.6271186440677966
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 54.03333333333333,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 9,
+      "declareIntervalSec": 5.645833333333333,
+      "hanAvg": 1.3333333333333333,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 169.44444444444446,
+       "chainBonus": 26,
+       "power": 29,
+       "sent": 19,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 39,
+       "overflow": 0,
+       "canceled": 18,
+       "applied": 13,
+       "pinchDiscarded": 4,
+       "blocks": 4,
+       "waves": 7
+      },
+      "reached7": 4,
+      "attackPinchGraces": 4,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.509090909090909,
+       "pendingMax": 7,
+       "pendingAvg": 0.7454545454545455
+      }
+     },
+     {
+      "declares": 11,
+      "declareIntervalSec": 4.7299999999999995,
+      "hanAvg": 1.5454545454545454,
+      "chains": {
+       "continued": 1,
+       "max": 11,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 8,
+       "streakPercentAvg": 168.1818181818182,
+       "chainBonus": 34,
+       "power": 42,
+       "sent": 39,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 19,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 15,
+       "pinchDiscarded": 0,
+       "blocks": 5,
+       "waves": 7
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.2909090909090909,
+       "pendingMax": 5,
+       "pendingAvg": 0.5454545454545454
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 31.55,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 8.194444444444445,
+      "hanAvg": 1.75,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 143.75,
+       "chainBonus": 6,
+       "power": 10,
+       "sent": 10,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 10,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 8,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.25,
+       "pendingMax": 5,
+       "pendingAvg": 0.375
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 5.972222222222222,
+      "hanAvg": 2.25,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 7,
+       "streakPercentAvg": 150,
+       "chainBonus": 6,
+       "power": 13,
+       "sent": 10,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 10,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 4,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 2
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.125,
+       "pendingMax": 3,
+       "pendingAvg": 0.5625
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 53.45,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 6.863888888888888,
+      "hanAvg": 2.142857142857143,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 8,
+       "streakPercentAvg": 139.28571428571428,
+       "chainBonus": 18,
+       "power": 26,
+       "sent": 21,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 29,
+       "overflow": 0,
+       "canceled": 10,
+       "applied": 14,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 7
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 6,
+       "blockAvg": 0.3148148148148148,
+       "pendingMax": 7,
+       "pendingAvg": 1.037037037037037
+      }
+     },
+     {
+      "declares": 8,
+      "declareIntervalSec": 6.588095238095238,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 10,
+       "streakPercentAvg": 159.375,
+       "chainBonus": 22,
+       "power": 32,
+       "sent": 29,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 21,
+       "overflow": 0,
+       "canceled": 6,
+       "applied": 15,
+       "pinchDiscarded": 0,
+       "blocks": 5,
+       "waves": 7
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.35185185185185186,
+       "pendingMax": 6,
+       "pendingAvg": 0.4444444444444444
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 35.483333333333334,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 6.108333333333333,
+      "hanAvg": 2.2,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 9,
+       "streakPercentAvg": 165,
+       "chainBonus": 10,
+       "power": 19,
+       "sent": 17,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 12,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.05555555555555555,
+       "pendingMax": 4,
+       "pendingAvg": 0.5555555555555556
+      }
+     },
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.420833333333333,
+      "hanAvg": 1.6,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 150,
+       "chainBonus": 10,
+       "power": 13,
+       "sent": 12,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 17,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 6
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.7777777777777778,
+       "pendingMax": 7,
+       "pendingAvg": 0.6944444444444444
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 46.88333333333333,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 8,
+      "declareIntervalSec": 5.714285714285714,
+      "hanAvg": 1.75,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 8,
+       "streakPercentAvg": 165.625,
+       "chainBonus": 22,
+       "power": 30,
+       "sent": 27,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 16,
+       "overflow": 0,
+       "canceled": 5,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.19148936170212766,
+       "pendingMax": 4,
+       "pendingAvg": 0.6595744680851063
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 7.909999999999999,
+      "hanAvg": 2.1666666666666665,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 7,
+       "multiplied": 8,
+       "streakPercentAvg": 150,
+       "chainBonus": 14,
+       "power": 22,
+       "sent": 16,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 27,
+       "overflow": 0,
+       "canceled": 12,
+       "applied": 11,
+       "pinchDiscarded": 1,
+       "blocks": 4,
+       "waves": 6
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 1,
+       "blockAvg": 0.06382978723404255,
+       "pendingMax": 6,
+       "pendingAvg": 0.8936170212765957
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 43.733333333333334,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 6.038888888888889,
+      "hanAvg": 1.8571428571428572,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 6,
+       "streakPercentAvg": 153.57142857142858,
+       "chainBonus": 18,
+       "power": 24,
+       "sent": 22,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 13,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 9,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 6
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.29545454545454547,
+       "pendingMax": 4,
+       "pendingAvg": 0.3409090909090909
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 7.08,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 14,
+       "power": 17,
+       "sent": 13,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 22,
+       "overflow": 0,
+       "canceled": 6,
+       "applied": 7,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.25,
+       "pendingMax": 5,
+       "pendingAvg": 0.75
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 40.35,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 6,
+      "declareIntervalSec": 6.529999999999999,
+      "hanAvg": 2.3333333333333335,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 9,
+       "streakPercentAvg": 141.66666666666666,
+       "chainBonus": 14,
+       "power": 23,
+       "sent": 16,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 20,
+       "overflow": 0,
+       "canceled": 12,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.12195121951219512,
+       "pendingMax": 5,
+       "pendingAvg": 0.5365853658536586
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 6.07,
+      "hanAvg": 1.8333333333333333,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 6,
+       "streakPercentAvg": 158.33333333333334,
+       "chainBonus": 14,
+       "power": 20,
+       "sent": 20,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 16,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 12,
+       "pinchDiscarded": 2,
+       "blocks": 5,
+       "waves": 7
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.2682926829268293,
+       "pendingMax": 4,
+       "pendingAvg": 0.6341463414634146
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 25.866666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 5.911111111111111,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 2,
+       "multiplied": 2,
+       "streakPercentAvg": 143.75,
+       "chainBonus": 6,
+       "power": 8,
+       "sent": 8,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 11,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.5769230769230769,
+       "pendingMax": 6,
+       "pendingAvg": 0.6153846153846154
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 5.061111111111111,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 156.25,
+       "chainBonus": 6,
+       "power": 11,
+       "sent": 11,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 8,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 4
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.19230769230769232,
+       "pendingMax": 3,
+       "pendingAvg": 0.2692307692307692
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 31.666666666666668,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.466666666666667,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 155,
+       "chainBonus": 10,
+       "power": 15,
+       "sent": 14,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 13,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 7,
+       "pinchDiscarded": 2,
+       "blocks": 2,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 6,
+       "blockAvg": 0.46875,
+       "pendingMax": 6,
+       "pendingAvg": 0.6875
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.116666666666666,
+      "hanAvg": 1.6666666666666667,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 155,
+       "chainBonus": 10,
+       "power": 14,
+       "sent": 13,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 14,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 9,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 4
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 1,
+       "blockAvg": 0.09375,
+       "pendingMax": 4,
+       "pendingAvg": 0.71875
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 33.06666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.336666666666667,
+      "hanAvg": 1.6666666666666667,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 160,
+       "chainBonus": 10,
+       "power": 15,
+       "sent": 15,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 11,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.29411764705882354,
+       "pendingMax": 6,
+       "pendingAvg": 0.6470588235294118
+      }
+     },
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.8125,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 4,
+       "streakPercentAvg": 135,
+       "chainBonus": 10,
+       "power": 14,
+       "sent": 11,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 15,
+       "overflow": 0,
+       "canceled": 5,
+       "applied": 10,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.47058823529411764,
+       "pendingMax": 5,
+       "pendingAvg": 0.5882352941176471
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 68.48333333333333,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 10,
+      "declareIntervalSec": 6.290740740740741,
+      "hanAvg": 1.6,
+      "chains": {
+       "continued": 1,
+       "max": 10,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 7,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 30,
+       "power": 37,
+       "sent": 21,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 38,
+       "overflow": 0,
+       "canceled": 28,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.10144927536231885,
+       "pendingMax": 5,
+       "pendingAvg": 0.6666666666666666
+      }
+     },
+     {
+      "declares": 10,
+      "declareIntervalSec": 6.6537037037037035,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 10,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 9,
+       "streakPercentAvg": 152.5,
+       "chainBonus": 30,
+       "power": 39,
+       "sent": 38,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 21,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 18,
+       "pinchDiscarded": 1,
+       "blocks": 7,
+       "waves": 9
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.14492753623188406,
+       "pendingMax": 4,
+       "pendingAvg": 0.5507246376811594
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 33.18333333333333,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.533333333333333,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 8,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 14,
+       "power": 22,
+       "sent": 19,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 18,
+       "overflow": 0,
+       "canceled": 6,
+       "applied": 10,
+       "pinchDiscarded": 1,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 3,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.8529411764705882,
+       "pendingMax": 6,
+       "pendingAvg": 0.6470588235294118
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 4.7299999999999995,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 170.83333333333334,
+       "chainBonus": 14,
+       "power": 18,
+       "sent": 18,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 19,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 9,
+       "pinchDiscarded": 4,
+       "blocks": 5,
+       "waves": 6
+      },
+      "reached7": 3,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.5294117647058824,
+       "pendingMax": 7,
+       "pendingAvg": 0.9705882352941176
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 41.45,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 6,
+      "declareIntervalSec": 7.156666666666666,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 141.66666666666666,
+       "chainBonus": 14,
+       "power": 17,
+       "sent": 14,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 15,
+       "overflow": 0,
+       "canceled": 5,
+       "applied": 8,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 4,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.14285714285714285,
+       "pendingMax": 4,
+       "pendingAvg": 0.5238095238095238
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 6.63,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 158.33333333333334,
+       "chainBonus": 14,
+       "power": 17,
+       "sent": 15,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 14,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.2857142857142857,
+       "pendingMax": 4,
+       "pendingAvg": 0.5238095238095238
+      }
+     }
+    ]
+   }
+  ],
+  "cpu_normal__rise_hard": [
+   {
+    "seconds": 36.9,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 4.875,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 7,
+       "multiplied": 9,
+       "streakPercentAvg": 154.16666666666666,
+       "chainBonus": 14,
+       "power": 23,
+       "sent": 22,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 18,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 13,
+       "pinchDiscarded": 1,
+       "blocks": 4,
+       "waves": 6
+      },
+      "reached7": 3,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.8648648648648649,
+       "pendingMax": 7,
+       "pendingAvg": 0.8108108108108109
+      }
+     },
+     {
+      "declares": 7,
+      "declareIntervalSec": 4.861111111111112,
+      "hanAvg": 1.7142857142857142,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 7,
+       "streakPercentAvg": 171.42857142857142,
+       "chainBonus": 18,
+       "power": 25,
+       "sent": 18,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 22,
+       "overflow": 0,
+       "canceled": 12,
+       "applied": 9,
+       "pinchDiscarded": 1,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 5,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.32432432432432434,
+       "pendingMax": 7,
+       "pendingAvg": 0.7567567567567568
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 36.516666666666666,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 6.008333333333334,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 165,
+       "chainBonus": 10,
+       "power": 15,
+       "sent": 8,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 17,
+       "overflow": 0,
+       "canceled": 13,
+       "applied": 2,
+       "pinchDiscarded": 0,
+       "blocks": 1,
+       "waves": 1
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.08108108108108109,
+       "pendingMax": 4,
+       "pendingAvg": 0.43243243243243246
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.423333333333334,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 14,
+       "power": 18,
+       "sent": 17,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 8,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.13513513513513514,
+       "pendingMax": 3,
+       "pendingAvg": 0.40540540540540543
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 47.85,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 8,
+      "declareIntervalSec": 5.6499999999999995,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 10,
+       "streakPercentAvg": 156.25,
+       "chainBonus": 22,
+       "power": 32,
+       "sent": 22,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 33,
+       "overflow": 0,
+       "canceled": 19,
+       "applied": 11,
+       "pinchDiscarded": 3,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 6,
+       "blockAvg": 0.4791666666666667,
+       "pendingMax": 8,
+       "pendingAvg": 1.0416666666666667
+      }
+     },
+     {
+      "declares": 8,
+      "declareIntervalSec": 5.50952380952381,
+      "hanAvg": 2.25,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 10,
+       "multiplied": 15,
+       "streakPercentAvg": 165.625,
+       "chainBonus": 22,
+       "power": 37,
+       "sent": 33,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 22,
+       "overflow": 0,
+       "canceled": 7,
+       "applied": 12,
+       "pinchDiscarded": 1,
+       "blocks": 4,
+       "waves": 6
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.3333333333333333,
+       "pendingMax": 5,
+       "pendingAvg": 0.8541666666666666
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 45.3,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 8,
+      "declareIntervalSec": 5.219047619047619,
+      "hanAvg": 1.25,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 2,
+       "multiplied": 2,
+       "streakPercentAvg": 159.375,
+       "chainBonus": 22,
+       "power": 24,
+       "sent": 19,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 19,
+       "overflow": 0,
+       "canceled": 9,
+       "applied": 8,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 3,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.30434782608695654,
+       "pendingMax": 6,
+       "pendingAvg": 0.6521739130434783
+      }
+     },
+     {
+      "declares": 7,
+      "declareIntervalSec": 6.272222222222222,
+      "hanAvg": 1.7142857142857142,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 5,
+       "streakPercentAvg": 142.85714285714286,
+       "chainBonus": 18,
+       "power": 23,
+       "sent": 19,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 19,
+       "overflow": 0,
+       "canceled": 6,
+       "applied": 9,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 3,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.30434782608695654,
+       "pendingMax": 4,
+       "pendingAvg": 0.5869565217391305
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 63.266666666666666,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 12,
+      "declareIntervalSec": 4.9818181818181815,
+      "hanAvg": 1.3333333333333333,
+      "chains": {
+       "continued": 1,
+       "max": 12,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 168.75,
+       "chainBonus": 38,
+       "power": 43,
+       "sent": 35,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 27,
+       "overflow": 0,
+       "canceled": 13,
+       "applied": 11,
+       "pinchDiscarded": 3,
+       "blocks": 5,
+       "waves": 6
+      },
+      "reached7": 4,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.21875,
+       "pendingMax": 4,
+       "pendingAvg": 0.53125
+      }
+     },
+     {
+      "declares": 12,
+      "declareIntervalSec": 5.243939393939393,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 12,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 5,
+       "streakPercentAvg": 165.9090909090909,
+       "chainBonus": 34,
+       "power": 39,
+       "sent": 27,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 35,
+       "overflow": 0,
+       "canceled": 22,
+       "applied": 10,
+       "pinchDiscarded": 0,
+       "blocks": 5,
+       "waves": 6
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.203125,
+       "pendingMax": 7,
+       "pendingAvg": 0.78125
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 57.416666666666664,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 11,
+      "declareIntervalSec": 4.9350000000000005,
+      "hanAvg": 1.4545454545454546,
+      "chains": {
+       "continued": 1,
+       "max": 11,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 6,
+       "streakPercentAvg": 172.72727272727272,
+       "chainBonus": 34,
+       "power": 40,
+       "sent": 32,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 33,
+       "overflow": 0,
+       "canceled": 13,
+       "applied": 13,
+       "pinchDiscarded": 2,
+       "blocks": 6,
+       "waves": 8
+      },
+      "reached7": 5,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.29310344827586204,
+       "pendingMax": 7,
+       "pendingAvg": 0.9137931034482759
+      }
+     },
+     {
+      "declares": 10,
+      "declareIntervalSec": 5.7444444444444445,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 10,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 10,
+       "multiplied": 13,
+       "streakPercentAvg": 167.5,
+       "chainBonus": 30,
+       "power": 43,
+       "sent": 33,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 32,
+       "overflow": 0,
+       "canceled": 17,
+       "applied": 12,
+       "pinchDiscarded": 0,
+       "blocks": 6,
+       "waves": 8
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.3620689655172414,
+       "pendingMax": 7,
+       "pendingAvg": 0.7931034482758621
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 27.5,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 6.344444444444445,
+      "hanAvg": 1.75,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 6,
+       "power": 10,
+       "sent": 9,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 8,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 6,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 3
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.25,
+       "pendingMax": 5,
+       "pendingAvg": 0.5357142857142857
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 6.727777777777778,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 168.75,
+       "chainBonus": 6,
+       "power": 11,
+       "sent": 8,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 9,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 5,
+       "pinchDiscarded": 0,
+       "blocks": 1,
+       "waves": 2
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.42857142857142855,
+       "pendingMax": 5,
+       "pendingAvg": 0.5357142857142857
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 31.316666666666666,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.6125,
+      "hanAvg": 1.6,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 160,
+       "chainBonus": 10,
+       "power": 14,
+       "sent": 14,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 14,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 7,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 3,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.21875,
+       "pendingMax": 5,
+       "pendingAvg": 0.71875
+      }
+     },
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.966666666666667,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 6,
+       "streakPercentAvg": 160,
+       "chainBonus": 10,
+       "power": 16,
+       "sent": 14,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 14,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 3
+      },
+      "reached7": 1,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 6,
+       "blockAvg": 0.65625,
+       "pendingMax": 6,
+       "pendingAvg": 0.625
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 41.9,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 5.463888888888889,
+      "hanAvg": 2.142857142857143,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 12,
+       "streakPercentAvg": 164.28571428571428,
+       "chainBonus": 18,
+       "power": 30,
+       "sent": 26,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 16,
+       "overflow": 0,
+       "canceled": 8,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.2619047619047619,
+       "pendingMax": 4,
+       "pendingAvg": 0.4523809523809524
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 6.266666666666667,
+      "hanAvg": 2.3333333333333335,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 10,
+       "streakPercentAvg": 158.33333333333334,
+       "chainBonus": 14,
+       "power": 24,
+       "sent": 16,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 26,
+       "overflow": 0,
+       "canceled": 15,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.30952380952380953,
+       "pendingMax": 7,
+       "pendingAvg": 0.8095238095238095
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 25.216666666666665,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 4.688888888888889,
+      "hanAvg": 1.75,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 168.75,
+       "chainBonus": 6,
+       "power": 9,
+       "sent": 8,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 9,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.23076923076923078,
+       "pendingMax": 3,
+       "pendingAvg": 0.5384615384615384
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 6.083333333333333,
+      "hanAvg": 1.75,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 156.25,
+       "chainBonus": 6,
+       "power": 9,
+       "sent": 9,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 8,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 7,
+       "pinchDiscarded": 1,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.23076923076923078,
+       "pendingMax": 3,
+       "pendingAvg": 0.3076923076923077
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 22.6,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 3,
+      "declareIntervalSec": 4.833333333333333,
+      "hanAvg": 1.6666666666666667,
+      "chains": {
+       "continued": 1,
+       "max": 3,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 2,
+       "multiplied": 3,
+       "streakPercentAvg": 158.33333333333334,
+       "chainBonus": 3,
+       "power": 6,
+       "sent": 5,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 3,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 1,
+       "pinchDiscarded": 0,
+       "blocks": 1,
+       "waves": 1
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 0,
+       "blockAvg": 0,
+       "pendingMax": 2,
+       "pendingAvg": 0.21739130434782608
+      }
+     },
+     {
+      "declares": 3,
+      "declareIntervalSec": 5.133333333333334,
+      "hanAvg": 1,
+      "chains": {
+       "continued": 1,
+       "max": 3,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 0,
+       "multiplied": 0,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 3,
+       "power": 3,
+       "sent": 3,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 5,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 3,
+       "pinchDiscarded": 2,
+       "blocks": 2,
+       "waves": 3
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 1,
+       "blockAvg": 0.17391304347826086,
+       "pendingMax": 4,
+       "pendingAvg": 0.2608695652173913
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 40.31666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 5.261111111111111,
+      "hanAvg": 1.4285714285714286,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 157.14285714285714,
+       "chainBonus": 18,
+       "power": 22,
+       "sent": 18,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 18,
+       "overflow": 0,
+       "canceled": 6,
+       "applied": 8,
+       "pinchDiscarded": 4,
+       "blocks": 5,
+       "waves": 5
+      },
+      "reached7": 6,
+      "attackPinchGraces": 4,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.3170731707317073,
+       "pendingMax": 3,
+       "pendingAvg": 0.6097560975609756
+      }
+     },
+     {
+      "declares": 7,
+      "declareIntervalSec": 5.363888888888888,
+      "hanAvg": 1.8571428571428572,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 6,
+       "streakPercentAvg": 157.14285714285714,
+       "chainBonus": 18,
+       "power": 24,
+       "sent": 18,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 18,
+       "overflow": 0,
+       "canceled": 11,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.07317073170731707,
+       "pendingMax": 4,
+       "pendingAvg": 0.4878048780487805
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 37.05,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 5.1499999999999995,
+      "hanAvg": 1.7142857142857142,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 7,
+       "streakPercentAvg": 164.28571428571428,
+       "chainBonus": 18,
+       "power": 25,
+       "sent": 21,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 14,
+       "overflow": 0,
+       "canceled": 7,
+       "applied": 3,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.13157894736842105,
+       "pendingMax": 4,
+       "pendingAvg": 0.4473684210526316
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.743333333333333,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 158.33333333333334,
+       "chainBonus": 14,
+       "power": 17,
+       "sent": 14,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 21,
+       "overflow": 0,
+       "canceled": 5,
+       "applied": 6,
+       "pinchDiscarded": 1,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 3,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.23684210526315788,
+       "pendingMax": 9,
+       "pendingAvg": 0.6578947368421053
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 32,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 6.416666666666667,
+      "hanAvg": 2.5,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 6,
+       "streakPercentAvg": 131.25,
+       "chainBonus": 6,
+       "power": 12,
+       "sent": 11,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 17,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.3125,
+       "pendingMax": 7,
+       "pendingAvg": 0.78125
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.14,
+      "hanAvg": 1.6666666666666667,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 14,
+       "power": 19,
+       "sent": 17,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 11,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 4,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.28125,
+       "pendingMax": 4,
+       "pendingAvg": 0.59375
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 24.55,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 5.316666666666666,
+      "hanAvg": 2.25,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 6,
+       "streakPercentAvg": 150,
+       "chainBonus": 6,
+       "power": 12,
+       "sent": 10,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 6,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 3,
+       "pinchDiscarded": 0,
+       "blocks": 1,
+       "waves": 1
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.32,
+       "pendingMax": 3,
+       "pendingAvg": 0.24
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 5.305555555555555,
+      "hanAvg": 1.25,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 1,
+       "multiplied": 1,
+       "streakPercentAvg": 168.75,
+       "chainBonus": 6,
+       "power": 7,
+       "sent": 6,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 10,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 6,
+       "pinchDiscarded": 1,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 1,
+       "blockAvg": 0.12,
+       "pendingMax": 4,
+       "pendingAvg": 0.48
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 47.8,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 8,
+      "declareIntervalSec": 6.066666666666667,
+      "hanAvg": 2.25,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 10,
+       "multiplied": 15,
+       "streakPercentAvg": 164.28571428571428,
+       "chainBonus": 18,
+       "power": 33,
+       "sent": 27,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 20,
+       "overflow": 0,
+       "canceled": 10,
+       "applied": 9,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.3541666666666667,
+       "pendingMax": 5,
+       "pendingAvg": 0.6666666666666666
+      }
+     },
+     {
+      "declares": 9,
+      "declareIntervalSec": 4.883333333333334,
+      "hanAvg": 1.2222222222222223,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 2,
+       "multiplied": 2,
+       "streakPercentAvg": 172.22222222222223,
+       "chainBonus": 26,
+       "power": 28,
+       "sent": 20,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 27,
+       "overflow": 0,
+       "canceled": 13,
+       "applied": 10,
+       "pinchDiscarded": 2,
+       "blocks": 2,
+       "waves": 4
+      },
+      "reached7": 5,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 9,
+       "blockAvg": 0.5,
+       "pendingMax": 9,
+       "pendingAvg": 0.8541666666666666
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 28.133333333333333,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 4.816666666666666,
+      "hanAvg": 1,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 0,
+       "multiplied": 0,
+       "streakPercentAvg": 170,
+       "chainBonus": 10,
+       "power": 10,
+       "sent": 10,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 5,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 4,
+       "pinchDiscarded": 1,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 4,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 1,
+       "blockAvg": 0.10344827586206896,
+       "pendingMax": 2,
+       "pendingAvg": 0.20689655172413793
+      }
+     },
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.945833333333334,
+      "hanAvg": 1.2,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 1,
+       "multiplied": 1,
+       "streakPercentAvg": 150,
+       "chainBonus": 6,
+       "power": 7,
+       "sent": 5,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 10,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 4,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 1,
+       "blockAvg": 0.06896551724137931,
+       "pendingMax": 4,
+       "pendingAvg": 0.5862068965517241
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 29.266666666666666,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 6,
+      "declareIntervalSec": 4.6033333333333335,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 1,
+       "multiplied": 1,
+       "streakPercentAvg": 170,
+       "chainBonus": 10,
+       "power": 11,
+       "sent": 10,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 9,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 5,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.23333333333333334,
+       "pendingMax": 4,
+       "pendingAvg": 0.5333333333333333
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 6.7555555555555555,
+      "hanAvg": 1.75,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 6,
+       "power": 10,
+       "sent": 9,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 10,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 6,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 3
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.26666666666666666,
+       "pendingMax": 5,
+       "pendingAvg": 0.43333333333333335
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 24.783333333333335,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 3,
+      "declareIntervalSec": 6.583333333333333,
+      "hanAvg": 2.3333333333333335,
+      "chains": {
+       "continued": 1,
+       "max": 3,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 6,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 3,
+       "power": 9,
+       "sent": 7,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 8,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 4,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 3
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.12,
+       "pendingMax": 4,
+       "pendingAvg": 0.52
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 4.711111111111111,
+      "hanAvg": 1.75,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 156.25,
+       "chainBonus": 6,
+       "power": 9,
+       "sent": 8,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 7,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 6,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 2
+      },
+      "reached7": 3,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.24,
+       "pendingMax": 3,
+       "pendingAvg": 0.52
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 30.85,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 6.1125,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 160,
+       "chainBonus": 10,
+       "power": 15,
+       "sent": 13,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 11,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 6,
+       "pinchDiscarded": 1,
+       "blocks": 2,
+       "waves": 3
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.3870967741935484,
+       "pendingMax": 4,
+       "pendingAvg": 0.5806451612903226
+      }
+     },
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.470833333333333,
+      "hanAvg": 1.6,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 170,
+       "chainBonus": 10,
+       "power": 13,
+       "sent": 11,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 13,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 6,
+       "pinchDiscarded": 1,
+       "blocks": 4,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.06451612903225806,
+       "pendingMax": 4,
+       "pendingAvg": 0.5806451612903226
+      }
+     }
+    ]
+   }
+  ],
+  "cpu_hard__rise_normal": [
+   {
+    "seconds": 85.78333333333333,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 15,
+      "declareIntervalSec": 5.501190476190476,
+      "hanAvg": 1.7333333333333334,
+      "chains": {
+       "continued": 1,
+       "max": 15,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 11,
+       "multiplied": 15,
+       "streakPercentAvg": 163.33333333333334,
+       "chainBonus": 50,
+       "power": 65,
+       "sent": 57,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 48,
+       "overflow": 0,
+       "canceled": 15,
+       "applied": 23,
+       "pinchDiscarded": 2,
+       "blocks": 7,
+       "waves": 12
+      },
+      "reached7": 3,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.6162790697674418,
+       "pendingMax": 7,
+       "pendingAvg": 1
+      }
+     },
+     {
+      "declares": 14,
+      "declareIntervalSec": 6.228205128205128,
+      "hanAvg": 2.142857142857143,
+      "chains": {
+       "continued": 1,
+       "max": 14,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 16,
+       "multiplied": 21,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 46,
+       "power": 67,
+       "sent": 48,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 57,
+       "overflow": 0,
+       "canceled": 35,
+       "applied": 18,
+       "pinchDiscarded": 1,
+       "blocks": 7,
+       "waves": 10
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.2558139534883721,
+       "pendingMax": 7,
+       "pendingAvg": 0.8488372093023255
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 52.416666666666664,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 9,
+      "declareIntervalSec": 5.745833333333334,
+      "hanAvg": 1.8888888888888888,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 10,
+       "streakPercentAvg": 161.11111111111111,
+       "chainBonus": 26,
+       "power": 36,
+       "sent": 26,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 33,
+       "overflow": 0,
+       "canceled": 19,
+       "applied": 11,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 6
+      },
+      "reached7": 4,
+      "attackPinchGraces": 4,
+      "stock": {
+       "blockMax": 6,
+       "blockAvg": 0.5471698113207547,
+       "pendingMax": 7,
+       "pendingAvg": 1.0943396226415094
+      }
+     },
+     {
+      "declares": 9,
+      "declareIntervalSec": 5.545833333333333,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 9,
+       "multiplied": 12,
+       "streakPercentAvg": 161.11111111111111,
+       "chainBonus": 26,
+       "power": 38,
+       "sent": 33,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 26,
+       "overflow": 0,
+       "canceled": 8,
+       "applied": 12,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 6
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.33962264150943394,
+       "pendingMax": 5,
+       "pendingAvg": 0.6226415094339622
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 52.15,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 9,
+      "declareIntervalSec": 5.564583333333333,
+      "hanAvg": 1.5555555555555556,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 6,
+       "streakPercentAvg": 158.33333333333334,
+       "chainBonus": 26,
+       "power": 32,
+       "sent": 26,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 33,
+       "overflow": 0,
+       "canceled": 10,
+       "applied": 17,
+       "pinchDiscarded": 2,
+       "blocks": 5,
+       "waves": 9
+      },
+      "reached7": 4,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.5849056603773585,
+       "pendingMax": 7,
+       "pendingAvg": 0.9056603773584906
+      }
+     },
+     {
+      "declares": 10,
+      "declareIntervalSec": 4.9944444444444445,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 10,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 7,
+       "streakPercentAvg": 167.5,
+       "chainBonus": 30,
+       "power": 37,
+       "sent": 33,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 26,
+       "overflow": 0,
+       "canceled": 7,
+       "applied": 15,
+       "pinchDiscarded": 1,
+       "blocks": 7,
+       "waves": 9
+      },
+      "reached7": 3,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.2641509433962264,
+       "pendingMax": 5,
+       "pendingAvg": 0.7358490566037735
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 25.25,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 5.733333333333333,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 6,
+       "streakPercentAvg": 168.75,
+       "chainBonus": 6,
+       "power": 12,
+       "sent": 12,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 12,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 10,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.7692307692307693,
+       "pendingMax": 4,
+       "pendingAvg": 0.3076923076923077
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 5.211111111111111,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 6,
+       "streakPercentAvg": 168.75,
+       "chainBonus": 6,
+       "power": 12,
+       "sent": 12,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 12,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 10,
+       "pinchDiscarded": 2,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.34615384615384615,
+       "pendingMax": 5,
+       "pendingAvg": 0.7307692307692307
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 80.8,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 15,
+      "declareIntervalSec": 5.160714285714286,
+      "hanAvg": 1.7333333333333334,
+      "chains": {
+       "continued": 1,
+       "max": 15,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 11,
+       "multiplied": 14,
+       "streakPercentAvg": 170,
+       "chainBonus": 50,
+       "power": 64,
+       "sent": 43,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 67,
+       "overflow": 0,
+       "canceled": 37,
+       "applied": 23,
+       "pinchDiscarded": 0,
+       "blocks": 9,
+       "waves": 12
+      },
+      "reached7": 3,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.2839506172839506,
+       "pendingMax": 7,
+       "pendingAvg": 0.8518518518518519
+      }
+     },
+     {
+      "declares": 17,
+      "declareIntervalSec": 4.597916666666666,
+      "hanAvg": 1.7647058823529411,
+      "chains": {
+       "continued": 1,
+       "max": 17,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 13,
+       "multiplied": 16,
+       "streakPercentAvg": 173.52941176470588,
+       "chainBonus": 58,
+       "power": 74,
+       "sent": 67,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 43,
+       "overflow": 0,
+       "canceled": 13,
+       "applied": 23,
+       "pinchDiscarded": 3,
+       "blocks": 11,
+       "waves": 13
+      },
+      "reached7": 6,
+      "attackPinchGraces": 4,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.30864197530864196,
+       "pendingMax": 5,
+       "pendingAvg": 0.8148148148148148
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 26.683333333333334,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 4.916666666666667,
+      "hanAvg": 2.25,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 7,
+       "streakPercentAvg": 168.75,
+       "chainBonus": 6,
+       "power": 13,
+       "sent": 11,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 10,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 5,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 2
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.25925925925925924,
+       "pendingMax": 4,
+       "pendingAvg": 0.5925925925925926
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 6.183333333333334,
+      "hanAvg": 1.75,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 6,
+       "power": 10,
+       "sent": 10,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 11,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 9,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.3333333333333333,
+       "pendingMax": 5,
+       "pendingAvg": 0.8148148148148148
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 53.61666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 9,
+      "declareIntervalSec": 5.720833333333333,
+      "hanAvg": 1.5555555555555556,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 6,
+       "streakPercentAvg": 163.88888888888889,
+       "chainBonus": 26,
+       "power": 32,
+       "sent": 31,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 25,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 15,
+       "pinchDiscarded": 3,
+       "blocks": 7,
+       "waves": 9
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.37037037037037035,
+       "pendingMax": 5,
+       "pendingAvg": 0.7962962962962963
+      }
+     },
+     {
+      "declares": 9,
+      "declareIntervalSec": 5.91875,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 9,
+       "multiplied": 10,
+       "streakPercentAvg": 169.44444444444446,
+       "chainBonus": 26,
+       "power": 36,
+       "sent": 25,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 31,
+       "overflow": 0,
+       "canceled": 20,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.42592592592592593,
+       "pendingMax": 7,
+       "pendingAvg": 0.6666666666666666
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 76.28333333333333,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 15,
+      "declareIntervalSec": 4.958333333333334,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 15,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 12,
+       "multiplied": 14,
+       "streakPercentAvg": 170,
+       "chainBonus": 50,
+       "power": 64,
+       "sent": 59,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 36,
+       "overflow": 0,
+       "canceled": 8,
+       "applied": 26,
+       "pinchDiscarded": 2,
+       "blocks": 9,
+       "waves": 14
+      },
+      "reached7": 4,
+      "attackPinchGraces": 4,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.23376623376623376,
+       "pendingMax": 7,
+       "pendingAvg": 0.6623376623376623
+      }
+     },
+     {
+      "declares": 13,
+      "declareIntervalSec": 5.6930555555555555,
+      "hanAvg": 1.6923076923076923,
+      "chains": {
+       "continued": 1,
+       "max": 13,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 9,
+       "multiplied": 13,
+       "streakPercentAvg": 167.30769230769232,
+       "chainBonus": 42,
+       "power": 55,
+       "sent": 36,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 59,
+       "overflow": 0,
+       "canceled": 34,
+       "applied": 21,
+       "pinchDiscarded": 1,
+       "blocks": 5,
+       "waves": 10
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.4675324675324675,
+       "pendingMax": 7,
+       "pendingAvg": 1.0129870129870129
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 69.21666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 12,
+      "declareIntervalSec": 5.898484848484849,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 12,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 11,
+       "multiplied": 15,
+       "streakPercentAvg": 156.8181818181818,
+       "chainBonus": 34,
+       "power": 49,
+       "sent": 40,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 34,
+       "overflow": 0,
+       "canceled": 16,
+       "applied": 16,
+       "pinchDiscarded": 0,
+       "blocks": 7,
+       "waves": 9
+      },
+      "reached7": 3,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.21428571428571427,
+       "pendingMax": 4,
+       "pendingAvg": 0.44285714285714284
+      }
+     },
+     {
+      "declares": 13,
+      "declareIntervalSec": 5.165277777777778,
+      "hanAvg": 1.3076923076923077,
+      "chains": {
+       "continued": 1,
+       "max": 13,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 4,
+       "streakPercentAvg": 165.3846153846154,
+       "chainBonus": 42,
+       "power": 46,
+       "sent": 34,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 40,
+       "overflow": 0,
+       "canceled": 21,
+       "applied": 17,
+       "pinchDiscarded": 2,
+       "blocks": 7,
+       "waves": 9
+      },
+      "reached7": 4,
+      "attackPinchGraces": 4,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.2,
+       "pendingMax": 4,
+       "pendingAvg": 0.5428571428571428
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 48.71666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 8,
+      "declareIntervalSec": 6.192857142857143,
+      "hanAvg": 2.125,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 9,
+       "multiplied": 10,
+       "streakPercentAvg": 146.875,
+       "chainBonus": 22,
+       "power": 32,
+       "sent": 21,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 28,
+       "overflow": 0,
+       "canceled": 20,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 4
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.22448979591836735,
+       "pendingMax": 5,
+       "pendingAvg": 0.7346938775510204
+      }
+     },
+     {
+      "declares": 8,
+      "declareIntervalSec": 5.707142857142857,
+      "hanAvg": 1.875,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 7,
+       "multiplied": 9,
+       "streakPercentAvg": 159.375,
+       "chainBonus": 22,
+       "power": 31,
+       "sent": 28,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 21,
+       "overflow": 0,
+       "canceled": 6,
+       "applied": 12,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.5306122448979592,
+       "pendingMax": 7,
+       "pendingAvg": 0.7551020408163265
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 46.9,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 8,
+      "declareIntervalSec": 5.378571428571428,
+      "hanAvg": 1.25,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 2,
+       "multiplied": 2,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 22,
+       "power": 24,
+       "sent": 20,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 19,
+       "overflow": 0,
+       "canceled": 8,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.19148936170212766,
+       "pendingMax": 4,
+       "pendingAvg": 0.6808510638297872
+      }
+     },
+     {
+      "declares": 8,
+      "declareIntervalSec": 5.345238095238095,
+      "hanAvg": 1.25,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 2,
+       "multiplied": 2,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 22,
+       "power": 24,
+       "sent": 19,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 20,
+       "overflow": 0,
+       "canceled": 9,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 5,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.1702127659574468,
+       "pendingMax": 4,
+       "pendingAvg": 0.5106382978723404
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 33.25,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 6.120833333333334,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 7,
+       "streakPercentAvg": 165,
+       "chainBonus": 10,
+       "power": 17,
+       "sent": 17,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 18,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 10,
+       "pinchDiscarded": 1,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.9117647058823529,
+       "pendingMax": 5,
+       "pendingAvg": 0.6470588235294118
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 4.746666666666667,
+      "hanAvg": 1.6666666666666667,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 158.33333333333334,
+       "chainBonus": 14,
+       "power": 19,
+       "sent": 18,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 17,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 10,
+       "pinchDiscarded": 3,
+       "blocks": 4,
+       "waves": 6
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.5588235294117647,
+       "pendingMax": 5,
+       "pendingAvg": 0.6470588235294118
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 31.266666666666666,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.904166666666667,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 6,
+       "streakPercentAvg": 155,
+       "chainBonus": 10,
+       "power": 16,
+       "sent": 16,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 12,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 10,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.4375,
+       "pendingMax": 3,
+       "pendingAvg": 0.4375
+      }
+     },
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.65,
+      "hanAvg": 1.6,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 160,
+       "chainBonus": 10,
+       "power": 13,
+       "sent": 12,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 16,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.4375,
+       "pendingMax": 4,
+       "pendingAvg": 0.59375
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 36.5,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.713333333333333,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 7,
+       "streakPercentAvg": 170.83333333333334,
+       "chainBonus": 14,
+       "power": 21,
+       "sent": 19,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 13,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 8,
+       "pinchDiscarded": 1,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.32432432432432434,
+       "pendingMax": 4,
+       "pendingAvg": 0.4864864864864865
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.446666666666667,
+      "hanAvg": 1.1666666666666667,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 1,
+       "multiplied": 1,
+       "streakPercentAvg": 170.83333333333334,
+       "chainBonus": 14,
+       "power": 15,
+       "sent": 13,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 19,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 9,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.2972972972972973,
+       "pendingMax": 5,
+       "pendingAvg": 0.7837837837837838
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 35.45,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 6,
+      "declareIntervalSec": 4.6866666666666665,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 8,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 14,
+       "power": 22,
+       "sent": 19,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 16,
+       "overflow": 0,
+       "canceled": 5,
+       "applied": 9,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.25,
+       "pendingMax": 5,
+       "pendingAvg": 0.7222222222222222
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.4399999999999995,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 14,
+       "power": 18,
+       "sent": 16,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 19,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 11,
+       "pinchDiscarded": 1,
+       "blocks": 4,
+       "waves": 6
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.7222222222222222,
+       "pendingMax": 7,
+       "pendingAvg": 0.8055555555555556
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 57.8,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 9,
+      "declareIntervalSec": 6.366666666666666,
+      "hanAvg": 1.6666666666666667,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 7,
+       "streakPercentAvg": 163.88888888888889,
+       "chainBonus": 26,
+       "power": 33,
+       "sent": 30,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 22,
+       "overflow": 0,
+       "canceled": 6,
+       "applied": 16,
+       "pinchDiscarded": 0,
+       "blocks": 6,
+       "waves": 8
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.29310344827586204,
+       "pendingMax": 5,
+       "pendingAvg": 0.6896551724137931
+      }
+     },
+     {
+      "declares": 10,
+      "declareIntervalSec": 5.907407407407407,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 10,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 7,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 26,
+       "power": 33,
+       "sent": 22,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 30,
+       "overflow": 0,
+       "canceled": 20,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 4
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.05172413793103448,
+       "pendingMax": 7,
+       "pendingAvg": 0.6896551724137931
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 113.85,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 20,
+      "declareIntervalSec": 5.628070175438597,
+      "hanAvg": 1.95,
+      "chains": {
+       "continued": 1,
+       "max": 20,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 19,
+       "multiplied": 24,
+       "streakPercentAvg": 165,
+       "chainBonus": 70,
+       "power": 94,
+       "sent": 73,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 68,
+       "overflow": 0,
+       "canceled": 38,
+       "applied": 29,
+       "pinchDiscarded": 1,
+       "blocks": 9,
+       "waves": 12
+      },
+      "reached7": 5,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 8,
+       "blockAvg": 0.39473684210526316,
+       "pendingMax": 9,
+       "pendingAvg": 0.9210526315789473
+      }
+     },
+     {
+      "declares": 19,
+      "declareIntervalSec": 5.912037037037037,
+      "hanAvg": 1.7894736842105263,
+      "chains": {
+       "continued": 1,
+       "max": 19,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 15,
+       "multiplied": 20,
+       "streakPercentAvg": 167.10526315789474,
+       "chainBonus": 66,
+       "power": 86,
+       "sent": 68,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 73,
+       "overflow": 0,
+       "canceled": 32,
+       "applied": 33,
+       "pinchDiscarded": 5,
+       "blocks": 10,
+       "waves": 17
+      },
+      "reached7": 4,
+      "attackPinchGraces": 4,
+      "stock": {
+       "blockMax": 6,
+       "blockAvg": 0.38596491228070173,
+       "pendingMax": 7,
+       "pendingAvg": 0.8508771929824561
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 55.31666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 8,
+      "declareIntervalSec": 6.8619047619047615,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 11,
+       "streakPercentAvg": 165.625,
+       "chainBonus": 22,
+       "power": 33,
+       "sent": 20,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 31,
+       "overflow": 0,
+       "canceled": 23,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 6,
+       "blockAvg": 0.25,
+       "pendingMax": 7,
+       "pendingAvg": 0.75
+      }
+     },
+     {
+      "declares": 9,
+      "declareIntervalSec": 5.910416666666666,
+      "hanAvg": 1.6666666666666667,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 7,
+       "streakPercentAvg": 161.11111111111111,
+       "chainBonus": 26,
+       "power": 33,
+       "sent": 31,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 20,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 15,
+       "pinchDiscarded": 0,
+       "blocks": 5,
+       "waves": 7
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.26785714285714285,
+       "pendingMax": 6,
+       "pendingAvg": 0.7142857142857143
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 91.9,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 16,
+      "declareIntervalSec": 5.58,
+      "hanAvg": 2.0625,
+      "chains": {
+       "continued": 1,
+       "max": 16,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 17,
+       "multiplied": 22,
+       "streakPercentAvg": 164.0625,
+       "chainBonus": 54,
+       "power": 76,
+       "sent": 54,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 60,
+       "overflow": 0,
+       "canceled": 39,
+       "applied": 19,
+       "pinchDiscarded": 2,
+       "blocks": 6,
+       "waves": 10
+      },
+      "reached7": 3,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.42391304347826086,
+       "pendingMax": 7,
+       "pendingAvg": 0.7391304347826086
+      }
+     },
+     {
+      "declares": 15,
+      "declareIntervalSec": 5.966666666666667,
+      "hanAvg": 1.9333333333333333,
+      "chains": {
+       "continued": 1,
+       "max": 15,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 14,
+       "multiplied": 17,
+       "streakPercentAvg": 163.33333333333334,
+       "chainBonus": 50,
+       "power": 67,
+       "sent": 60,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 54,
+       "overflow": 0,
+       "canceled": 12,
+       "applied": 31,
+       "pinchDiscarded": 4,
+       "blocks": 11,
+       "waves": 17
+      },
+      "reached7": 4,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.30434782608695654,
+       "pendingMax": 5,
+       "pendingAvg": 0.782608695652174
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 60.38333333333333,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 9,
+      "declareIntervalSec": 6.54375,
+      "hanAvg": 1.7777777777777777,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 7,
+       "multiplied": 7,
+       "streakPercentAvg": 150,
+       "chainBonus": 26,
+       "power": 33,
+       "sent": 22,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 30,
+       "overflow": 0,
+       "canceled": 19,
+       "applied": 9,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.16393442622950818,
+       "pendingMax": 7,
+       "pendingAvg": 0.5737704918032787
+      }
+     },
+     {
+      "declares": 8,
+      "declareIntervalSec": 7.116666666666667,
+      "hanAvg": 2.125,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 9,
+       "multiplied": 11,
+       "streakPercentAvg": 156.25,
+       "chainBonus": 22,
+       "power": 33,
+       "sent": 30,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 22,
+       "overflow": 0,
+       "canceled": 6,
+       "applied": 14,
+       "pinchDiscarded": 2,
+       "blocks": 5,
+       "waves": 7
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.22950819672131148,
+       "pendingMax": 5,
+       "pendingAvg": 0.6885245901639344
+      }
+     }
+    ]
+   }
+  ],
+  "cpu_hard__rise_hard": [
+   {
+    "seconds": 27.483333333333334,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 6,
+      "declareIntervalSec": 4.279999999999999,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 165,
+       "chainBonus": 10,
+       "power": 13,
+       "sent": 10,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 13,
+       "overflow": 0,
+       "canceled": 5,
+       "applied": 6,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.35714285714285715,
+       "pendingMax": 4,
+       "pendingAvg": 0.5
+      }
+     },
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.175,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 155,
+       "chainBonus": 10,
+       "power": 15,
+       "sent": 13,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 10,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 6,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.2857142857142857,
+       "pendingMax": 4,
+       "pendingAvg": 0.4642857142857143
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 50.9,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 10,
+      "declareIntervalSec": 4.9259259259259265,
+      "hanAvg": 2.1,
+      "chains": {
+       "continued": 1,
+       "max": 10,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 11,
+       "multiplied": 14,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 30,
+       "power": 44,
+       "sent": 42,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 21,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 13,
+       "pinchDiscarded": 1,
+       "blocks": 6,
+       "waves": 8
+      },
+      "reached7": 3,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.27450980392156865,
+       "pendingMax": 5,
+       "pendingAvg": 0.7843137254901961
+      }
+     },
+     {
+      "declares": 9,
+      "declareIntervalSec": 5.30625,
+      "hanAvg": 1.6666666666666667,
+      "chains": {
+       "continued": 1,
+       "max": 9,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 8,
+       "streakPercentAvg": 169.44444444444446,
+       "chainBonus": 26,
+       "power": 34,
+       "sent": 21,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 42,
+       "overflow": 0,
+       "canceled": 24,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.27450980392156865,
+       "pendingMax": 7,
+       "pendingAvg": 1.0392156862745099
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 31.75,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 6.029166666666667,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 6,
+       "streakPercentAvg": 165,
+       "chainBonus": 10,
+       "power": 16,
+       "sent": 15,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 16,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 8,
+       "pinchDiscarded": 2,
+       "blocks": 2,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 10,
+       "blockAvg": 1.0625,
+       "pendingMax": 10,
+       "pendingAvg": 0.78125
+      }
+     },
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.683333333333334,
+      "hanAvg": 2.4,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 7,
+       "multiplied": 10,
+       "streakPercentAvg": 165,
+       "chainBonus": 10,
+       "power": 20,
+       "sent": 16,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 15,
+       "overflow": 0,
+       "canceled": 7,
+       "applied": 8,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.21875,
+       "pendingMax": 6,
+       "pendingAvg": 0.71875
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 31.816666666666666,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.941666666666666,
+      "hanAvg": 1.4,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 2,
+       "multiplied": 3,
+       "streakPercentAvg": 170,
+       "chainBonus": 10,
+       "power": 13,
+       "sent": 9,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 14,
+       "overflow": 0,
+       "canceled": 6,
+       "applied": 7,
+       "pinchDiscarded": 1,
+       "blocks": 1,
+       "waves": 3
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.78125,
+       "pendingMax": 8,
+       "pendingAvg": 0.90625
+      }
+     },
+     {
+      "declares": 5,
+      "declareIntervalSec": 5,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 6,
+       "streakPercentAvg": 170,
+       "chainBonus": 10,
+       "power": 16,
+       "sent": 14,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 9,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 4,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 2
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 1,
+       "blockAvg": 0.03125,
+       "pendingMax": 3,
+       "pendingAvg": 0.5625
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 33.46666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.126666666666667,
+      "hanAvg": 1.6666666666666667,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 14,
+       "power": 19,
+       "sent": 17,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 13,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 9,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.38235294117647056,
+       "pendingMax": 4,
+       "pendingAvg": 0.5588235294117647
+      }
+     },
+     {
+      "declares": 7,
+      "declareIntervalSec": 4.486111111111112,
+      "hanAvg": 1.5714285714285714,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 170.83333333333334,
+       "chainBonus": 14,
+       "power": 17,
+       "sent": 13,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 17,
+       "overflow": 0,
+       "canceled": 7,
+       "applied": 6,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.29411764705882354,
+       "pendingMax": 4,
+       "pendingAvg": 0.6764705882352942
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 36.21666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 4.813888888888889,
+      "hanAvg": 1.5714285714285714,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 6,
+       "streakPercentAvg": 171.42857142857142,
+       "chainBonus": 18,
+       "power": 24,
+       "sent": 19,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 20,
+       "overflow": 0,
+       "canceled": 9,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 6,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.5675675675675675,
+       "pendingMax": 7,
+       "pendingAvg": 0.8108108108108109
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.216666666666667,
+      "hanAvg": 2.3333333333333335,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 11,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 14,
+       "power": 25,
+       "sent": 20,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 19,
+       "overflow": 0,
+       "canceled": 9,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 5,
+       "waves": 5
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.16216216216216217,
+       "pendingMax": 9,
+       "pendingAvg": 0.9459459459459459
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 37.8,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.99,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 3,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 14,
+       "power": 17,
+       "sent": 11,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 20,
+       "overflow": 0,
+       "canceled": 10,
+       "applied": 8,
+       "pinchDiscarded": 2,
+       "blocks": 3,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.2894736842105263,
+       "pendingMax": 4,
+       "pendingAvg": 0.7368421052631579
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.9799999999999995,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 7,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 14,
+       "power": 21,
+       "sent": 20,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 11,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 8,
+       "pinchDiscarded": 1,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.2631578947368421,
+       "pendingMax": 3,
+       "pendingAvg": 0.3157894736842105
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 34.766666666666666,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 4.383333333333334,
+      "hanAvg": 1.1428571428571428,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 1,
+       "multiplied": 1,
+       "streakPercentAvg": 171.42857142857142,
+       "chainBonus": 18,
+       "power": 19,
+       "sent": 19,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 9,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 6,
+       "pinchDiscarded": 2,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 1,
+       "blockAvg": 0.11428571428571428,
+       "pendingMax": 4,
+       "pendingAvg": 0.5142857142857142
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 5.8966666666666665,
+      "hanAvg": 1.8333333333333333,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 175,
+       "chainBonus": 10,
+       "power": 14,
+       "sent": 9,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 19,
+       "overflow": 0,
+       "canceled": 8,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.3142857142857143,
+       "pendingMax": 4,
+       "pendingAvg": 0.8857142857142857
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 20.216666666666665,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 5.227777777777778,
+      "hanAvg": 2.25,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 7,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 3,
+       "power": 10,
+       "sent": 10,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 8,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.2857142857142857,
+       "pendingMax": 3,
+       "pendingAvg": 0.47619047619047616
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 4.3277777777777775,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 2,
+       "multiplied": 2,
+       "streakPercentAvg": 168.75,
+       "chainBonus": 6,
+       "power": 8,
+       "sent": 8,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 10,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 7,
+       "pinchDiscarded": 3,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.3333333333333333,
+       "pendingMax": 3,
+       "pendingAvg": 0.47619047619047616
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 35.333333333333336,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 5.155555555555556,
+      "hanAvg": 1.7142857142857142,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 6,
+       "streakPercentAvg": 164.28571428571428,
+       "chainBonus": 18,
+       "power": 24,
+       "sent": 21,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 18,
+       "overflow": 0,
+       "canceled": 5,
+       "applied": 9,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.3611111111111111,
+       "pendingMax": 4,
+       "pendingAvg": 0.5833333333333334
+      }
+     },
+     {
+      "declares": 7,
+      "declareIntervalSec": 4.4944444444444445,
+      "hanAvg": 1.1428571428571428,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 1,
+       "multiplied": 1,
+       "streakPercentAvg": 171.42857142857142,
+       "chainBonus": 18,
+       "power": 19,
+       "sent": 18,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 21,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 7,
+       "pinchDiscarded": 4,
+       "blocks": 5,
+       "waves": 6
+      },
+      "reached7": 6,
+      "attackPinchGraces": 4,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 0.5,
+       "pendingMax": 7,
+       "pendingAvg": 0.9444444444444444
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 48.61666666666667,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 8,
+      "declareIntervalSec": 5.6690476190476184,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 8,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 11,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 22,
+       "power": 33,
+       "sent": 22,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 35,
+       "overflow": 0,
+       "canceled": 21,
+       "applied": 10,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.3469387755102041,
+       "pendingMax": 5,
+       "pendingAvg": 0.6122448979591837
+      }
+     },
+     {
+      "declares": 10,
+      "declareIntervalSec": 4.609259259259259,
+      "hanAvg": 1.7,
+      "chains": {
+       "continued": 1,
+       "max": 10,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 7,
+       "multiplied": 10,
+       "streakPercentAvg": 172.5,
+       "chainBonus": 30,
+       "power": 40,
+       "sent": 35,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 22,
+       "overflow": 0,
+       "canceled": 9,
+       "applied": 11,
+       "pinchDiscarded": 2,
+       "blocks": 5,
+       "waves": 6
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.2857142857142857,
+       "pendingMax": 4,
+       "pendingAvg": 0.8571428571428571
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 29.916666666666668,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 6.127777777777777,
+      "hanAvg": 2.5,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 6,
+       "multiplied": 9,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 6,
+       "power": 15,
+       "sent": 13,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 9,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 6,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 3
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.1,
+       "pendingMax": 4,
+       "pendingAvg": 0.5
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 6.111111111111111,
+      "hanAvg": 2,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 156.25,
+       "chainBonus": 6,
+       "power": 11,
+       "sent": 9,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 13,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 7,
+       "pinchDiscarded": 2,
+       "blocks": 2,
+       "waves": 3
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.16666666666666666,
+       "pendingMax": 6,
+       "pendingAvg": 0.8666666666666667
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 24.783333333333335,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 5.233333333333333,
+      "hanAvg": 1.75,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 3,
+       "multiplied": 4,
+       "streakPercentAvg": 162.5,
+       "chainBonus": 6,
+       "power": 10,
+       "sent": 9,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 12,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 6,
+       "pinchDiscarded": 2,
+       "blocks": 2,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.52,
+       "pendingMax": 5,
+       "pendingAvg": 0.68
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 4.666666666666667,
+      "hanAvg": 2.25,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 7,
+       "streakPercentAvg": 168.75,
+       "chainBonus": 6,
+       "power": 13,
+       "sent": 12,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 9,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 5,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.2,
+       "pendingMax": 3,
+       "pendingAvg": 0.52
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 25.033333333333335,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 6.394444444444445,
+      "hanAvg": 2.5,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 7,
+       "streakPercentAvg": 158.33333333333334,
+       "chainBonus": 3,
+       "power": 10,
+       "sent": 9,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 6,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 2,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.2692307692307692,
+       "pendingMax": 3,
+       "pendingAvg": 0.38461538461538464
+      }
+     },
+     {
+      "declares": 4,
+      "declareIntervalSec": 5.2555555555555555,
+      "hanAvg": 1.25,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 1,
+       "multiplied": 1,
+       "streakPercentAvg": 168.75,
+       "chainBonus": 6,
+       "power": 7,
+       "sent": 6,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 9,
+       "overflow": 0,
+       "canceled": 1,
+       "applied": 6,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 3
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 5,
+       "blockAvg": 0.5384615384615384,
+       "pendingMax": 5,
+       "pendingAvg": 0.6923076923076923
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 31.766666666666666,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 6,
+      "declareIntervalSec": 4.663333333333333,
+      "hanAvg": 2.1666666666666665,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 7,
+       "multiplied": 10,
+       "streakPercentAvg": 170.83333333333334,
+       "chainBonus": 14,
+       "power": 24,
+       "sent": 22,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 21,
+       "overflow": 0,
+       "canceled": 4,
+       "applied": 11,
+       "pinchDiscarded": 2,
+       "blocks": 4,
+       "waves": 6
+      },
+      "reached7": 3,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 1.0625,
+       "pendingMax": 6,
+       "pendingAvg": 0.6875
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 4.576666666666666,
+      "hanAvg": 1.8333333333333333,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 7,
+       "streakPercentAvg": 170.83333333333334,
+       "chainBonus": 14,
+       "power": 21,
+       "sent": 21,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 22,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 12,
+       "pinchDiscarded": 2,
+       "blocks": 5,
+       "waves": 8
+      },
+      "reached7": 5,
+      "attackPinchGraces": 5,
+      "stock": {
+       "blockMax": 7,
+       "blockAvg": 1.0625,
+       "pendingMax": 7,
+       "pendingAvg": 0.65625
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 44.88333333333333,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 6.402777777777778,
+      "hanAvg": 2.142857142857143,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 10,
+       "streakPercentAvg": 153.57142857142858,
+       "chainBonus": 18,
+       "power": 28,
+       "sent": 21,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 24,
+       "overflow": 0,
+       "canceled": 13,
+       "applied": 10,
+       "pinchDiscarded": 1,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.17777777777777778,
+       "pendingMax": 5,
+       "pendingAvg": 0.8
+      }
+     },
+     {
+      "declares": 7,
+      "declareIntervalSec": 6.030555555555555,
+      "hanAvg": 2.2857142857142856,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 9,
+       "multiplied": 10,
+       "streakPercentAvg": 146.42857142857142,
+       "chainBonus": 18,
+       "power": 28,
+       "sent": 24,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 21,
+       "overflow": 0,
+       "canceled": 8,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 6
+      },
+      "reached7": 3,
+      "attackPinchGraces": 3,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.35555555555555557,
+       "pendingMax": 5,
+       "pendingAvg": 0.7111111111111111
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 36.666666666666664,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 7,
+      "declareIntervalSec": 5.194444444444445,
+      "hanAvg": 1.7142857142857142,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 7,
+       "streakPercentAvg": 170.83333333333334,
+       "chainBonus": 14,
+       "power": 21,
+       "sent": 14,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 22,
+       "overflow": 0,
+       "canceled": 12,
+       "applied": 6,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 4
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 4,
+       "blockAvg": 0.21621621621621623,
+       "pendingMax": 5,
+       "pendingAvg": 0.9459459459459459
+      }
+     },
+     {
+      "declares": 7,
+      "declareIntervalSec": 4.872222222222223,
+      "hanAvg": 1.7142857142857142,
+      "chains": {
+       "continued": 1,
+       "max": 7,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 5,
+       "multiplied": 6,
+       "streakPercentAvg": 171.42857142857142,
+       "chainBonus": 18,
+       "power": 24,
+       "sent": 22,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 14,
+       "overflow": 0,
+       "canceled": 3,
+       "applied": 11,
+       "pinchDiscarded": 0,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.3783783783783784,
+       "pendingMax": 4,
+       "pendingAvg": 0.6486486486486487
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 22.133333333333333,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 4,
+      "declareIntervalSec": 4.561111111111111,
+      "hanAvg": 1,
+      "chains": {
+       "continued": 1,
+       "max": 4,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 0,
+       "multiplied": 0,
+       "streakPercentAvg": 168.75,
+       "chainBonus": 6,
+       "power": 6,
+       "sent": 5,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 7,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 5,
+       "pinchDiscarded": 0,
+       "blocks": 3,
+       "waves": 3
+      },
+      "reached7": 2,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.17391304347826086,
+       "pendingMax": 4,
+       "pendingAvg": 0.6086956521739131
+      }
+     },
+     {
+      "declares": 3,
+      "declareIntervalSec": 5.591666666666667,
+      "hanAvg": 2.3333333333333335,
+      "chains": {
+       "continued": 1,
+       "max": 3,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 166.66666666666666,
+       "chainBonus": 3,
+       "power": 8,
+       "sent": 7,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 5,
+       "overflow": 0,
+       "canceled": 2,
+       "applied": 2,
+       "pinchDiscarded": 0,
+       "blocks": 1,
+       "waves": 1
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 1,
+       "blockAvg": 0.043478260869565216,
+       "pendingMax": 3,
+       "pendingAvg": 0.34782608695652173
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 33.166666666666664,
+    "decided": true,
+    "outcome": "win",
+    "winner": 0,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.145833333333333,
+      "hanAvg": 1.8,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 4,
+       "multiplied": 5,
+       "streakPercentAvg": 170,
+       "chainBonus": 10,
+       "power": 15,
+       "sent": 9,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 16,
+       "overflow": 0,
+       "canceled": 10,
+       "applied": 3,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 2
+      },
+      "reached7": 0,
+      "attackPinchGraces": 0,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.14705882352941177,
+       "pendingMax": 4,
+       "pendingAvg": 0.5588235294117647
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 4.9799999999999995,
+      "hanAvg": 1.3333333333333333,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 2,
+       "multiplied": 2,
+       "streakPercentAvg": 170.83333333333334,
+       "chainBonus": 14,
+       "power": 16,
+       "sent": 16,
+       "zeroPowerDeclares": 1
+      },
+      "incoming": {
+       "received": 9,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 6,
+       "pinchDiscarded": 3,
+       "blocks": 5,
+       "waves": 6
+      },
+      "reached7": 2,
+      "attackPinchGraces": 2,
+      "stock": {
+       "blockMax": 2,
+       "blockAvg": 0.11764705882352941,
+       "pendingMax": 5,
+       "pendingAvg": 0.5294117647058824
+      }
+     }
+    ]
+   },
+   {
+    "seconds": 30.283333333333335,
+    "decided": true,
+    "outcome": "win",
+    "winner": 1,
+    "causes": [
+     "attack_pinch"
+    ],
+    "players": [
+     {
+      "declares": 5,
+      "declareIntervalSec": 5.866666666666666,
+      "hanAvg": 2.6,
+      "chains": {
+       "continued": 1,
+       "max": 5,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 8,
+       "multiplied": 10,
+       "streakPercentAvg": 150,
+       "chainBonus": 10,
+       "power": 20,
+       "sent": 20,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 7,
+       "overflow": 0,
+       "canceled": 0,
+       "applied": 7,
+       "pinchDiscarded": 0,
+       "blocks": 2,
+       "waves": 3
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 3,
+       "blockAvg": 0.2903225806451613,
+       "pendingMax": 3,
+       "pendingAvg": 0.1935483870967742
+      }
+     },
+     {
+      "declares": 6,
+      "declareIntervalSec": 4.779999999999999,
+      "hanAvg": 1.5,
+      "chains": {
+       "continued": 1,
+       "max": 6,
+       "brokenByTimeout": 0,
+       "endedByRound": 1
+      },
+      "attack": {
+       "base": 1,
+       "multiplied": 1,
+       "streakPercentAvg": 170,
+       "chainBonus": 10,
+       "power": 11,
+       "sent": 7,
+       "zeroPowerDeclares": 0
+      },
+      "incoming": {
+       "received": 20,
+       "overflow": 0,
+       "canceled": 8,
+       "applied": 7,
+       "pinchDiscarded": 1,
+       "blocks": 4,
+       "waves": 5
+      },
+      "reached7": 1,
+      "attackPinchGraces": 1,
+      "stock": {
+       "blockMax": 6,
+       "blockAvg": 0.5806451612903226,
+       "pendingMax": 6,
+       "pendingAvg": 1.096774193548387
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

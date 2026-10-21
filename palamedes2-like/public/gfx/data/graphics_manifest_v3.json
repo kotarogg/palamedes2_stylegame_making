@@ -1,0 +1,10377 @@
+{
+  "version": "graphics-v3-delivery-r1-20261021",
+  "status": "READY_FOR_PM_INSPECTION_NOT_ADOPTED",
+  "canvas": [
+    640,
+    360
+  ],
+  "sheets": [
+    {
+      "id": "S1",
+      "file": "assets/kotaro_sheet.png",
+      "w": 512,
+      "h": 512,
+      "sha256": "1b143f5b1ea1a3fa286ef44883d9e2df64b61b67e0cde15cc7b4e572ad94aea5",
+      "classification": "modified",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/player_p1_bluegothic_sheet.png"
+    },
+    {
+      "id": "S2",
+      "file": "assets/akane_sheet.png",
+      "w": 512,
+      "h": 512,
+      "sha256": "77bc79bc66d7296ce2faaac164651a1c1ffa442cbcb89e49138b42e02cb665fd",
+      "classification": "modified",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/player_p2_akane_sheet.png"
+    },
+    {
+      "id": "S3",
+      "file": "assets/nekotaro_sheet.png",
+      "w": 256,
+      "h": 256,
+      "sha256": "711cc650455439ae318b4aad318ff6697af1e678bacd043b182d2d3eae1e7b77",
+      "classification": "modified",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/mascot_cat_sheet.png"
+    },
+    {
+      "id": "S4",
+      "file": "assets/legacy/pieces_and_smallpieces_sheet.png",
+      "w": 256,
+      "h": 256,
+      "sha256": "60df1bbea86ec1ccf4f2e36c896687372a9edb79603421f98a499f7ce4d5a758",
+      "classification": "existing_reuse",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/pieces_and_smallpieces_sheet.png"
+    },
+    {
+      "id": "S5",
+      "file": "assets/legacy/ui_common_sheet.png",
+      "w": 512,
+      "h": 512,
+      "sha256": "6a637ca1b6b0ba575f0340c7070d3846ae198431d868563f019034293c30d161",
+      "classification": "existing_reuse",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/ui_common_sheet.png"
+    },
+    {
+      "id": "S6",
+      "file": "assets/legacy/effects_sheet.png",
+      "w": 512,
+      "h": 512,
+      "sha256": "eab8e0b7a5c44b9e95ac2dd22d41576be9e61145c0efc544356b009553fd19c6",
+      "classification": "existing_reuse",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/effects_sheet.png"
+    },
+    {
+      "id": "S7",
+      "file": "assets/legacy/role_name_sheet.png",
+      "w": 1024,
+      "h": 1024,
+      "sha256": "d43012d7440fc95f1605b44560ef19f5190641c3539f7c8ad82b0f3d20cb394a",
+      "classification": "existing_reuse",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/role_name_sheet.png"
+    },
+    {
+      "id": "S8",
+      "file": "assets/legacy/ui_theme_sheet.png",
+      "w": 1024,
+      "h": 1024,
+      "sha256": "a9d50a097faacc00875deb23f940f1d0d6c61a868db61ae736eafef08d8d027e",
+      "classification": "existing_reuse",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/ui_theme_sheet.png"
+    },
+    {
+      "id": "S9",
+      "file": "assets/legacy/announcements_sheet.png",
+      "w": 1024,
+      "h": 1024,
+      "sha256": "acd728bac72d496734a8a98e67707562e16c665a6f51312b1b79c60f5a26fb45",
+      "classification": "existing_reuse",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/announcements_sheet.png"
+    },
+    {
+      "id": "S10",
+      "file": "assets/legacy/mode_effects_sheet.png",
+      "w": 512,
+      "h": 512,
+      "sha256": "6bc8456cbe99b3cb52f0881ed518b07638ad541c9364ae90a247a371c2d10805",
+      "classification": "existing_reuse",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/mode_effects_sheet.png"
+    },
+    {
+      "id": "S11",
+      "file": "assets/legacy/gameplay_frames_sheet.png",
+      "w": 512,
+      "h": 512,
+      "sha256": "ae89e2cc0075b45e5ad39caf6798f1d983e9b1529982ae3787dfbd601cfc40c9",
+      "classification": "existing_reuse",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/gameplay_frames_sheet.png"
+    },
+    {
+      "id": "S12",
+      "file": "assets/legacy/display_numeric_sheet.png",
+      "w": 512,
+      "h": 512,
+      "sha256": "7a7586a355fb6fb3d53c806477702fc3273b0162f5e166b827d3c75fa0aa52aa",
+      "classification": "existing_reuse",
+      "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/display_numeric_sheet.png"
+    },
+    {
+      "id": "S13",
+      "file": "assets/zunko_sheet.png",
+      "w": 512,
+      "h": 512,
+      "sha256": "0277b9aa5c71e883d142a7633fee60a57ff15cea476fc8722cc526799705f376",
+      "classification": "new"
+    },
+    {
+      "id": "CTRL",
+      "file": "assets/controls_sheet.png",
+      "w": 256,
+      "h": 128,
+      "sha256": "421ddddc697f11fbcd2704c41bcccafe64ef988929204e5cea66bb973e91e9dc",
+      "classification": "new"
+    }
+  ],
+  "frames": [
+    {
+      "sheet": "S1",
+      "id": "idle_00",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 0,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "idle_01",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 1,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "idle_02",
+      "x": 96,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 2,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "idle_03",
+      "x": 144,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 3,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "walk_00",
+      "x": 192,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 4,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "walk_01",
+      "x": 0,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 5,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "walk_02",
+      "x": 48,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 6,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "walk_03",
+      "x": 96,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 7,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "launch_00",
+      "x": 144,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 8,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "launch_01",
+      "x": 192,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 9,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "launch_02",
+      "x": 0,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 10,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "launch_03",
+      "x": 48,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 11,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "attack_00",
+      "x": 96,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 12,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "attack_01",
+      "x": 144,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 13,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "attack_02",
+      "x": 192,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 14,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "attack_03",
+      "x": 0,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 15,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "win_00",
+      "x": 48,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 16,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "win_01",
+      "x": 96,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 17,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "win_02",
+      "x": 144,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 18,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "win_03",
+      "x": 192,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 19,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "win_04",
+      "x": 0,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 20,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "win_05",
+      "x": 48,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 21,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "lose_fall_00",
+      "x": 96,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 22,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "lose_fall_01",
+      "x": 144,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 23,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "lose_fall_02",
+      "x": 192,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 24,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "lose_fall_03",
+      "x": 0,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 25,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S1",
+      "id": "fail_declare_00",
+      "x": 48,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 26,
+      "semantic": "不成立宣言",
+      "origin": [
+        24,
+        55
+      ],
+      "recommended_ms": 110
+    },
+    {
+      "sheet": "S1",
+      "id": "fail_declare_01",
+      "x": 96,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 27,
+      "semantic": "不成立宣言",
+      "origin": [
+        24,
+        55
+      ],
+      "recommended_ms": 120
+    },
+    {
+      "sheet": "S1",
+      "id": "fail_declare_02",
+      "x": 144,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 28,
+      "semantic": "不成立宣言",
+      "origin": [
+        24,
+        55
+      ],
+      "recommended_ms": 180
+    },
+    {
+      "sheet": "S1",
+      "id": "fail_declare_03",
+      "x": 192,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 29,
+      "semantic": "不成立宣言",
+      "origin": [
+        24,
+        55
+      ],
+      "recommended_ms": 150
+    },
+    {
+      "sheet": "S2",
+      "id": "idle_00",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 0,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "idle_01",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 1,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "idle_02",
+      "x": 96,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 2,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "idle_03",
+      "x": 144,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 3,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "walk_00",
+      "x": 192,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 4,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "walk_01",
+      "x": 0,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 5,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "walk_02",
+      "x": 48,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 6,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "walk_03",
+      "x": 96,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 7,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "launch_00",
+      "x": 144,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 8,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "launch_01",
+      "x": 192,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 9,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "launch_02",
+      "x": 0,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 10,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "launch_03",
+      "x": 48,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 11,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "attack_00",
+      "x": 96,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 12,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "attack_01",
+      "x": 144,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 13,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "attack_02",
+      "x": 192,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 14,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "attack_03",
+      "x": 0,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 15,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "win_00",
+      "x": 48,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 16,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "win_01",
+      "x": 96,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 17,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "win_02",
+      "x": 144,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 18,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "win_03",
+      "x": 192,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 19,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "win_04",
+      "x": 0,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 20,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "win_05",
+      "x": 48,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 21,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "lose_fall_00",
+      "x": 96,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 22,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "lose_fall_01",
+      "x": 144,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 23,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "lose_fall_02",
+      "x": 192,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 24,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "lose_fall_03",
+      "x": 0,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 25,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S2",
+      "id": "fail_declare_00",
+      "x": 48,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 26,
+      "semantic": "不成立宣言",
+      "origin": [
+        24,
+        55
+      ],
+      "recommended_ms": 110
+    },
+    {
+      "sheet": "S2",
+      "id": "fail_declare_01",
+      "x": 96,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 27,
+      "semantic": "不成立宣言",
+      "origin": [
+        24,
+        55
+      ],
+      "recommended_ms": 120
+    },
+    {
+      "sheet": "S2",
+      "id": "fail_declare_02",
+      "x": 144,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 28,
+      "semantic": "不成立宣言",
+      "origin": [
+        24,
+        55
+      ],
+      "recommended_ms": 180
+    },
+    {
+      "sheet": "S2",
+      "id": "fail_declare_03",
+      "x": 192,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "reserved": false,
+      "slot": 29,
+      "semantic": "不成立宣言",
+      "origin": [
+        24,
+        55
+      ],
+      "recommended_ms": 150
+    },
+    {
+      "sheet": "S3",
+      "id": "idle_00",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 0,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "idle_01",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 1,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "idle_02",
+      "x": 96,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 2,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "idle_03",
+      "x": 144,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 3,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "ready_00",
+      "x": 192,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 4,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "ready_01",
+      "x": 0,
+      "y": 48,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 5,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "start_00",
+      "x": 48,
+      "y": 48,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 6,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "start_01",
+      "x": 96,
+      "y": 48,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 7,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "cracker_00",
+      "x": 144,
+      "y": 48,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 8,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "cracker_01",
+      "x": 192,
+      "y": 48,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 9,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "cracker_02",
+      "x": 0,
+      "y": 96,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 10,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "cracker_03",
+      "x": 48,
+      "y": 96,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 11,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "joy_00",
+      "x": 96,
+      "y": 96,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 12,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "joy_01",
+      "x": 144,
+      "y": 96,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 13,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "surprise_00",
+      "x": 192,
+      "y": 96,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 14,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "surprise_01",
+      "x": 0,
+      "y": 144,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 15,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "panic_00",
+      "x": 48,
+      "y": 144,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 16,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "panic_01",
+      "x": 96,
+      "y": 144,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 17,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "sad_00",
+      "x": 144,
+      "y": 144,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 18,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "sad_01",
+      "x": 192,
+      "y": 144,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "slot": 19,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "reserved_00",
+      "x": 0,
+      "y": 192,
+      "w": 48,
+      "h": 48,
+      "reserved": true,
+      "slot": 20,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "reserved_01",
+      "x": 48,
+      "y": 192,
+      "w": 48,
+      "h": 48,
+      "reserved": true,
+      "slot": 21,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "reserved_02",
+      "x": 96,
+      "y": 192,
+      "w": 48,
+      "h": 48,
+      "reserved": true,
+      "slot": 22,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "reserved_03",
+      "x": 144,
+      "y": 192,
+      "w": 48,
+      "h": 48,
+      "reserved": true,
+      "slot": 23,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S3",
+      "id": "reserved_04",
+      "x": 192,
+      "y": 192,
+      "w": 48,
+      "h": 48,
+      "reserved": true,
+      "slot": 24,
+      "origin": [
+        24,
+        47
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_1_spade",
+      "x": 0,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 1,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_1_spade",
+      "x": 0,
+      "y": 96,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 1,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_1_diamond",
+      "x": 32,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 1,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_1_diamond",
+      "x": 24,
+      "y": 96,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 1,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_1_club",
+      "x": 64,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 1,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_1_club",
+      "x": 48,
+      "y": 96,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 1,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_1_heart",
+      "x": 96,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 1,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_1_heart",
+      "x": 72,
+      "y": 96,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 1,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_2_spade",
+      "x": 128,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 2,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_2_spade",
+      "x": 96,
+      "y": 96,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 2,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_2_diamond",
+      "x": 160,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 2,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_2_diamond",
+      "x": 120,
+      "y": 96,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 2,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_2_club",
+      "x": 192,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 2,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_2_club",
+      "x": 144,
+      "y": 96,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 2,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_2_heart",
+      "x": 224,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 2,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_2_heart",
+      "x": 168,
+      "y": 96,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 2,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_3_spade",
+      "x": 0,
+      "y": 32,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 3,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_3_spade",
+      "x": 0,
+      "y": 120,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 3,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_3_diamond",
+      "x": 32,
+      "y": 32,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 3,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_3_diamond",
+      "x": 24,
+      "y": 120,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 3,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_3_club",
+      "x": 64,
+      "y": 32,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 3,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_3_club",
+      "x": 48,
+      "y": 120,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 3,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_3_heart",
+      "x": 96,
+      "y": 32,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 3,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_3_heart",
+      "x": 72,
+      "y": 120,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 3,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_4_spade",
+      "x": 128,
+      "y": 32,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 4,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_4_spade",
+      "x": 96,
+      "y": 120,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 4,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_4_diamond",
+      "x": 160,
+      "y": 32,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 4,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_4_diamond",
+      "x": 120,
+      "y": 120,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 4,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_4_club",
+      "x": 192,
+      "y": 32,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 4,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_4_club",
+      "x": 144,
+      "y": 120,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 4,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_4_heart",
+      "x": 224,
+      "y": 32,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 4,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_4_heart",
+      "x": 168,
+      "y": 120,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 4,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_5_spade",
+      "x": 0,
+      "y": 64,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 5,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_5_spade",
+      "x": 0,
+      "y": 144,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 5,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_5_diamond",
+      "x": 32,
+      "y": 64,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 5,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_5_diamond",
+      "x": 24,
+      "y": 144,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 5,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_5_club",
+      "x": 64,
+      "y": 64,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 5,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_5_club",
+      "x": 48,
+      "y": 144,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 5,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_5_heart",
+      "x": 96,
+      "y": 64,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 5,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_5_heart",
+      "x": 72,
+      "y": 144,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 5,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_6_spade",
+      "x": 128,
+      "y": 64,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 6,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_6_spade",
+      "x": 96,
+      "y": 144,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 6,
+      "suit": "spade",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_6_diamond",
+      "x": 160,
+      "y": 64,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 6,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_6_diamond",
+      "x": 120,
+      "y": 144,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 6,
+      "suit": "diamond",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_6_club",
+      "x": 192,
+      "y": 64,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 6,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_6_club",
+      "x": 144,
+      "y": 144,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 6,
+      "suit": "club",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "piece_6_heart",
+      "x": 224,
+      "y": 64,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "number": 6,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S4",
+      "id": "small_6_heart",
+      "x": 168,
+      "y": 144,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "number": 6,
+      "suit": "heart",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "panel_corner_tl",
+      "x": 0,
+      "y": 0,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "panel_corner_tr",
+      "x": 8,
+      "y": 0,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "panel_corner_bl",
+      "x": 0,
+      "y": 8,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "panel_corner_br",
+      "x": 8,
+      "y": 8,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "panel_edge_h",
+      "x": 16,
+      "y": 0,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "panel_edge_v",
+      "x": 24,
+      "y": 0,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "panel_fill_dark",
+      "x": 16,
+      "y": 8,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "panel_fill_light",
+      "x": 24,
+      "y": 8,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "panel_fill_alert",
+      "x": 32,
+      "y": 8,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "chain_bar_frame",
+      "x": 0,
+      "y": 32,
+      "w": 24,
+      "h": 112,
+      "reserved": false,
+      "legacy_only": true,
+      "replaced_by": "S11/player_frame_p1 or S11/player_frame_p2",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "chain_bar_fill_safe",
+      "x": 24,
+      "y": 32,
+      "w": 8,
+      "h": 96,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "chain_bar_fill_warn",
+      "x": 32,
+      "y": 32,
+      "w": 8,
+      "h": 96,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "chain_bar_fill_danger",
+      "x": 40,
+      "y": 32,
+      "w": 8,
+      "h": 96,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "chain_bar_fill_flash",
+      "x": 48,
+      "y": 32,
+      "w": 8,
+      "h": 96,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "multiplier_panel",
+      "x": 72,
+      "y": 32,
+      "w": 64,
+      "h": 40,
+      "reserved": false,
+      "deprecated": true,
+      "empty": true,
+      "runtime_use": false,
+      "replacement": "S12 numeric glyphs; no panel",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "multiplier_x_icon",
+      "x": 136,
+      "y": 32,
+      "w": 16,
+      "h": 16,
+      "reserved": false,
+      "legacy_only": true,
+      "replaced_by": "S12 numeric glyphs",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "multiplier_dot_icon",
+      "x": 152,
+      "y": 32,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "legacy_only": true,
+      "replaced_by": "S12 numeric glyphs",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "win_count_frame_3",
+      "x": 192,
+      "y": 280,
+      "w": 64,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "win_count_slot_empty",
+      "x": 264,
+      "y": 280,
+      "w": 16,
+      "h": 16,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "win_count_slot_fill",
+      "x": 288,
+      "y": 280,
+      "w": 16,
+      "h": 16,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "win_count_slot_flash",
+      "x": 312,
+      "y": 280,
+      "w": 16,
+      "h": 16,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "win_count_crown",
+      "x": 336,
+      "y": 280,
+      "w": 16,
+      "h": 16,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "attack_icon_big",
+      "x": 56,
+      "y": 280,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "attack_icon_big_flash",
+      "x": 80,
+      "y": 280,
+      "w": 24,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "attack_icon_small",
+      "x": 56,
+      "y": 312,
+      "w": 16,
+      "h": 16,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "attack_icon_small_flash",
+      "x": 80,
+      "y": 312,
+      "w": 16,
+      "h": 16,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "attack_icon_cancel_overlay",
+      "x": 104,
+      "y": 312,
+      "w": 16,
+      "h": 16,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "attack_stock_frame",
+      "x": 0,
+      "y": 280,
+      "w": 48,
+      "h": 144,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "attack_label_plate",
+      "x": 128,
+      "y": 280,
+      "w": 48,
+      "h": 16,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "base_piece_frame",
+      "x": 248,
+      "y": 32,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "p1_badge",
+      "x": 304,
+      "y": 72,
+      "w": 24,
+      "h": 12,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "p2_badge",
+      "x": 336,
+      "y": 72,
+      "w": 24,
+      "h": 12,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "neutral_badge",
+      "x": 368,
+      "y": 72,
+      "w": 24,
+      "h": 12,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "banner_ready",
+      "x": 0,
+      "y": 160,
+      "w": 96,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "banner_go",
+      "x": 96,
+      "y": 160,
+      "w": 64,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "banner_win",
+      "x": 160,
+      "y": 160,
+      "w": 96,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "banner_lose",
+      "x": 256,
+      "y": 160,
+      "w": 96,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "banner_counter",
+      "x": 352,
+      "y": 160,
+      "w": 128,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "banner_pause",
+      "x": 0,
+      "y": 192,
+      "w": 96,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "banner_start",
+      "x": 96,
+      "y": 192,
+      "w": 96,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "banner_draw",
+      "x": 192,
+      "y": 192,
+      "w": 96,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "banner_result",
+      "x": 288,
+      "y": 192,
+      "w": 96,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "banner_chain",
+      "x": 384,
+      "y": 192,
+      "w": 96,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_0",
+      "x": 0,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_0",
+      "x": 160,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_1",
+      "x": 8,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_1",
+      "x": 176,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_2",
+      "x": 16,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_2",
+      "x": 192,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_3",
+      "x": 24,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_3",
+      "x": 208,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_4",
+      "x": 32,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_4",
+      "x": 224,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_5",
+      "x": 40,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_5",
+      "x": 240,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_6",
+      "x": 48,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_6",
+      "x": 256,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_7",
+      "x": 56,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_7",
+      "x": 272,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_8",
+      "x": 64,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_8",
+      "x": 288,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_9",
+      "x": 72,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_9",
+      "x": 304,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_x",
+      "x": 80,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_x",
+      "x": 320,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_dot",
+      "x": 88,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_dot",
+      "x": 336,
+      "y": 224,
+      "w": 8,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "sm_plus",
+      "x": 96,
+      "y": 224,
+      "w": 8,
+      "h": 8,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S5",
+      "id": "big_plus",
+      "x": 344,
+      "y": 224,
+      "w": 16,
+      "h": 24,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "launch_fx_1",
+      "x": 0,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "launch_fx_2",
+      "x": 32,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "launch_fx_3",
+      "x": 64,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "launch_fx_4",
+      "x": 96,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "hit_base_fx_1",
+      "x": 128,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "hit_base_fx_2",
+      "x": 160,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "bounce_fx_1",
+      "x": 192,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "bounce_fx_2",
+      "x": 224,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "bounce_fx_3",
+      "x": 256,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "return_fx_1",
+      "x": 288,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "return_fx_2",
+      "x": 320,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "fail_arc_trail_1",
+      "x": 352,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "fail_arc_trail_2",
+      "x": 384,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "fail_arc_trail_3",
+      "x": 416,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "fall_return_spark",
+      "x": 448,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_4_back_a",
+      "x": 0,
+      "y": 64,
+      "w": 96,
+      "h": 48,
+      "reserved": false,
+      "target_rect": {
+        "x": 0,
+        "y": 12,
+        "w": 96,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_4_back_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_4_back_b",
+      "x": 96,
+      "y": 64,
+      "w": 96,
+      "h": 48,
+      "reserved": false,
+      "target_rect": {
+        "x": 0,
+        "y": 12,
+        "w": 96,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_4_back_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_4_front_a",
+      "x": 192,
+      "y": 64,
+      "w": 96,
+      "h": 48,
+      "reserved": false,
+      "target_rect": {
+        "x": 0,
+        "y": 12,
+        "w": 96,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_4_front_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_4_front_b",
+      "x": 288,
+      "y": 64,
+      "w": 96,
+      "h": 48,
+      "reserved": false,
+      "target_rect": {
+        "x": 0,
+        "y": 12,
+        "w": 96,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_4_front_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_6_back_a",
+      "x": 0,
+      "y": 128,
+      "w": 144,
+      "h": 48,
+      "reserved": false,
+      "target_rect": {
+        "x": 0,
+        "y": 12,
+        "w": 144,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_6_back_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_6_back_b",
+      "x": 144,
+      "y": 128,
+      "w": 144,
+      "h": 48,
+      "reserved": false,
+      "target_rect": {
+        "x": 0,
+        "y": 12,
+        "w": 144,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_6_back_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_6_front_a",
+      "x": 288,
+      "y": 128,
+      "w": 144,
+      "h": 48,
+      "reserved": false,
+      "target_rect": {
+        "x": 0,
+        "y": 12,
+        "w": 144,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_6_front_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_6_front_b",
+      "x": 0,
+      "y": 176,
+      "w": 144,
+      "h": 48,
+      "reserved": false,
+      "target_rect": {
+        "x": 0,
+        "y": 12,
+        "w": 144,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_6_front_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_6_spark",
+      "x": 144,
+      "y": 176,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "counter_fx_1",
+      "x": 0,
+      "y": 240,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "counter_fx_2",
+      "x": 48,
+      "y": 240,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "line_send_fx_1",
+      "x": 96,
+      "y": 240,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "line_send_fx_2",
+      "x": 144,
+      "y": 240,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "line_send_fx_3",
+      "x": 192,
+      "y": 240,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "vanish_fx_1",
+      "x": 240,
+      "y": 240,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "vanish_fx_2",
+      "x": 272,
+      "y": 240,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "shock_mark",
+      "x": 320,
+      "y": 240,
+      "w": 32,
+      "h": 32,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "confetti_1",
+      "x": 0,
+      "y": 304,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "confetti_2",
+      "x": 48,
+      "y": 304,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "confetti_3",
+      "x": 96,
+      "y": 304,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "confetti_4",
+      "x": 144,
+      "y": 304,
+      "w": 48,
+      "h": 48,
+      "reserved": false,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_1_back_a",
+      "reserved": false,
+      "x": 0,
+      "y": 368,
+      "w": 24,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_1_back_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_1_back_b",
+      "reserved": false,
+      "x": 24,
+      "y": 368,
+      "w": 24,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_1_back_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_1_front_a",
+      "reserved": false,
+      "x": 48,
+      "y": 368,
+      "w": 24,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_1_front_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_1_front_b",
+      "reserved": false,
+      "x": 72,
+      "y": 368,
+      "w": 24,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_1_front_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_2_back_a",
+      "reserved": false,
+      "x": 0,
+      "y": 400,
+      "w": 48,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 48,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_2_back_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_2_back_b",
+      "reserved": false,
+      "x": 48,
+      "y": 400,
+      "w": 48,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 48,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_2_back_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_2_front_a",
+      "reserved": false,
+      "x": 96,
+      "y": 400,
+      "w": 48,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 48,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_2_front_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_2_front_b",
+      "reserved": false,
+      "x": 144,
+      "y": 400,
+      "w": 48,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 48,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_2_front_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_3_back_a",
+      "reserved": false,
+      "x": 0,
+      "y": 432,
+      "w": 72,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 72,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_3_back_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_3_back_b",
+      "reserved": false,
+      "x": 72,
+      "y": 432,
+      "w": 72,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 72,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_3_back_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_3_front_a",
+      "reserved": false,
+      "x": 144,
+      "y": 432,
+      "w": 72,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 72,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_3_front_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_3_front_b",
+      "reserved": false,
+      "x": 216,
+      "y": 432,
+      "w": 72,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 72,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_3_front_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_5_back_a",
+      "reserved": false,
+      "x": 0,
+      "y": 464,
+      "w": 120,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 120,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_5_back_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_5_back_b",
+      "reserved": false,
+      "x": 120,
+      "y": 464,
+      "w": 120,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 120,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_5_back_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_5_front_a",
+      "reserved": false,
+      "x": 240,
+      "y": 464,
+      "w": 120,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 120,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_5_front_a.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S6",
+      "id": "role_glow_5_front_b",
+      "reserved": false,
+      "x": 360,
+      "y": 464,
+      "w": 120,
+      "h": 32,
+      "target_rect": {
+        "x": 0,
+        "y": 4,
+        "w": 120,
+        "h": 24
+      },
+      "standalone_file": "role_glow_frames/role_glow_5_front_b.png",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_00_A",
+      "x": 0,
+      "y": 0,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 0,
+      "role_name": "フォーカード！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_00_B",
+      "x": 0,
+      "y": 64,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 0,
+      "role_name": "フォーカード！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_00_C",
+      "x": 0,
+      "y": 128,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 0,
+      "role_name": "フォーカード！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_01_A",
+      "x": 160,
+      "y": 0,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 1,
+      "role_name": "ニコニコ！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_01_B",
+      "x": 160,
+      "y": 64,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 1,
+      "role_name": "ニコニコ！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_01_C",
+      "x": 160,
+      "y": 128,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 1,
+      "role_name": "ニコニコ！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_02_A",
+      "x": 320,
+      "y": 0,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 2,
+      "role_name": "ストレート！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_02_B",
+      "x": 320,
+      "y": 64,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 2,
+      "role_name": "ストレート！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_02_C",
+      "x": 320,
+      "y": 128,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 2,
+      "role_name": "ストレート！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_03_A",
+      "x": 480,
+      "y": 0,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 3,
+      "role_name": "ハイストレート！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_03_B",
+      "x": 480,
+      "y": 64,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 3,
+      "role_name": "ハイストレート！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_03_C",
+      "x": 480,
+      "y": 128,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 3,
+      "role_name": "ハイストレート！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_04_A",
+      "x": 0,
+      "y": 192,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 4,
+      "role_name": "フルカード！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_04_B",
+      "x": 0,
+      "y": 256,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 4,
+      "role_name": "フルカード！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_04_C",
+      "x": 0,
+      "y": 320,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 4,
+      "role_name": "フルカード！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_05_A",
+      "x": 160,
+      "y": 192,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 5,
+      "role_name": "ニコニコニコ！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_05_B",
+      "x": 160,
+      "y": 256,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 5,
+      "role_name": "ニコニコニコ！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_05_C",
+      "x": 160,
+      "y": 320,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 5,
+      "role_name": "ニコニコニコ！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_06_A",
+      "x": 320,
+      "y": 192,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 6,
+      "role_name": "スーパーストレート！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_06_B",
+      "x": 320,
+      "y": 256,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 6,
+      "role_name": "スーパーストレート！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_06_C",
+      "x": 320,
+      "y": 320,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 6,
+      "role_name": "スーパーストレート！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_07_A",
+      "x": 480,
+      "y": 192,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 7,
+      "role_name": "フォーブラック！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_07_B",
+      "x": 480,
+      "y": 256,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 7,
+      "role_name": "フォーブラック！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_07_C",
+      "x": 480,
+      "y": 320,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 7,
+      "role_name": "フォーブラック！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_08_A",
+      "x": 0,
+      "y": 384,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 8,
+      "role_name": "フォーレッド！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_08_B",
+      "x": 0,
+      "y": 448,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 8,
+      "role_name": "フォーレッド！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_08_C",
+      "x": 0,
+      "y": 512,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 8,
+      "role_name": "フォーレッド！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_09_A",
+      "x": 160,
+      "y": 384,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 9,
+      "role_name": "オールブラック！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_09_B",
+      "x": 160,
+      "y": 448,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 9,
+      "role_name": "オールブラック！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_09_C",
+      "x": 160,
+      "y": 512,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 9,
+      "role_name": "オールブラック！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_10_A",
+      "x": 320,
+      "y": 384,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 10,
+      "role_name": "オールレッド！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_10_B",
+      "x": 320,
+      "y": 448,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 10,
+      "role_name": "オールレッド！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_10_C",
+      "x": 320,
+      "y": 512,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 10,
+      "role_name": "オールレッド！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_11_A",
+      "x": 480,
+      "y": 384,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 11,
+      "role_name": "オールマーク！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_11_B",
+      "x": 480,
+      "y": 448,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 11,
+      "role_name": "オールマーク！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_11_C",
+      "x": 480,
+      "y": 512,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 11,
+      "role_name": "オールマーク！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_12_A",
+      "x": 0,
+      "y": 576,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 12,
+      "role_name": "フラッシュ！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_12_B",
+      "x": 0,
+      "y": 640,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 12,
+      "role_name": "フラッシュ！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_12_C",
+      "x": 0,
+      "y": 704,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 12,
+      "role_name": "フラッシュ！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_13_A",
+      "x": 160,
+      "y": 576,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 13,
+      "role_name": "ストレートフラッシュ！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_13_B",
+      "x": 160,
+      "y": 640,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 13,
+      "role_name": "ストレートフラッシュ！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_13_C",
+      "x": 160,
+      "y": 704,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 13,
+      "role_name": "ストレートフラッシュ！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_14_A",
+      "x": 320,
+      "y": 576,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 14,
+      "role_name": "ハイストレートフラッシュ！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_14_B",
+      "x": 320,
+      "y": 640,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 14,
+      "role_name": "ハイストレートフラッシュ！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_14_C",
+      "x": 320,
+      "y": 704,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 14,
+      "role_name": "ハイストレートフラッシュ！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_15_A",
+      "x": 480,
+      "y": 576,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 15,
+      "role_name": "スーパーストレートフラッシュ！",
+      "frame": "A",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_15_B",
+      "x": 480,
+      "y": 640,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 15,
+      "role_name": "スーパーストレートフラッシュ！",
+      "frame": "B",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S7",
+      "id": "role_15_C",
+      "x": 480,
+      "y": 704,
+      "w": 160,
+      "h": 64,
+      "reserved": false,
+      "role_index": 15,
+      "role_name": "スーパーストレートフラッシュ！",
+      "frame": "C",
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S8",
+      "id": "settings_panel",
+      "x": 0,
+      "y": 0,
+      "w": 448,
+      "h": 284,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "help_panel",
+      "x": 450,
+      "y": 0,
+      "w": 448,
+      "h": 264,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "field_frame",
+      "x": 0,
+      "y": 286,
+      "w": 208,
+      "h": 240,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": false
+    },
+    {
+      "sheet": "S8",
+      "id": "result_panel",
+      "x": 210,
+      "y": 286,
+      "w": 320,
+      "h": 232,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "info_panel",
+      "x": 532,
+      "y": 286,
+      "w": 192,
+      "h": 224,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "confirmation_panel",
+      "x": 726,
+      "y": 286,
+      "w": 280,
+      "h": 120,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "mode_count_panel",
+      "x": 0,
+      "y": 528,
+      "w": 192,
+      "h": 32,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true,
+      "previous_rect": [
+        0,
+        528,
+        192,
+        64
+      ],
+      "target_rect": [
+        0,
+        0,
+        192,
+        32
+      ]
+    },
+    {
+      "sheet": "S8",
+      "id": "menu_item_normal",
+      "x": 194,
+      "y": 528,
+      "w": 240,
+      "h": 40,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "menu_item_selected",
+      "x": 436,
+      "y": 528,
+      "w": 240,
+      "h": 40,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "readout_panel",
+      "x": 678,
+      "y": 528,
+      "w": 160,
+      "h": 40,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "role_stock_frame",
+      "x": 0,
+      "y": 594,
+      "w": 192,
+      "h": 32,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": false
+    },
+    {
+      "sheet": "S8",
+      "id": "corner_flourish",
+      "x": 194,
+      "y": 594,
+      "w": 32,
+      "h": 32,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": false
+    },
+    {
+      "sheet": "S8",
+      "id": "focus_ring",
+      "x": 228,
+      "y": 594,
+      "w": 224,
+      "h": 28,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S8",
+      "id": "input_waiting",
+      "x": 454,
+      "y": 594,
+      "w": 224,
+      "h": 28,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S8",
+      "id": "mode_badge",
+      "x": 680,
+      "y": 594,
+      "w": 88,
+      "h": 28,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "keycap_wide",
+      "x": 770,
+      "y": 594,
+      "w": 48,
+      "h": 24,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "keycap",
+      "x": 820,
+      "y": 594,
+      "w": 28,
+      "h": 24,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "pad_button",
+      "x": 850,
+      "y": 594,
+      "w": 24,
+      "h": 24,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": true
+    },
+    {
+      "sheet": "S8",
+      "id": "dpad",
+      "x": 876,
+      "y": 594,
+      "w": 24,
+      "h": 24,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": false
+    },
+    {
+      "sheet": "S8",
+      "id": "left_stick",
+      "x": 902,
+      "y": 594,
+      "w": 24,
+      "h": 24,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": false
+    },
+    {
+      "sheet": "S8",
+      "id": "slider_knob",
+      "x": 928,
+      "y": 594,
+      "w": 16,
+      "h": 20,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": false
+    },
+    {
+      "sheet": "S8",
+      "id": "arrow_left",
+      "x": 946,
+      "y": 594,
+      "w": 16,
+      "h": 16,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": false
+    },
+    {
+      "sheet": "S8",
+      "id": "arrow_right",
+      "x": 964,
+      "y": 594,
+      "w": 16,
+      "h": 16,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": false
+    },
+    {
+      "sheet": "S8",
+      "id": "selection_cursor",
+      "x": 982,
+      "y": 594,
+      "w": 16,
+      "h": 16,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": false
+    },
+    {
+      "sheet": "S8",
+      "id": "danger_chevron",
+      "x": 1000,
+      "y": 594,
+      "w": 16,
+      "h": 16,
+      "origin": [
+        0,
+        0
+      ],
+      "runtime_text": false
+    },
+    {
+      "sheet": "S8",
+      "id": "slider_rail",
+      "x": 0,
+      "y": 628,
+      "w": 160,
+      "h": 12,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S8",
+      "id": "panel_separator",
+      "x": 162,
+      "y": 628,
+      "w": 192,
+      "h": 8,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S8",
+      "id": "slider_fill",
+      "x": 356,
+      "y": 628,
+      "w": 1,
+      "h": 6,
+      "origin": [
+        0,
+        0
+      ],
+      "stretch_x": true
+    },
+    {
+      "sheet": "S9",
+      "id": "show_ready_A",
+      "x": 0,
+      "y": 0,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "READY!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_ready_B",
+      "x": 160,
+      "y": 0,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "READY!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_ready_C",
+      "x": 320,
+      "y": 0,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "READY!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_go_A",
+      "x": 480,
+      "y": 0,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "GO!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_go_B",
+      "x": 640,
+      "y": 0,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "GO!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_go_C",
+      "x": 800,
+      "y": 0,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "GO!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_win_A",
+      "x": 0,
+      "y": 64,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "WIN!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_win_B",
+      "x": 160,
+      "y": 64,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "WIN!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_win_C",
+      "x": 320,
+      "y": 64,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "WIN!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_lose_A",
+      "x": 480,
+      "y": 64,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "LOSE!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_lose_B",
+      "x": 640,
+      "y": 64,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "LOSE!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_lose_C",
+      "x": 800,
+      "y": 64,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "LOSE!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_draw_A",
+      "x": 0,
+      "y": 128,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "DRAW!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_draw_B",
+      "x": 160,
+      "y": 128,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "DRAW!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_draw_C",
+      "x": 320,
+      "y": 128,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "DRAW!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_result_A",
+      "x": 480,
+      "y": 128,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "RESULT!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_result_B",
+      "x": 640,
+      "y": 128,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "RESULT!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_result_C",
+      "x": 800,
+      "y": 128,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "RESULT!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_game_over_A",
+      "x": 0,
+      "y": 192,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "GAME OVER",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_game_over_B",
+      "x": 160,
+      "y": 192,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "GAME OVER",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_game_over_C",
+      "x": 320,
+      "y": 192,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "GAME OVER",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_stage_clear_A",
+      "x": 480,
+      "y": 192,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "STAGE CLEAR!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_stage_clear_B",
+      "x": 640,
+      "y": 192,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "STAGE CLEAR!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_stage_clear_C",
+      "x": 800,
+      "y": 192,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "STAGE CLEAR!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_all_clear_A",
+      "x": 0,
+      "y": 256,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "ALL CLEAR!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_all_clear_B",
+      "x": 160,
+      "y": 256,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "ALL CLEAR!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_all_clear_C",
+      "x": 320,
+      "y": 256,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "ALL CLEAR!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_level_up_A",
+      "x": 480,
+      "y": 256,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "LEVEL UP!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_level_up_B",
+      "x": 640,
+      "y": 256,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "LEVEL UP!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_level_up_C",
+      "x": 800,
+      "y": 256,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "LEVEL UP!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_max_A",
+      "x": 0,
+      "y": 320,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "MAX!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_max_B",
+      "x": 160,
+      "y": 320,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "MAX!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_max_C",
+      "x": 320,
+      "y": 320,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "MAX!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_chain_A",
+      "x": 480,
+      "y": 320,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "CHAIN!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_chain_B",
+      "x": 640,
+      "y": 320,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "CHAIN!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_chain_C",
+      "x": 800,
+      "y": 320,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "CHAIN!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_stage_bonus_A",
+      "x": 0,
+      "y": 384,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "STAGE BONUS",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_stage_bonus_B",
+      "x": 160,
+      "y": 384,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "STAGE BONUS",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_stage_bonus_C",
+      "x": 320,
+      "y": 384,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "STAGE BONUS",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_all_clear_bonus_A",
+      "x": 480,
+      "y": 384,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "ALL CLEAR BONUS",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_all_clear_bonus_B",
+      "x": 640,
+      "y": 384,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "ALL CLEAR BONUS",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_all_clear_bonus_C",
+      "x": 800,
+      "y": 384,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "ALL CLEAR BONUS",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_pause_A",
+      "x": 0,
+      "y": 448,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "PAUSE",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_pause_B",
+      "x": 160,
+      "y": 448,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "PAUSE",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_pause_C",
+      "x": 320,
+      "y": 448,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "PAUSE",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_start_A",
+      "x": 480,
+      "y": 448,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "START!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_start_B",
+      "x": 640,
+      "y": 448,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "START!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_start_C",
+      "x": 800,
+      "y": 448,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "START!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_counter_A",
+      "x": 0,
+      "y": 512,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "COUNTER!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_counter_B",
+      "x": 160,
+      "y": 512,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "COUNTER!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_counter_C",
+      "x": 320,
+      "y": 512,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "COUNTER!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_all_stages_complete_A",
+      "x": 480,
+      "y": 512,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "ALL STAGES COMPLETE!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_all_stages_complete_B",
+      "x": 640,
+      "y": 512,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "ALL STAGES COMPLETE!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_all_stages_complete_C",
+      "x": 800,
+      "y": 512,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "ALL STAGES COMPLETE!",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_countdown_3_A",
+      "x": 0,
+      "y": 576,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "3",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_countdown_3_B",
+      "x": 160,
+      "y": 576,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "3",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_countdown_3_C",
+      "x": 320,
+      "y": 576,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "3",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_countdown_2_A",
+      "x": 480,
+      "y": 576,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "2",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_countdown_2_B",
+      "x": 640,
+      "y": 576,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "2",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_countdown_2_C",
+      "x": 800,
+      "y": 576,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "2",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_countdown_1_A",
+      "x": 0,
+      "y": 640,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "1",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_countdown_1_B",
+      "x": 160,
+      "y": 640,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "1",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_countdown_1_C",
+      "x": 320,
+      "y": 640,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "1",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_mode1_A",
+      "x": 480,
+      "y": 640,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "MODE1",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_mode1_B",
+      "x": 640,
+      "y": 640,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "MODE1",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_mode1_C",
+      "x": 800,
+      "y": 640,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "MODE1",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_mode2_A",
+      "x": 0,
+      "y": 704,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "MODE2",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_mode2_B",
+      "x": 160,
+      "y": 704,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "MODE2",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_mode2_C",
+      "x": 320,
+      "y": 704,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "MODE2",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_no_role_A",
+      "x": 480,
+      "y": 704,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "NO ROLE",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_no_role_B",
+      "x": 640,
+      "y": 704,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "NO ROLE",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S9",
+      "id": "show_no_role_C",
+      "x": 800,
+      "y": 704,
+      "w": 160,
+      "h": 64,
+      "origin": [
+        0,
+        0
+      ],
+      "text": "NO ROLE",
+      "runtime_value": false,
+      "render_style": "S7 palette/border/shadow; matching generated Latin glyphs",
+      "has_panel": false
+    },
+    {
+      "sheet": "S10",
+      "id": "card_refresh_0",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S10",
+      "id": "card_refresh_1",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S10",
+      "id": "card_refresh_2",
+      "x": 96,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S10",
+      "id": "card_refresh_3",
+      "x": 144,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S10",
+      "id": "line_clear_0",
+      "x": 0,
+      "y": 64,
+      "w": 192,
+      "h": 32,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S10",
+      "id": "line_clear_1",
+      "x": 0,
+      "y": 96,
+      "w": 192,
+      "h": 32,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S10",
+      "id": "line_clear_2",
+      "x": 0,
+      "y": 128,
+      "w": 192,
+      "h": 32,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S10",
+      "id": "line_clear_3",
+      "x": 0,
+      "y": 160,
+      "w": 192,
+      "h": 32,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S10",
+      "id": "danger_border_0",
+      "x": 0,
+      "y": 208,
+      "w": 208,
+      "h": 240,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S10",
+      "id": "danger_border_1",
+      "x": 208,
+      "y": 208,
+      "w": 208,
+      "h": 240,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S11",
+      "id": "player_frame_p1",
+      "x": 0,
+      "y": 0,
+      "w": 216,
+      "h": 240,
+      "origin": [
+        0,
+        0
+      ],
+      "board_target": [
+        16,
+        8,
+        192,
+        224
+      ],
+      "timer_fill_target": [
+        4,
+        48,
+        8,
+        96
+      ]
+    },
+    {
+      "sheet": "S11",
+      "id": "player_frame_p2",
+      "x": 216,
+      "y": 0,
+      "w": 216,
+      "h": 240,
+      "origin": [
+        0,
+        0
+      ],
+      "board_target": [
+        8,
+        8,
+        192,
+        224
+      ],
+      "timer_fill_target": [
+        204,
+        48,
+        8,
+        96
+      ]
+    },
+    {
+      "sheet": "S11",
+      "id": "center_info_frame",
+      "x": 0,
+      "y": 256,
+      "w": 112,
+      "h": 224,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "S11",
+      "id": "timer_fill_safe",
+      "x": 128,
+      "y": 256,
+      "w": 8,
+      "h": 96,
+      "origin": [
+        0,
+        0
+      ],
+      "clip_axis": "y",
+      "fill_direction": "bottom_to_top",
+      "runtime_remaining_ratio": true
+    },
+    {
+      "sheet": "S11",
+      "id": "timer_fill_warn",
+      "x": 144,
+      "y": 256,
+      "w": 8,
+      "h": 96,
+      "origin": [
+        0,
+        0
+      ],
+      "clip_axis": "y",
+      "fill_direction": "bottom_to_top",
+      "runtime_remaining_ratio": true
+    },
+    {
+      "sheet": "S11",
+      "id": "timer_fill_danger",
+      "x": 160,
+      "y": 256,
+      "w": 8,
+      "h": 96,
+      "origin": [
+        0,
+        0
+      ],
+      "clip_axis": "y",
+      "fill_direction": "bottom_to_top",
+      "runtime_remaining_ratio": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_0_A",
+      "x": 0,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "0",
+      "phase": "A",
+      "ink_box": [
+        1,
+        0,
+        35,
+        32
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_1_A",
+      "x": 36,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "1",
+      "phase": "A",
+      "ink_box": [
+        5,
+        0,
+        31,
+        34
+      ],
+      "advance": 24,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_2_A",
+      "x": 72,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "2",
+      "phase": "A",
+      "ink_box": [
+        1,
+        0,
+        35,
+        34
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_3_A",
+      "x": 108,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "3",
+      "phase": "A",
+      "ink_box": [
+        1,
+        0,
+        34,
+        34
+      ],
+      "advance": 31,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_4_A",
+      "x": 144,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "4",
+      "phase": "A",
+      "ink_box": [
+        1,
+        0,
+        35,
+        32
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_5_A",
+      "x": 180,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "5",
+      "phase": "A",
+      "ink_box": [
+        1,
+        0,
+        34,
+        34
+      ],
+      "advance": 31,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_6_A",
+      "x": 216,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "6",
+      "phase": "A",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_7_A",
+      "x": 252,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "7",
+      "phase": "A",
+      "ink_box": [
+        1,
+        0,
+        35,
+        34
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_8_A",
+      "x": 288,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "8",
+      "phase": "A",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_9_A",
+      "x": 324,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "9",
+      "phase": "A",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_times_A",
+      "x": 360,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "×",
+      "phase": "A",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_dot_A",
+      "x": 396,
+      "y": 0,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": ".",
+      "phase": "A",
+      "ink_box": [
+        11,
+        22,
+        24,
+        34
+      ],
+      "advance": 11,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_0_B",
+      "x": 0,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "0",
+      "phase": "B",
+      "ink_box": [
+        1,
+        0,
+        35,
+        32
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_1_B",
+      "x": 36,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "1",
+      "phase": "B",
+      "ink_box": [
+        5,
+        0,
+        31,
+        34
+      ],
+      "advance": 24,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_2_B",
+      "x": 72,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "2",
+      "phase": "B",
+      "ink_box": [
+        1,
+        0,
+        35,
+        34
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_3_B",
+      "x": 108,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "3",
+      "phase": "B",
+      "ink_box": [
+        1,
+        0,
+        34,
+        34
+      ],
+      "advance": 31,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_4_B",
+      "x": 144,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "4",
+      "phase": "B",
+      "ink_box": [
+        1,
+        0,
+        35,
+        32
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_5_B",
+      "x": 180,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "5",
+      "phase": "B",
+      "ink_box": [
+        1,
+        0,
+        34,
+        34
+      ],
+      "advance": 31,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_6_B",
+      "x": 216,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "6",
+      "phase": "B",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_7_B",
+      "x": 252,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "7",
+      "phase": "B",
+      "ink_box": [
+        1,
+        0,
+        35,
+        34
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_8_B",
+      "x": 288,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "8",
+      "phase": "B",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_9_B",
+      "x": 324,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "9",
+      "phase": "B",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_times_B",
+      "x": 360,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "×",
+      "phase": "B",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_dot_B",
+      "x": 396,
+      "y": 40,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": ".",
+      "phase": "B",
+      "ink_box": [
+        11,
+        22,
+        24,
+        34
+      ],
+      "advance": 11,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_0_C",
+      "x": 0,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "0",
+      "phase": "C",
+      "ink_box": [
+        1,
+        0,
+        35,
+        32
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_1_C",
+      "x": 36,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "1",
+      "phase": "C",
+      "ink_box": [
+        5,
+        0,
+        31,
+        34
+      ],
+      "advance": 24,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_2_C",
+      "x": 72,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "2",
+      "phase": "C",
+      "ink_box": [
+        1,
+        0,
+        35,
+        34
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_3_C",
+      "x": 108,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "3",
+      "phase": "C",
+      "ink_box": [
+        1,
+        0,
+        34,
+        34
+      ],
+      "advance": 31,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_4_C",
+      "x": 144,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "4",
+      "phase": "C",
+      "ink_box": [
+        1,
+        0,
+        35,
+        32
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_5_C",
+      "x": 180,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "5",
+      "phase": "C",
+      "ink_box": [
+        1,
+        0,
+        34,
+        34
+      ],
+      "advance": 31,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_6_C",
+      "x": 216,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "6",
+      "phase": "C",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_7_C",
+      "x": 252,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "7",
+      "phase": "C",
+      "ink_box": [
+        1,
+        0,
+        35,
+        34
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_8_C",
+      "x": 288,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "8",
+      "phase": "C",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_9_C",
+      "x": 324,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "9",
+      "phase": "C",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_times_C",
+      "x": 360,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": "×",
+      "phase": "C",
+      "ink_box": [
+        1,
+        0,
+        35,
+        33
+      ],
+      "advance": 32,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S12",
+      "id": "display_dot_C",
+      "x": 396,
+      "y": 80,
+      "w": 36,
+      "h": 34,
+      "origin": [
+        0,
+        0
+      ],
+      "character": ".",
+      "phase": "C",
+      "ink_box": [
+        11,
+        22,
+        24,
+        34
+      ],
+      "advance": 11,
+      "runtime_composable": true
+    },
+    {
+      "sheet": "S13",
+      "id": "idle_00",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "idle_01",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "idle_02",
+      "x": 96,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "idle_03",
+      "x": 144,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "walk_00",
+      "x": 192,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "walk_01",
+      "x": 0,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "walk_02",
+      "x": 48,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "walk_03",
+      "x": 96,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "launch_00",
+      "x": 144,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "launch_01",
+      "x": 192,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "launch_02",
+      "x": 0,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "launch_03",
+      "x": 48,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "attack_00",
+      "x": 96,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "attack_01",
+      "x": 144,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "attack_02",
+      "x": 192,
+      "y": 112,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "attack_03",
+      "x": 0,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "win_00",
+      "x": 48,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "win_01",
+      "x": 96,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "win_02",
+      "x": 144,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "win_03",
+      "x": 192,
+      "y": 168,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "win_04",
+      "x": 0,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "win_05",
+      "x": 48,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "lose_fall_00",
+      "x": 96,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "lose_fall_01",
+      "x": 144,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "lose_fall_02",
+      "x": 192,
+      "y": 224,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "lose_fall_03",
+      "x": 0,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "fail_declare_00",
+      "x": 48,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "fail_declare_01",
+      "x": 96,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "fail_declare_02",
+      "x": 144,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "S13",
+      "id": "fail_declare_03",
+      "x": 192,
+      "y": 280,
+      "w": 48,
+      "h": 56,
+      "origin": [
+        24,
+        55
+      ]
+    },
+    {
+      "sheet": "CTRL",
+      "id": "arrow_left",
+      "x": 0,
+      "y": 0,
+      "w": 12,
+      "h": 12,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "CTRL",
+      "id": "arrow_right",
+      "x": 16,
+      "y": 0,
+      "w": 12,
+      "h": 12,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "CTRL",
+      "id": "slider_rail",
+      "x": 0,
+      "y": 20,
+      "w": 128,
+      "h": 8,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "CTRL",
+      "id": "slider_fill",
+      "x": 0,
+      "y": 32,
+      "w": 128,
+      "h": 8,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "CTRL",
+      "id": "slider_knob",
+      "x": 144,
+      "y": 20,
+      "w": 8,
+      "h": 14,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "CTRL",
+      "id": "keycap",
+      "x": 0,
+      "y": 48,
+      "w": 24,
+      "h": 16,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "CTRL",
+      "id": "pad_button",
+      "x": 32,
+      "y": 48,
+      "w": 16,
+      "h": 16,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "CTRL",
+      "id": "dpad",
+      "x": 56,
+      "y": 48,
+      "w": 16,
+      "h": 16,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "CTRL",
+      "id": "left_stick",
+      "x": 80,
+      "y": 48,
+      "w": 16,
+      "h": 16,
+      "origin": [
+        0,
+        0
+      ]
+    },
+    {
+      "sheet": "CTRL",
+      "id": "input_waiting",
+      "x": 0,
+      "y": 76,
+      "w": 160,
+      "h": 24,
+      "origin": [
+        0,
+        0
+      ]
+    }
+  ],
+  "animations": {
+    "S1/idle": {
+      "file": "assets/kotaro_sheet.png",
+      "frames": [
+        "idle_00",
+        "idle_01",
+        "idle_02",
+        "idle_03"
+      ],
+      "durations_ms": [
+        220,
+        220,
+        220,
+        220
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S1/walk": {
+      "file": "assets/kotaro_sheet.png",
+      "frames": [
+        "walk_00",
+        "walk_01",
+        "walk_02",
+        "walk_03"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S1/launch": {
+      "file": "assets/kotaro_sheet.png",
+      "frames": [
+        "launch_00",
+        "launch_01",
+        "launch_02",
+        "launch_03"
+      ],
+      "durations_ms": [
+        70,
+        70,
+        70,
+        70
+      ],
+      "loop": false,
+      "return": "idle",
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S1/attack": {
+      "file": "assets/kotaro_sheet.png",
+      "frames": [
+        "attack_00",
+        "attack_01",
+        "attack_02",
+        "attack_03"
+      ],
+      "durations_ms": [
+        110,
+        110,
+        110,
+        110
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": "attack_01"
+    },
+    "S1/win": {
+      "file": "assets/kotaro_sheet.png",
+      "frames": [
+        "win_00",
+        "win_01",
+        "win_02",
+        "win_03",
+        "win_04",
+        "win_05"
+      ],
+      "durations_ms": [
+        140,
+        140,
+        140,
+        140,
+        140,
+        140
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S1/lose_fall": {
+      "file": "assets/kotaro_sheet.png",
+      "frames": [
+        "lose_fall_00",
+        "lose_fall_01",
+        "lose_fall_02",
+        "lose_fall_03"
+      ],
+      "durations_ms": [
+        160,
+        160,
+        160,
+        160
+      ],
+      "loop": false,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S1/fail_declare": {
+      "file": "assets/kotaro_sheet.png",
+      "frames": [
+        "fail_declare_00",
+        "fail_declare_01",
+        "fail_declare_02",
+        "fail_declare_03"
+      ],
+      "durations_ms": [
+        110,
+        120,
+        180,
+        150
+      ],
+      "loop": false,
+      "return": "idle",
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S2/idle": {
+      "file": "assets/akane_sheet.png",
+      "frames": [
+        "idle_00",
+        "idle_01",
+        "idle_02",
+        "idle_03"
+      ],
+      "durations_ms": [
+        220,
+        220,
+        220,
+        220
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S2/walk": {
+      "file": "assets/akane_sheet.png",
+      "frames": [
+        "walk_00",
+        "walk_01",
+        "walk_02",
+        "walk_03"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S2/launch": {
+      "file": "assets/akane_sheet.png",
+      "frames": [
+        "launch_00",
+        "launch_01",
+        "launch_02",
+        "launch_03"
+      ],
+      "durations_ms": [
+        70,
+        70,
+        70,
+        70
+      ],
+      "loop": false,
+      "return": "idle",
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S2/attack": {
+      "file": "assets/akane_sheet.png",
+      "frames": [
+        "attack_00",
+        "attack_01",
+        "attack_02",
+        "attack_03"
+      ],
+      "durations_ms": [
+        110,
+        110,
+        110,
+        110
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": "attack_01"
+    },
+    "S2/win": {
+      "file": "assets/akane_sheet.png",
+      "frames": [
+        "win_00",
+        "win_01",
+        "win_02",
+        "win_03",
+        "win_04",
+        "win_05"
+      ],
+      "durations_ms": [
+        140,
+        140,
+        140,
+        140,
+        140,
+        140
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S2/lose_fall": {
+      "file": "assets/akane_sheet.png",
+      "frames": [
+        "lose_fall_00",
+        "lose_fall_01",
+        "lose_fall_02",
+        "lose_fall_03"
+      ],
+      "durations_ms": [
+        160,
+        160,
+        160,
+        160
+      ],
+      "loop": false,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S2/fail_declare": {
+      "file": "assets/akane_sheet.png",
+      "frames": [
+        "fail_declare_00",
+        "fail_declare_01",
+        "fail_declare_02",
+        "fail_declare_03"
+      ],
+      "durations_ms": [
+        110,
+        120,
+        180,
+        150
+      ],
+      "loop": false,
+      "return": "idle",
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S13/idle": {
+      "file": "assets/zunko_sheet.png",
+      "frames": [
+        "idle_00",
+        "idle_01",
+        "idle_02",
+        "idle_03"
+      ],
+      "durations_ms": [
+        220,
+        220,
+        220,
+        220
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S13/walk": {
+      "file": "assets/zunko_sheet.png",
+      "frames": [
+        "walk_00",
+        "walk_01",
+        "walk_02",
+        "walk_03"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S13/launch": {
+      "file": "assets/zunko_sheet.png",
+      "frames": [
+        "launch_00",
+        "launch_01",
+        "launch_02",
+        "launch_03"
+      ],
+      "durations_ms": [
+        70,
+        70,
+        70,
+        70
+      ],
+      "loop": false,
+      "return": "idle",
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S13/attack": {
+      "file": "assets/zunko_sheet.png",
+      "frames": [
+        "attack_00",
+        "attack_01",
+        "attack_02",
+        "attack_03"
+      ],
+      "durations_ms": [
+        110,
+        110,
+        110,
+        110
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": "attack_01"
+    },
+    "S13/win": {
+      "file": "assets/zunko_sheet.png",
+      "frames": [
+        "win_00",
+        "win_01",
+        "win_02",
+        "win_03",
+        "win_04",
+        "win_05"
+      ],
+      "durations_ms": [
+        140,
+        140,
+        140,
+        140,
+        140,
+        140
+      ],
+      "loop": true,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S13/lose_fall": {
+      "file": "assets/zunko_sheet.png",
+      "frames": [
+        "lose_fall_00",
+        "lose_fall_01",
+        "lose_fall_02",
+        "lose_fall_03"
+      ],
+      "durations_ms": [
+        160,
+        160,
+        160,
+        160
+      ],
+      "loop": false,
+      "return": null,
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S13/fail_declare": {
+      "file": "assets/zunko_sheet.png",
+      "frames": [
+        "fail_declare_00",
+        "fail_declare_01",
+        "fail_declare_02",
+        "fail_declare_03"
+      ],
+      "durations_ms": [
+        110,
+        120,
+        180,
+        150
+      ],
+      "loop": false,
+      "return": "idle",
+      "timing_source": "current_config.ts DEFAULT_VIEW_CONFIG / baseline fail_declare timing",
+      "swap_alias": null
+    },
+    "S3/idle": {
+      "file": "assets/nekotaro_sheet.png",
+      "frames": [
+        "idle_00",
+        "idle_01",
+        "idle_02",
+        "idle_03"
+      ],
+      "durations_ms": [
+        220,
+        220,
+        220,
+        220
+      ],
+      "loop": true,
+      "timing_source": "current gameView collectMascot uses charFrameMs.idle"
+    },
+    "S3/ready": {
+      "file": "assets/nekotaro_sheet.png",
+      "frames": [
+        "ready_00",
+        "ready_01"
+      ],
+      "durations_ms": [
+        220,
+        220
+      ],
+      "loop": true,
+      "timing_source": "current gameView collectMascot uses charFrameMs.idle"
+    },
+    "S3/start": {
+      "file": "assets/nekotaro_sheet.png",
+      "frames": [
+        "start_00",
+        "start_01"
+      ],
+      "durations_ms": [
+        220,
+        220
+      ],
+      "loop": true,
+      "timing_source": "current gameView collectMascot uses charFrameMs.idle"
+    },
+    "S3/cracker": {
+      "file": "assets/nekotaro_sheet.png",
+      "frames": [
+        "cracker_00",
+        "cracker_01",
+        "cracker_02",
+        "cracker_03"
+      ],
+      "durations_ms": [
+        220,
+        220,
+        220,
+        220
+      ],
+      "loop": true,
+      "timing_source": "current gameView collectMascot uses charFrameMs.idle"
+    },
+    "S3/joy": {
+      "file": "assets/nekotaro_sheet.png",
+      "frames": [
+        "joy_00",
+        "joy_01"
+      ],
+      "durations_ms": [
+        220,
+        220
+      ],
+      "loop": true,
+      "timing_source": "current gameView collectMascot uses charFrameMs.idle"
+    },
+    "S3/surprise": {
+      "file": "assets/nekotaro_sheet.png",
+      "frames": [
+        "surprise_00",
+        "surprise_01"
+      ],
+      "durations_ms": [
+        220,
+        220
+      ],
+      "loop": true,
+      "timing_source": "current gameView collectMascot uses charFrameMs.idle"
+    },
+    "S3/panic": {
+      "file": "assets/nekotaro_sheet.png",
+      "frames": [
+        "panic_00",
+        "panic_01"
+      ],
+      "durations_ms": [
+        220,
+        220
+      ],
+      "loop": true,
+      "timing_source": "current gameView collectMascot uses charFrameMs.idle"
+    },
+    "S3/sad": {
+      "file": "assets/nekotaro_sheet.png",
+      "frames": [
+        "sad_00",
+        "sad_01"
+      ],
+      "durations_ms": [
+        220,
+        220
+      ],
+      "loop": true,
+      "timing_source": "current gameView collectMascot uses charFrameMs.idle"
+    },
+    "S7/role_00": {
+      "frames": [
+        "role_00_A",
+        "role_00_B",
+        "role_00_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_01": {
+      "frames": [
+        "role_01_A",
+        "role_01_B",
+        "role_01_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_02": {
+      "frames": [
+        "role_02_A",
+        "role_02_B",
+        "role_02_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_03": {
+      "frames": [
+        "role_03_A",
+        "role_03_B",
+        "role_03_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_04": {
+      "frames": [
+        "role_04_A",
+        "role_04_B",
+        "role_04_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_05": {
+      "frames": [
+        "role_05_A",
+        "role_05_B",
+        "role_05_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_06": {
+      "frames": [
+        "role_06_A",
+        "role_06_B",
+        "role_06_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_07": {
+      "frames": [
+        "role_07_A",
+        "role_07_B",
+        "role_07_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_08": {
+      "frames": [
+        "role_08_A",
+        "role_08_B",
+        "role_08_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_09": {
+      "frames": [
+        "role_09_A",
+        "role_09_B",
+        "role_09_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_10": {
+      "frames": [
+        "role_10_A",
+        "role_10_B",
+        "role_10_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_11": {
+      "frames": [
+        "role_11_A",
+        "role_11_B",
+        "role_11_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_12": {
+      "frames": [
+        "role_12_A",
+        "role_12_B",
+        "role_12_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_13": {
+      "frames": [
+        "role_13_A",
+        "role_13_B",
+        "role_13_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_14": {
+      "frames": [
+        "role_14_A",
+        "role_14_B",
+        "role_14_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S7/role_15": {
+      "frames": [
+        "role_15_A",
+        "role_15_B",
+        "role_15_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_1_back": {
+      "frames": [
+        "role_glow_1_back_a",
+        "role_glow_1_back_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_1_front": {
+      "frames": [
+        "role_glow_1_front_a",
+        "role_glow_1_front_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_2_back": {
+      "frames": [
+        "role_glow_2_back_a",
+        "role_glow_2_back_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_2_front": {
+      "frames": [
+        "role_glow_2_front_a",
+        "role_glow_2_front_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_3_back": {
+      "frames": [
+        "role_glow_3_back_a",
+        "role_glow_3_back_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_3_front": {
+      "frames": [
+        "role_glow_3_front_a",
+        "role_glow_3_front_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_4_back": {
+      "frames": [
+        "role_glow_4_back_a",
+        "role_glow_4_back_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_4_front": {
+      "frames": [
+        "role_glow_4_front_a",
+        "role_glow_4_front_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_5_back": {
+      "frames": [
+        "role_glow_5_back_a",
+        "role_glow_5_back_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_5_front": {
+      "frames": [
+        "role_glow_5_front_a",
+        "role_glow_5_front_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_6_back": {
+      "frames": [
+        "role_glow_6_back_a",
+        "role_glow_6_back_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S6/role_glow_6_front": {
+      "frames": [
+        "role_glow_6_front_a",
+        "role_glow_6_front_b"
+      ],
+      "durations_ms": [
+        250,
+        250
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_ready": {
+      "frames": [
+        "show_ready_A",
+        "show_ready_B",
+        "show_ready_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_go": {
+      "frames": [
+        "show_go_A",
+        "show_go_B",
+        "show_go_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_win": {
+      "frames": [
+        "show_win_A",
+        "show_win_B",
+        "show_win_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_lose": {
+      "frames": [
+        "show_lose_A",
+        "show_lose_B",
+        "show_lose_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_draw": {
+      "frames": [
+        "show_draw_A",
+        "show_draw_B",
+        "show_draw_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_result": {
+      "frames": [
+        "show_result_A",
+        "show_result_B",
+        "show_result_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_game_over": {
+      "frames": [
+        "show_game_over_A",
+        "show_game_over_B",
+        "show_game_over_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_stage_clear": {
+      "frames": [
+        "show_stage_clear_A",
+        "show_stage_clear_B",
+        "show_stage_clear_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_all_clear": {
+      "frames": [
+        "show_all_clear_A",
+        "show_all_clear_B",
+        "show_all_clear_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_level_up": {
+      "frames": [
+        "show_level_up_A",
+        "show_level_up_B",
+        "show_level_up_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_max": {
+      "frames": [
+        "show_max_A",
+        "show_max_B",
+        "show_max_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_chain": {
+      "frames": [
+        "show_chain_A",
+        "show_chain_B",
+        "show_chain_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_stage_bonus": {
+      "frames": [
+        "show_stage_bonus_A",
+        "show_stage_bonus_B",
+        "show_stage_bonus_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_all_clear_bonus": {
+      "frames": [
+        "show_all_clear_bonus_A",
+        "show_all_clear_bonus_B",
+        "show_all_clear_bonus_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_pause": {
+      "frames": [
+        "show_pause_A",
+        "show_pause_B",
+        "show_pause_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_start": {
+      "frames": [
+        "show_start_A",
+        "show_start_B",
+        "show_start_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_counter": {
+      "frames": [
+        "show_counter_A",
+        "show_counter_B",
+        "show_counter_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_all_stages_complete": {
+      "frames": [
+        "show_all_stages_complete_A",
+        "show_all_stages_complete_B",
+        "show_all_stages_complete_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_countdown_3": {
+      "frames": [
+        "show_countdown_3_A",
+        "show_countdown_3_B",
+        "show_countdown_3_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_countdown_2": {
+      "frames": [
+        "show_countdown_2_A",
+        "show_countdown_2_B",
+        "show_countdown_2_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_countdown_1": {
+      "frames": [
+        "show_countdown_1_A",
+        "show_countdown_1_B",
+        "show_countdown_1_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_mode1": {
+      "frames": [
+        "show_mode1_A",
+        "show_mode1_B",
+        "show_mode1_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_mode2": {
+      "frames": [
+        "show_mode2_A",
+        "show_mode2_B",
+        "show_mode2_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S9/show_no_role": {
+      "frames": [
+        "show_no_role_A",
+        "show_no_role_B",
+        "show_no_role_C"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S10/card_refresh": {
+      "frames": [
+        "card_refresh_0",
+        "card_refresh_1",
+        "card_refresh_2",
+        "card_refresh_3"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S10/line_clear": {
+      "frames": [
+        "line_clear_0",
+        "line_clear_1",
+        "line_clear_2",
+        "line_clear_3"
+      ],
+      "durations_ms": [
+        90,
+        90,
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    },
+    "S10/danger_border": {
+      "frames": [
+        "danger_border_0",
+        "danger_border_1"
+      ],
+      "durations_ms": [
+        90,
+        90
+      ],
+      "loop": true,
+      "source": "unchanged baseline; existing game timing takes precedence"
+    }
+  },
+  "standalone_assets": [
+    {
+      "id": "attack_stock_active_frame",
+      "file": "assets/attack_stock_active_frame.png",
+      "dimensions": [
+        22,
+        22
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "0",
+          "rect": [
+            0,
+            0,
+            22,
+            22
+          ],
+          "origin": [
+            3,
+            3
+          ]
+        }
+      ],
+      "purpose": "attack_stock_active_frame",
+      "classification": "existing_reuse",
+      "color_count": 2,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "9a99fbe69470becf3c26667567d983a3b8d46cb6f7417b68d71a39d989c93ccb"
+    },
+    {
+      "id": "attack_stock_active_frame_bright",
+      "file": "assets/attack_stock_active_frame_bright.png",
+      "dimensions": [
+        22,
+        22
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "0",
+          "rect": [
+            0,
+            0,
+            22,
+            22
+          ],
+          "origin": [
+            3,
+            3
+          ]
+        }
+      ],
+      "purpose": "attack_stock_active_frame_bright",
+      "classification": "existing_reuse",
+      "color_count": 2,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "da9ac7074ece3771e2bc84a4868d0d3195686a55b66b5f0a54e95f8127b693d7"
+    },
+    {
+      "id": "attack_stock_cancel_burst_sheet",
+      "file": "assets/attack_stock_cancel_burst_sheet.png",
+      "dimensions": [
+        96,
+        24
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "0",
+          "rect": [
+            0,
+            0,
+            24,
+            24
+          ],
+          "origin": [
+            12,
+            12
+          ]
+        },
+        {
+          "id": "1",
+          "rect": [
+            24,
+            0,
+            24,
+            24
+          ],
+          "origin": [
+            12,
+            12
+          ]
+        },
+        {
+          "id": "2",
+          "rect": [
+            48,
+            0,
+            24,
+            24
+          ],
+          "origin": [
+            12,
+            12
+          ]
+        },
+        {
+          "id": "3",
+          "rect": [
+            72,
+            0,
+            24,
+            24
+          ],
+          "origin": [
+            12,
+            12
+          ]
+        }
+      ],
+      "purpose": "attack_stock_cancel_burst_sheet",
+      "classification": "existing_reuse",
+      "color_count": 4,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "d5017be8f971af8e394daf3f22fe14daf951a5cf70d79fa9a66f6bc95bae857c"
+    },
+    {
+      "id": "attack_stock_cancel_burst_small_sheet",
+      "file": "assets/attack_stock_cancel_burst_small_sheet.png",
+      "dimensions": [
+        48,
+        12
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "0",
+          "rect": [
+            0,
+            0,
+            12,
+            12
+          ],
+          "origin": [
+            6,
+            6
+          ]
+        },
+        {
+          "id": "1",
+          "rect": [
+            12,
+            0,
+            12,
+            12
+          ],
+          "origin": [
+            6,
+            6
+          ]
+        },
+        {
+          "id": "2",
+          "rect": [
+            24,
+            0,
+            12,
+            12
+          ],
+          "origin": [
+            6,
+            6
+          ]
+        },
+        {
+          "id": "3",
+          "rect": [
+            36,
+            0,
+            12,
+            12
+          ],
+          "origin": [
+            6,
+            6
+          ]
+        }
+      ],
+      "purpose": "attack_stock_cancel_burst_small_sheet",
+      "classification": "existing_reuse",
+      "color_count": 4,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "6a89802a9d25f0d6f3ff971237f55f77951265fb4588fe53126a96152213e0f5"
+    },
+    {
+      "id": "attack_stock_nekotaro_large",
+      "file": "assets/attack_stock_nekotaro_large.png",
+      "dimensions": [
+        16,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "0",
+          "rect": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "attack_stock_nekotaro_large",
+      "classification": "existing_reuse",
+      "color_count": 7,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "76edadbb9a738e7cb6ae5084008762dc516981237fd76a8447bf9b6b7dc66996"
+    },
+    {
+      "id": "attack_stock_nekotaro_large_xd",
+      "file": "assets/attack_stock_nekotaro_large_xd.png",
+      "dimensions": [
+        16,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "0",
+          "rect": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "attack_stock_nekotaro_large_xd",
+      "classification": "existing_reuse",
+      "color_count": 7,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "d910e08284958f342f64932ecd8b5a5451aa4895c74bcfe160b8e12c272c01c9"
+    },
+    {
+      "id": "attack_stock_nekotaro_small",
+      "file": "assets/attack_stock_nekotaro_small.png",
+      "dimensions": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "0",
+          "rect": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "attack_stock_nekotaro_small",
+      "classification": "existing_reuse",
+      "color_count": 4,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "aa2b2c6b61cab351612643b91f7bfe03acd1d3b03c96e274937d0aa0ff68239e"
+    },
+    {
+      "id": "attack_stock_nekotaro_small_xd",
+      "file": "assets/attack_stock_nekotaro_small_xd.png",
+      "dimensions": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "0",
+          "rect": [
+            0,
+            0,
+            8,
+            8
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "attack_stock_nekotaro_small_xd",
+      "classification": "existing_reuse",
+      "color_count": 4,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "ba088f277eb9ee13a2f64bff003a346ff1606161e73153105eb422dea7f0f780"
+    },
+    {
+      "id": "background_common",
+      "file": "assets/background_common.png",
+      "dimensions": [
+        640,
+        360
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "background_common",
+          "rect": [
+            0,
+            0,
+            640,
+            360
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "background_common",
+      "classification": "existing_reuse",
+      "color_count": 48,
+      "alpha_values": [
+        255
+      ],
+      "sha256": "e65bf513a45771788a4d7c78c55fe15eb14c9bdd8cf2cdee114c2f88deee9464"
+    },
+    {
+      "id": "board_frame_mode2",
+      "file": "assets/board_frame_mode2.png",
+      "dimensions": [
+        196,
+        228
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "board_frame_mode2",
+          "rect": [
+            0,
+            0,
+            196,
+            228
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "board_frame_mode2",
+      "classification": "new",
+      "color_count": 1,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "301862e91640327b69b4bb4781fdbf3d943bbbc9441ab1af6079fa1adb7fc7b6"
+    },
+    {
+      "id": "center_frame",
+      "file": "assets/center_frame.png",
+      "dimensions": [
+        112,
+        224
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "center_frame",
+          "rect": [
+            0,
+            0,
+            112,
+            224
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "center_frame",
+      "classification": "existing_reuse",
+      "color_count": 5,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "d46098deab8c1eb48fec10baf997e0c3f658ff0be36db6ec24aab45e5c70b0b7"
+    },
+    {
+      "id": "count_panel",
+      "file": "assets/count_panel.png",
+      "dimensions": [
+        192,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "count_panel",
+          "rect": [
+            0,
+            0,
+            192,
+            32
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "count_panel",
+      "classification": "existing_reuse",
+      "color_count": 5,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "96494f6b146e918ac0e9f73912943fe42649a2e29c72d8107aa342854c8a64f0"
+    },
+    {
+      "id": "cursor_1p_focus",
+      "file": "assets/cursor_1p_focus.png",
+      "dimensions": [
+        96,
+        96
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "cursor_1p_focus",
+          "rect": [
+            0,
+            0,
+            96,
+            96
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "cursor_1p_focus",
+      "classification": "existing_reuse",
+      "color_count": 1,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "6b0eb374399fe576ac88c07892aa6b0d801be873ed7b3deb1b47a622b5abcb32"
+    },
+    {
+      "id": "cursor_2p_focus",
+      "file": "assets/cursor_2p_focus.png",
+      "dimensions": [
+        96,
+        96
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "cursor_2p_focus",
+          "rect": [
+            0,
+            0,
+            96,
+            96
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "cursor_2p_focus",
+      "classification": "existing_reuse",
+      "color_count": 1,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "1b919841b22a792c1c31f54d342cac15e27f5baa38af8459871bd963a0a01710"
+    },
+    {
+      "id": "dialog_panel",
+      "file": "assets/dialog_panel.png",
+      "dimensions": [
+        288,
+        112
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "dialog_panel",
+          "rect": [
+            0,
+            0,
+            288,
+            112
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "dialog_panel",
+      "classification": "new",
+      "color_count": 3,
+      "alpha_values": [
+        255
+      ],
+      "sha256": "d4e14525fc1d8826274b205b0e1533076dda0e09447fa2c94dbff421c2fb054f"
+    },
+    {
+      "id": "icon_akane",
+      "file": "assets/icon_akane.png",
+      "dimensions": [
+        64,
+        64
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "icon_akane",
+          "rect": [
+            0,
+            0,
+            64,
+            64
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "icon_akane",
+      "classification": "modified",
+      "color_count": 30,
+      "alpha_values": [
+        255
+      ],
+      "sha256": "c5f6a1bd8e5495eb2ed69c598d47ed65df3ea1397fd9e1197e4d0e9070f263b1"
+    },
+    {
+      "id": "icon_kotaro",
+      "file": "assets/icon_kotaro.png",
+      "dimensions": [
+        64,
+        64
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "icon_kotaro",
+          "rect": [
+            0,
+            0,
+            64,
+            64
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "icon_kotaro",
+      "classification": "modified",
+      "color_count": 27,
+      "alpha_values": [
+        255
+      ],
+      "sha256": "37c9f4ca728b6f5d8560ade526c20b714fb296294ca38355979a6743da4e1ccd"
+    },
+    {
+      "id": "icon_zunko",
+      "file": "assets/icon_zunko.png",
+      "dimensions": [
+        64,
+        64
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "icon_zunko",
+          "rect": [
+            0,
+            0,
+            64,
+            64
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "icon_zunko",
+      "classification": "modified",
+      "color_count": 30,
+      "alpha_values": [
+        255
+      ],
+      "sha256": "2741c8a798117d8a10b6160f3540f48a915b7ddf0ce66501f5600f3e8806f76c"
+    },
+    {
+      "id": "info_panel",
+      "file": "assets/info_panel.png",
+      "dimensions": [
+        192,
+        224
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "info_panel",
+          "rect": [
+            0,
+            0,
+            192,
+            224
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "info_panel",
+      "classification": "existing_reuse",
+      "color_count": 6,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "509732aebc94fba7be86ab36c592dee6d1e1a3f1f873aafc5fa3abb7b5242422"
+    },
+    {
+      "id": "input_hint",
+      "file": "assets/input_hint.png",
+      "dimensions": [
+        176,
+        24
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "input_hint",
+          "rect": [
+            0,
+            0,
+            176,
+            24
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "input_hint",
+      "classification": "existing_reuse",
+      "color_count": 5,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "d2db11214bd34271a8e5cee5e8998b259c2352263fcdecb91a66bb6faf7391dd"
+    },
+    {
+      "id": "menu_akane",
+      "file": "assets/menu_akane.png",
+      "dimensions": [
+        144,
+        168
+      ],
+      "origin": [
+        72,
+        167
+      ],
+      "frames": [
+        {
+          "id": "menu_akane",
+          "rect": [
+            0,
+            0,
+            144,
+            168
+          ],
+          "origin": [
+            72,
+            167
+          ]
+        }
+      ],
+      "purpose": "menu_akane",
+      "classification": "modified",
+      "color_count": 30,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "8a9019a5435b59d6ed2e273c4fba000755e6cdbed99772429bfb625b7337e52c"
+    },
+    {
+      "id": "menu_item_normal",
+      "file": "assets/menu_item_normal.png",
+      "dimensions": [
+        232,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "menu_item_normal",
+          "rect": [
+            0,
+            0,
+            232,
+            32
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "menu_item_normal",
+      "classification": "existing_reuse",
+      "color_count": 5,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "1243b0f53c4006a810bf7f85b276bfcf2d77911f26b7985ef45aa91b746d086b"
+    },
+    {
+      "id": "menu_item_selected",
+      "file": "assets/menu_item_selected.png",
+      "dimensions": [
+        232,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "menu_item_selected",
+          "rect": [
+            0,
+            0,
+            232,
+            32
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "menu_item_selected",
+      "classification": "existing_reuse",
+      "color_count": 5,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "2129a6aa6ed6cf63431b5846e2dd4ad7067d735adba2b777f9a80e7528c1777b"
+    },
+    {
+      "id": "menu_kotaro",
+      "file": "assets/menu_kotaro.png",
+      "dimensions": [
+        144,
+        168
+      ],
+      "origin": [
+        72,
+        167
+      ],
+      "frames": [
+        {
+          "id": "menu_kotaro",
+          "rect": [
+            0,
+            0,
+            144,
+            168
+          ],
+          "origin": [
+            72,
+            167
+          ]
+        }
+      ],
+      "purpose": "menu_kotaro",
+      "classification": "modified",
+      "color_count": 27,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "11ec4d4d68b1f213f8e69ff8b370489670ca541e7e19ab269be36578869e4059"
+    },
+    {
+      "id": "menu_zunko",
+      "file": "assets/menu_zunko.png",
+      "dimensions": [
+        144,
+        168
+      ],
+      "origin": [
+        72,
+        167
+      ],
+      "frames": [
+        {
+          "id": "menu_zunko",
+          "rect": [
+            0,
+            0,
+            144,
+            168
+          ],
+          "origin": [
+            72,
+            167
+          ]
+        }
+      ],
+      "purpose": "menu_zunko",
+      "classification": "new",
+      "color_count": 30,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "6539db991f051827d3122afa9e0347fb3f1624e862110317b49ffd6bb6af2a48"
+    },
+    {
+      "id": "options_row_normal",
+      "file": "assets/options_row_normal.png",
+      "dimensions": [
+        496,
+        24
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "options_row_normal",
+          "rect": [
+            0,
+            0,
+            496,
+            24
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "options_row_normal",
+      "classification": "new",
+      "color_count": 3,
+      "alpha_values": [
+        255
+      ],
+      "sha256": "fe8307c2e547486bb2715e89158437cf17d2ef70a56de646cce98e1015f40217"
+    },
+    {
+      "id": "options_row_selected",
+      "file": "assets/options_row_selected.png",
+      "dimensions": [
+        496,
+        24
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "options_row_selected",
+          "rect": [
+            0,
+            0,
+            496,
+            24
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "options_row_selected",
+      "classification": "new",
+      "color_count": 3,
+      "alpha_values": [
+        255
+      ],
+      "sha256": "b1bbd4230726fd66f165a465ecc079d64bb83869f3a12a5b8e690a696a619e1f"
+    },
+    {
+      "id": "player_frame_p1",
+      "file": "assets/player_frame_p1.png",
+      "dimensions": [
+        216,
+        240
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "player_frame_p1",
+          "rect": [
+            0,
+            0,
+            216,
+            240
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "player_frame_p1",
+      "classification": "existing_reuse",
+      "color_count": 6,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "0e532201eb16c9b4448877123017b71528bb3fdb0c187416c6546d2254c0758e"
+    },
+    {
+      "id": "player_frame_p2",
+      "file": "assets/player_frame_p2.png",
+      "dimensions": [
+        216,
+        240
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "player_frame_p2",
+          "rect": [
+            0,
+            0,
+            216,
+            240
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "player_frame_p2",
+      "classification": "existing_reuse",
+      "color_count": 6,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "b92519d5d2f1608ad4a3ae717ea12b48ec5ad6e8c206a55eb588ca8b3b93a81a"
+    },
+    {
+      "id": "reading_panel",
+      "file": "assets/reading_panel.png",
+      "dimensions": [
+        544,
+        264
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "reading_panel",
+          "rect": [
+            0,
+            0,
+            544,
+            264
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "reading_panel",
+      "classification": "existing_reuse",
+      "color_count": 5,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "b63bd6f62991af35e099268527607aad99682028850a573404e7c4f5a52269ab"
+    },
+    {
+      "id": "role_piece_reflection_sheet",
+      "file": "assets/role_piece_reflection_sheet.png",
+      "dimensions": [
+        96,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "0",
+          "rect": [
+            0,
+            0,
+            32,
+            32
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "1",
+          "rect": [
+            32,
+            0,
+            32,
+            32
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "2",
+          "rect": [
+            64,
+            0,
+            32,
+            32
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "role_piece_reflection_sheet",
+      "classification": "existing_reuse",
+      "color_count": 1,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "0d6155351321d7188cec529edd7d9ab4f8506849a4efa772f8cad3579e71cad4"
+    },
+    {
+      "id": "selection_locked",
+      "file": "assets/selection_locked.png",
+      "dimensions": [
+        96,
+        20
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "selection_locked",
+          "rect": [
+            0,
+            0,
+            96,
+            20
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "selection_locked",
+      "classification": "existing_reuse",
+      "color_count": 4,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "9186952c97cba297c8252c4c10d2fab10e11e13f6da841b098af2ec87d37a1d9"
+    },
+    {
+      "id": "stock_frame",
+      "file": "assets/stock_frame.png",
+      "dimensions": [
+        192,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "stock_frame",
+          "rect": [
+            0,
+            0,
+            192,
+            32
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "stock_frame",
+      "classification": "existing_reuse",
+      "color_count": 5,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "96494f6b146e918ac0e9f73912943fe42649a2e29c72d8107aa342854c8a64f0"
+    },
+    {
+      "id": "title_kotaro_nekotaro",
+      "file": "assets/title_kotaro_nekotaro.png",
+      "dimensions": [
+        216,
+        288
+      ],
+      "origin": [
+        108,
+        287
+      ],
+      "frames": [
+        {
+          "id": "title_kotaro_nekotaro",
+          "rect": [
+            0,
+            0,
+            216,
+            288
+          ],
+          "origin": [
+            108,
+            287
+          ]
+        }
+      ],
+      "purpose": "title_kotaro_nekotaro",
+      "classification": "modified",
+      "color_count": 27,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "1542c5cab570cbf0f8ef41d87d531218ab4a9c362bf1c406de9fff198f977223"
+    },
+    {
+      "id": "title_logo",
+      "file": "assets/title_logo.png",
+      "dimensions": [
+        352,
+        168
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "id": "title_logo",
+          "rect": [
+            0,
+            0,
+            352,
+            168
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "purpose": "title_logo",
+      "classification": "existing_reuse",
+      "color_count": 13552,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "sha256": "969ad5702a36176b97e8b2d3e74469a369955fec3197f16f6c7268674ef75ff8"
+    }
+  ],
+  "display_font": {
+    "sheet": "S12",
+    "characters": "0123456789×.",
+    "metrics": {
+      "0": {
+        "id_prefix": "display_0_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          32
+        ],
+        "advance": 32
+      },
+      "1": {
+        "id_prefix": "display_1_",
+        "ink_box": [
+          5,
+          0,
+          31,
+          34
+        ],
+        "advance": 24
+      },
+      "2": {
+        "id_prefix": "display_2_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          34
+        ],
+        "advance": 32
+      },
+      "3": {
+        "id_prefix": "display_3_",
+        "ink_box": [
+          1,
+          0,
+          34,
+          34
+        ],
+        "advance": 31
+      },
+      "4": {
+        "id_prefix": "display_4_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          32
+        ],
+        "advance": 32
+      },
+      "5": {
+        "id_prefix": "display_5_",
+        "ink_box": [
+          1,
+          0,
+          34,
+          34
+        ],
+        "advance": 31
+      },
+      "6": {
+        "id_prefix": "display_6_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          33
+        ],
+        "advance": 32
+      },
+      "7": {
+        "id_prefix": "display_7_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          34
+        ],
+        "advance": 32
+      },
+      "8": {
+        "id_prefix": "display_8_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          33
+        ],
+        "advance": 32
+      },
+      "9": {
+        "id_prefix": "display_9_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          33
+        ],
+        "advance": 32
+      },
+      "×": {
+        "id_prefix": "display_times_",
+        "ink_box": [
+          1,
+          0,
+          35,
+          33
+        ],
+        "advance": 32
+      },
+      ".": {
+        "id_prefix": "display_dot_",
+        "ink_box": [
+          11,
+          22,
+          24,
+          34
+        ],
+        "advance": 11
+      }
+    },
+    "line_height": 34,
+    "phase_period_ms": 90,
+    "multiplier_rects": {
+      "p1": [
+        24,
+        94,
+        120,
+        34
+      ],
+      "p2": [
+        496,
+        94,
+        120,
+        34
+      ]
+    },
+    "no_panel": true,
+    "format": "×{value}; decimal point is a separate glyph; do not quantize the game value",
+    "numeric_limit": null,
+    "overflow": "fit glyph composition within display area; no numeric truncation"
+  },
+  "glow_clock": {
+    "frame_ms": 250,
+    "period_ms": 500,
+    "synchronized": true
+  },
+  "multiplier": {
+    "source": "S12",
+    "frame_prefix": "display_",
+    "characters": "0123456789×.",
+    "panel": false
+  },
+  "shared_stock_count_regions": {
+    "p1": [
+      64,
+      32,
+      192,
+      32
+    ],
+    "p2": [
+      384,
+      32,
+      192,
+      32
+    ]
+  },
+  "swap_pose_alias": {
+    "S1": "attack_01",
+    "S2": "attack_01",
+    "S13": "attack_01"
+  },
+  "accepted_addition_manifest": "accepted_stock_manifest.json",
+  "geometry_notice": "Preview comparison coordinates are not game layout changes; baseline layout is reference-only."
+}

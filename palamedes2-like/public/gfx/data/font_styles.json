@@ -1,0 +1,37 @@
+{
+  "family": "Noto Sans JP",
+  "file": "fonts/NotoSansJP-VF.ttf",
+  "license": "SIL Open Font License1.1",
+  "body": {
+    "size": 12,
+    "weight": 600,
+    "line_height": 20
+  },
+  "heading": {
+    "size": 18,
+    "weight": 700,
+    "line_height": 26
+  },
+  "menu": {
+    "size": 14,
+    "weight": 600,
+    "line_height": 28
+  },
+  "setting_value": {
+    "size": 14,
+    "weight": 600,
+    "line_height": 24
+  },
+  "score_time": {
+    "size": 20,
+    "weight": 700,
+    "line_height": 28,
+    "tabular": true
+  },
+  "dark_background_text": "#fff1d6",
+  "selected_light_background_text": "#0b1f35",
+  "secondary": "#a5c5c5",
+  "shadow": null,
+  "preview_glyphs": "weight applied explicitly; pixel mask threshold100, no blending at native size",
+  "effects": "S7/S9/S12 are unchanged image art, not system typography"
+}

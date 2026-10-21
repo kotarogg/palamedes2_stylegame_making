@@ -2,13 +2,23 @@
 // S12の合成は runtime_display_reference.js と同じ規則（インク幅で詰め、領域に収まらなければ縮小。値は丸めない）。
 import { drawFrame, type Assets } from './assets';
 
-export const UI_FONT = '"Noto Sans CJK JP", "Yu Gothic UI", "Yu Gothic", "Meiryo", sans-serif';
+/**
+ * 第3版：採用フォント Noto Sans JP（gfx/fonts/NotoSansJP-VF.ttf、font_styles.json）。読込は assets.loadFont で完了を待つ。
+ * 読込に失敗した場合は画面上部に警告を表示する（黙って別フォントへ退避したことにしない）。
+ */
+export const UI_FONT = '"Noto Sans JP", sans-serif';
+
+/** font_styles.json の文字色（暗い背景＝明色、明るい選択面＝濃紺）と副次色 */
+export const TEXT_COLORS = { onDark: '#fff1d6', onLight: '#0b1f35', secondary: '#a5c5c5' } as const;
 
 export interface TextOpts {
   color?: string;
   align?: CanvasTextAlign;
   size?: number;
   bold?: boolean;
+  /** 明示的な太さ（font_styles.json：本文600、見出し・得点700） */
+  weight?: number;
+  /** 文字の影（font_styles.json は影なし。既定 false） */
   shadow?: boolean;
   /** 背景の半透明帯 */
   box?: boolean;
@@ -17,7 +27,7 @@ export interface TextOpts {
 
 export function drawText(ctx: CanvasRenderingContext2D, s: string, x: number, y: number, o: TextOpts = {}): void {
   ctx.save();
-  ctx.font = `${o.bold ? 'bold ' : ''}${o.size ?? 10}px ${UI_FONT}`;
+  ctx.font = `${o.weight ?? (o.bold ? 700 : 600)} ${o.size ?? 10}px ${UI_FONT}`;
   ctx.textBaseline = 'top';
   ctx.textAlign = o.align ?? 'left';
   if (o.box) {
@@ -26,11 +36,11 @@ export function drawText(ctx: CanvasRenderingContext2D, s: string, x: number, y:
     ctx.fillStyle = 'rgba(0,0,16,0.72)';
     ctx.fillRect(Math.round(bx), y - 2, Math.ceil(w), (o.size ?? 10) + 4);
   }
-  if (o.shadow !== false) {
+  if (o.shadow === true) {
     ctx.fillStyle = 'rgba(0,0,0,0.85)';
     ctx.fillText(s, x + 1, y + 1, o.maxWidth);
   }
-  ctx.fillStyle = o.color ?? '#ffffff';
+  ctx.fillStyle = o.color ?? TEXT_COLORS.onDark;
   ctx.fillText(s, x, y, o.maxWidth);
   ctx.restore();
 }

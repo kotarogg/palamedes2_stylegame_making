@@ -1,7 +1,6 @@
-// ゲーム画面の描画（MODE1対戦／MODE1シングル／MODE2対戦／MODE2シングル）。採用グラフィック graphics_v1_r2（マニフェスト2.3）。
+// ゲーム画面の描画（MODE1対戦／MODE1シングル／MODE2対戦／MODE2シングル）。第3版採用グラフィック（graphics_manifest_v3）。
 // ロジックのイベント列を読み、時間補間だけを行う（ロジックへ書き戻さない）。盤面の固定グリッド・論理座標は変更しない。
-import { totalIncoming } from '../core/incoming';
-import { ATTACK_MAX } from '../core/attack';
+import type { Character } from '../audio/audioMap';
 import { levelDef } from '../core/balance';
 import { DEFAULT_VIEW_CONFIG, type ViewConfig } from '../core/config';
 import type { Game, GameEvent, PlayerState } from '../core/game';
@@ -9,11 +8,15 @@ import type { AnyGame } from '../core/match';
 import type { Mode2Event, Mode2Game } from '../core/mode2';
 import { evaluateStock, glowSegments } from '../core/roles';
 import type { Piece, PlayerId } from '../core/types';
-import { drawFrame, type Assets } from './assets';
+import { drawFrame, drawNineSlice, type Assets } from './assets';
 import type { ManifestFrame } from './data';
 import { arcPoint, barY, CELL, cellX, columnCenterX, descentY, easeInOutSine, easeOutQuad, lerp, progress, Z, type BoardRect } from './geometry';
-import { characterPose, type ResultPlan } from './presentation';
-import { drawNumeric, drawText, formatTime, multiplierText, numericPhase } from './text';
+import { characterPose, crackerPose, type ResultPlan } from './presentation';
+import { DEFAULT_STOCK_VIEW, stockGroupHeight, stockIcons, pendingGroupY, type StockViewConfig } from './stockLayout';
+import { drawNumeric, drawText, formatTime, multiplierText, numericPhase, TEXT_COLORS } from './text';
+
+/** キャラクター → モーションシート（第3版：コタローS1・アカネS2・ずん子S13。プレイヤー番号では選ばない） */
+export const CHARACTER_SHEET: Record<Character, string> = { kotaro: 'S1', akane: 'S2', zunko: 'S13' };
 
 /**
  * 役ストックのピースの描画レイヤー。役成立光は「背面→ピース→前面」（確定）のため、
@@ -28,16 +31,31 @@ export interface PlayViewConfig {
   countdownFadeMs: number;
   /** 一時的な演出バナー（LEVEL UP 等）の表示時間 */
   noticeMs: number;
-  /** 攻撃ストック枠の位置（画面見本 mode1_versus の配置） */
-  attackPanel: Record<PlayerId, [number, number]>;
+  /** 受攻撃ストックの列（第10章） */
+  stock: StockViewConfig;
+  /** 攻撃段の接着：画面下から飛来（PM指定初期値120ms）→揺れ（120ms・最大2px） */
+  attachFlyMs: number;
+  attachShakeMs: number;
+  attachShakePx: number;
+  /** 役ピースの反射光（PM指定：1コマ50ms・列ごと30ms遅延・左→右・同列同時） */
+  reflectionFrameMs: number;
+  reflectionColumnDelayMs: number;
 }
 
 export const DEFAULT_PLAY_VIEW: PlayViewConfig = {
   countdownOffsetPx: 4,
   countdownFadeMs: 150,
   noticeMs: 1100,
-  attackPanel: { 0: [4, 207], 1: [592, 207] },
+  stock: DEFAULT_STOCK_VIEW,
+  attachFlyMs: 120,
+  attachShakeMs: 120,
+  attachShakePx: 2,
+  reflectionFrameMs: 50,
+  reflectionColumnDelayMs: 30,
 };
+
+const REFLECTION_FRAMES = 3;
+const BURST_FRAMES = 4;
 
 interface BarTween {
   start: number;
@@ -90,9 +108,33 @@ interface RoleVis {
   introEnd: number;
   /** 攻撃処理（キャラモーション戻し）tick。未到達なら null */
   attackTick: number | null;
-  logos: number[];
   consumed: Piece[];
   indices: number[];
+}
+
+/** 受攻撃ストックの表示状態（予約高さ・上詰め） */
+interface StockVis {
+  /** 処理中ブロックの予約高さ（px）。ブロックなしは null */
+  reservedPx: number | null;
+  /** ブロック終了時の待機群の位置（上詰めの起点）と終了tick */
+  slideFromPx: number | null;
+  endTick: number | null;
+}
+
+/** 減った分の残像（相殺＝XD顔＋小爆発、ピンチ破棄＝フェード） */
+interface StockAfterimage {
+  player: PlayerId;
+  kind: 'counter' | 'discard';
+  lines: number;
+  start: number;
+}
+
+interface ReflectionVis {
+  player: PlayerId;
+  x: number;
+  y: number;
+  col: number;
+  start: number;
 }
 
 interface Notice {
@@ -111,6 +153,8 @@ interface PlayerVis {
   role: RoleVis | null;
   fail: { start: number; end: number } | null;
   grace: { start: number; end: number } | null;
+  pinch: { start: number; end: number } | null;
+  stock: StockVis;
 }
 
 interface DrawItem {
@@ -127,6 +171,10 @@ export interface HudInfo {
   labels?: readonly [string, string];
   result?: ResultPlan | null;
   matchOver?: boolean;
+  /** プレイヤーごとのキャラクター（既定：1P コタロー／2P アカネ） */
+  characters?: readonly Character[];
+  /** 役名表示の予定（RoleNameDirector）。表示中のロゴと表示開始tick */
+  roleLogo?: (p: PlayerId, tick: number) => { logo: number; since: number } | null;
 }
 
 export class GameView {
@@ -137,6 +185,10 @@ export class GameView {
   private fx: FxVis[] = [];
   private vanish: VanishVis[] = [];
   private lineFx: { player: PlayerId; y: number; start: number }[] = [];
+  private afterimages: StockAfterimage[] = [];
+  private reflections: ReflectionVis[] = [];
+  /** 攻撃段で追加したピースID → 接着開始tick */
+  private readonly attach = new Map<number, number>();
   private notices: Notice[] = [];
   private countdown: { value: number; start: number; end: number } | null = null;
   private refreshFx: number | null = null;
@@ -184,6 +236,8 @@ export class GameView {
       role: null,
       fail: null,
       grace: null,
+      pinch: null,
+      stock: { reservedPx: null, slideFromPx: null, endTick: null },
     }));
   }
 
@@ -197,6 +251,9 @@ export class GameView {
     this.fx = [];
     this.vanish = [];
     this.lineFx = [];
+    this.afterimages = [];
+    this.reflections = [];
+    this.attach.clear();
     this.notices = [];
     this.countdown = null;
     this.refreshFx = null;
@@ -395,7 +452,7 @@ export class GameView {
         v.height = e.heightAfter;
         break;
       case 'declare':
-        v.role = { start: e.tick, introEnd: e.introEndTick, attackTick: null, logos: e.logos, consumed: e.consumed, indices: e.result.indices };
+        v.role = { start: e.tick, introEnd: e.introEndTick, attackTick: null, consumed: e.consumed, indices: e.result.indices };
         v.fail = null;
         break;
       case 'declareFail':
@@ -403,7 +460,10 @@ export class GameView {
         break;
       case 'lineClear': {
         const y = this.pieceBar(e.player, e.tick);
-        for (const r of e.removed) this.vanish.push({ piece: r.piece, player: e.player, x: cellX(board, r.col), y, start: e.tick, end: e.clearEnd });
+        for (const r of e.removed) {
+          this.vanish.push({ piece: r.piece, player: e.player, x: cellX(board, r.col), y, start: e.tick, end: e.clearEnd });
+          if (this.game.mode === 'mode1') this.reflections.push({ player: e.player, x: cellX(board, r.col), y, col: r.col, start: e.tick });
+        }
         this.lineFx.push({ player: e.player, y, start: e.tick });
         if (e.heightAfter !== e.heightBefore) {
           v.barTweens.push({ start: e.clearEnd, end: e.shiftEnd, offset: (e.heightAfter - e.heightBefore) * CELL, piecesFollow: false });
@@ -414,14 +474,35 @@ export class GameView {
       case 'attack': {
         if (v.role) v.role.attackTick = e.tick;
         if (this.isSingle) break;
-        const [ox, oy] = this.attackIconOrigin(e.player);
-        if (e.counter.canceled > 0) this.fx.push({ frames: this.fxFrames('counter_fx_1', 'counter_fx_2'), x: ox - 12, y: oy - 8, start: e.tick, frameTicks: 8 });
+        // 送信の演出は受け手の列の上端（相殺の演出はストックの XD 顔＋小爆発）
         if (e.counter.sent > 0) {
-          const [tx, ty] = this.attackIconOrigin((1 - e.player) as PlayerId);
-          this.fx.push({ frames: this.fxFrames('line_send_fx_1', 'line_send_fx_2', 'line_send_fx_3'), x: tx - 12, y: ty - 8, start: e.tick, frameTicks: 6 });
+          const [tx, ty] = this.pvc.stock.origin[(1 - e.player) as PlayerId];
+          this.fx.push({ frames: this.fxFrames('line_send_fx_1', 'line_send_fx_2', 'line_send_fx_3'), x: tx + 8 - 24, y: ty - 30, start: e.tick, frameTicks: 6 });
         }
         break;
       }
+      case 'blockStart':
+        v.stock = { reservedPx: stockGroupHeight(e.lines), slideFromPx: null, endTick: null };
+        break;
+      case 'blockEnd': {
+        const r = v.stock.reservedPx;
+        v.stock = { reservedPx: null, slideFromPx: r ? r + this.pvc.stock.groupGapPx : null, endTick: e.tick };
+        break;
+      }
+      case 'attackCancel':
+        this.afterimages.push({ player: e.player, kind: 'counter', lines: e.canceled, start: e.tick });
+        break;
+      case 'attackDiscard':
+        this.afterimages.push({ player: e.player, kind: 'discard', lines: e.lines, start: e.tick });
+        break;
+      case 'attackRow':
+        // 盤面は1段上がり、新しい段は画面下から飛来して接着する（時間は表示のみ。ロジックは即時）
+        v.barTweens.push({ start: e.tick, end: e.tick + this.ticksOf(this.pvc.attachFlyMs), offset: (e.heightAfter - e.heightBefore) * CELL, piecesFollow: true });
+        for (const id of e.rowIds) this.attach.set(id, e.tick);
+        break;
+      case 'attackPinch':
+        v.pinch = e.state === 'grace' ? { start: e.tick, end: e.graceEnd } : null;
+        break;
       case 'roleEnd':
         v.role = null;
         break;
@@ -479,8 +560,8 @@ export class GameView {
     return this.assets.atlas.frame(sheet, id);
   }
 
-  private put(items: DrawItem[], z: number, f: ManifestFrame, x: number, y: number, opts: { dark?: boolean; alpha?: number; clip?: BoardRect } = {}): void {
-    items.push({ z, clip: opts.clip, draw: (ctx) => drawFrame(ctx, this.assets, f, x, y, { dark: opts.dark, alpha: opts.alpha }) });
+  private put(items: DrawItem[], z: number, f: ManifestFrame, x: number, y: number, opts: { dark?: boolean; alpha?: number; clip?: BoardRect; flipX?: boolean } = {}): void {
+    items.push({ z, clip: opts.clip, draw: (ctx) => drawFrame(ctx, this.assets, f, x, y, { dark: opts.dark, alpha: opts.alpha, flipX: opts.flipX }) });
   }
 
   private buildStaticLayer(): HTMLCanvasElement {
@@ -490,31 +571,23 @@ export class GameView {
     c.height = L.data.canvas.h;
     const g = c.getContext('2d')!;
     g.imageSmoothingEnabled = false;
-    const bg = this.assets.images.get('BG_MENU');
-    if (bg) g.drawImage(bg, 0, 0);
-    else {
-      g.fillStyle = '#0b0b1c';
-      g.fillRect(0, 0, c.width, c.height);
-    }
+    // 第3版：共通背景 background_common（640×360）。盤面枠の内側は透明のため盤面の下地を描く
     const at = (sheet: string, id: string, x: number, y: number) => drawFrame(g, this.assets, this.frame(sheet, id), x, y);
+    at('background_common', 'background_common', 0, 0);
     const mode2 = this.game.mode === 'mode2';
     this.game.players.forEach((_, i) => {
       const p = i as PlayerId;
       const board = this.boards[p];
-      // 盤面の下地（論理グリッドの範囲だけ。座標は変えない）
-      g.fillStyle = 'rgba(10,8,30,0.82)';
+      g.fillStyle = '#132538';
       g.fillRect(board.x, board.y, board.w, board.h);
-      if (mode2) at('S8', 'field_frame', board.x - 8, board.y - 8);
+      if (mode2) at('board_frame_mode2', 'board_frame_mode2', board.x - 2, board.y - 2);
       else {
         const vf = L.rect(`p${p + 1}_visual_frame`);
-        at('S11', `player_frame_p${p + 1}`, vf.x, vf.y);
+        at(`player_frame_p${p + 1}`, `player_frame_p${p + 1}`, vf.x, vf.y);
       }
       const sb = L.pRect(p, 'stock_background');
-      at('S8', mode2 ? 'mode_count_panel' : 'role_stock_frame', sb.x, sb.y);
-      if (!mode2 && !this.isSingle) {
-        const [ax, ay] = this.pvc.attackPanel[p];
-        at('S5', 'attack_stock_frame', ax, ay);
-      }
+      if (mode2) at('count_panel', 'count_panel', sb.x, sb.y);
+      else at('stock_frame', 'stock_frame', sb.x, sb.y);
       if (!this.isSingle) {
         const wc = L.pRect(p, 'win_counter');
         at('S5', 'win_count_frame_3', wc.x, wc.y);
@@ -522,13 +595,10 @@ export class GameView {
     });
     if (this.isSingle) {
       const r = L.data.graphic_mode_rules?.single_info_rect ?? [384, 128, 192, 224];
-      at('S8', 'info_panel', r[0], r[1]);
+      at('info_panel', 'info_panel', r[0], r[1]);
     }
-    const cf = L.rect('central_visual_frame');
-    at('S11', 'center_info_frame', cf.x, cf.y);
     const bf = L.rect('base_frame');
     at('S5', 'base_piece_frame', bf.x, bf.y);
-    at('S8', 'mode_badge', 276, 5);
     return c;
   }
 
@@ -540,15 +610,20 @@ export class GameView {
     return frames[Math.min(frames.length - 1, Math.floor(Math.max(0, elapsed) / per))];
   }
 
+  /** プレイヤーのキャラクター（hud.characters。未指定は 1P コタロー／2P アカネ） */
+  characterOf(p: PlayerId): Character {
+    return this.hud.characters?.[p] ?? (p === 0 ? 'kotaro' : 'akane');
+  }
+
   private characterFrame(p: PlayerId, t: number): ManifestFrame {
-    const sheet = p === 0 ? 'S1' : 'S2';
+    const sheet = CHARACTER_SHEET[this.characterOf(p)];
     const v = this.pv[p];
     const A = this.assets.atlas;
     const tk = (ms: number) => this.ticksOf(ms);
     const pose = characterPose(this.hud.result ?? null, p, t);
     const r = this.hud.result;
     if (pose.anim === 'win' && r) return this.loop(A.animation(sheet, 'win'), t - (r.winnerTick ?? r.startTick), tk(this.vc.charFrameMs.win));
-    if (pose.anim === 'lose_fall' && r) return this.once(A.animation(sheet, 'lose_fall'), t - r.startTick, tk(this.vc.charFrameMs.lose));
+    if (pose.anim === 'lose_fall' && r) return this.once(A.animation(sheet, 'lose_fall'), pose.motionTicks, tk(this.vc.charFrameMs.lose));
     if (v.role && (v.role.attackTick === null || t < v.role.attackTick)) return this.loop(A.animation(sheet, 'attack'), t - v.role.start, tk(this.vc.charFrameMs.attack));
     if (v.fail && t < v.fail.end) {
       // 不成立モーション（採用済み fail_declare 4枠、推奨時間 110/120/180/150ms）
@@ -579,8 +654,11 @@ export class GameView {
         const { k, tw } = this.localK(slot.piece.id, i, t);
         const dark = !!tw?.dark;
         const u = tw ? progress(t, tw.start, tw.end) : 0;
-        const x = cellX(board, c) + (dark ? Math.sin(Math.PI * u) * this.vc.rotateCurveX : 0);
-        this.put(items, dark ? Z.darkPiece : Z.piece, this.assets.atlas.piece(slot.piece.n, slot.piece.suit), x, pieceBar + CELL * k, { dark, clip: board });
+        let x = cellX(board, c) + (dark ? Math.sin(Math.PI * u) * this.vc.rotateCurveX : 0);
+        let y = pieceBar + CELL * k;
+        const at = this.attach.get(slot.piece.id);
+        if (at !== undefined) ({ x, y } = this.attachOffset(at, t, x, y));
+        this.put(items, dark ? Z.darkPiece : Z.piece, this.assets.atlas.piece(slot.piece.n, slot.piece.suit), x, y, { dark, clip: at !== undefined ? undefined : board });
       });
     });
     for (const e of this.vanish) {
@@ -589,6 +667,12 @@ export class GameView {
       if (u < 0.5 && Math.floor((t - e.start) / 2) % 2 === 0) this.put(items, Z.piece, this.assets.atlas.piece(e.piece.n, e.piece.suit), e.x, e.y, { clip: board });
       const fr = this.fxFrames('vanish_fx_1', 'vanish_fx_2');
       this.put(items, Z.contact, fr[u < 0.5 ? 0 : 1], e.x, e.y, { clip: board });
+    }
+    // 役ピースの反射光（3コマ×50ms、列ごとに30ms遅延・左→右、同列は同時）
+    for (const e of this.reflections) {
+      if (e.player !== p) continue;
+      const i = this.reflectionFrame(e, t);
+      if (i !== null) this.put(items, Z.contact, this.frame('role_piece_reflection_sheet', String(i)), e.x, e.y, { clip: board });
     }
     // 1ライン消去の演出（S10 line_clear 60ms×4）
     const lineFrames = this.assets.atlas.animation('S10', 'line_clear');
@@ -609,9 +693,12 @@ export class GameView {
     const pose = characterPose(this.hud.result ?? null, p, t);
     if (!pose.gone) {
       const cf = this.characterFrame(p, t);
-      const fallDist = 360 + 8 - (bar - cf.h);
+      // 原点（足元）を足場の上へ。落下はモーション終了後に最終姿勢のまま、画像矩形全体が画面外へ出るまで
+      const ox = cf.origin?.[0] ?? cf.w / 2;
+      const top = bar - 1 - (cf.origin?.[1] ?? cf.h - 1);
+      const fallDist = 360 - top;
       const dy = pose.fall > 0 ? fallDist * pose.fall * pose.fall : 0;
-      this.put(items, Z.character, cf, this.characterX(p, t) - cf.w / 2, bar - cf.h + dy);
+      this.put(items, Z.character, cf, this.characterX(p, t) - ox, top + dy);
     }
     // 危険枠（S10 danger_border 250ms）
     if (this.game.mode === 'mode1' && st.board.height() >= this.game.config.dangerHeight) {
@@ -631,7 +718,6 @@ export class GameView {
   private collectMode1Player(items: DrawItem[], p: PlayerId, t: number): void {
     const g = this.mode1!;
     const L = this.assets.layout;
-    const v = this.pv[p];
     const st = g.players[p] as PlayerState;
     const glow = this.glowTargets(p, t);
     const shown = glow?.pieces ?? st.roleStock;
@@ -645,32 +731,108 @@ export class GameView {
         this.put(items, Z.glowFront, gp.front, gp.x, gp.y);
       }
     }
-    if (!this.isSingle) this.collectAttackIcons(items, p, totalIncoming(st.incoming));
-    // 役名ロゴ（S7 A/B/C）
-    const role = v.role;
-    if (role) {
+    if (!this.isSingle) this.collectAttackStock(items, p, t);
+    // 役名ロゴ（S7 A/B/C）：表示予定は RoleNameDirector（第13章）。ゲーム処理の時間とは独立
+    const logo = this.hud.roleLogo?.(p, t) ?? null;
+    if (logo) {
       const r = L.pRect(p, 'role_logo');
-      const dur = Math.max(1, (role.attackTick ?? t + 1) - role.start);
-      const logo = role.logos[Math.min(role.logos.length - 1, Math.floor(((t - role.start) / dur) * role.logos.length))];
-      const letter = (['A', 'B', 'C'] as const)[Math.floor((t - role.start) / this.ticksOf(this.vc.roleFrameMs)) % 3];
-      this.put(items, Z.roleName, this.assets.atlas.role(logo, letter), r.x, r.y);
+      const letter = (['A', 'B', 'C'] as const)[Math.floor((t - logo.since) / this.ticksOf(this.vc.roleFrameMs)) % 3];
+      this.put(items, Z.roleName, this.assets.atlas.role(logo.logo, letter), r.x, r.y);
     }
   }
 
-  /** 攻撃ストック（画面見本の枠内：大＝10ライン×最大2、小＝1ライン×最大9） */
-  private attackIconOrigin(p: PlayerId): [number, number] {
-    const [ax, ay] = this.pvc.attackPanel[p];
-    return [ax + 12, ay + 13];
+  /** 攻撃段の接着位置：画面下から飛来 → 揺れ（最大2px）。テスト・検証用に公開 */
+  attachOffset(start: number, t: number, x: number, y: number): { x: number; y: number } {
+    const fly = this.ticksOf(this.pvc.attachFlyMs);
+    const shake = this.ticksOf(this.pvc.attachShakeMs);
+    if (t < start + fly) return { x, y: Math.round(lerp(360 + 4, y, easeOutQuad(progress(t, start, start + fly)))) };
+    if (t < start + fly + shake) {
+      const u = progress(t, start + fly, start + fly + shake);
+      return { x: x + Math.round(Math.sin(u * Math.PI * 4) * this.pvc.attachShakePx * (1 - u)), y };
+    }
+    return { x, y };
   }
 
-  private collectAttackIcons(items: DrawItem[], p: PlayerId, lines: number): void {
-    const n = Math.max(0, Math.min(ATTACK_MAX, lines));
-    const big = Math.min(2, Math.floor(n / 10));
-    const small = Math.min(9, n - big * 10);
-    const [ox, oy] = this.attackIconOrigin(p);
-    for (let i = 0; i < big; i++) this.put(items, Z.ui, this.frame('S5', 'attack_icon_big'), ox, oy + 28 * i);
-    const sy = oy + 28 * big;
-    for (let i = 0; i < small; i++) this.put(items, Z.ui, this.frame('S5', 'attack_icon_small'), ox - 4 + 16 * Math.floor(i / 5), sy + 14 * (i % 5));
+  private reflectionFrame(e: ReflectionVis, t: number): number | null {
+    const ms = (t - e.start) * this.game.tickMs - e.col * this.pvc.reflectionColumnDelayMs;
+    if (ms < 0) return null;
+    const i = Math.floor(ms / this.pvc.reflectionFrameMs);
+    return i < REFLECTION_FRAMES ? i : null;
+  }
+
+  /**
+   * 受攻撃ストック（第10章）：上＝処理中ブロック（予約高さを終了まで維持・残りアイコンを点滅枠で囲う）、
+   * 下＝nextPending（予約領域の下に固定。ブロック終了で120ms上詰め）。表示の合計＝3状態の合計。
+   */
+  stockView(p: PlayerId, t: number): { blockLines: number; pendingLines: number; blockY: number; pendingY: number; reservedPx: number | null } {
+    const g = this.mode1!;
+    const s = g.players[p].incoming;
+    const v = this.pv[p].stock;
+    const cfg = this.pvc.stock;
+    const [, oy] = cfg.origin[p];
+    const blockLines = s.blockActive ? s.blockRemaining + s.waveRemaining : 0;
+    // 予約高さはブロック開始時の量（blockReserved）から。終了まで縮めない
+    const reservedPx = s.blockActive ? stockGroupHeight(s.blockReserved) : null;
+    const sinceEnd = v.endTick === null ? null : (t - v.endTick) * g.tickMs;
+    const py = pendingGroupY(reservedPx, v.slideFromPx, sinceEnd, cfg);
+    return { blockLines, pendingLines: s.nextPending, blockY: oy, pendingY: oy + py, reservedPx };
+  }
+
+  /** 表示中の残像（相殺・ピンチ破棄）。テスト・検証用に公開 */
+  stockAfterimages(p: PlayerId, t: number): { kind: 'counter' | 'discard'; lines: number; frame: number }[] {
+    const cfg = this.pvc.stock;
+    return this.afterimages
+      .filter((a) => a.player === p && t >= a.start)
+      .map((a) => {
+        const ms = (t - a.start) * this.game.tickMs;
+        return { kind: a.kind, lines: a.lines, frame: a.kind === 'counter' ? Math.floor(ms / cfg.counterFrameMs) : ms / cfg.discardFadeMs };
+      })
+      .filter((a) => (a.kind === 'counter' ? a.frame < BURST_FRAMES : a.frame < 1));
+  }
+
+  /** プレイヤーのモーションシート（テスト・検証用に公開） */
+  characterSheet(p: PlayerId): string {
+    return CHARACTER_SHEET[this.characterOf(p)];
+  }
+
+  private collectAttackStock(items: DrawItem[], p: PlayerId, t: number): void {
+    const cfg = this.pvc.stock;
+    const [ox] = cfg.origin[p];
+    const sv = this.stockView(p, t);
+    const icon = (size: 'large' | 'small', xd = false) => this.frame(`attack_stock_nekotaro_${size}${xd ? '_xd' : ''}`, '0');
+    const group = (lines: number, x0: number, y0: number, opts: { xd?: boolean; alpha?: number } = {}) => {
+      for (const ic of stockIcons(lines)) this.put(items, Z.ui, icon(ic.size, opts.xd), x0 + ic.x, y0 + ic.y, { alpha: opts.alpha });
+    };
+    group(sv.blockLines, ox, sv.blockY);
+    if (sv.blockLines > 0) {
+      // 残ったアイコンだけを囲う（9スライス 3px、内寸16×群の高さ）。240ms で通常／明るいを交互
+      const bright = Math.floor((t * this.game.tickMs) / cfg.blinkMs) % 2 === 1;
+      const f = this.frame(bright ? 'attack_stock_active_frame_bright' : 'attack_stock_active_frame', '0');
+      const h = stockGroupHeight(sv.blockLines);
+      items.push({ z: Z.ui + 1, draw: (ctx) => drawNineSlice(ctx, this.assets, f, 3, ox - 3, sv.blockY - 3, 22, h + 6) });
+    }
+    group(sv.pendingLines, ox, sv.pendingY);
+    for (const a of this.afterimages) {
+      if (a.player !== p) continue;
+      const ms = (t - a.start) * this.game.tickMs;
+      if (ms < 0) continue;
+      if (a.kind === 'discard') {
+        // ピンチ破棄：XD顔・SEなし。ブロックの残りの下でフェードして消える
+        if (ms < cfg.discardFadeMs) group(a.lines, ox, sv.blockY + stockGroupHeight(sv.blockLines), { alpha: 1 - ms / cfg.discardFadeMs });
+        continue;
+      }
+      // 相殺：XD顔＋小爆発（4コマ×40ms）。数量は即時に減っており、これは残像
+      const fi = Math.floor(ms / cfg.counterFrameMs);
+      if (fi >= BURST_FRAMES) continue;
+      const y0 = sv.pendingY + stockGroupHeight(sv.pendingLines);
+      group(a.lines, ox, y0, { xd: true });
+      for (const ic of stockIcons(a.lines)) {
+        const large = ic.size === 'large';
+        const bf = this.frame(large ? 'attack_stock_cancel_burst_sheet' : 'attack_stock_cancel_burst_small_sheet', String(fi));
+        const c = large ? 8 : 4;
+        this.put(items, Z.ui + 2, bf, ox + ic.x + c - bf.w / 2, y0 + ic.y + c - bf.h / 2);
+      }
+    }
   }
 
   private s9Phase(t: number): 'A' | 'B' | 'C' {
@@ -691,15 +853,25 @@ export class GameView {
     const A = this.assets.atlas;
     const goEnd = g.playStartTick + g.ticks(g.config.timing.goMs);
     let anim = 'idle';
-    const anyGrace = g.mode === 'mode1' && this.pv.some((v) => v.grace);
+    const anyGrace = g.mode === 'mode1' && this.pv.some((v) => v.grace || v.pinch);
     const anyRole = this.pv.some((v) => v.role);
-    if (g.result) anim = g.result.outcome === 'draw' || g.result.outcome === 'gameOver' ? 'sad' : 'cracker';
-    else if (t < g.playStartTick) anim = 'ready';
-    else if (t < goEnd) anim = 'start';
-    else if (anyGrace) anim = 'panic';
-    else if (anyRole) anim = 'joy';
-    else if (this.pv.some((v) => v.fail && t < v.fail.end)) anim = 'surprise';
-    this.put(items, Z.character, this.loop(A.animation('S3', anim), t, this.ticksOf(this.vc.charFrameMs.idle)), m.x, m.y);
+    const plan = this.hud.result ?? null;
+    // クラッカー：勝者演出と同時に1回だけ（4コマ×220ms）。素材は右向きのため、勝者が1P（左）なら左右反転
+    const cp = crackerPose(plan, t, g.tickMs);
+    if (cp) {
+      this.put(items, Z.character, A.animation('S3', 'cracker')[cp.frame], m.x, m.y, { flipX: cp.toward === 0 });
+    } else {
+      if (g.result) {
+        if (g.result.outcome === 'draw' || g.result.outcome === 'gameOver') anim = 'sad';
+        else if (plan && plan.crackerTick !== null && t >= plan.crackerTick) anim = 'joy';
+        else anim = 'surprise';
+      } else if (t < g.playStartTick) anim = 'ready';
+      else if (t < goEnd) anim = 'start';
+      else if (anyGrace) anim = 'panic';
+      else if (anyRole) anim = 'joy';
+      else if (this.pv.some((v) => v.fail && t < v.fail.end)) anim = 'surprise';
+      this.put(items, Z.character, this.loop(A.animation('S3', anim), t, this.ticksOf(this.vc.charFrameMs.idle)), m.x, m.y);
+    }
     const phase = this.s9Phase(t);
     const banner = (id: string, rectId = 'ready_banner', dy = 0, alpha?: number) => {
       const r = L.rect(rectId);
@@ -761,6 +933,9 @@ export class GameView {
     this.fx = this.fx.filter((e) => t - e.start < e.frames.length * e.frameTicks);
     this.vanish = this.vanish.filter((e) => t < e.end);
     this.lineFx = this.lineFx.filter((e) => t - e.start < this.ticksOf(60) * 4);
+    this.afterimages = this.afterimages.filter((a) => (t - a.start) * this.game.tickMs < Math.max(this.pvc.stock.counterFrameMs * BURST_FRAMES, this.pvc.stock.discardFadeMs));
+    this.reflections = this.reflections.filter((e) => (t - e.start) * this.game.tickMs < e.col * this.pvc.reflectionColumnDelayMs + REFLECTION_FRAMES * this.pvc.reflectionFrameMs);
+    for (const [id, st] of this.attach) if (t >= st + this.ticksOf(this.pvc.attachFlyMs + this.pvc.attachShakeMs)) this.attach.delete(id);
     this.notices = this.notices.filter((n) => t < n.end);
     if (this.refreshFx !== null && t - this.refreshFx > this.ticksOf(400)) this.refreshFx = null;
     for (const [id, tw] of this.localTweens) if (t >= tw.end) this.localTweens.delete(id);
@@ -776,7 +951,7 @@ export class GameView {
     const L = this.assets.layout;
     const g = this.game;
     const ms = this.glowClockMs(t);
-    drawText(ctx, g.mode === 'mode1' ? 'MODE1' : 'MODE2', 320, 12, { align: 'center', size: 11, bold: true, color: '#fff3c8' });
+    drawText(ctx, g.mode === 'mode1' ? 'MODE1' : 'MODE2', 320, 6, { align: 'center', size: 14, weight: 700 });
     g.players.forEach((_, i) => {
       const p = i as PlayerId;
       const board = this.boards[p];
@@ -791,22 +966,28 @@ export class GameView {
             })()
           : multiplierText((g as Game).currentStreakPercent(st), 100);
         drawNumeric(ctx, this.assets, txt, mr.x, mr.y, mr.w, numericPhase(ms));
-        drawText(ctx, this.isSingle ? '得点倍率' : '攻撃倍率', mr.x + mr.w / 2, mr.y + 33, { align: 'center', size: 8, color: '#c9d6ff' });
+        drawText(ctx, this.isSingle ? '得点倍率' : '攻撃倍率', mr.x + mr.w / 2, mr.y + 33, { align: 'center', size: 9, color: TEXT_COLORS.secondary });
         this.drawChainGauge(ctx, p, st);
-        const v = this.pv[p];
-        if (v.grace) drawText(ctx, `危険 ${((Math.max(0, v.grace.end - t) * g.tickMs) / 1000).toFixed(1)}秒`, board.x + board.w / 2, board.y + 4, { align: 'center', size: 10, bold: true, color: '#ff8a8a', box: true });
-        if (!this.isSingle) drawText(ctx, `${totalIncoming(st.incoming)}`, this.pvc.attackPanel[p][0] + 24, this.pvc.attackPanel[p][1] - 12, { align: 'center', size: 9, color: '#ffd6d6' });
+        // 危険の残り時間：自然上昇の危険猶予と攻撃ピンチ猶予のうち早い期限（どちらも自分の役処理中は止まる）
+        const rest = g.result ? null : this.dangerRemainingTicks(st);
+        if (rest !== null) drawText(ctx, `危険 ${((rest * g.tickMs) / 1000).toFixed(1)}秒`, board.x + board.w / 2, board.y + 4, { align: 'center', size: 12, weight: 700, color: '#ff8a8a', box: true });
       } else {
         // MODE2：役・攻撃の要素は出さない。手役ストックと同じ領域に残りピース数
         const m2 = g as Mode2Game;
         const sb = L.pRect(p, 'stock_background');
-        drawText(ctx, `のこり ${m2.remaining(m2.players[p])}`, sb.x + sb.w / 2, sb.y + 8, { align: 'center', size: 14, bold: true, color: '#fff7d0' });
+        drawText(ctx, `残り ${m2.remaining(m2.players[p])}`, sb.x + sb.w / 2, sb.y + 7, { align: 'center', size: 14, weight: 600 });
       }
       if (!this.isSingle && this.hud.wins) this.drawWins(ctx, p, t);
-      if (this.hud.labels && !this.isSingle) drawText(ctx, this.hud.labels[p], p === 0 ? 4 : 636, 4, { align: p === 0 ? 'left' : 'right', size: 8, color: '#b8c0e0' });
+      if (this.hud.labels && !this.isSingle) drawText(ctx, this.hud.labels[p], p === 0 ? 4 : 636, 4, { align: p === 0 ? 'left' : 'right', size: 10, color: TEXT_COLORS.secondary });
     });
     if (this.isSingle) this.drawSingleInfo(ctx);
-    else if (this.hud.firstTo) drawText(ctx, `${this.hud.firstTo}本先取 R${this.hud.round ?? 1}`, 320, 134, { align: 'center', size: 9, color: '#dfe6ff' });
+    else if (this.hud.firstTo) drawText(ctx, `${this.hud.firstTo}本先取 R${this.hud.round ?? 1}`, 320, 124, { align: 'center', size: 10, color: TEXT_COLORS.secondary });
+  }
+
+  /** 危険表示の残りtick（自然上昇の危険猶予・攻撃ピンチ猶予の早い方。どちらもなければ null） */
+  private dangerRemainingTicks(st: PlayerState): number | null {
+    const xs = [st.graceRemaining, st.incoming.pinchRemaining].filter((x): x is number => x !== null);
+    return xs.length ? Math.max(0, Math.min(...xs)) : null;
   }
 
   private drawChainGauge(ctx: CanvasRenderingContext2D, p: PlayerId, st: PlayerState): void {
@@ -818,7 +999,7 @@ export class GameView {
     const f = this.frame('S11', id);
     const h = Math.max(1, Math.round(f.h * ratio));
     ctx.drawImage(this.assets.images.get('S11')!, f.x, f.y + (f.h - h), f.w, h, r.x, r.y + (r.h - h), f.w, h);
-    if (st.chainCount > 0) drawText(ctx, `連鎖${st.chainCount}`, r.x + r.w / 2, r.y + r.h + 2, { align: 'center', size: 8, color: '#c0ffd0' });
+    if (st.chainCount > 0) drawText(ctx, `連鎖${st.chainCount}`, r.x + r.w / 2, r.y + r.h + 2, { align: 'center', size: 9, color: TEXT_COLORS.secondary });
   }
 
   private drawWins(ctx: CanvasRenderingContext2D, p: PlayerId, t: number): void {
@@ -832,35 +1013,37 @@ export class GameView {
     }
   }
 
-  /** シングルの右側：2P盤面の代わりの情報欄（得点・Lv／次まで、またはステージ／ノルマ。MODE2は経過時間・残り） */
+  /** シングルの右側：2P盤面の代わりの情報欄（第3版 info_panel は暗い面：明色文字・影なし） */
   private drawSingleInfo(ctx: CanvasRenderingContext2D): void {
     const r = this.assets.layout.data.graphic_mode_rules?.single_info_rect ?? [384, 128, 192, 224];
     const x = r[0] + 16;
-    let y = r[1] + 28; // 上端の装飾を避ける
-    // 情報欄（S8 info_panel）は明るいクリーム地のため、文字は濃紺・影なし（視認性）
-    const line = (label: string, value: string, big = false) => {
-      drawText(ctx, label, x, y, { size: 9, bold: true, color: '#3a4a7c', shadow: false });
-      y += 12;
-      drawText(ctx, value, x + 4, y, { size: big ? 18 : 13, bold: true, color: '#14204a', shadow: false });
-      y += big ? 26 : 20;
+    let y = r[1] + 12;
+    const title = (s: string) => {
+      drawText(ctx, s, x, y, { size: 14, weight: 700, color: '#f2b950' });
+      y += 26;
+    };
+    const line = (label: string, value: string) => {
+      ctx.fillStyle = 'rgba(165,197,197,0.35)';
+      ctx.fillRect(x, y - 4, r[2] - 32, 1);
+      drawText(ctx, label, x, y, { size: 10, color: TEXT_COLORS.secondary });
+      drawText(ctx, value, x, y + 14, { size: 20, weight: 700 });
+      y += 52;
     };
     const g = this.game;
     if (g.mode === 'mode2') {
       const m2 = g as Mode2Game;
-      line('MODE2 シングル', '');
-      y -= 14;
-      line('経過時間', formatTime(m2.elapsedMs()), true);
-      line('のこりピース', String(m2.remaining(m2.players[0])), true);
+      title('MODE2 シングル');
+      line('経過時間', formatTime(m2.elapsedMs()));
+      line('残りピース', String(m2.remaining(m2.players[0])));
       return;
     }
     const s = (g as Game).single!;
-    line(s.kind === 'endless' ? 'ひたすら' : 'ステージクリア', '');
-    y -= 14;
-    line('得点', s.score.toLocaleString('ja-JP'), true);
+    title(s.kind === 'endless' ? 'ひたすら' : 'ステージクリア');
+    line('得点', s.score.toLocaleString('ja-JP'));
     if (s.kind === 'endless') {
       const req = levelDef(s.level).required_clears_to_next;
-      line('レベル', req === null ? `Lv${s.level} MAX` : `Lv${s.level}`);
-      line('次のLvまで', req === null ? 'MAX' : `あと ${Math.max(0, req - s.levelProgress)}`);
+      line('レベル', req === null ? `Lv ${s.level} MAX` : `Lv ${s.level}`);
+      line('次Lvまで', req === null ? 'MAX' : `あと ${Math.max(0, req - s.levelProgress)}個`);
     } else {
       line('ステージ', `${s.stage} / 10`);
       line('ノルマ', `${Math.min(s.progress, s.quota)} / ${s.quota}`);

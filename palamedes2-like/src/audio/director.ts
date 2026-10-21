@@ -5,14 +5,14 @@ import type { AnyGame } from '../core/match';
 import type { Mode2Event } from '../core/mode2';
 import type { PlayerId } from '../core/types';
 import type { AudioBus } from './audioBus';
-import { PLAYER_CHARACTER, roleVoiceLine, VOICE_PRIORITY, type Character } from './audioMap';
+import { launchSuccessSfx, roleDeclareSfx, VOICE_PRIORITY, type Character } from './audioMap';
 
 export interface DirectorOptions {
-  /** 2回目以降の連鎖成立で成立音を連鎖音に置換する（調整可能な演出補完） */
-  chainReplacesRoleSuccess: boolean;
+  /** 接着音の遅延（攻撃ピースの飛来時間＝最初のピースが接着する時刻）ms */
+  attachDelayMs: number;
 }
 
-export const DEFAULT_DIRECTOR_OPTIONS: DirectorOptions = { chainReplacesRoleSuccess: true };
+export const DEFAULT_DIRECTOR_OPTIONS: DirectorOptions = { attachDelayMs: 120 };
 
 export class SoundDirector {
   private cursor = 0;
@@ -21,9 +21,14 @@ export class SoundDirector {
   constructor(
     private readonly bus: AudioBus,
     private game: AnyGame,
+    /** プレイヤー番号→キャラクター（ボイスの話者） */
+    private characters: readonly Character[],
     private readonly opts: DirectorOptions = DEFAULT_DIRECTOR_OPTIONS,
-    private readonly characters: readonly Character[] = PLAYER_CHARACTER,
   ) {}
+
+  setCharacters(c: readonly Character[]): void {
+    this.characters = c;
+  }
 
   reset(game: AnyGame): void {
     this.game = game;
@@ -50,7 +55,9 @@ export class SoundDirector {
         b.playSfx('piece_launch');
         return;
       case 'arrive':
-        b.playSfx(e.success ? 'piece_success' : 'piece_reject');
+        // 成功：連続取得の回数1〜5（6以上は5）の段階SE（第3版）。MODE2は連続取得がないため段階1
+        if (e.success) b.playSfx(launchSuccessSfx('streak' in e && e.streak > 0 ? e.streak : 1));
+        else b.playSfx('piece_reject');
         return;
       case 'returned':
         if (!e.instant) b.playSfx('piece_return'); // 役成立による一括SNAP帰還では鳴らさない
@@ -65,9 +72,9 @@ export class SoundDirector {
         b.playSfx('role_available');
         return;
       case 'declare': {
-        b.playSfx(this.opts.chainReplacesRoleSuccess && e.chainCount >= 2 ? 'chain' : 'role_success');
-        // 役名ボイスは表示順で最初の役だけ（専用複合ロゴならその1本）
-        if (e.logos.length > 0) b.playVoice(this.char(e.player), roleVoiceLine(e.logos[0]), VOICE_PRIORITY.role);
+        // 役連鎖の回数1〜5（6以上は5）の段階SE（第3版。旧成立音・連鎖音は重ねない）。
+        // 代表役のボイスは役名表示の予定（presentation.RoleNameSchedule）が先頭ロゴの表示開始と同時に鳴らす
+        b.playSfx(roleDeclareSfx(e.chainCount));
         return;
       }
       case 'declareFail':
@@ -86,10 +93,12 @@ export class SoundDirector {
         return;
       case 'attackRow':
         // 実適用された1ラインにつき接着音1回（破棄・未適用の段は attackRow を出さない）。被攻撃ボイスは波の最初の実適用だけ
-        b.playSfx('attack_row');
+        b.playSfx('attack_row', this.opts.attachDelayMs);
         if (e.firstOfWave) b.playVoice(this.char(e.player), 'damage', VOICE_PRIORITY.attack);
         return;
       case 'danger':
+      case 'attackPinch':
+        // 自然上昇の危険猶予・攻撃ピンチ猶予とも同じ警告音（ピンチ時の未適用段の破棄そのものは無音）
         if (e.state === 'grace') b.playSfx('danger');
         return;
       case 'levelUp':
@@ -116,9 +125,9 @@ export class SoundDirector {
     }
   }
 
-  /** 危険猶予中は警告音を最短1000ms間隔で繰り返す（解除・終了で停止） */
+  /** 危険猶予中（自然上昇・攻撃ピンチ）は警告音を最短1000ms間隔で繰り返す（解除・終了で停止） */
   private updateDanger(): void {
     if (this.ended || this.game.mode !== 'mode1' || !this.game.playing) return;
-    if (this.game.players.some((p) => p.graceRemaining !== null && !p.defeated)) this.bus.playSfx('danger');
+    if (this.game.players.some((p) => (p.graceRemaining !== null || p.incoming.pinchRemaining !== null) && !p.defeated)) this.bus.playSfx('danger');
   }
 }

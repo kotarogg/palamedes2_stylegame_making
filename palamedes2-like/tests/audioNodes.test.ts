@@ -72,7 +72,7 @@ async function readyBus(files: string[]) {
 }
 
 describe('結果・クリアの効果音は、結果遷移の停止処理で途中停止しない（R3）', () => {
-  const files = ['stage_clear', 'all_stages_clear', 'all_clear', 'piece_success', 'win'].map((id) => sfxFile(id as never));
+  const files = ['stage_clear', 'all_stages_clear', 'all_clear', 'launch_success_1', 'win'].map((id) => sfxFile(id as never));
 
   it('stageClear → roundEnd が同じイベント列でも stage_clear は終端まで鳴る。通常SEは止める', async () => {
     const { bus, at } = await readyBus([...files, voiceFile('kotaro', 'attack')]);
@@ -85,12 +85,12 @@ describe('結果・クリアの効果音は、結果遷移の停止処理で途�
     ];
     const game = { events, mode: 'mode1', playing: false, players: [] } as unknown as AnyGame;
     bus.playVoice('kotaro', 'attack', VOICE_PRIORITY.attack);
-    new SoundDirector(bus, game).sync();
+    new SoundDirector(bus, game, ['kotaro', 'akane']).sync();
     at(1010);
     const rec = (id: string) => bus.nodes.find((n) => n.id === id)!;
     expect(rec('stage_clear')).toMatchObject({ kind: 'sfx', stoppedAt: null });
     expect(rec('all_clear').stoppedAt).toBeNull();
-    expect(rec('piece_success').stoppedAt).not.toBeNull(); // 鳴り残りの通常SEは止める
+    expect(rec('launch_success_1').stoppedAt).not.toBeNull(); // 鳴り残りの通常SEは止める
     expect(rec('kotaro_attack').stoppedAt).not.toBeNull(); // プレイ中の声も止める
   });
 
@@ -98,7 +98,7 @@ describe('結果・クリアの効果音は、結果遷移の停止処理で途�
     const { bus, at } = await readyBus(files);
     at(500);
     const game = { events: [{ type: 'stageClear', tick: 1, player: 0, stage: 10, final: true }, { type: 'roundEnd', tick: 1 }], mode: 'mode1', players: [] } as unknown as AnyGame;
-    new SoundDirector(bus, game).sync();
+    new SoundDirector(bus, game, ['kotaro', 'akane']).sync();
     expect(bus.nodes.find((n) => n.id === 'all_stages_clear')!.stoppedAt).toBeNull();
     at(700);
     bus.stopEffects();
@@ -108,10 +108,10 @@ describe('結果・クリアの効果音は、結果遷移の停止処理で途�
   it('対戦結果への遷移では通常のSEとプレイ中の声を止める（回帰）、結果SE（win）は残す', async () => {
     const { bus, at } = await readyBus(files);
     at(100);
-    bus.playSfx('piece_success');
+    bus.playSfx('launch_success_1');
     bus.playSfx('win');
     bus.stopPlaySounds();
-    expect(bus.nodes.find((n) => n.id === 'piece_success')!.stoppedAt).not.toBeNull();
+    expect(bus.nodes.find((n) => n.id === 'launch_success_1')!.stoppedAt).not.toBeNull();
     expect(bus.nodes.find((n) => n.id === 'win')!.stoppedAt).toBeNull();
   });
 });

@@ -1,5 +1,5 @@
 // オプション設定（音・操作・対戦・表示）の保持。保存先はこのブラウザの localStorage（保存・読込できない環境でも初期値で起動）。
-// 初期値（設計補完）：2本先取・自然上昇中級・NPC中級、1P/2Pキーボード、各音量100（マスター−6dBは別に適用）、表示は収まる最大整数倍率。
+// 初期値（設計補完）：2本先取・自然上昇中級・NPC中級、1P/2Pキーボード、各音量100（マスター−6dBは別に適用）、表示は収まる最大（実画素の整数倍）。
 import { DEFAULT_VOLUMES, type AudioVolumes } from '../audio/audioBus';
 import type { Difficulty } from '../core/config';
 import type { FirstTo } from '../core/match';
@@ -16,8 +16,8 @@ import {
 
 export type DeviceChoice = { kind: 'keyboard' } | { kind: 'gamepad'; index: number } | { kind: 'cpu'; level: Difficulty };
 
-/** 0＝自動（画面に収まる最大の整数倍）、1〜4＝指定倍率（はみ出す場合は収まる倍率を使う） */
-export type DisplayScale = 0 | 1 | 2 | 3 | 4;
+/** 0＝収まる最大（実画素の整数倍）、1〜8＝固定倍率（実画素。収まらない倍率は選べない。第3版 B6） */
+export type DisplayScale = number;
 
 export interface AppSettings {
   firstTo: FirstTo;
@@ -86,7 +86,7 @@ export function parseSettings(raw: string | null): AppSettings {
     }
     if (s.display && typeof s.display === 'object') {
       const sc = s.display.scale;
-      if (sc === 0 || sc === 1 || sc === 2 || sc === 3 || sc === 4) d.display.scale = sc;
+      if (typeof sc === 'number' && Number.isInteger(sc) && sc >= 0 && sc <= 8) d.display.scale = sc;
       d.display.fullscreen = s.display.fullscreen === true;
     }
   } catch {

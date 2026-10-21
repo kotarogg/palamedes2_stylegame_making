@@ -8,3 +8,4 @@ test-results/
 
 # BGM（大容量。README参照）
 public/assets/audio/bgm/*.wav
+public/gfx/fonts/*.ttf

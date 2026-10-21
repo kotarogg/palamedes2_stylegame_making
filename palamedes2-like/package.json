@@ -1,8 +1,8 @@
 {
   "name": "palamedes2-like",
-  "version": "1.0.0-rc.1",
+  "version": "3.0.0-rc.1",
   "private": true,
-  "description": "パラメデス２風ブラウザパズル 第1版統合候補",
+  "description": "コタローくんパズル 第3版統合候補 v3.0.0-rc1",
   "type": "module",
   "engines": {
     "node": ">=22.12"
@@ -19,7 +19,10 @@
     "verify": "npm run typecheck && npm run test && npm run build && npm run e2e",
     "e2e:fallback": "node scripts/e2e.mjs --fallback",
     "check:release": "node scripts/check-release.mjs",
-    "verify:fallback": "npm run typecheck && npm run test && npm run build && npm run e2e:fallback"
+    "verify:fallback": "npm run typecheck && npm run test && npm run build && npm run e2e:fallback",
+    "measure:cpu": "vitest run --config tools/vitest.measure.config.ts",
+    "measure:mix": "node tools/mix-peak.mjs",
+    "assemble:play": "node scripts/assemble-play.mjs"
   },
   "devDependencies": {
     "@types/node": "22.20.5",

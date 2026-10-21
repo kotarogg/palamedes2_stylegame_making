@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 import { DEFAULT_CONFIG, type GameConfig } from '../src/core/config';
 import { Game, type Command } from '../src/core/game';
 import type { Piece, PlayerId, Suit } from '../src/core/types';
-import { Layout, SpriteAtlas, type ScreenLayout, type SpriteManifest } from '../src/view/data';
+import type { Assets, CreditsText, FontStyles } from '../src/view/assets';
+import { Layout, normalizeManifest, SpriteAtlas, type LoadingList, type RawManifestV3, type ScreenLayout, type SpriteManifest } from '../src/view/data';
 
 export const ROOT = new URL('..', import.meta.url);
 
@@ -10,10 +11,25 @@ export function readJson<T>(rel: string): T {
   return JSON.parse(readFileSync(new URL(rel, ROOT), 'utf8')) as T;
 }
 
-export const manifest = () => readJson<SpriteManifest>('public/data/sprite_manifest_v2.json');
+/** 第3版：graphics_manifest_v3.json を明示読込一覧で内部形式へ */
+export const rawManifest = () => readJson<RawManifestV3>('public/gfx/data/graphics_manifest_v3.json');
+export const loadingList = () => readJson<LoadingList>('public/gfx/data/game_loading_list.json');
+export const manifest = (): SpriteManifest => normalizeManifest(rawManifest(), loadingList()).manifest;
 export const layoutData = () => readJson<ScreenLayout>('public/data/screen_layout_v2.json');
 export const layout = () => new Layout(layoutData());
 export const atlas = () => new SpriteAtlas(manifest());
+
+/** DOMなしの描画検証用（画像は持たない） */
+export const fakeAssets = (): Assets => ({
+  atlas: atlas(),
+  layout: layout(),
+  images: new Map(),
+  darkS4: null as never,
+  darkAlpha: 0.5,
+  fontStyles: readJson<FontStyles>('public/gfx/data/font_styles.json'),
+  credits: readJson<CreditsText>('public/gfx/data/credits_text.json'),
+  fontLoaded: true,
+});
 
 const SUIT: Record<string, Suit> = { s: 'spade', d: 'diamond', c: 'club', h: 'heart' };
 

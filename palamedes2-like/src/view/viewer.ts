@@ -1,10 +1,11 @@
 // 素材確認画面（全PNG切出し・主要モーション・役名16×3フレーム・攻撃表示0〜29）
-import { layoutAttackIcons } from '../core/attack';
 import { DEFAULT_VIEW_CONFIG } from '../core/config';
 import { glowSegments } from '../core/roles';
 import { SUITS } from '../core/types';
 import { drawFrame, type Assets } from './assets';
 import type { ManifestFrame } from './data';
+import { stockGroupHeight, stockIcons } from './stockLayout';
+import { UI_FONT } from './text';
 
 export const VIEWER_PAGES = ['キャラ・猫モーション', '役名16種×A/B/C', 'S4ピース（通常・小型・B暗色）', 'S6エフェクト', 'S5 UI', '攻撃表示 0〜29', '役成立光 v2.1（共有時計）'] as const;
 
@@ -26,7 +27,7 @@ export class AssetViewer {
   }
 
   private label(ctx: CanvasRenderingContext2D, s: string, x: number, y: number, color = '#ffffff'): void {
-    ctx.font = '9px "Noto Sans CJK JP", "Yu Gothic", "Meiryo", sans-serif';
+    ctx.font = `600 9px ${UI_FONT}`;
     ctx.textBaseline = 'top';
     ctx.fillStyle = color;
     ctx.fillText(s, x, y);
@@ -39,10 +40,10 @@ export class AssetViewer {
 
   private motions(ctx: CanvasRenderingContext2D, ms: number): void {
     const names = ['idle', 'walk', 'launch', 'attack', 'win', 'lose_fall'];
-    ['S1', 'S2'].forEach((sheet, row) => {
+    ['S1', 'S2', 'S13'].forEach((sheet, row) => {
       names.forEach((n, i) => {
-        const x = 8 + i * 70;
-        const y = 8 + row * 84;
+        const x = 8 + i * 62;
+        const y = 4 + row * 62;
         drawFrame(ctx, this.assets, this.anim(sheet, n, ms, 160), x, y);
         this.label(ctx, `${sheet} ${n}`, x, y + 58);
       });
@@ -50,14 +51,13 @@ export class AssetViewer {
     const cat = ['idle', 'ready', 'start', 'cracker', 'joy', 'surprise', 'panic', 'sad'];
     cat.forEach((n, i) => {
       const x = 8 + i * 60;
-      drawFrame(ctx, this.assets, this.anim('S3', n, ms, 200), x, 190);
-      this.label(ctx, `S3 ${n}`, x, 240);
+      drawFrame(ctx, this.assets, this.anim('S3', n, ms, 200), x, 196);
+      this.label(ctx, `S3 ${n}`, x, 246);
     });
     // B押下時の一瞬ポーズに使う枠
     const pose = DEFAULT_VIEW_CONFIG.bPoseSlotId;
-    drawFrame(ctx, this.assets, this.assets.atlas.frame('S1', pose), 440, 8);
-    drawFrame(ctx, this.assets, this.assets.atlas.frame('S2', pose), 440, 92);
-    this.label(ctx, `Bポーズ ${pose}`, 440, 66);
+    ['S1', 'S2', 'S13'].forEach((sheet, i) => drawFrame(ctx, this.assets, this.assets.atlas.frame(sheet, pose), 400 + i * 52, 8));
+    this.label(ctx, `Bポーズ ${pose}`, 400, 66);
     this.label(ctx, '予備透明枠(reserved)はアニメーションに含めない', 8, 262, '#9aa4c0');
   }
 
@@ -107,19 +107,16 @@ export class AssetViewer {
     this.flow(ctx, this.assets.atlas.manifest.frames.filter((f) => f.sheet === 'S5'), 4, 4, 636);
   }
 
+  /** 受攻撃ストック 0〜29（大＝5ライン、小＝1ライン 2×2。第10章） */
   private attack(ctx: CanvasRenderingContext2D): void {
-    const rules = this.assets.layout.attackRules();
-    const big = this.assets.atlas.frame('S5', 'attack_icon_big');
-    const small = this.assets.atlas.frame('S5', 'attack_icon_small');
+    const A = this.assets.atlas;
     for (let n = 0; n <= 29; n++) {
-      const ox = 6 + (n % 15) * 42;
-      const oy = 14 + Math.floor(n / 15) * 166;
-      this.label(ctx, String(n), ox, oy - 11, '#c0d8ff');
+      const ox = 10 + (n % 15) * 42;
+      const oy = 16 + Math.floor(n / 15) * 160;
+      this.label(ctx, String(n), ox, oy - 12, '#c0d8ff');
       ctx.strokeStyle = '#30305a';
-      ctx.strokeRect(ox - 0.5, oy - 0.5, 41, 145);
-      const icons = layoutAttackIcons(n, [ox, oy], rules);
-      icons.big.forEach((b) => drawFrame(ctx, this.assets, big, b.x, b.y));
-      icons.small.forEach((s) => drawFrame(ctx, this.assets, small, s.x, s.y));
+      ctx.strokeRect(ox - 0.5, oy - 0.5, 17, Math.max(1, stockGroupHeight(n)) + 1);
+      for (const ic of stockIcons(n)) drawFrame(ctx, this.assets, A.frame(`attack_stock_nekotaro_${ic.size}`, '0'), ox + ic.x, oy + ic.y);
     }
   }
 

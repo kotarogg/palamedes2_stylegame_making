@@ -1,34 +1,4 @@
-// 攻撃ストック・攻撃量・相殺（統合仕様 第9〜10章＋2026-10-18確定事項）。
-
-/** 内部ロジック上の上限も29。30以上は29へ飽和 */
-export const ATTACK_MAX = 29;
-
-export function addAttackLines(stock: number, lines: number): number {
-  if (!Number.isInteger(lines) || lines < 0) throw new Error(`invalid attack lines: ${lines}`);
-  return Math.min(ATTACK_MAX, stock + lines);
-}
-
-export interface WaveRules {
-  /** 1波で適用する最大ライン数（確定：3） */
-  maxPerWave: number;
-  /** 攻撃による盤面増加の上限段数（確定：6。7段目へ押し込まない） */
-  maxHeightByAttack: number;
-}
-
-export const WAVE_RULES: WaveRules = { maxPerWave: 3, maxHeightByAttack: 6 };
-
-/**
- * 波の開始時に予約するライン数（2026-10-20確定：1波最大3段）。
- * 予約した段は 0/200/400ms に1段ずつ適用し、その時点で入りきらない段は破棄する（後続波の分は破棄しない）。
- */
-export function waveReserve(stock: number, rules: WaveRules = WAVE_RULES): number {
-  return Math.max(0, Math.min(rules.maxPerWave, stock));
-}
-
-/** 1段を適用できるか（予約空白を含む最長列の段数で判定） */
-export function stepFits(height: number, rules: WaveRules = WAVE_RULES): boolean {
-  return height < rules.maxHeightByAttack;
-}
+// 攻撃量・相殺（統合仕様 第9〜10章＋2026-10-18確定事項）。受攻撃の段階処理は incoming.ts（第3版）。
 
 export interface AttackBreakdown {
   /** 基本攻撃量＝max(合計翻数−1, 0) */
@@ -75,36 +45,4 @@ export function resolveCounter(power: number, waiting: number, perLine = 2): Cou
   const usedPower = Math.min(power, Math.ceil(waiting / perLine));
   const canceled = Math.min(waiting, usedPower * perLine);
   return { usedPower, canceled, sent: power - usedPower, discarded: usedPower * perLine - canceled };
-}
-
-export interface AttackIconLayoutRules {
-  bigLines: number; // 10
-  bigMax: number; // 2
-  bigPitchY: number; // 32
-  smallMax: number; // 9
-  smallOffsets: ReadonlyArray<readonly [number, number]>; // 左5→右4
-}
-
-export interface AttackIconPlacement {
-  big: Array<{ x: number; y: number }>;
-  small: Array<{ x: number; y: number }>;
-}
-
-/** 攻撃アイコン配置（画面JSONの attack_stock 定義から規則を与える） */
-export function layoutAttackIcons(
-  lines: number,
-  origin: readonly [number, number],
-  rules: AttackIconLayoutRules,
-): AttackIconPlacement {
-  const clamped = Math.max(0, Math.min(ATTACK_MAX, lines));
-  const bigCount = Math.min(rules.bigMax, Math.floor(clamped / rules.bigLines));
-  const smallCount = Math.min(rules.smallMax, clamped - bigCount * rules.bigLines);
-  const [ox, oy] = origin;
-  const big = Array.from({ length: bigCount }, (_, i) => ({ x: ox, y: oy + rules.bigPitchY * i }));
-  const smallStartY = oy + rules.bigPitchY * bigCount;
-  const small = Array.from({ length: smallCount }, (_, i) => ({
-    x: ox + rules.smallOffsets[i][0],
-    y: smallStartY + rules.smallOffsets[i][1],
-  }));
-  return { big, small };
 }

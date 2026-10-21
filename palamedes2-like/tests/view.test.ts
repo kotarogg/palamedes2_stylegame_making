@@ -1,12 +1,8 @@
 // 表示側の確定事項：役成立光（区間・原点オフセット・共有時計・描画順）、ライン消去後の段数推移、読み込み許可リスト
 import { describe, expect, it } from 'vitest';
-import type { Assets } from '../src/view/assets';
-import { sheetsToLoad, type AssetLoadingPolicy } from '../src/view/data';
 import { STOCK_PIECE_Z, GameView } from '../src/view/gameView';
 import { CELL, Z } from '../src/view/geometry';
-import { atlas, layout, makeGame, manifest, readJson, rows, setStock, stepN, toPlay } from './helpers';
-
-const fakeAssets = (): Assets => ({ atlas: atlas(), layout: layout(), images: new Map(), darkS4: null as never, darkAlpha: 0.5 });
+import { fakeAssets, makeGame, manifest, rows, setStock, stepN, toPlay, atlas } from './helpers';
 
 describe('役成立光 v2.1（確定）', () => {
   it('採用位置の連続区間ごとに role_glow_<長さ> を1個。画像位置＝対象左上−原点オフセット', () => {
@@ -72,7 +68,6 @@ describe('役成立光 v2.1（確定）', () => {
   it('旧来の role_glow_6_spark は常時囲み光のアニメーションに含めない', () => {
     const anims = manifest().animations;
     for (const [k, ids] of Object.entries(anims)) if (k.startsWith('S6/role_glow')) expect(ids).not.toContain('role_glow_6_spark');
-    expect(manifest().version).toBe('2.3');
   });
 });
 
@@ -97,19 +92,5 @@ describe('ライン消去後の段数推移（表示）', () => {
     const mid = (lc.clearEnd + lc.shiftEnd) / 2;
     expect(v.barVisual(0, mid)).toBeGreaterThan(before.bar);
     expect(v.pieceBar(0, mid)).toBeCloseTo(secondRowY, 6);
-  });
-});
-
-describe('読み込み許可リスト（asset_loading_policy.json v2.3）', () => {
-  it('12シート＋背景の13PNGだけを明示許可リストで読み込み、再帰収集しない。許可外・旧版はエラー', () => {
-    const policy = readJson<AssetLoadingPolicy>('public/data/asset_loading_policy.json');
-    const m = manifest();
-    expect(policy).toMatchObject({ mode: 'explicit_allowlist', no_recursive_discovery: true });
-    const files = sheetsToLoad(m, policy).map((s) => s.file).sort();
-    expect(files).toEqual([...policy.files].sort());
-    expect(files).toHaveLength(13);
-    expect(policy.exclude).toEqual(expect.arrayContaining(['*.zip', 'previews/**', 'graphics_preview.html']));
-    expect(() => sheetsToLoad({ ...m, sheets: [...m.sheets, { id: 'X', file: 'old.png', width: 1, height: 1, sha256: '' }] }, policy)).toThrow(/allowlist/);
-    expect(() => sheetsToLoad(m, { ...policy, no_recursive_discovery: false })).toThrow();
   });
 });

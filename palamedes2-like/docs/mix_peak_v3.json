@@ -1,0 +1,63 @@
+{
+ "note": "波形の加算による検査（聴感ではない）。BGM除く。マスター−6dB・音量100で計算",
+ "duckDb": -4,
+ "masterDb": -6,
+ "DUCK": 0.6309573444801932,
+ "rows": [
+  {
+   "name": "勝敗演出（勝利SE＋敗者ボイス→落下SE→勝者ボイス＋クラッカー）",
+   "peakDbfs": -6.66,
+   "files": [
+    "sfx/sfx_win.wav",
+    "voice/voice_akane_lose.wav",
+    "sfx/se_character_fall.wav",
+    "voice/voice_kotaro_win.wav",
+    "sfx/se_result_cracker.wav"
+   ]
+  },
+  {
+   "name": "同時の役宣言・攻撃（両者が同じ瞬間に宣言・攻撃・相殺・接着。役ボイス2声）",
+   "peakDbfs": -4.71,
+   "files": [
+    "sfx/se_role_declare_05.wav",
+    "sfx/se_role_declare_05.wav",
+    "sfx/se_launch_success_05.wav",
+    "sfx/se_launch_success_05.wav",
+    "sfx/sfx_attack_send.wav",
+    "sfx/sfx_counter.wav",
+    "sfx/sfx_attack_row.wav",
+    "sfx/sfx_line_clear.wav",
+    "voice/voice_kotaro_role_16.wav",
+    "voice/voice_zunko_role_16.wav"
+   ]
+  },
+  {
+   "name": "ステージ最終面クリア＋全消し同時（R3と同じ組合せ）",
+   "peakDbfs": -6.31,
+   "files": [
+    "sfx/sfx_all_stages_clear.wav",
+    "sfx/sfx_all_clear.wav",
+    "sfx/se_launch_success_05.wav",
+    "sfx/se_result_cracker.wav"
+   ]
+  },
+  {
+   "name": "理論上の最悪：ピーク上位12本のSEを同時（同時発音上限12）",
+   "peakDbfs": -0.82,
+   "files": [
+    "sfx/se_result_cracker.wav",
+    "sfx/sfx_counter.wav",
+    "sfx/sfx_all_clear.wav",
+    "sfx/sfx_stage_clear.wav",
+    "sfx/sfx_level_up.wav",
+    "sfx/sfx_win.wav",
+    "sfx/sfx_all_stages_clear.wav",
+    "sfx/se_character_fall.wav",
+    "sfx/sfx_role_available.wav",
+    "sfx/sfx_attack_row.wav",
+    "sfx/sfx_line_clear.wav",
+    "sfx/se_role_declare_05.wav"
+   ]
+  }
+ ]
+}

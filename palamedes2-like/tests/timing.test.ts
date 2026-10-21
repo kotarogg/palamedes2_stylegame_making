@@ -5,10 +5,9 @@ import { FixedStepDriver } from '../src/core/driver';
 import type { Command } from '../src/core/game';
 import { createSeededRng, randomInt } from '../src/core/rng';
 import type { PlayerId } from '../src/core/types';
-import type { Assets } from '../src/view/assets';
 import { CELL, descentY } from '../src/view/geometry';
 import { GameView } from '../src/view/gameView';
-import { atlas, layout, makeGame, stepN, stepUntil, testConfig, toPlay } from './helpers';
+import { fakeAssets, makeGame, stepN, stepUntil, testConfig, toPlay } from './helpers';
 
 const ACTIONS = ['left', 'right', 'launch', 'rotate', 'declare', 'manualRise'] as const;
 
@@ -23,8 +22,6 @@ function script(seed: number, ticks: number): Map<number, Command[]> {
   }
   return m;
 }
-
-const fakeAssets = (): Assets => ({ atlas: atlas(), layout: layout(), images: new Map(), darkS4: null as never, darkAlpha: 0.5 });
 
 describe('描画FPSに依存しない', () => {
   const TICKS = 3600;

@@ -1,6 +1,5 @@
-// sprite_manifest_v2.json / screen_layout_v2.json の読取り（DOM非依存）。
+// 採用画像（第3版：graphics_manifest_v3.json＋game_loading_list.json）と screen_layout_v2.json の読取り（DOM非依存）。
 // 画像差し替え時はPNGとマニフェストを差し替えるだけでロジックは変更しない。
-import type { AttackIconLayoutRules } from '../core/attack';
 import type { PlayerId, Suit } from '../core/types';
 
 export interface SheetInfo {
@@ -93,12 +92,20 @@ export interface ScreenLayout {
   graphic_mode_rules?: { single_info_rect: [number, number, number, number] };
 }
 
-/** asset_loading_policy.json（v2.3：明示許可リスト13PNG。旧版・プレビュー・ZIPを再帰収集しない） */
-export interface AssetLoadingPolicy {
-  mode: 'explicit_allowlist';
+/** 第3版 graphics_manifest_v3.json の生データ（シート＋単独画像） */
+export interface RawManifestV3 {
+  version: string;
+  sheets: { id: string; file: string; w: number; h: number; sha256: string }[];
+  frames: ManifestFrame[];
+  animations: Record<string, { frames: string[]; durations_ms?: number[]; loop?: boolean }>;
+  standalone_assets: { id: string; file: string; dimensions: [number, number]; origin: [number, number]; frames: { id: string; rect: [number, number, number, number]; origin?: [number, number] }[] }[];
+  display_font?: SpriteManifest['display_font'];
+}
+
+/** game_loading_list.json（明示読込一覧。フォルダの再帰探索をしない） */
+export interface LoadingList {
   files: string[];
   exclude?: string[];
-  no_recursive_discovery: boolean;
 }
 
 export interface LoadTarget {
@@ -109,18 +116,36 @@ export interface LoadTarget {
 }
 
 /**
- * 読み込むPNG＝マニフェストの12シート＋背景。すべて許可リストに含まれることを検査し、許可リスト外は読まない。
- * アトラス方式のみ使用（個別PNG role_glow_frames は読み込まない＝二重読み込みしない）。
+ * 生データを内部形式へ：シートは id のまま、単独画像は「画像ID」を擬似シートIDとしてフレームを登録する。
+ * 読み込む画像はすべて明示読込一覧に含まれていなければならない（一覧外は読まない・旧版や見本を混ぜない）。
  */
-export function sheetsToLoad(manifest: SpriteManifest, policy: AssetLoadingPolicy): LoadTarget[] {
-  if (policy.mode !== 'explicit_allowlist' || !policy.no_recursive_discovery) throw new Error('asset policy must be explicit_allowlist without recursive discovery');
-  const allowed = new Set(policy.files);
+export function normalizeManifest(raw: RawManifestV3, list: LoadingList): { manifest: SpriteManifest; targets: LoadTarget[] } {
+  const allowed = new Set(list.files);
   const targets: LoadTarget[] = [
-    ...manifest.sheets.map((s) => ({ id: s.id, file: s.file, width: s.width, height: s.height })),
-    ...(manifest.backgrounds ?? []).map((b) => ({ id: b.id, file: b.file, width: b.width, height: b.height })),
+    ...raw.sheets.map((s) => ({ id: s.id, file: s.file, width: s.w, height: s.h })),
+    ...raw.standalone_assets.map((a) => ({ id: a.id, file: a.file, width: a.dimensions[0], height: a.dimensions[1] })),
   ];
-  for (const t of targets) if (!allowed.has(t.file)) throw new Error(`sheet not in allowlist: ${t.file}`);
-  return targets;
+  for (const t of targets) if (!allowed.has(t.file)) throw new Error(`image not in loading list: ${t.file}`);
+  const frames: ManifestFrame[] = [...raw.frames];
+  for (const a of raw.standalone_assets)
+    for (const f of a.frames) frames.push({ sheet: a.id, id: f.id, x: f.rect[0], y: f.rect[1], w: f.rect[2], h: f.rect[3], reserved: false, origin: f.origin ?? a.origin });
+  // アニメーションは「枠IDの列」と「推奨時間」に分けて保持する（時間はマニフェスト記載値）
+  const animations: Record<string, string[]> = {};
+  const recommended_timing: Record<string, { durations_ms?: number[] }> = {};
+  for (const [k, a] of Object.entries(raw.animations)) {
+    animations[k] = a.frames;
+    if (a.durations_ms) recommended_timing[k] = { durations_ms: a.durations_ms };
+  }
+  const manifest: SpriteManifest = {
+    schema: 'graphics_manifest_v3',
+    version: raw.version,
+    sheets: targets.map((t) => ({ id: t.id, file: t.file, width: t.width, height: t.height, sha256: raw.sheets.find((s) => s.id === t.id)?.sha256 ?? '' })),
+    frames,
+    animations,
+    display_font: raw.display_font,
+    recommended_timing,
+  };
+  return { manifest, targets };
 }
 
 export class SpriteAtlas {
@@ -173,20 +198,5 @@ export class Layout {
 
   pRect(player: PlayerId, name: string): LayoutObject {
     return this.rect(`p${player + 1}_${name}`);
-  }
-
-  attackOrigin(player: PlayerId): [number, number] {
-    return player === 0 ? this.data.attack_stock.origins.p1 : this.data.attack_stock.origins.p2;
-  }
-
-  attackRules(): AttackIconLayoutRules {
-    const a = this.data.attack_stock;
-    return {
-      bigLines: a.big_lines,
-      bigMax: a.big_max,
-      bigPitchY: a.big_pitch_y,
-      smallMax: a.small_max,
-      smallOffsets: a.small_offsets,
-    };
   }
 }
