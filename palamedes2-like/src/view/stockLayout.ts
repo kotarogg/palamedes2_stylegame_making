@@ -66,17 +66,25 @@ export function pendingGroupY(reservedPx: number | null, slideFromPx: number | n
   return Math.round(slideFromPx * (1 - u));
 }
 
-/** 列に描く要素（アイコン・処理中の囲い・相殺の小爆発）。描画と画面内検査で同じ配置を使う */
+/**
+ * 列に描く要素。vanish＝表示専用の消失対象（相殺の XD 顔・ピンチ破棄のフェード）と小爆発。
+ * 消失対象は有効なストックではない（数量・相殺・消化に含めない）ので、通常のストックより前面に描く。
+ */
 export type StockDrawEntry =
-  | { type: 'icon'; size: 'large' | 'small'; xd: boolean; alpha: number; x: number; y: number; w: number; h: number }
+  | { type: 'icon'; size: 'large' | 'small'; xd: boolean; alpha: number; vanish: boolean; x: number; y: number; w: number; h: number }
   | { type: 'frame'; x: number; y: number; w: number; h: number }
   | { type: 'burst'; size: 'large' | 'small'; frame: number; x: number; y: number; w: number; h: number };
 
+/**
+ * 消失演出1件（修正R5）。y＝発生時に確定した群の上端（論理px）。後から増減した待機群の末尾へは配置し直さない。
+ * 相殺は待機群に、ピンチ破棄は現ブロックに所属し、所属する群の移動（上詰め）にだけ追従する。
+ */
 export interface StockAfterimageState {
   kind: 'counter' | 'discard';
   lines: number;
   /** 発生からの経過ms */
   ms: number;
+  y: number;
 }
 
 const ICON_PX = { large: 16, small: 8 } as const;
@@ -85,9 +93,19 @@ export const BURST_FRAMES = 4;
 /** 処理中ブロックの囲い（9スライス 3px） */
 export const FRAME_PAD = 3;
 
+/** 消失演出の長さ（相殺＝4コマ×40ms、破棄＝フェード） */
+export function afterimageDurationMs(kind: 'counter' | 'discard', cfg: StockViewConfig = DEFAULT_STOCK_VIEW): number {
+  return kind === 'counter' ? cfg.counterFrameMs * BURST_FRAMES : cfg.discardFadeMs;
+}
+
+/** 相殺の消失対象の位置：相殺後に残った待機群の下（待機群の上端からの相対px）。相殺の時点で確定する */
+export const counterAnchorOffset = (pendingAfter: number): number => stockGroupHeight(pendingAfter);
+/** ピンチ破棄の消失対象の位置：破棄後に残った現ブロックの下（ブロックの上端からの相対px） */
+export const discardAnchorOffset = (blockAfter: number): number => stockGroupHeight(blockAfter);
+
 /**
- * 1列の配置：上＝処理中ブロックの残り（囲い付き）、その下にピンチ破棄の残像（フェード）、
- * 予約高さの下＝nextPending、その下に相殺の残像（XD顔＋小爆発）。
+ * 1列の配置：処理中ブロックの残り（囲い付き）→ nextPending → 消失演出（記録した位置、発生順。前面）。
+ * 呼び出し側は、通常ストックより消失演出を前面へ（同じ消失演出の中は発生順に）描く。
  */
 export function stockColumnLayout(
   x0: number,
@@ -99,26 +117,24 @@ export function stockColumnLayout(
   cfg: StockViewConfig = DEFAULT_STOCK_VIEW,
 ): StockDrawEntry[] {
   const out: StockDrawEntry[] = [];
-  const group = (lines: number, y0: number, xd: boolean, alpha: number) => {
-    for (const ic of stockIcons(lines)) out.push({ type: 'icon', size: ic.size, xd, alpha, x: x0 + ic.x, y: y0 + ic.y, w: ICON_PX[ic.size], h: ICON_PX[ic.size] });
+  const group = (lines: number, y0: number, xd: boolean, alpha: number, vanish: boolean) => {
+    for (const ic of stockIcons(lines)) out.push({ type: 'icon', size: ic.size, xd, alpha, vanish, x: x0 + ic.x, y: y0 + ic.y, w: ICON_PX[ic.size], h: ICON_PX[ic.size] });
   };
-  group(blockLines, blockY, false, 1);
+  group(blockLines, blockY, false, 1, false);
   if (blockLines > 0) out.push({ type: 'frame', x: x0 - FRAME_PAD, y: blockY - FRAME_PAD, w: CELL_PX + 2 * FRAME_PAD, h: stockGroupHeight(blockLines) + 2 * FRAME_PAD });
-  group(pendingLines, pendingY, false, 1);
+  group(pendingLines, pendingY, false, 1, false);
   for (const a of afterimages) {
-    if (a.ms < 0) continue;
+    if (a.ms < 0 || a.ms >= afterimageDurationMs(a.kind, cfg)) continue;
     if (a.kind === 'discard') {
-      if (a.ms < cfg.discardFadeMs) group(a.lines, blockY + stockGroupHeight(blockLines), false, 1 - a.ms / cfg.discardFadeMs);
+      group(a.lines, a.y, false, 1 - a.ms / cfg.discardFadeMs, true);
       continue;
     }
     const fi = Math.floor(a.ms / cfg.counterFrameMs);
-    if (fi >= BURST_FRAMES) continue;
-    const y0 = pendingY + stockGroupHeight(pendingLines);
-    group(a.lines, y0, true, 1);
+    group(a.lines, a.y, true, 1, true);
     for (const ic of stockIcons(a.lines)) {
       const c = ICON_PX[ic.size] / 2;
       const b = BURST_PX[ic.size];
-      out.push({ type: 'burst', size: ic.size, frame: fi, x: x0 + ic.x + c - b / 2, y: y0 + ic.y + c - b / 2, w: b, h: b });
+      out.push({ type: 'burst', size: ic.size, frame: fi, x: x0 + ic.x + c - b / 2, y: a.y + ic.y + c - b / 2, w: b, h: b });
     }
   }
   return out;

@@ -107,7 +107,7 @@ export type GameEvent =
   /** 受信：accepted を nextPending へ。overflow は上限29の超過で破棄（相殺・ピンチ破棄とは別統計） */
   | { type: 'attackReceive'; tick: number; player: PlayerId; accepted: number; overflow: number; total: number; cause: 'receive' | 'debug' }
   /** 相殺：nextPending から canceled を消した（XD顔・小爆発の対象） */
-  | { type: 'attackCancel'; tick: number; player: PlayerId; canceled: number; total: number }
+  | { type: 'attackCancel'; tick: number; player: PlayerId; canceled: number; total: number; /** 相殺後の nextPending（表示用） */ pending: number }
   /** 受攻撃ブロックの開始：nextPending 全量を現ブロックへ確定（表示ストック数は減らない） */
   | { type: 'blockStart'; tick: number; player: PlayerId; blockId: number; lines: number }
   /** 攻撃波の開始：現ブロックから最大3段を割当（内部移動。表示ストック数は減らない） */
@@ -118,8 +118,9 @@ export type GameEvent =
    */
   | { type: 'attackRow'; tick: number; player: PlayerId; blockId: number; waveId: number; step: number; firstOfWave: boolean; heightBefore: number; heightAfter: number; rowIds: number[]; total: number }
   /** ピンチライン到達で、同じ波の未適用分を破棄（相殺とは別の消失表現） */
-  | { type: 'attackDiscard'; tick: number; player: PlayerId; waveId: number; lines: number; reason: 'pinch'; total: number }
-  | { type: 'blockEnd'; tick: number; player: PlayerId; blockId: number }
+  | { type: 'attackDiscard'; tick: number; player: PlayerId; waveId: number; lines: number; reason: 'pinch'; total: number; /** 破棄後の現ブロック残量（表示用） */ block: number }
+  /** 現ブロックの終了。pending＝その時点の nextPending（表示用） */
+  | { type: 'blockEnd'; tick: number; player: PlayerId; blockId: number; pending: number }
   /** 攻撃ピンチ猶予（2000ms）：grace＝開始、release＝6段以下へ下がり解除、defeat＝期限時も7段 */
   | { type: 'attackPinch'; tick: number; player: PlayerId; state: 'grace' | 'release' | 'defeat'; graceEnd: number }
   | { type: 'danger'; tick: number; player: PlayerId; state: 'grace' | 'release' | 'defeat'; graceEnd: number }
@@ -619,7 +620,7 @@ export class Game {
       const counter = resolveCounter(breakdown.power, p.incoming.nextPending, this.config.counterPerLine);
       if (counter.canceled > 0) {
         cancelPending(p.incoming, counter.canceled);
-        this.emit({ type: 'attackCancel', tick: this.tick, player: p.id, canceled: counter.canceled, total: totalIncoming(p.incoming) });
+        this.emit({ type: 'attackCancel', tick: this.tick, player: p.id, canceled: counter.canceled, total: totalIncoming(p.incoming), pending: p.incoming.nextPending });
       }
       if (counter.sent > 0) this.pendingSends.push({ to: (1 - p.id) as PlayerId, lines: counter.sent });
       this.emit({ type: 'attack', tick: this.tick, player: p.id, breakdown, counter, linesCleared: r.linesCleared });
@@ -844,13 +845,13 @@ export class Game {
             const lines = s.waveRemaining;
             s.waveRemaining = 0;
             s.stats.pinchDiscarded += lines;
-            this.emit({ type: 'attackDiscard', tick: this.tick, player: p.id, waveId: s.waveId, lines, reason: 'pinch', total: totalIncoming(s) });
+            this.emit({ type: 'attackDiscard', tick: this.tick, player: p.id, waveId: s.waveId, lines, reason: 'pinch', total: totalIncoming(s), block: s.blockRemaining + s.waveRemaining });
           }
           this.startAttackPinch(p);
         }
       }
     }
-    if (tryEndBlock(s, this.tick, (ms) => this.ticks(ms), cfg)) this.emit({ type: 'blockEnd', tick: this.tick, player: p.id, blockId: s.blockId });
+    if (tryEndBlock(s, this.tick, (ms) => this.ticks(ms), cfg)) this.emit({ type: 'blockEnd', tick: this.tick, player: p.id, blockId: s.blockId, pending: s.nextPending });
   }
 
   private resolveDefeat(): void {

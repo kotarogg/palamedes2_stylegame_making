@@ -88,6 +88,48 @@ const now = () => ev(() => performance.now());
 const logSince = (t) => ev((t) => window.__p2like.bus.log.filter((e) => e.t >= t).map((e) => ({ ...e })), t);
 const nodesSince = (ct) => ev((ct) => window.__p2like.bus.nodes.filter((n) => n.start >= ct).map((n) => ({ ...n })), ct);
 const ctxTime = () => ev(() => window.__p2like.bus.ctx?.currentTime ?? 0);
+/**
+ * 修正R6：音声の状態を条件で待つ（明示的な上限付き。固定の待機時間に依存しない）。
+ * 上限に達したら、デコード数・デコード待ち・欠落・AudioContext の状態と時刻・対象ノードの開始／終了／停止を返す。
+ */
+const audioDiag = (ids) =>
+  ev((ids) => {
+    const b = window.__p2like.bus;
+    return {
+      decoded: b.decodedCount,
+      pendingDecode: b.pendingDecodeCount,
+      missing: [...b.missing],
+      ctxState: b.ctx?.state ?? null,
+      ctxTime: b.ctx ? +b.ctx.currentTime.toFixed(3) : null,
+      nodes: b.nodes.filter((n) => ids.includes(n.id)).map((n) => ({ id: n.id, start: +n.start.toFixed(3), end: +(n.start + n.duration).toFixed(3), duration: +n.duration.toFixed(3), stoppedAt: n.stoppedAt, loop: n.loop })),
+    };
+  }, ids);
+const waitAudio = async (pred, arg, timeoutMs, ids) => {
+  const t = Date.now();
+  try {
+    await page.waitForFunction(pred, arg, { timeout: timeoutMs, polling: 50 });
+    return { ok: true, waitedMs: Date.now() - t, diag: await audioDiag(ids) };
+  } catch {
+    return { ok: false, timeout: true, timeoutMs, diag: await audioDiag(ids) };
+  }
+};
+/** 対象ノード（start が ct 以降）がすべて AudioContext 時刻で start＋duration を過ぎるまで待つ */
+const waitNodesEnded = (ct, ids, timeoutMs) =>
+  waitAudio(
+    ([ct, ids]) => {
+      const b = window.__p2like.bus;
+      const ns = b.nodes.filter((n) => n.start >= ct && ids.includes(n.id));
+      return !!b.ctx && ns.length >= ids.length && ns.every((n) => b.ctx.currentTime >= n.start + n.duration || n.stoppedAt !== null);
+    },
+    [ct, ids],
+    timeoutMs,
+    ids,
+  );
+/** 途中停止なしで終端に達したか（AudioContext 時刻の判定。停止要求が終端より前なら途中停止） */
+const intactEnded = (diag, id) => {
+  const n = diag.nodes.filter((x) => x.id === id).at(-1);
+  return !!n && diag.ctxTime !== null && diag.ctxTime >= n.end && (n.stoppedAt === null || n.stoppedAt >= n.end - 0.005);
+};
 /** ロジックを n tick 進める（until：式が真で停止）。演出は実時間の描画で進む */
 const steps = (n, until = '') =>
   ev(
@@ -191,9 +233,17 @@ try {
     !before.ctx && !before.attempted && afterPad.attempted && afterPad.ctx === 'running' && afterPad.scene === 'MenuScene' && afterPad.depth === 1 && afterPad.cursor === 0,
     `before=${JSON.stringify(before)} after=${JSON.stringify(afterPad)}`,
   );
-  await wait(300);
+  // 修正R6：メニュー曲はデコード完了とノード開始を上限付きで待つ（未配置を許容する検査では、デコード完了まで待って無音を確認）
+  const menuBgmExpected = !(allowMissingBgm && !bgmPresent.includes('bgm_menu.wav'));
+  const bgmWait = menuBgmExpected
+    ? await waitAudio(() => window.__p2like.bus.nodes.some((n) => n.kind === 'bgm' && n.id === 'menu') && window.__p2like.bus.ctx?.state === 'running', undefined, 30000, ['menu'])
+    : await waitAudio(() => window.__p2like.bus.pendingDecodeCount === 0 && window.__p2like.bus.ctx?.state === 'running', undefined, 30000, ['menu']);
   const bgmNodes0 = await ev(() => window.__p2like.bus.nodes.filter((n) => n.kind === 'bgm').map((n) => ({ ...n })));
-  check('タイトルはメニュー曲（自動再生を強制せず、有効化後に開始）。タイトル→メニューで再始動しない', bgmTitle === 'menu' && (allowMissingBgm && !bgmPresent.includes('bgm_menu.wav') ? bgmNodes0.length === 0 : bgmNodes0.length === 1 && bgmNodes0[0].id === 'menu'), JSON.stringify(bgmNodes0));
+  check(
+    '修正R6・タイトルはメニュー曲（自動再生を強制せず、有効化後にデコード完了を待って開始）。タイトル→メニューで再始動しない',
+    bgmWait.ok && bgmTitle === 'menu' && (menuBgmExpected ? bgmNodes0.length === 1 && bgmNodes0[0].id === 'menu' : bgmNodes0.length === 0),
+    JSON.stringify({ wait: bgmWait, bgmNodes0 }),
+  );
   await shot('S02_menu');
   const menuArt = await ev(() => [window.__cmp('menu_kotaro', 'menu_kotaro', 16, 163), window.__cmp('menu_akane', 'menu_akane', 480, 163)]);
   check('メインメニュー（MODE1／MODE2／オプション／遊び方）：両脇の menu_kotaro・menu_akane を原寸・原点どおりに描画（画素一致）', menuArt.every((m) => m.bad === 0 && m.opaque > 0) && (await ev(() => window.__p2like.scene().stack[0].items.map((i) => i.label).join())) === 'MODE1,MODE2,オプション,遊び方', JSON.stringify(menuArt));
@@ -480,19 +530,159 @@ try {
   await keysSameFrame(['KeyF', 'Comma']);
   await wait(120);
   const selScene = await ev(() => ({ scene: window.__p2like.scene().constructor.name, chars: window.__p2like.gameScene()?.characters }));
-  await wait(2400); // コタローの確定ボイス 約1.94秒 を超えるまで
+  // 修正R6：固定待機ではなく、AudioContext.currentTime が各ノードの start＋duration を過ぎるまで待つ（上限付き）
+  const selIds = ['kotaro_select', 'akane_select'];
+  const selWait = await waitNodesEnded(ctxSel, selIds, 10000);
   const selNodes = (await nodesSince(ctxSel)).filter((n) => n.id.endsWith('_select'));
-  const nowCt = await ctxTime();
-  const selDone = selNodes.map((n) => ({ id: n.id, dur: +n.duration.toFixed(3), stoppedAt: n.stoppedAt, ended: nowCt >= n.start + n.duration }));
+  const selDone = selIds.map((id) => ({ id, intact: intactEnded(selWait.diag, id) }));
   const readyHeard = (await logSince(tSel)).some((e) => e.kind === 'voice' && e.id.endsWith('_ready') && !e.skipped);
   check(
-    '修正R3：ほぼ同時の確定でもコタロー・アカネの確定ボイスが各1回、途中停止せず終端まで再生（READYと重なっても止まらない、試合開始は待たない）',
-    selScene.scene === 'GameScene' && selScene.chars?.join() === 'kotaro,akane' && selNodes.length === 2 && selDone.every((n) => n.stoppedAt === null && n.ended) && readyHeard,
-    JSON.stringify({ selScene, selDone, readyHeard }),
+    '修正R3・R6：ほぼ同時の確定でもコタロー・アカネの確定ボイスが各1回、途中停止せず終端まで再生（AudioContext時刻で判定。READYと重なっても止まらない、試合開始は待たない）',
+    selWait.ok && selScene.scene === 'GameScene' && selScene.chars?.join() === 'kotaro,akane' && selNodes.length === 2 && selDone.every((n) => n.intact) && readyHeard,
+    JSON.stringify({ selScene, wait: selWait, selDone, readyHeard }),
   );
   await ev(() => window.__p2like.app.toMenu(['MODE1']));
   const leftSel = await ev(() => window.__p2like.bus.voicesPlaying());
   check('修正R3：メニュー復帰で声を持ち越さない', leftSel.length === 0, JSON.stringify(leftSel));
+
+  // ---- 修正R5：相殺の消失演出（2P対戦。実素材で描画した結果を画素照合し、画像を保存） ----
+  await ev(() => window.__p2like.app.startGame('mode1', '2p'));
+  await waitPlaying();
+  const r5 = await ev(() => {
+    const sc = window.__p2like.gameScene();
+    const g = sc.game;
+    const v = sc.view;
+    const FAR = 1e9;
+    const shots = {};
+    const canvases = {};
+    const render = (name) => {
+      const c = document.createElement('canvas');
+      c.width = 640;
+      c.height = 360;
+      const ctx = c.getContext('2d', { willReadFrequently: true });
+      v.render(ctx, g.tick);
+      canvases[name] = c;
+      const big = document.createElement('canvas');
+      big.width = 1280;
+      big.height = 720;
+      const bg = big.getContext('2d');
+      bg.imageSmoothingEnabled = false;
+      bg.drawImage(c, 0, 0, 1280, 720);
+      shots[name] = big.toDataURL('image/png');
+    };
+    // 描画結果に素材画像（不透明画素）がその位置で描かれているか（前面に見えているか）
+    const match = (name, sheet, id, x, y) => {
+      const { app } = window.__p2like;
+      const f = app.assets.atlas.frame(sheet, id);
+      const t = document.createElement('canvas');
+      t.width = f.w;
+      t.height = f.h;
+      const tg = t.getContext('2d', { willReadFrequently: true });
+      tg.drawImage(app.assets.images.get(f.sheet), f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+      const s = tg.getImageData(0, 0, f.w, f.h).data;
+      const d = canvases[name].getContext('2d', { willReadFrequently: true }).getImageData(Math.round(x), Math.round(y), f.w, f.h).data;
+      let opaque = 0;
+      let bad = 0;
+      for (let i = 0; i < s.length; i += 4) {
+        if (s[i + 3] < 255) continue;
+        opaque++;
+        if (Math.abs(s[i] - d[i]) > 2 || Math.abs(s[i + 1] - d[i + 1]) > 2 || Math.abs(s[i + 2] - d[i + 2]) > 2) bad++;
+      }
+      return { opaque, bad };
+    };
+    const set = (p, o) => {
+      const s = g.players[p].incoming;
+      s.blockActive = (o.cur ?? 0) > 0;
+      s.blockReserved = o.reserved ?? 0;
+      s.blockRemaining = o.cur ?? 0;
+      s.waveRemaining = 0;
+      s.nextPending = o.pending;
+      s.nextStepTick = FAR;
+      s.nextBlockTick = o.nextBlockTick ?? null;
+    };
+    const cancel = (p, n) => {
+      const s = g.players[p].incoming;
+      s.nextPending -= n;
+      s.stats.canceled += n;
+      g.events.push({ type: 'attackCancel', tick: g.tick, player: p, canceled: n, total: s.nextPending + s.blockRemaining + s.waveRemaining, pending: s.nextPending });
+    };
+    const vanishOf = (plan) => plan.entries.filter((e) => e.type === 'burst' || (e.type === 'icon' && e.vanish));
+    const inScreen = (plan) => plan.entries.every((e) => e.x >= 0 && e.y >= 0 && e.x + e.w <= 640 && e.y + e.h <= 360);
+    const out = {};
+    // A：1P 予約29・現残1・待機28 → 12相殺 → 6受信
+    set(0, { reserved: 29, cur: 1, pending: 28 });
+    set(1, { pending: 0 });
+    cancel(0, 12);
+    render('R5_a0_cancel12');
+    const yA = v.stockAfterimages(0, g.tick)[0]?.y;
+    sc.debugQueue.push({ player: 0, type: 'debugAttack', lines: 6 });
+    sc.step();
+    sc.step();
+    render('R5_a1_receive6_during_burst');
+    const planA = v.stockDrawPlan(0, g.tick);
+    const lastBurst = planA.entries.filter((e) => e.type === 'burst').at(-1);
+    out.a = {
+      pending: g.players[0].incoming.nextPending,
+      label: planA.label?.text,
+      y0: yA,
+      y1: v.stockAfterimages(0, g.tick)[0]?.y,
+      inScreen: inScreen(planA),
+      maxBottom: Math.max(...planA.entries.map((e) => e.y + e.h)),
+      burstFront: lastBurst ? match('R5_a1_receive6_during_burst', lastBurst.size === 'large' ? 'attack_stock_cancel_burst_sheet' : 'attack_stock_cancel_burst_small_sheet', String(lastBurst.frame), lastBurst.x, lastBurst.y) : null,
+    };
+    for (let i = 0; i < 10; i++) sc.step();
+    render('R5_a2_after_160ms');
+    out.a.after = { vanish: vanishOf(v.stockDrawPlan(0, g.tick)).length, label: v.pendingCountLabel(0, g.tick)?.text };
+    // B：2P 待機10のうち3を相殺 → 爆発中にブロック開始（現ブロック7、相殺の3は即時打切り）
+    set(0, { pending: 0 });
+    set(1, { pending: 10, nextBlockTick: FAR });
+    cancel(1, 3);
+    sc.step();
+    render('R5_b0_p2_cancel3');
+    const b0 = vanishOf(v.stockDrawPlan(1, g.tick)).length;
+    g.players[1].incoming.nextBlockTick = g.tick + 1;
+    g.players[1].incoming.nextStepTick = FAR;
+    sc.step();
+    render('R5_b1_p2_block_start_cut');
+    const planB = v.stockDrawPlan(1, g.tick);
+    const firstIcon = planB.entries.find((e) => e.type === 'icon');
+    out.b = {
+      vanishBefore: b0,
+      vanishAfter: vanishOf(planB).length,
+      blockStart: g.events.filter((e) => e.type === 'blockStart' && e.player === 1).at(-1)?.lines,
+      icons: planB.entries.filter((e) => e.type === 'icon').length,
+      frames: planB.entries.filter((e) => e.type === 'frame').length,
+      xd: planB.entries.filter((e) => e.type === 'icon' && e.xd).length,
+      inScreen: inScreen(planB),
+      blockIcon: firstIcon ? match('R5_b1_p2_block_start_cut', `attack_stock_nekotaro_${firstIcon.size}`, '0', firstIcon.x, firstIcon.y) : null,
+      canceled: g.players[1].incoming.stats.canceled,
+    };
+    let revived = 0;
+    for (let i = 0; i < 12; i++) {
+      sc.step();
+      revived += vanishOf(v.stockDrawPlan(1, g.tick)).length;
+    }
+    out.b.revived = revived;
+    return { out, shots };
+  });
+  for (const [name, url] of Object.entries(r5.shots)) {
+    const file = `screens/${name}.png`;
+    writeFileSync(new URL(file, OUT), Buffer.from(url.split(',')[1], 'base64'));
+    shots.push(file);
+  }
+  const ra = r5.out.a;
+  check(
+    '修正R5：予約29・現残1・待機28→12相殺→6受信。数字は待機22（消失対象を含めない）、爆発は相殺時の位置のまま画面内、小爆発が前面に描かれている（画素照合）',
+    ra.pending === 22 && ra.label === '22' && ra.y0 === ra.y1 && ra.inScreen && ra.maxBottom <= 360 && ra.burstFront && ra.burstFront.opaque > 0 && ra.burstFront.bad === 0 && ra.after.vanish === 0 && ra.after.label === '22',
+    JSON.stringify(ra),
+  );
+  const rb = r5.out.b;
+  check(
+    '修正R5：2Pの爆発中にブロック開始 → 相殺した3の表示を即時打切り、有効な7だけで現ブロック（囲いあり）。数量は減らし直さず、演出は復活しない',
+    rb.vanishBefore > 0 && rb.vanishAfter === 0 && rb.blockStart === 7 && rb.frames === 1 && rb.xd === 0 && rb.inScreen && rb.blockIcon && rb.blockIcon.bad === 0 && rb.canceled === 3 && rb.revived === 0,
+    JSON.stringify(rb),
+  );
+  await ev(() => window.__p2like.app.toMenu(['MODE1']));
 
   // ---- パッド2台でキャラ選択・2P対戦・START 確認 ----
   const saveDevices = await ev(() => JSON.parse(JSON.stringify(window.__p2like.app.settings.devices)));
@@ -574,21 +764,23 @@ try {
       g.base = g.factory.make(top.piece.n, top.piece.suit);
       return { n: window.__p2like.bus.nodes.length };
     }, finalStage);
-    await key('KeyF', 3200);
-    return ev(([n]) => ({ outcome: window.__p2like.game().result?.outcome, now: window.__p2like.bus.ctx.currentTime, nodes: window.__p2like.bus.nodes.slice(n).map((x) => ({ ...x })), plan: window.__p2like.gameScene().staging.plan }), [prep.n]);
+    const ct = await ctxTime();
+    await key('KeyF');
+    // 修正R6：クリア音のノードが AudioContext 時刻で終端を過ぎるまで待つ（上限付き）
+    const ids = finalStage ? ['all_stages_clear', 'all_clear'] : ['stage_clear'];
+    const w = await waitNodesEnded(ct, ids, 15000);
+    const r = await ev(() => ({ outcome: window.__p2like.game().result?.outcome, plan: window.__p2like.gameScene().staging.plan }));
+    return { ...r, wait: w };
   };
-  const endedIntact = (r, id) => {
-    const x = r.nodes.find((n) => n.id === id);
-    return !!x && x.stoppedAt === null && r.now >= x.start + x.duration;
-  };
+  const endedIntact = (r, id) => r.wait.ok && intactEnded(r.wait.diag, id);
   const r3a = await clearRun(false);
   await shot('S16_stage_clear');
-  check('R3：ステージクリアで sfx_stage_clear が途中停止せず終端まで再生。シングル成功はクラッカーあり', r3a.outcome === 'stageClear' && endedIntact(r3a, 'stage_clear') && r3a.plan?.crackerTick !== null, JSON.stringify({ outcome: r3a.outcome, plan: r3a.plan }));
+  check('R3：ステージクリアで sfx_stage_clear が途中停止せず終端まで再生。シングル成功はクラッカーあり', r3a.outcome === 'stageClear' && endedIntact(r3a, 'stage_clear') && r3a.plan?.crackerTick !== null, JSON.stringify({ outcome: r3a.outcome, plan: r3a.plan, wait: r3a.wait }));
   await toMenu();
   await ev(() => window.__p2like.app.startGame('mode1', 'single', 'stage'));
   const r3b = await clearRun(true);
   await shot('S16_all_stages');
-  check('R3：最終面クリア＋全消し同時で sfx_all_stages_clear・sfx_all_clear とも終端まで再生', r3b.outcome === 'allStagesClear' && endedIntact(r3b, 'all_stages_clear') && endedIntact(r3b, 'all_clear'), r3b.outcome);
+  check('R3：最終面クリア＋全消し同時で sfx_all_stages_clear・sfx_all_clear とも終端まで再生', r3b.outcome === 'allStagesClear' && endedIntact(r3b, 'all_stages_clear') && endedIntact(r3b, 'all_clear'), JSON.stringify({ outcome: r3b.outcome, wait: r3b.wait }));
   await toMenu();
 
   // ---- MODE2 ----

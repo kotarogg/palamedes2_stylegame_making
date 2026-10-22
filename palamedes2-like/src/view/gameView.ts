@@ -12,7 +12,7 @@ import { drawFrame, drawNineSlice, type Assets } from './assets';
 import type { ManifestFrame } from './data';
 import { arcPoint, barY, CELL, cellX, columnCenterX, descentY, easeInOutSine, easeOutQuad, lerp, progress, Z, type BoardRect } from './geometry';
 import { characterPose, crackerPose, type ResultPlan } from './presentation';
-import { BURST_FRAMES, DEFAULT_STOCK_VIEW, FRAME_PAD, pendingGroupY, stockColumnLayout, stockGroupHeight, type StockViewConfig } from './stockLayout';
+import { afterimageDurationMs, counterAnchorOffset, DEFAULT_STOCK_VIEW, discardAnchorOffset, FRAME_PAD, pendingGroupY, stockColumnLayout, stockGroupHeight, type StockDrawEntry, type StockViewConfig } from './stockLayout';
 import { drawNumeric, drawText, formatTime, multiplierText, numericPhase, TEXT_COLORS } from './text';
 
 /** キャラクター → モーションシート（第3版：コタローS1・アカネS2・ずん子S13。プレイヤー番号では選ばない） */
@@ -120,12 +120,20 @@ interface StockVis {
   endTick: number | null;
 }
 
-/** 減った分の残像（相殺＝XD顔＋小爆発、ピンチ破棄＝フェード） */
+/**
+ * 消失演出（修正R5。相殺＝XD顔＋小爆発、ピンチ破棄＝フェード）。表示専用で、有効なストックではない。
+ * 相殺ごとに独立して開始・終了し、位置は発生時に確定（所属する群の上端からの相対px）。
+ * 打切り条件（onEvent）：所属プレイヤーのブロック開始で全件（待機群が現ブロックへ切り替わるため）、
+ * ブロック終了時に待機群が残っていれば破棄の残像（上詰めする待機群と重なるため）、ラウンド終了・差し替えで全件。
+ */
 interface StockAfterimage {
   player: PlayerId;
   kind: 'counter' | 'discard';
   lines: number;
   start: number;
+  /** 所属する群：pending＝待機群（相殺）、block＝現ブロック（ピンチ破棄） */
+  anchor: 'pending' | 'block';
+  offsetPx: number;
 }
 
 interface ReflectionVis {
@@ -386,6 +394,9 @@ export class GameView {
   private onEvent(e: GameEvent | Mode2Event): void {
     switch (e.type) {
       case 'roundEnd':
+        // 状態遷移が最優先：ラウンド終了で消失演出をすべて打ち切る
+        this.afterimages = [];
+        return;
       case 'stuck':
       case 'remaining':
         return;
@@ -481,18 +492,24 @@ export class GameView {
         break;
       }
       case 'blockStart':
+        // 待機群が現ブロックへ切り替わる：そのプレイヤーの消失演出（小爆発・XD顔・残像）を即時打切り。
+        // 有効な待機ストック（e.lines）だけで現ブロックの表示を始める。数量は減らさない（表示だけの打切り）
+        this.afterimages = this.afterimages.filter((a) => a.player !== e.player);
         v.stock = { reservedPx: stockGroupHeight(e.lines), slideFromPx: null, endTick: null };
         break;
       case 'blockEnd': {
         const r = v.stock.reservedPx;
+        // 待機群が上詰めしてくる場合、元ブロック位置の破棄残像は新しい表示を妨げるので打ち切る
+        if (e.pending > 0) this.afterimages = this.afterimages.filter((a) => !(a.player === e.player && a.anchor === 'block'));
         v.stock = { reservedPx: null, slideFromPx: r ? r + this.pvc.stock.groupGapPx : null, endTick: e.tick };
         break;
       }
       case 'attackCancel':
-        this.afterimages.push({ player: e.player, kind: 'counter', lines: e.canceled, start: e.tick });
+        // 位置は相殺の時点（イベントの数量）で確定。複数tickをまとめて取り込んでも、後の受信・相殺で動かさない
+        this.afterimages.push({ player: e.player, kind: 'counter', lines: e.canceled, start: e.tick, anchor: 'pending', offsetPx: counterAnchorOffset(e.pending) });
         break;
       case 'attackDiscard':
-        this.afterimages.push({ player: e.player, kind: 'discard', lines: e.lines, start: e.tick });
+        this.afterimages.push({ player: e.player, kind: 'discard', lines: e.lines, start: e.tick, anchor: 'block', offsetPx: discardAnchorOffset(e.block) });
         break;
       case 'attackRow':
         // 盤面は1段上がり、新しい段は画面下から飛来して接着する（時間は表示のみ。ロジックは即時）
@@ -777,16 +794,33 @@ export class GameView {
     return { blockLines, pendingLines: s.nextPending, blockY: oy, pendingY: oy + py, reservedPx };
   }
 
-  /** 表示中の残像（相殺・ピンチ破棄）。テスト・検証用に公開 */
-  stockAfterimages(p: PlayerId, t: number): { kind: 'counter' | 'discard'; lines: number; frame: number }[] {
+  /** 表示中の消失演出（相殺・ピンチ破棄）。発生順。y＝群の上端（記録位置）。テスト・検証用に公開 */
+  stockAfterimages(p: PlayerId, t: number): { kind: 'counter' | 'discard'; lines: number; frame: number; y: number; start: number; endMs: number }[] {
     const cfg = this.pvc.stock;
+    const sv = this.stockView(p, t);
     return this.afterimages
-      .filter((a) => a.player === p && t >= a.start)
+      .filter((a) => a.player === p && t >= a.start && (t - a.start) * this.game.tickMs < afterimageDurationMs(a.kind, cfg))
       .map((a) => {
         const ms = (t - a.start) * this.game.tickMs;
-        return { kind: a.kind, lines: a.lines, frame: a.kind === 'counter' ? Math.floor(ms / cfg.counterFrameMs) : ms / cfg.discardFadeMs };
-      })
-      .filter((a) => (a.kind === 'counter' ? a.frame < BURST_FRAMES : a.frame < 1));
+        return {
+          kind: a.kind,
+          lines: a.lines,
+          frame: a.kind === 'counter' ? Math.floor(ms / cfg.counterFrameMs) : ms / cfg.discardFadeMs,
+          y: (a.anchor === 'pending' ? sv.pendingY : sv.blockY) + a.offsetPx,
+          start: a.start,
+          endMs: a.start * this.game.tickMs + afterimageDurationMs(a.kind, cfg),
+        };
+      });
+  }
+
+  /** 待機ライン数の表示（修正R5）：nextPending（消失対象を含めない）。待機ありか相殺演出中だけ。テスト・検証用に公開 */
+  pendingCountLabel(p: PlayerId, t: number): { text: string; x: number; y: number; align: 'left' | 'right' } | null {
+    const s = this.mode1!.players[p].incoming;
+    if (s.nextPending <= 0 && !this.stockAfterimages(p, t).some((a) => a.kind === 'counter')) return null;
+    const [ox] = this.pvc.stock.origin[p];
+    const sv = this.stockView(p, t);
+    // 列の外側（1P は左、2P は右。囲いの外）で待機群の上端にそろえる。盤面・キャラ・HUDと重ならない
+    return p === 0 ? { text: String(s.nextPending), x: ox - FRAME_PAD - 1, y: sv.pendingY, align: 'right' } : { text: String(s.nextPending), x: ox + 16 + FRAME_PAD + 1, y: sv.pendingY, align: 'left' };
   }
 
   /** プレイヤーのモーションシート（テスト・検証用に公開） */
@@ -794,20 +828,39 @@ export class GameView {
     return CHARACTER_SHEET[this.characterOf(p)];
   }
 
-  private collectAttackStock(items: DrawItem[], p: PlayerId, t: number): void {
+  /**
+   * 受攻撃ストック列の描画計画（修正R5。描画とテストで同じ計画を使う）。
+   * z：通常ストック＝ui、囲い＝ui+1、消失演出（XD顔・破棄フェード・小爆発）＝ui+2（同じ z の中は発生順＝新しいほど前面）、
+   * 待機ライン数＝ui+3。消失演出は有効なストックより前面に描き、数字は消失対象を含めない。
+   */
+  stockDrawPlan(p: PlayerId, t: number): { entries: (StockDrawEntry & { z: number })[]; label: ReturnType<GameView['pendingCountLabel']> } {
     const cfg = this.pvc.stock;
     const [ox] = cfg.origin[p];
     const sv = this.stockView(p, t);
-    const after = this.afterimages.filter((a) => a.player === p).map((a) => ({ kind: a.kind, lines: a.lines, ms: (t - a.start) * this.game.tickMs }));
+    const after = this.afterimages
+      .filter((a) => a.player === p)
+      .map((a) => ({ kind: a.kind, lines: a.lines, ms: (t - a.start) * this.game.tickMs, y: (a.anchor === 'pending' ? sv.pendingY : sv.blockY) + a.offsetPx }));
+    const entries = stockColumnLayout(ox, sv.blockY, sv.pendingY, sv.blockLines, sv.pendingLines, after, cfg).map((e) => ({
+      ...e,
+      z: e.type === 'frame' ? Z.ui + 1 : e.type === 'burst' || e.vanish ? Z.ui + 2 : Z.ui,
+    }));
+    return { entries, label: this.pendingCountLabel(p, t) };
+  }
+
+  private collectAttackStock(items: DrawItem[], p: PlayerId, t: number): void {
+    const cfg = this.pvc.stock;
     // 処理中の囲いは 240ms で通常／明るいを交互
     const bright = Math.floor((t * this.game.tickMs) / cfg.blinkMs) % 2 === 1;
-    for (const e of stockColumnLayout(ox, sv.blockY, sv.pendingY, sv.blockLines, sv.pendingLines, after, cfg)) {
-      if (e.type === 'icon') this.put(items, Z.ui, this.frame(`attack_stock_nekotaro_${e.size}${e.xd ? '_xd' : ''}`, '0'), e.x, e.y, { alpha: e.alpha < 1 ? e.alpha : undefined });
+    const plan = this.stockDrawPlan(p, t);
+    for (const e of plan.entries) {
+      if (e.type === 'icon') this.put(items, e.z, this.frame(`attack_stock_nekotaro_${e.size}${e.xd ? '_xd' : ''}`, '0'), e.x, e.y, { alpha: e.alpha < 1 ? e.alpha : undefined });
       else if (e.type === 'frame') {
         const f = this.frame(bright ? 'attack_stock_active_frame_bright' : 'attack_stock_active_frame', '0');
-        items.push({ z: Z.ui + 1, draw: (ctx) => drawNineSlice(ctx, this.assets, f, FRAME_PAD, e.x, e.y, e.w, e.h) });
-      } else this.put(items, Z.ui + 2, this.frame(e.size === 'large' ? 'attack_stock_cancel_burst_sheet' : 'attack_stock_cancel_burst_small_sheet', String(e.frame)), e.x, e.y);
+        items.push({ z: e.z, draw: (ctx) => drawNineSlice(ctx, this.assets, f, FRAME_PAD, e.x, e.y, e.w, e.h) });
+      } else this.put(items, e.z, this.frame(e.size === 'large' ? 'attack_stock_cancel_burst_sheet' : 'attack_stock_cancel_burst_small_sheet', String(e.frame)), e.x, e.y);
     }
+    const label = plan.label;
+    if (label) items.push({ z: Z.ui + 3, draw: (ctx) => drawText(ctx, label.text, label.x, label.y, { align: label.align, size: 10, weight: 700, box: true }) });
   }
 
   private s9Phase(t: number): 'A' | 'B' | 'C' {
@@ -908,7 +961,7 @@ export class GameView {
     this.fx = this.fx.filter((e) => t - e.start < e.frames.length * e.frameTicks);
     this.vanish = this.vanish.filter((e) => t < e.end);
     this.lineFx = this.lineFx.filter((e) => t - e.start < this.ticksOf(60) * 4);
-    this.afterimages = this.afterimages.filter((a) => (t - a.start) * this.game.tickMs < Math.max(this.pvc.stock.counterFrameMs * BURST_FRAMES, this.pvc.stock.discardFadeMs));
+    this.afterimages = this.afterimages.filter((a) => (t - a.start) * this.game.tickMs < afterimageDurationMs(a.kind, this.pvc.stock));
     this.reflections = this.reflections.filter((e) => (t - e.start) * this.game.tickMs < e.col * this.pvc.reflectionColumnDelayMs + REFLECTION_FRAMES * this.pvc.reflectionFrameMs);
     for (const [id, st] of this.attach) if (t >= st + this.ticksOf(this.pvc.attachFlyMs + this.pvc.attachShakeMs)) this.attach.delete(id);
     this.notices = this.notices.filter((n) => t < n.end);

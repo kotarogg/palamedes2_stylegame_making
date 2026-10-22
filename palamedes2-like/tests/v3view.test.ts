@@ -9,7 +9,7 @@ import type { PlayerId } from '../src/core/types';
 import { CharacterSelect, creditPages, CPU_ORDER, nextCpuOpponent } from '../src/app';
 import { CHARACTER_SHEET, GameView } from '../src/view/gameView';
 import { crackerPose, planResult, RoleNameDirector, RoleNameSchedule } from '../src/view/presentation';
-import { DEFAULT_STOCK_VIEW, pendingGroupY, stockColumnLayout, stockGroupHeight, stockIcons } from '../src/view/stockLayout';
+import { counterAnchorOffset, DEFAULT_STOCK_VIEW, discardAnchorOffset, pendingGroupY, stockColumnLayout, stockGroupHeight, stockIcons } from '../src/view/stockLayout';
 import { EMPTY, fakeAssets, makeGame, rows, setStock, stepN, toPlay } from './helpers';
 
 const atk = (player: PlayerId, lines: number): Command => ({ player, type: 'debugAttack', lines });
@@ -47,18 +47,24 @@ describe('受攻撃ストックの配置（第10章）', () => {
         for (let cur = 1; cur <= reserved; cur++)
           for (let pend = 0; pend <= 29 - cur; pend++) {
             const pendingY = top + pendingGroupY(stockGroupHeight(reserved), null, null, cfg);
-            // ピンチ破棄の残像（同じ波の余り最大2、予約内）と相殺の残像（相殺前の待機＝pend＋相殺分 ≦ 29−残量）
+            const check = (after: Parameters<typeof stockColumnLayout>[5], label: string) => {
+              for (const e of stockColumnLayout(x0, top, pendingY, cur, pend, after, cfg)) {
+                const ok = e.x >= 0 && e.y >= 0 && e.x + e.w <= 640 && e.y + e.h <= 360;
+                if (!ok) throw new Error(`画面外 side=${side} reserved=${reserved} cur=${cur} pend=${pend} ${label}: ${JSON.stringify(e)}`);
+                maxBottom = Math.max(maxBottom, e.y + e.h);
+              }
+            };
+            // 修正R5：消失演出は発生時の位置に固定。相殺は「相殺後の待機 rem」の下に canceled（rem＋canceled ≦ 29−残量）。
+            // その後の受信で待機群（pend）が増えても動かないので、待機群と消失演出の位置は独立に全組合せを検査する
             const discard = Math.min(2, reserved - cur);
-            const canceled = 29 - cur - pend;
-            const after = [
-              { kind: 'discard' as const, lines: discard, ms: 0 },
-              { kind: 'counter' as const, lines: canceled, ms: 0 },
-            ];
-            for (const e of stockColumnLayout(x0, top, pendingY, cur, pend, after, cfg)) {
-              const ok = e.x >= 0 && e.y >= 0 && e.x + e.w <= 640 && e.y + e.h <= 360;
-              if (!ok) throw new Error(`画面外 side=${side} reserved=${reserved} cur=${cur} pend=${pend}: ${JSON.stringify(e)}`);
-              maxBottom = Math.max(maxBottom, e.y + e.h);
-            }
+            check([{ kind: 'discard', lines: discard, ms: 0, y: top + discardAnchorOffset(cur) }], `discard=${discard}`);
+            if (pend === 0) {
+              // 相殺の位置は待機群の上端（予約高さで決まる）と rem・canceled だけで決まる（reserved・cur ごとに1回）
+              for (let rem = 0; rem <= 29 - cur; rem++)
+                for (let canceled = 1; rem + canceled <= 29 - cur; canceled++) {
+                  for (const ms of [0, 40, 80, 120]) check([{ kind: 'counter', lines: canceled, ms, y: pendingY + counterAnchorOffset(rem) }], `rem=${rem} canceled=${canceled} ms=${ms}`);
+                }
+            } else check([], '');
             cases++;
           }
     }
@@ -80,11 +86,11 @@ describe('受攻撃ストックの配置（第10章）', () => {
 
   it('修正R1：大5／小1・群の分離・囲い・XD相殺と破棄フェードの区別は従来どおり', () => {
     const L = stockColumnLayout(20, 148, 186, 9, 11, [
-      { kind: 'counter', lines: 2, ms: 40 },
-      { kind: 'discard', lines: 1, ms: 60 },
+      { kind: 'counter', lines: 2, ms: 40, y: 186 + counterAnchorOffset(11) },
+      { kind: 'discard', lines: 1, ms: 60, y: 148 + discardAnchorOffset(9) },
     ]);
     const icons = L.filter((e) => e.type === 'icon');
-    expect(icons.filter((e) => e.y < 186 && e.type === 'icon' && !e.xd && e.alpha === 1).map((e) => (e as { size: string }).size)).toEqual(['large', 'small', 'small', 'small', 'small']);
+    expect(icons.filter((e) => e.y < 186 && e.type === 'icon' && !e.vanish).map((e) => (e as { size: string }).size)).toEqual(['large', 'small', 'small', 'small', 'small']);
     expect(L.filter((e) => e.type === 'frame')).toEqual([{ type: 'frame', x: 17, y: 145, w: 22, h: 38 }]);
     expect(L.filter((e) => e.type === 'burst').map((e) => (e as { frame: number }).frame)).toEqual([1, 1]);
     expect(icons.filter((e) => e.type === 'icon' && e.xd)).toHaveLength(2);
@@ -135,7 +141,8 @@ describe('受攻撃ストックの配置（第10章）', () => {
     v.syncEvents();
     const c = evs(g, 'attackCancel', 0)[0];
     expect(c.total).toBe(0);
-    expect(v.stockAfterimages(0, c.tick)).toEqual([{ kind: 'counter', lines: 3, frame: 0 }]);
+    expect(c.pending).toBe(0);
+    expect(v.stockAfterimages(0, c.tick)).toMatchObject([{ kind: 'counter', lines: 3, frame: 0 }]);
     expect(v.stockAfterimages(0, c.tick + 8)[0].frame).toBe(3); // 133ms
     expect(v.stockAfterimages(0, c.tick + g.ticks(160))).toEqual([]);
 
@@ -146,7 +153,7 @@ describe('受攻撃ストックの配置（第10章）', () => {
     stepN(h, 120 + h.ticks(400));
     w.syncEvents();
     const d = evs(h, 'attackDiscard', 0)[0];
-    expect(w.stockAfterimages(0, d.tick)).toEqual([{ kind: 'discard', lines: 1, frame: 0 }]);
+    expect(w.stockAfterimages(0, d.tick)).toMatchObject([{ kind: 'discard', lines: 1, frame: 0 }]);
     expect(w.stockAfterimages(0, d.tick + 8)).toEqual([]); // 133ms
   });
 });

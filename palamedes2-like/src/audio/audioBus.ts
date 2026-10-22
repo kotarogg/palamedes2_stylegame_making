@@ -134,6 +134,11 @@ export class AudioBus {
     return this.buffers.size;
   }
 
+  /** 取得済みでデコード待ちの素材数（自動検証用。unlock 後のデコード完了で0） */
+  get pendingDecodeCount(): number {
+    return this.raw.size;
+  }
+
   get currentBgm(): BgmId | null {
     return this.bgmId;
   }
