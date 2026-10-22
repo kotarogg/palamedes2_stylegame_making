@@ -321,6 +321,10 @@ try {
   const rowLog = (await logSince(tRows)).filter((e) => e.id === 'attack_row' && !e.skipped);
   const rowNodes = (await nodesSince(ctxRows)).filter((n) => n.id === 'attack_row');
   check('接着音 sfx_attack_row：実適用1ラインにつき1回（実ノード）', rowsApplied > 0 && rowNodes.length === rowsApplied && rowLog.length === rowsApplied, `rows=${rowsApplied} log=${rowLog.length} nodes=${rowNodes.length}`);
+  // 修正R2：上昇音 se_field_rise は実適用1段につき1回（attackRow から）＋自然・手動の上昇。攻撃の rise では重ねない
+  const riseExpected = await ev(() => window.__p2like.game().events.filter((e) => e.type === 'attackRow' || (e.type === 'rise' && e.kind !== 'attack')).length);
+  const riseReq = (await logSince(tRows)).filter((e) => e.id === 'field_rise').length;
+  check('修正R2：上昇音 se_field_rise は攻撃の実適用1段につき1回（自然・手動上昇を含めた要求数が一致、二重要求なし）', rowsApplied > 0 && riseReq === riseExpected, `rows=${rowsApplied} expected=${riseExpected} requested=${riseReq}`);
   check('クラッカーは1回だけ（勝者＝1P・左側へ向けて左右反転）', crackerCount === 1);
   const accept = await ev(() => window.__p2like.gameScene().staging.acceptReady);
   check('勝者演出の開始後に決定入力を受付', accept);
@@ -418,9 +422,9 @@ try {
     cs2.c.join() === '2,0' && cs2.l.join() === 'true,false' && cs3.join() === 'false,false' && selLog.filter((e) => e.id === 'zunko_select').length === 2 && selLog.filter((e) => e.id === 'kotaro_select').length === 1,
     JSON.stringify({ cs2, cs3, voices: selLog.filter((e) => e.kind === 'voice').map((e) => e.id) }),
   );
-  await wait(1100);
+  await wait(150);
   const vs2 = await ev(() => ({ scene: window.__p2like.scene().constructor.name, chars: window.__p2like.gameScene()?.characters, ann: window.__p2like.gameScene()?.staging.announcer }));
-  check('両者決定で 2P対戦開始（1P ずん子・2P コタロー）。READY担当は両者のどちらか', vs2.scene === 'GameScene' && vs2.chars?.join() === 'zunko,kotaro' && ['zunko', 'kotaro'].includes(vs2.ann), JSON.stringify(vs2));
+  check('修正R3：両者決定でただちに 2P対戦開始（固定待機なし。1P ずん子・2P コタロー）。READY担当は両者のどちらか', vs2.scene === 'GameScene' && vs2.chars?.join() === 'zunko,kotaro' && ['zunko', 'kotaro'].includes(vs2.ann), JSON.stringify(vs2));
   await page.waitForFunction(() => window.__p2like.game()?.tick > 2, null, { timeout: 5000 });
   await shot('S11_ready');
   await waitPlaying();
@@ -465,6 +469,30 @@ try {
   const back2 = await ev(() => ({ scene: window.__p2like.scene().constructor.name, title: window.__p2like.scene().stack?.at(-1).title }));
   check('「キャラ選択へ」→ 両者未決定の戻るで前のメニュー（MODE1）へ', back === 'CharacterSelectScene' && back2.scene === 'MenuScene' && back2.title === 'MODE1', JSON.stringify({ back, back2 }));
   await shot('S04_menu_mode1_from_select');
+
+  // ---- 修正R3：標準設定（1P コタロー・2P アカネ）でほぼ同時に確定 → 両者の確定ボイスが終端まで鳴る ----
+  await ev(() => window.__p2like.app.toMenu(['MODE1']));
+  await key('ArrowDown');
+  await key('ArrowDown');
+  await key('Enter', 200);
+  const ctxSel = await ctxTime();
+  const tSel = await now();
+  await keysSameFrame(['KeyF', 'Comma']);
+  await wait(120);
+  const selScene = await ev(() => ({ scene: window.__p2like.scene().constructor.name, chars: window.__p2like.gameScene()?.characters }));
+  await wait(2400); // コタローの確定ボイス 約1.94秒 を超えるまで
+  const selNodes = (await nodesSince(ctxSel)).filter((n) => n.id.endsWith('_select'));
+  const nowCt = await ctxTime();
+  const selDone = selNodes.map((n) => ({ id: n.id, dur: +n.duration.toFixed(3), stoppedAt: n.stoppedAt, ended: nowCt >= n.start + n.duration }));
+  const readyHeard = (await logSince(tSel)).some((e) => e.kind === 'voice' && e.id.endsWith('_ready') && !e.skipped);
+  check(
+    '修正R3：ほぼ同時の確定でもコタロー・アカネの確定ボイスが各1回、途中停止せず終端まで再生（READYと重なっても止まらない、試合開始は待たない）',
+    selScene.scene === 'GameScene' && selScene.chars?.join() === 'kotaro,akane' && selNodes.length === 2 && selDone.every((n) => n.stoppedAt === null && n.ended) && readyHeard,
+    JSON.stringify({ selScene, selDone, readyHeard }),
+  );
+  await ev(() => window.__p2like.app.toMenu(['MODE1']));
+  const leftSel = await ev(() => window.__p2like.bus.voicesPlaying());
+  check('修正R3：メニュー復帰で声を持ち越さない', leftSel.length === 0, JSON.stringify(leftSel));
 
   // ---- パッド2台でキャラ選択・2P対戦・START 確認 ----
   const saveDevices = await ev(() => JSON.parse(JSON.stringify(window.__p2like.app.settings.devices)));

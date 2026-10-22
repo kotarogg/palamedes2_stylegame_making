@@ -9,7 +9,7 @@ import type { PlayerId } from '../src/core/types';
 import { CharacterSelect, creditPages, CPU_ORDER, nextCpuOpponent } from '../src/app';
 import { CHARACTER_SHEET, GameView } from '../src/view/gameView';
 import { crackerPose, planResult, RoleNameDirector, RoleNameSchedule } from '../src/view/presentation';
-import { DEFAULT_STOCK_VIEW, pendingGroupY, stockGroupHeight, stockIcons } from '../src/view/stockLayout';
+import { DEFAULT_STOCK_VIEW, pendingGroupY, stockColumnLayout, stockGroupHeight, stockIcons } from '../src/view/stockLayout';
 import { EMPTY, fakeAssets, makeGame, rows, setStock, stepN, toPlay } from './helpers';
 
 const atk = (player: PlayerId, lines: number): Command => ({ player, type: 'debugAttack', lines });
@@ -35,17 +35,60 @@ describe('受攻撃ストックの配置（第10章）', () => {
     ]);
   });
 
-  it('処理中ブロック＋待機群の合計（最大29）が画面内（列の上端228から360まで）に収まる', () => {
-    const top = DEFAULT_STOCK_VIEW.origin[0][1];
-    for (let b = 0; b <= 29; b++) {
-      const p = 29 - b;
-      const bottom = top + (b > 0 ? stockGroupHeight(b) + DEFAULT_STOCK_VIEW.groupGapPx : 0) + stockGroupHeight(p);
-      expect(bottom, `${b}+${p}`).toBeLessThanOrEqual(360);
+  it('修正R1：開始時の予約1〜29 × 現ブロック残量1〜予約 × 待機0〜(29−残量)、破棄・相殺の残像を含め、全要素が画面内（640×360）', () => {
+    const cfg = DEFAULT_STOCK_VIEW;
+    expect(cfg.origin[0]).toEqual([20, 148]);
+    expect(cfg.origin[1]).toEqual([604, 148]);
+    let cases = 0;
+    let maxBottom = 0;
+    for (const side of [0, 1] as const) {
+      const [x0, top] = cfg.origin[side];
+      for (let reserved = 1; reserved <= 29; reserved++)
+        for (let cur = 1; cur <= reserved; cur++)
+          for (let pend = 0; pend <= 29 - cur; pend++) {
+            const pendingY = top + pendingGroupY(stockGroupHeight(reserved), null, null, cfg);
+            // ピンチ破棄の残像（同じ波の余り最大2、予約内）と相殺の残像（相殺前の待機＝pend＋相殺分 ≦ 29−残量）
+            const discard = Math.min(2, reserved - cur);
+            const canceled = 29 - cur - pend;
+            const after = [
+              { kind: 'discard' as const, lines: discard, ms: 0 },
+              { kind: 'counter' as const, lines: canceled, ms: 0 },
+            ];
+            for (const e of stockColumnLayout(x0, top, pendingY, cur, pend, after, cfg)) {
+              const ok = e.x >= 0 && e.y >= 0 && e.x + e.w <= 640 && e.y + e.h <= 360;
+              if (!ok) throw new Error(`画面外 side=${side} reserved=${reserved} cur=${cur} pend=${pend}: ${JSON.stringify(e)}`);
+              maxBottom = Math.max(maxBottom, e.y + e.h);
+            }
+            cases++;
+          }
     }
-    // 列は盤面枠（1P x48〜、2P 〜x592）と重ならない。処理中枠（±3px）も画面内
-    expect(DEFAULT_STOCK_VIEW.origin[0][0] + 16 + 3).toBeLessThanOrEqual(48);
-    expect(DEFAULT_STOCK_VIEW.origin[1][0] - 3).toBeGreaterThanOrEqual(592);
-    expect(DEFAULT_STOCK_VIEW.origin[1][0] + 16 + 3).toBeLessThanOrEqual(640);
+    expect(cases).toBeGreaterThan(8000);
+    expect(maxBottom).toBeLessThanOrEqual(360);
+    // 列は盤面枠（1P x48〜、2P 〜x592）と重ならない（囲い±3px を含む）
+    expect(cfg.origin[0][0] + 16 + 3).toBeLessThanOrEqual(48);
+    expect(cfg.origin[1][0] - 3).toBeGreaterThanOrEqual(592);
+  });
+
+  it('修正R1：PMの再現状態（予約29・残量5＝block3＋wave2・待機24）で待機群の下端が360以内（旧 y=228 では410）', () => {
+    const top = DEFAULT_STOCK_VIEW.origin[0][1];
+    const pendingY = top + pendingGroupY(stockGroupHeight(29), null, null);
+    const bottom = Math.max(...stockColumnLayout(20, top, pendingY, 5, 24, []).map((e) => e.y + e.h));
+    expect(bottom).toBe(148 + 96 + 6 + 80);
+    expect(228 + 96 + 6 + 80).toBe(410);
+    expect(bottom).toBeLessThanOrEqual(360);
+  });
+
+  it('修正R1：大5／小1・群の分離・囲い・XD相殺と破棄フェードの区別は従来どおり', () => {
+    const L = stockColumnLayout(20, 148, 186, 9, 11, [
+      { kind: 'counter', lines: 2, ms: 40 },
+      { kind: 'discard', lines: 1, ms: 60 },
+    ]);
+    const icons = L.filter((e) => e.type === 'icon');
+    expect(icons.filter((e) => e.y < 186 && e.type === 'icon' && !e.xd && e.alpha === 1).map((e) => (e as { size: string }).size)).toEqual(['large', 'small', 'small', 'small', 'small']);
+    expect(L.filter((e) => e.type === 'frame')).toEqual([{ type: 'frame', x: 17, y: 145, w: 22, h: 38 }]);
+    expect(L.filter((e) => e.type === 'burst').map((e) => (e as { frame: number }).frame)).toEqual([1, 1]);
+    expect(icons.filter((e) => e.type === 'icon' && e.xd)).toHaveLength(2);
+    expect(icons.filter((e) => e.type === 'icon' && e.alpha < 1)).toHaveLength(1);
   });
 
   it('待機群：ブロック中は予約高さ＋間隔の下に固定、終了後は120msで上詰め', () => {
@@ -268,7 +311,7 @@ describe('段階SE（第12章）', () => {
     ];
     const game = { events, mode: 'mode1', playing: false, players: [] } as unknown as AnyGame;
     new SoundDirector(bus, game, ['kotaro', 'zunko']).sync();
-    expect(sfx).toEqual(['launch_success_1', 'launch_success_3', 'launch_success_5', 'role_declare_1', 'role_declare_5', 'counter', 'attack_row', 'attack_row']);
+    expect(sfx).toEqual(['launch_success_1', 'launch_success_3', 'launch_success_5', 'role_declare_1', 'role_declare_5', 'counter', 'field_rise', 'attack_row', 'field_rise', 'attack_row']);
     // 役ボイスは役名表示側（先頭ロゴ開始と同時）。被攻撃ボイスは波の最初だけ、話者は2Pのキャラ
     expect(voice).toEqual(['zunko_damage']);
   });

@@ -5,8 +5,8 @@
 // 1倍（実画素）すら収まらない場合だけ緊急縮小し、通知を出す。
 export const LOGICAL_W = 640;
 export const LOGICAL_H = 360;
-/** 選択肢に出す固定倍率の上限 */
-export const MAX_FIXED_SCALE = 6;
+/** 固定倍率の選択肢は1〜4倍（第3版 修正R4。「収まる最大」は別項目） */
+export const MAX_FIXED_SCALE = 4;
 
 /** CSSピクセルの丸め誤差を許す幅 */
 const EPS = 1e-6;

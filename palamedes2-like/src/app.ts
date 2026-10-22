@@ -198,8 +198,9 @@ export class App {
   // ---- 試合開始 ----
 
   /** characters：シングル＝コタロー、CPU対戦＝コタロー対現在の相手、2P対戦＝キャラ選択の結果 */
-  startGame(mode: GameMode, kind: 'single' | 'cpu' | '2p', singleMode?: SingleMode, characters?: readonly Character[]): void {
-    this.bus.stopEffects();
+  startGame(mode: GameMode, kind: 'single' | 'cpu' | '2p', singleMode?: SingleMode, characters?: readonly Character[], opts: { keepSelectVoices?: boolean } = {}): void {
+    // キャラクター選択から：決定ボイス（select）だけは止めずに終端まで鳴らす。他の声・SEは止める
+    this.bus.stopEffects(opts.keepSelectVoices ? ['select'] : []);
     const chars: readonly Character[] = kind === 'single' ? ['kotaro'] : kind === 'cpu' ? ['kotaro', this.cpuOpponent] : (characters ?? ['kotaro', 'akane']);
     this.setScene(new GameScene(this, mode, kind, singleMode, chars));
   }
@@ -396,17 +397,15 @@ type SelectAction = 'left' | 'right' | 'confirm' | 'back';
 /**
  * 2P対戦のキャラクター選択。入力機器はオプションの1P/2P設定に従う。
  * キーボード：各プレイヤーの割当（移動・発射＝決定・B入れ替え＝戻る）。キーボードの操作者が1人なら ←→／Enter／Esc も使える。
- * 同じフレームの入力は 1P→2P の順に処理する。両者決定後、決定ボイスを聞かせてから試合へ。
+ * 同じフレームの入力は 1P→2P の順に処理する。両者決定でただちに試合へ（決定ボイスの終了を待たない）。
+ * 決定ボイスは select チャンネルで鳴らし、試合開始の一括停止・READY では止めない（終端まで鳴る）。
+ * 決定の入力は試合画面へ渡さない（同じフレームの残りの入力は捨て、パッドは押下中の状態を引き継いで再発火しない）。
  */
 export class CharacterSelectScene implements Scene {
   readonly rawKeys = true;
   readonly sel = new CharacterSelect();
   private pending: { p: PlayerId; act: SelectAction }[] = [];
   private keyboards: (KeyboardController | null)[];
-  private startAt: number | null = null;
-  private elapsed = 0;
-  /** 両者決定から試合開始まで（決定ボイスを切らない） */
-  static START_DELAY_MS = 900;
 
   constructor(
     private readonly app: App,
@@ -460,8 +459,7 @@ export class CharacterSelectScene implements Scene {
     this.app.toMenu([this.mode === 'mode1' ? 'MODE1' : 'MODE2']);
   }
 
-  update(dtMs: number): void {
-    this.elapsed += dtMs;
+  update(): void {
     // 同じフレームの入力は 1P→2P（安定ソート）
     const acts = this.pending.splice(0).sort((a, b) => a.p - b.p);
     const bus = this.app.bus;
@@ -471,18 +469,20 @@ export class CharacterSelectScene implements Scene {
       } else if (act === 'confirm') {
         if (this.sel.confirm(p)) {
           bus.playSfx('ui_confirm');
-          bus.playVoice(this.sel.characters()[p], 'select', VOICE_PRIORITY.start, p === 0 ? 'main' : 'announce');
+          bus.playVoice(this.sel.characters()[p], 'select', VOICE_PRIORITY.start, 'select');
+          // 両者決定：ただちに試合へ。同じフレームの残りの入力は試合へ渡さない
+          if (this.sel.done) return this.app.startGame(this.mode, '2p', undefined, this.sel.characters(), { keepSelectVoices: true });
         } else bus.playSfx('ui_invalid');
       } else {
+        const ch = this.sel.characters()[p];
         const r = this.sel.back(p);
-        if (r === 'undo') bus.playSfx('ui_cancel');
-        else if (r === 'leave') return this.leave();
+        if (r === 'undo') {
+          // 取消：その人の決定ボイスを止める（不要な音を残さない）
+          bus.stopVoice('select', `${ch}_select`);
+          bus.playSfx('ui_cancel');
+        } else if (r === 'leave') return this.leave();
       }
     }
-    if (this.sel.done) {
-      this.startAt ??= this.elapsed + CharacterSelectScene.START_DELAY_MS;
-      if (this.elapsed >= this.startAt) this.app.startGame(this.mode, '2p', undefined, this.sel.characters());
-    } else this.startAt = null;
   }
 
   render(ctx: CanvasRenderingContext2D, ms: number): void {

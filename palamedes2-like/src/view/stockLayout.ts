@@ -18,7 +18,8 @@ export interface StockViewConfig {
 }
 
 export const DEFAULT_STOCK_VIEW: StockViewConfig = {
-  origin: { 0: [20, 228], 1: [604, 228] },
+  // 修正R1：上端を y=148 に（開始時の予約29＋待機28でも画面内に収まる。Xは維持）
+  origin: { 0: [20, 148], 1: [604, 148] },
   groupGapPx: 6,
   blinkMs: 240,
   slideMs: 120,
@@ -63,4 +64,62 @@ export function pendingGroupY(reservedPx: number | null, slideFromPx: number | n
   if (slideFromPx === null || sinceEndMs === null) return 0;
   const u = Math.max(0, Math.min(1, sinceEndMs / cfg.slideMs));
   return Math.round(slideFromPx * (1 - u));
+}
+
+/** 列に描く要素（アイコン・処理中の囲い・相殺の小爆発）。描画と画面内検査で同じ配置を使う */
+export type StockDrawEntry =
+  | { type: 'icon'; size: 'large' | 'small'; xd: boolean; alpha: number; x: number; y: number; w: number; h: number }
+  | { type: 'frame'; x: number; y: number; w: number; h: number }
+  | { type: 'burst'; size: 'large' | 'small'; frame: number; x: number; y: number; w: number; h: number };
+
+export interface StockAfterimageState {
+  kind: 'counter' | 'discard';
+  lines: number;
+  /** 発生からの経過ms */
+  ms: number;
+}
+
+const ICON_PX = { large: 16, small: 8 } as const;
+const BURST_PX = { large: 24, small: 12 } as const;
+export const BURST_FRAMES = 4;
+/** 処理中ブロックの囲い（9スライス 3px） */
+export const FRAME_PAD = 3;
+
+/**
+ * 1列の配置：上＝処理中ブロックの残り（囲い付き）、その下にピンチ破棄の残像（フェード）、
+ * 予約高さの下＝nextPending、その下に相殺の残像（XD顔＋小爆発）。
+ */
+export function stockColumnLayout(
+  x0: number,
+  blockY: number,
+  pendingY: number,
+  blockLines: number,
+  pendingLines: number,
+  afterimages: readonly StockAfterimageState[],
+  cfg: StockViewConfig = DEFAULT_STOCK_VIEW,
+): StockDrawEntry[] {
+  const out: StockDrawEntry[] = [];
+  const group = (lines: number, y0: number, xd: boolean, alpha: number) => {
+    for (const ic of stockIcons(lines)) out.push({ type: 'icon', size: ic.size, xd, alpha, x: x0 + ic.x, y: y0 + ic.y, w: ICON_PX[ic.size], h: ICON_PX[ic.size] });
+  };
+  group(blockLines, blockY, false, 1);
+  if (blockLines > 0) out.push({ type: 'frame', x: x0 - FRAME_PAD, y: blockY - FRAME_PAD, w: CELL_PX + 2 * FRAME_PAD, h: stockGroupHeight(blockLines) + 2 * FRAME_PAD });
+  group(pendingLines, pendingY, false, 1);
+  for (const a of afterimages) {
+    if (a.ms < 0) continue;
+    if (a.kind === 'discard') {
+      if (a.ms < cfg.discardFadeMs) group(a.lines, blockY + stockGroupHeight(blockLines), false, 1 - a.ms / cfg.discardFadeMs);
+      continue;
+    }
+    const fi = Math.floor(a.ms / cfg.counterFrameMs);
+    if (fi >= BURST_FRAMES) continue;
+    const y0 = pendingY + stockGroupHeight(pendingLines);
+    group(a.lines, y0, true, 1);
+    for (const ic of stockIcons(a.lines)) {
+      const c = ICON_PX[ic.size] / 2;
+      const b = BURST_PX[ic.size];
+      out.push({ type: 'burst', size: ic.size, frame: fi, x: x0 + ic.x + c - b / 2, y: y0 + ic.y + c - b / 2, w: b, h: b });
+    }
+  }
+  return out;
 }

@@ -12,7 +12,7 @@ import { drawFrame, drawNineSlice, type Assets } from './assets';
 import type { ManifestFrame } from './data';
 import { arcPoint, barY, CELL, cellX, columnCenterX, descentY, easeInOutSine, easeOutQuad, lerp, progress, Z, type BoardRect } from './geometry';
 import { characterPose, crackerPose, type ResultPlan } from './presentation';
-import { DEFAULT_STOCK_VIEW, stockGroupHeight, stockIcons, pendingGroupY, type StockViewConfig } from './stockLayout';
+import { BURST_FRAMES, DEFAULT_STOCK_VIEW, FRAME_PAD, pendingGroupY, stockColumnLayout, stockGroupHeight, type StockViewConfig } from './stockLayout';
 import { drawNumeric, drawText, formatTime, multiplierText, numericPhase, TEXT_COLORS } from './text';
 
 /** キャラクター → モーションシート（第3版：コタローS1・アカネS2・ずん子S13。プレイヤー番号では選ばない） */
@@ -55,7 +55,6 @@ export const DEFAULT_PLAY_VIEW: PlayViewConfig = {
 };
 
 const REFLECTION_FRAMES = 3;
-const BURST_FRAMES = 4;
 
 interface BarTween {
   start: number;
@@ -799,39 +798,15 @@ export class GameView {
     const cfg = this.pvc.stock;
     const [ox] = cfg.origin[p];
     const sv = this.stockView(p, t);
-    const icon = (size: 'large' | 'small', xd = false) => this.frame(`attack_stock_nekotaro_${size}${xd ? '_xd' : ''}`, '0');
-    const group = (lines: number, x0: number, y0: number, opts: { xd?: boolean; alpha?: number } = {}) => {
-      for (const ic of stockIcons(lines)) this.put(items, Z.ui, icon(ic.size, opts.xd), x0 + ic.x, y0 + ic.y, { alpha: opts.alpha });
-    };
-    group(sv.blockLines, ox, sv.blockY);
-    if (sv.blockLines > 0) {
-      // 残ったアイコンだけを囲う（9スライス 3px、内寸16×群の高さ）。240ms で通常／明るいを交互
-      const bright = Math.floor((t * this.game.tickMs) / cfg.blinkMs) % 2 === 1;
-      const f = this.frame(bright ? 'attack_stock_active_frame_bright' : 'attack_stock_active_frame', '0');
-      const h = stockGroupHeight(sv.blockLines);
-      items.push({ z: Z.ui + 1, draw: (ctx) => drawNineSlice(ctx, this.assets, f, 3, ox - 3, sv.blockY - 3, 22, h + 6) });
-    }
-    group(sv.pendingLines, ox, sv.pendingY);
-    for (const a of this.afterimages) {
-      if (a.player !== p) continue;
-      const ms = (t - a.start) * this.game.tickMs;
-      if (ms < 0) continue;
-      if (a.kind === 'discard') {
-        // ピンチ破棄：XD顔・SEなし。ブロックの残りの下でフェードして消える
-        if (ms < cfg.discardFadeMs) group(a.lines, ox, sv.blockY + stockGroupHeight(sv.blockLines), { alpha: 1 - ms / cfg.discardFadeMs });
-        continue;
-      }
-      // 相殺：XD顔＋小爆発（4コマ×40ms）。数量は即時に減っており、これは残像
-      const fi = Math.floor(ms / cfg.counterFrameMs);
-      if (fi >= BURST_FRAMES) continue;
-      const y0 = sv.pendingY + stockGroupHeight(sv.pendingLines);
-      group(a.lines, ox, y0, { xd: true });
-      for (const ic of stockIcons(a.lines)) {
-        const large = ic.size === 'large';
-        const bf = this.frame(large ? 'attack_stock_cancel_burst_sheet' : 'attack_stock_cancel_burst_small_sheet', String(fi));
-        const c = large ? 8 : 4;
-        this.put(items, Z.ui + 2, bf, ox + ic.x + c - bf.w / 2, y0 + ic.y + c - bf.h / 2);
-      }
+    const after = this.afterimages.filter((a) => a.player === p).map((a) => ({ kind: a.kind, lines: a.lines, ms: (t - a.start) * this.game.tickMs }));
+    // 処理中の囲いは 240ms で通常／明るいを交互
+    const bright = Math.floor((t * this.game.tickMs) / cfg.blinkMs) % 2 === 1;
+    for (const e of stockColumnLayout(ox, sv.blockY, sv.pendingY, sv.blockLines, sv.pendingLines, after, cfg)) {
+      if (e.type === 'icon') this.put(items, Z.ui, this.frame(`attack_stock_nekotaro_${e.size}${e.xd ? '_xd' : ''}`, '0'), e.x, e.y, { alpha: e.alpha < 1 ? e.alpha : undefined });
+      else if (e.type === 'frame') {
+        const f = this.frame(bright ? 'attack_stock_active_frame_bright' : 'attack_stock_active_frame', '0');
+        items.push({ z: Z.ui + 1, draw: (ctx) => drawNineSlice(ctx, this.assets, f, FRAME_PAD, e.x, e.y, e.w, e.h) });
+      } else this.put(items, Z.ui + 2, this.frame(e.size === 'large' ? 'attack_stock_cancel_burst_sheet' : 'attack_stock_cancel_burst_small_sheet', String(e.frame)), e.x, e.y);
     }
   }
 

@@ -31,7 +31,8 @@ export interface MixConfig {
 
 export const DEFAULT_MIX: MixConfig = { masterDb: -6, duckDb: -4, duckAttackMs: 60, duckReleaseMs: 250, bgmFadeMs: 300, maxSfx: 12, sameFrameMs: 20 };
 
-export type VoiceChannel = 'main' | 'announce' | 'result';
+/** select：キャラクター選択の確定ボイス（両者分が重なってよい。選択→試合の遷移では止めない） */
+export type VoiceChannel = 'main' | 'announce' | 'result' | 'select';
 
 export interface AudioLogEntry {
   t: number;
@@ -101,7 +102,7 @@ export class AudioBus {
   private bgmSrc: { src: AudioBufferSourceNode; gain: GainNode; rec: AudioNodeRecord } | null = null;
   private readonly lastSfx = new Map<SfxId, number>();
   private sfxPlaying: Playing[] = [];
-  private readonly voices: Record<VoiceChannel, Playing[]> = { main: [], announce: [], result: [] };
+  private readonly voices: Record<VoiceChannel, Playing[]> = { main: [], announce: [], result: [], select: [] };
   private unlocking: Promise<void> | null = null;
 
   constructor(
@@ -311,6 +312,7 @@ export class AudioBus {
    * ボイス：main は全体で1本。優先度の低い声は鳴っている高い声を切らず、長い待ち行列にも溜めない（捨てる）。
    * 同等以上の優先度なら現在の声を止めて再生。announce は開始アナウンス1本。
    * result は結果の敗者→勝者の2声で、短い重なりを許容する（互いに切らない）。結果は main を中断できる。
+   * select はキャラクター選択の確定ボイス。1P・2P の声が重なってよく、他のチャンネルの声では止めない。
    */
   playVoice(c: Character, line: VoiceLine, prio: number, channel: VoiceChannel = 'main', delayMs = 0): boolean {
     const t = this.now() + delayMs;
@@ -321,7 +323,7 @@ export class AudioBus {
       this.record({ t, kind: 'voice', id, channel, skipped: 'priority' });
       return false;
     }
-    if (channel !== 'result') this.stopChannel(channel);
+    if (channel !== 'result' && channel !== 'select') this.stopChannel(channel);
     if (channel === 'result') this.stopChannel('main');
     const file = voiceFile(c, line);
     const p = this.start(id, file, 'voice', delayMs);
@@ -332,9 +334,12 @@ export class AudioBus {
     return true;
   }
 
-  /** 次ラウンド・再戦・メニュー復帰時：前の演出の声とSEを持ち越さない */
-  stopEffects(): void {
-    for (const ch of Object.keys(this.voices) as VoiceChannel[]) this.stopChannel(ch);
+  /**
+   * 次ラウンド・再戦・メニュー復帰時：前の演出の声とSEを持ち越さない。
+   * keep：止めずに残すチャンネル（キャラクター選択→試合開始の遷移で、確定ボイス select だけを終端まで鳴らす）
+   */
+  stopEffects(keep: readonly VoiceChannel[] = []): void {
+    for (const ch of Object.keys(this.voices) as VoiceChannel[]) if (!keep.includes(ch)) this.stopChannel(ch);
     for (const p of this.sfxPlaying) this.stopNode(p);
     this.sfxPlaying = [];
     this.updateDuck(this.now(), 0);
@@ -349,6 +354,12 @@ export class AudioBus {
       this.stopNode(p);
       return false;
     });
+  }
+
+  /** 指定IDの声だけを止める（キャラクター選択の取消で、その人の確定ボイスを止める） */
+  stopVoice(channel: VoiceChannel, id: string): void {
+    for (const p of this.voices[channel]) if (p.id === id) this.stopNode(p);
+    this.voices[channel] = this.voices[channel].filter((p) => p.id !== id);
   }
 
   voicesPlaying(channel?: VoiceChannel): string[] {

@@ -66,7 +66,8 @@ export class SoundDirector {
         b.playSfx('column_swap');
         return;
       case 'rise':
-        if (e.kind !== 'attack') b.playSfx('field_rise'); // 攻撃による段は attackRow で1段ずつ
+        // 自然・手動の上昇。攻撃による段の上昇音は attackRow 側だけで鳴らす（同じ上昇で二重に鳴らさない）
+        if (e.kind !== 'attack') b.playSfx('field_rise');
         return;
       case 'roleAvailable':
         b.playSfx('role_available');
@@ -92,7 +93,10 @@ export class SoundDirector {
         }
         return;
       case 'attackRow':
-        // 実適用された1ラインにつき接着音1回（破棄・未適用の段は attackRow を出さない）。被攻撃ボイスは波の最初の実適用だけ
+        // 実適用された1段（attackRow は実適用のときだけ出る。破棄・未適用・保留中は出ない）につき：
+        //   上昇音 se_field_rise を上昇開始（適用tick）で1回（修正R2）、接着音 sfx_attack_row を最初の接着（飛来後）で1回。
+        // 被攻撃ボイスは波の最初の実適用だけ
+        b.playSfx('field_rise');
         b.playSfx('attack_row', this.opts.attachDelayMs);
         if (e.firstOfWave) b.playVoice(this.char(e.player), 'damage', VOICE_PRIORITY.attack);
         return;
