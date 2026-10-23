@@ -9,6 +9,7 @@ import { browserPads } from './input/controller';
 import { loadSettings, type AppSettings } from './input/settings';
 import { loadAssets } from './view/assets';
 import { resolveScale, type ScaleResult } from './view/scale';
+import { drawNumericScaled, numericGlyph } from './view/text';
 import { AssetViewer } from './view/viewer';
 
 const canvas = document.getElementById('screen') as HTMLCanvasElement;
@@ -148,6 +149,8 @@ async function boot(): Promise<void> {
     scene: () => app.scene,
     game: () => (app.scene instanceof GameScene ? app.scene.game : null),
     gameScene: () => (app.scene instanceof GameScene ? app.scene : null),
+    // 自動検証用：S12 数字の合成（v3.1.0 ヒビのマスク確認）
+    numeric: { numericGlyph, drawNumericScaled },
     ...(DEV ? { metrics: () => app.devMetrics } : {}),
   };
 

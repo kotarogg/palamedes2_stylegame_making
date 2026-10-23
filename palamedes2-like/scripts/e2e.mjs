@@ -193,8 +193,8 @@ try {
   const pngs = ok('.png');
   const jsons = ok('.json').map((p) => p.split('/').pop()).sort();
   check(
-    '明示読込一覧の49PNGだけを取得（旧版・見本・previews を読まない）、JSON5件',
-    pngs.length === 49 && pngs.every((p) => p.includes('/gfx/assets/')) && jsons.join() === 'credits_text.json,font_styles.json,game_loading_list.json,graphics_manifest_v3.json,screen_layout_v2.json',
+    '明示読込一覧の49PNG＋v3.1.0追加9PNG（additional_assets_v310.json）だけを取得（旧版・見本・previews を読まない）、JSON6件',
+    pngs.length === 58 && pngs.every((p) => p.includes('/gfx/assets/')) && jsons.join() === 'additional_assets_v310.json,credits_text.json,font_styles.json,game_loading_list.json,graphics_manifest_v3.json,screen_layout_v2.json',
     `png=${pngs.length} json=${jsons.join(',')}`,
   );
   const wavs = ok('.wav');
@@ -253,7 +253,10 @@ try {
   await shot('S03_menu_mode1');
   await pad(13); // ↓ CPU対戦
   let t0 = await now();
-  await pad(0, 300);
+  await pad(0, 300); // v3.1.0：CPU対戦のキャラクター選択へ（初期コタロー）
+  const cpuSel = await ev(() => ({ scene: window.__p2like.scene().constructor.name, ch: window.__p2like.scene().sel?.character }));
+  check('v3.1.0 CPU対戦：メニューからキャラクター選択へ（初期カーソル＝コタロー、2Pカーソルなし）', cpuSel.scene === 'CpuCharacterSelectScene' && cpuSel.ch === 'kotaro', JSON.stringify(cpuSel));
+  await pad(0, 300); // 決定
   await waitPlaying();
   await wait(300);
   const padStart = await ev(() => ({ chars: window.__p2like.gameScene().characters, ann: window.__p2like.gameScene().staging.announcer }));
@@ -312,12 +315,16 @@ try {
     return sc.roleNames.logoAt(0, sc.game.tick);
   });
   const roleLog = await logSince(t0);
-  const roleVoice = roleLog.find((e) => e.kind === 'voice' && e.id.startsWith('kotaro_role_'));
+  // v3.1.0：代表ボイスは役名ボイスか、20%の抽選で代替の攻撃ボイス（どちらか1本だけ）
+  const altKind = await ev(() => window.__p2like.gameScene().roleNames.voiceLog.at(-1)?.voice);
+  const repVoices = roleLog.filter((e) => e.kind === 'voice' && (e.id.startsWith('kotaro_role_') || e.id === 'kotaro_attack'));
+  const wantVoice = altKind === 'attack' ? 'kotaro_attack' : `kotaro_role_${String(decl.logos[0] + 1).padStart(2, '0')}`;
+  const declSfxE = roleLog.find((e) => e.kind === 'sfx' && e.id === `role_declare_${Math.min(5, decl.chain)}`);
   const declSfx = roleLog.filter((e) => e.kind === 'sfx').map((e) => e.id);
   check(
-    '役宣言：代表役（先頭ロゴ）と代表役ボイスを同時開始。役宣言SEは連鎖段階 se_role_declare_0N、旧成立音・連鎖音を鳴らさない',
-    roleShow?.logo === decl.logos?.[0] && roleVoice?.id === `kotaro_role_${String(decl.logos[0] + 1).padStart(2, '0')}` && declSfx.includes(`role_declare_${Math.min(5, decl.chain)}`) && !declSfx.some((id) => OLD_SFX.includes(id)),
-    JSON.stringify({ decl, roleShow, roleVoice, declSfx }),
+    '役宣言：代表役（先頭ロゴ）と代表ボイス（役名、または20%で代替の攻撃ボイス。両方は鳴らさない）を同時開始。役宣言SEは連鎖段階 se_role_declare_0N（代表ボイスと同時なので −2dB）、旧成立音・連鎖音を鳴らさない',
+    roleShow?.logo === decl.logos?.[0] && repVoices.length === 1 && repVoices[0].id === wantVoice && declSfxE?.gainDb === -2 && !declSfx.some((id) => OLD_SFX.includes(id)),
+    JSON.stringify({ decl, roleShow, altKind, repVoices, declSfxE, declSfx }),
   );
   await wait(250);
   await shot('S08_role_chain');
@@ -355,14 +362,17 @@ try {
   };
   const r1 = await runResult(1, 'S13_round_result');
   const rv = (id) => r1.find((e) => e.id === id && !e.skipped);
-  const order = ['win', 'akane_lose', 'character_fall', 'kotaro_win', 'result_cracker'].map((id) => rv(id)?.t ?? null);
+  const order = ['akane_lose', 'character_fall', 'win', 'kotaro_win', 'result_cracker'].map((id) => rv(id)?.t ?? null);
   const plan1 = await ev(() => window.__p2like.gameScene().staging.plan);
   check(
-    '勝敗演出：勝利SE＋敗者ボイス→（640ms）落下開始で se_character_fall→（700ms＋200ms）勝者ボイスとクラッカーSEが同時。敗者ボイスの終了は待たない',
+    'v3.1.0 勝敗演出：敗者ボイス→（640ms）落下開始で se_character_fall→（700ms＋200ms）勝者演出の開始で勝利SE・勝者ボイス・クラッカーSEが同時（人が勝ったCPU対戦は敗北SEなし、勝利SEは1回）',
     order.every((x) => x !== null) &&
-      order[2] - order[1] >= 600 &&
-      order[3] - order[2] >= 850 &&
-      Math.abs(order[4] - order[3]) < 40 &&
+      order[1] - order[0] >= 600 &&
+      order[2] - order[1] >= 850 &&
+      Math.abs(order[3] - order[2]) < 40 &&
+      Math.abs(order[4] - order[2]) < 40 &&
+      r1.filter((e) => e.id === 'win' && !e.skipped).length === 1 &&
+      !r1.some((e) => e.id === 'lose' && !e.skipped) &&
       plan1.crackerToward === 0,
     JSON.stringify({ order: order.map((x) => (x === null ? null : Math.round(x - order[0]))), plan1 }),
   );
@@ -407,7 +417,7 @@ try {
   await wait(400);
   const fin = await ev(() => ({ state: window.__p2like.gameScene().session.state, choices: window.__p2like.gameScene().finalChoices().map((c) => c.label) }));
   await shot('S14_cpu_win');
-  check('CPU対戦で勝利：次の相手へ／同じ相手と再戦／メニューへ', fin.state === 'matchResult' && fin.choices.join() === '次の相手へ,同じ相手と再戦,メニューへ', JSON.stringify(fin));
+  check('CPU対戦で勝利：次の相手へ／同じ相手と再戦／キャラ選択へ／メニューへ', fin.state === 'matchResult' && fin.choices.join() === '次の相手へ,同じ相手と再戦,キャラ選択へ,メニューへ', JSON.stringify(fin));
   t0 = await now();
   await key('Enter', 600); // 次の相手へ
   const nx = await ev(() => ({ chars: window.__p2like.gameScene().characters, wins: window.__p2like.gameScene().session.wins, opp: window.__p2like.app.cpuOpponent, ann: window.__p2like.gameScene().staging.announcer }));
@@ -432,7 +442,7 @@ try {
   await wait(300);
   const lose = await ev(() => window.__p2like.gameScene().finalChoices().map((c) => c.label));
   await shot('S14_cpu_lose');
-  check('CPU対戦で敗北：同じ相手に再挑戦／メニューへ', lose.join() === '同じ相手に再挑戦,メニューへ', lose.join());
+  check('CPU対戦で敗北：同じ相手に再挑戦／キャラ選択へ／メニューへ', lose.join() === '同じ相手に再挑戦,キャラ選択へ,メニューへ', lose.join());
   const ctxR = await ctxTime();
   await key('Enter', 500); // 再挑戦
   const re = await ev(() => ({ chars: window.__p2like.gameScene().characters, wins: window.__p2like.gameScene().session.wins, opp: window.__p2like.app.cpuOpponent }));
@@ -548,6 +558,7 @@ try {
   // ---- 修正R5：相殺の消失演出（2P対戦。実素材で描画した結果を画素照合し、画像を保存） ----
   await ev(() => window.__p2like.app.startGame('mode1', '2p'));
   await waitPlaying();
+  await wait(900); // GO の見出し（中央）が消えてから描画を確かめる（v3.1.0 でストック列が中央エリアへ移ったため）
   const r5 = await ev(() => {
     const sc = window.__p2like.gameScene();
     const g = sc.game;
@@ -683,6 +694,257 @@ try {
     JSON.stringify(rb),
   );
   await ev(() => window.__p2like.app.toMenu(['MODE1']));
+
+  // ==== v3.1.0 ====
+  // ---- 開始前待機：表示準備後 1000ms はゲームを進めない。待機中の操作を解除後へ持ち越さない ----
+  {
+    const tH = await now();
+    await ev(() => window.__p2like.app.startGame('mode1', '2p'));
+    await wait(120);
+    const h0 = await ev(() => ({ holding: window.__p2like.gameScene().preStartHolding, tick: window.__p2like.game().tick }));
+    await page.keyboard.press('KeyF'); // 1P 発射（待機中）
+    await page.keyboard.press('Comma'); // 2P 発射（待機中）
+    await wait(400);
+    const h1 = await ev(() => ({ holding: window.__p2like.gameScene().preStartHolding, tick: window.__p2like.game().tick }));
+    const voiceDuringHold = (await logSince(tH)).filter((e) => e.kind === 'voice' && e.id.endsWith('_ready'));
+    await page.waitForFunction(() => !window.__p2like.gameScene().preStartHolding, null, { timeout: 5000 });
+    const released = (await now()) - tH;
+    await waitPlaying();
+    await wait(300);
+    const after = await ev(() => ({ launches: window.__p2like.game().events.filter((e) => e.type === 'launch').length, tick: window.__p2like.game().tick }));
+    const readyAfter = (await logSince(tH)).some((e) => e.kind === 'voice' && e.id.endsWith('_ready') && !e.skipped);
+    check(
+      'v3.1.0 開始前待機：表示後1000msはゲームを進めない（tick 0・READY前）。待機中の発射を解除後へ持ち越さない',
+      h0.holding && h0.tick === 0 && h1.holding && h1.tick === 0 && voiceDuringHold.length === 0 && released >= 1000 && released < 1800 && after.launches === 0 && readyAfter,
+      JSON.stringify({ h0, h1, voiceDuringHold: voiceDuringHold.length, released: Math.round(released), after, readyAfter }),
+    );
+  }
+
+  // ---- ヒビのマスク（全数字×3種×3位相）：数字の外へ出ない・数字内に残る。17px 縮小後も同じ ----
+  {
+    const mask = await ev(() => {
+      const { app, numeric } = window.__p2like;
+      const A = app.assets;
+      // 読み取り用の写しへ描いてから読む（元の合成キャッシュには読み取り属性を付けない）
+      const alpha = (c) => {
+        const t = document.createElement('canvas');
+        t.width = c.width;
+        t.height = c.height;
+        const tg = t.getContext('2d', { willReadFrequently: true });
+        tg.drawImage(c, 0, 0);
+        return tg.getImageData(0, 0, c.width, c.height).data;
+      };
+      const out = { cases: 0, outside: 0, invisible: [] };
+      for (const ch of '0123456789')
+        for (const ph of ['A', 'B', 'C'])
+          for (const cr of ['streak_crack_01', 'streak_crack_02', 'streak_crack_03']) {
+            const plain = alpha(numeric.numericGlyph(A, ch, ph, null).canvas);
+            const crack = alpha(numeric.numericGlyph(A, ch, ph, cr).canvas);
+            let inside = 0;
+            for (let i = 0; i < plain.length; i += 4) {
+              if (plain[i + 3] === 0 && crack[i + 3] !== 0) out.outside++;
+              if (plain[i + 3] !== 0 && (plain[i] !== crack[i] || plain[i + 1] !== crack[i + 1] || plain[i + 2] !== crack[i + 2])) inside++;
+            }
+            if (inside === 0) out.invisible.push(`${ch}${ph}${cr}`);
+            out.cases++;
+          }
+      // 17px（縦横等比・最近傍）：複数桁「12」「19」
+      const draw = (text, crack) => {
+        const c = document.createElement('canvas');
+        c.width = 80;
+        c.height = 20;
+        const cg = c.getContext('2d', { willReadFrequently: true });
+        numeric.drawNumericScaled(cg, A, text, 0, 0, 17, 80, 'left', 'B', crack);
+        return cg.getImageData(0, 0, 80, 20).data;
+      };
+      let outside17 = 0;
+      let inside17 = 0;
+      for (const t of ['12', '19']) {
+        const a = draw(t, null);
+        const b = draw(t, 'streak_crack_03');
+        for (let i = 0; i < a.length; i += 4) {
+          if (a[i + 3] === 0 && b[i + 3] !== 0) outside17++;
+          if (a[i + 3] !== 0 && (a[i] !== b[i] || a[i + 1] !== b[i + 1])) inside17++;
+        }
+      }
+      return { ...out, outside17, inside17 };
+    });
+    check(
+      'v3.1.0 ヒビ：数字セルの(2,0)へ重ね、数字の不透明部でマスク（全数字×3種×A/B/C で数字外0px・数字内に残る）。17px 縮小・複数桁でも外へ出ない',
+      mask.cases === 90 && mask.outside === 0 && mask.invisible.length === 0 && mask.outside17 === 0 && mask.inside17 > 0,
+      JSON.stringify(mask),
+    );
+  }
+
+  // ---- 代表状態：連続出し（予約中のヒビ）・役連鎖・中央の受攻撃ストック（最大＋相殺）・ピンチ3 ----
+  await wait(700); // GO の見出しが消えてから
+  const v310 = await ev(() => {
+    const sc = window.__p2like.gameScene();
+    const g = sc.game;
+    const v = sc.view;
+    const FAR = 1e9;
+    const set = (p, o) => Object.assign(g.players[p].incoming, { blockActive: o.cur > 0, blockReserved: o.reserved ?? 0, blockRemaining: o.cur ?? 0, waveRemaining: 0, nextPending: o.pending, nextStepTick: FAR, nextBlockTick: null });
+    const cancel = (p, n) => {
+      const s = g.players[p].incoming;
+      s.nextPending -= n;
+      s.stats.canceled += n;
+      g.events.push({ type: 'attackCancel', tick: g.tick, player: p, canceled: n, total: s.nextPending + s.blockRemaining + s.waveRemaining, pending: s.nextPending });
+    };
+    const p0 = g.players[0];
+    const p1 = g.players[1];
+    Object.assign(p0, { streakCount: 12, streakRemaining: FAR, streakCutReserved: true, chainCount: 3, chainRemaining: FAR });
+    Object.assign(p1, { streakCount: 19, streakRemaining: FAR, streakCutReserved: false, chainCount: 6, chainRemaining: FAR });
+    v.pv[0].crack = 'streak_crack_02';
+    set(0, { reserved: 29, cur: 1, pending: 28 });
+    set(1, { reserved: 10, cur: 4, pending: 14 });
+    cancel(0, 12);
+    cancel(1, 3);
+    sc.debugQueue.push({ player: 0, type: 'debugAttack', lines: 6 });
+    // 2P を7段にしてピンチ（攻撃ピンチ猶予 2500ms 残り＝数字3）
+    while (p1.board.height() < 7) for (const c of p1.board.cols) if (c.length < 7) c.push({ kind: 'piece', piece: g.factory.make(1 + (c.length % 6), 'spade') });
+    p1.incoming.pinchRemaining = g.ticks(2500);
+    sc.step();
+    for (let i = 0; i < 12; i++) sc.step(); // 3 の出現（150ms）を終える
+    const c = document.createElement('canvas');
+    c.width = 640;
+    c.height = 360;
+    v.render(c.getContext('2d', { willReadFrequently: true }), g.tick);
+    const big = document.createElement('canvas');
+    big.width = 1280;
+    big.height = 720;
+    const bg = big.getContext('2d');
+    bg.imageSmoothingEnabled = false;
+    bg.drawImage(c, 0, 0, 1280, 720);
+    const A = window.__p2like.app.assets;
+    const img = (id) => A.images.get(id);
+    const cmpImg = (src, sx, sy, sw, sh, x, y) => {
+      const t = document.createElement('canvas');
+      t.width = sw;
+      t.height = sh;
+      const tg = t.getContext('2d', { willReadFrequently: true });
+      tg.drawImage(src, sx, sy, sw, sh, 0, 0, sw, sh);
+      const a = tg.getImageData(0, 0, sw, sh).data;
+      const b = c.getContext('2d', { willReadFrequently: true }).getImageData(x, y, sw, sh).data;
+      let opaque = 0;
+      let bad = 0;
+      for (let i = 0; i < a.length; i += 4) {
+        if (a[i + 3] < 255) continue;
+        opaque++;
+        if (Math.abs(a[i] - b[i]) > 2 || Math.abs(a[i + 1] - b[i + 1]) > 2 || Math.abs(a[i + 2] - b[i + 2]) > 2) bad++;
+      }
+      return { opaque, bad };
+    };
+    const sl0 = v.streakHudLayout(0);
+    const sl1 = v.streakHudLayout(1);
+    const pc = v.pinchCountView(1, g.tick);
+    const f3 = pc ? A.atlas.frame('S9', `show_countdown_${pc.value}_${v.s9Phase(g.tick)}`) : null;
+    const plans = [0, 1].map((p) => v.stockDrawPlan(p, g.tick));
+    return {
+      png: big.toDataURL('image/png'),
+      label0: cmpImg(img('label_launch_streak'), 0, 0, 80, 20, sl0.label.x, sl0.label.y),
+      label1: cmpImg(img('label_launch_streak'), 0, 0, 80, 20, sl1.label.x, sl1.label.y),
+      pinch: pc,
+      pinchPx: f3 ? cmpImg(A.images.get('S9'), f3.x, f3.y, f3.w, f3.h, pc.x, pc.y) : null,
+      stock: plans.map((pl) => ({ n: pl.entries.length, minX: Math.min(...pl.entries.map((e) => e.x)), maxX: Math.max(...pl.entries.map((e) => e.x + e.w)), maxY: Math.max(...pl.entries.map((e) => e.y + e.h)), label: pl.label })),
+      pending: [p0.incoming.nextPending, p1.incoming.nextPending],
+      mult: [g.currentStreakPercent(p0), g.currentStreakPercent(p1)],
+    };
+  });
+  writeFileSync(new URL('screens/V310_hud_stock_pinch.png', OUT), Buffer.from(v310.png.split(',')[1], 'base64'));
+  shots.push('screens/V310_hud_stock_pinch.png');
+  check(
+    'v3.1.0 連続出し（見出し・成功数17px・攻撃倍率、1P予約中のヒビ）：見出しを原寸で描画（画素一致）。成功数12＝×1.25、19＝×1.75',
+    v310.label0.bad === 0 && v310.label0.opaque > 0 && v310.label1.bad === 0 && v310.mult.join() === '125,175',
+    JSON.stringify({ label0: v310.label0, label1: v310.label1, mult: v310.mult }),
+  );
+  check(
+    'v3.1.0 受攻撃ストックの中央配置：1P（予約29＋待機22＋相殺12）・2P（予約10＋待機11＋相殺3）とも中央エリア x264〜376・下端360以内。数字は列の中央側',
+    v310.stock.every((s) => s.minX >= 264 && s.maxX <= 376 && s.maxY <= 360) && v310.stock[0].label?.text === '22' && v310.stock[1].label?.text === '11' && v310.stock[0].label.x < v310.stock[1].label.x,
+    JSON.stringify(v310.stock),
+  );
+  check(
+    'v3.1.0 ピンチの数字：残り猶予に同期して 3（枠なしS9、2Pの盤面上）を描画（画素一致）',
+    v310.pinch?.value === 3 && v310.pinchPx && v310.pinchPx.bad === 0 && v310.pinchPx.opaque > 0,
+    JSON.stringify({ pinch: v310.pinch, px: v310.pinchPx }),
+  );
+  await shot('V310_versus_live');
+
+  // ---- 日本語の結果見出し（勝利・敗北／対戦結果） ----
+  {
+    const firstTo = await ev(() => window.__p2like.gameScene().session.settings.firstTo);
+    for (let i = 0; i < firstTo; i++) {
+      await ev(() => {
+        const sc = window.__p2like.gameScene();
+        sc.game.players[0].defeated = true;
+        sc.step();
+      });
+      await wait(2300);
+      if (i === 0) await shot('V310_round_result_ja');
+      if (i < firstTo - 1) {
+        await key('Enter', 400);
+        await waitPlaying();
+        await wait(1100);
+      }
+    }
+    await wait(400);
+    await shot('V310_match_result_ja');
+    const heads = await ev(() => {
+      const sc = window.__p2like.gameScene();
+      const A = window.__p2like.app.assets;
+      const n = Number(document.getElementById('screen').dataset.scale) || 1;
+      const cmp = (id, x, y) => {
+        const im = A.images.get(id);
+        const t = document.createElement('canvas');
+        t.width = im.width;
+        t.height = im.height;
+        const tg = t.getContext('2d', { willReadFrequently: true });
+        tg.drawImage(im, 0, 0);
+        const a = tg.getImageData(0, 0, im.width, im.height).data;
+        const s2 = document.createElement('canvas');
+        s2.width = im.width;
+        s2.height = im.height;
+        const sg = s2.getContext('2d', { willReadFrequently: true });
+        sg.imageSmoothingEnabled = false;
+        sg.drawImage(document.getElementById('screen'), x * n, y * n, im.width * n, im.height * n, 0, 0, im.width, im.height);
+        const b = sg.getImageData(0, 0, im.width, im.height).data;
+        let opaque = 0;
+        let bad = 0;
+        for (let i = 0; i < a.length; i += 4) {
+          if (a[i + 3] < 255) continue;
+          opaque++;
+          if (Math.abs(a[i] - b[i]) > 2 || Math.abs(a[i + 1] - b[i + 1]) > 2 || Math.abs(a[i + 2] - b[i + 2]) > 2) bad++;
+        }
+        return { opaque, bad };
+      };
+      return { state: sc.session.state, match: cmp('result_match_ja', 240, 42) };
+    });
+    check('v3.1.0 対戦の最終結果の見出し「対戦結果」（result_match_ja、原寸・画素一致）', heads.state === 'matchResult' && heads.match.bad === 0 && heads.match.opaque > 0, JSON.stringify(heads));
+  }
+  await ev(() => window.__p2like.app.toMenu(['MODE1']));
+
+  // ---- CPU対戦のキャラクター選択：アカネを選ぶ → 相手はコタロー、READY／GO は相手。キャンセル確認 ----
+  {
+    await ev(() => (window.__p2like.scene().stack.at(-1).cursor = 1));
+    await key('Enter', 300); // CPU対戦
+    await key('ArrowRight', 200); // アカネ
+    await key('Escape', 200); // 確認
+    const d0 = await ev(() => ({ dialog: window.__p2like.scene().sel.dialog, ch: window.__p2like.scene().sel.character }));
+    await shot('V310_cpu_select_cancel_dialog');
+    await key('ArrowLeft', 150); // ポップアップ内の移動（背後は動かない）
+    await key('ArrowLeft', 150);
+    await key('Enter', 200); // 戻らない
+    const d1 = await ev(() => ({ scene: window.__p2like.scene().constructor.name, dialog: window.__p2like.scene().sel.dialog, ch: window.__p2like.scene().sel.character }));
+    await shot('V310_cpu_select_akane');
+    await key('Enter', 400); // 決定
+    await waitPlaying();
+    const st = await ev(() => ({ chars: window.__p2like.gameScene().characters, ann: window.__p2like.gameScene().staging.announcer, opp: window.__p2like.app.cpuOpponent, cpuChar: window.__p2like.gameScene().controllers[1].character }));
+    check(
+      'v3.1.0 CPU対戦キャラ選択：キャンセルで「メニューに戻りますか？」（初期「戻らない」、背後は動かない）→ 戻らないで位置維持 → アカネで開始、相手はコタロー・READY担当も相手、CPU設定のキャラも一致',
+      d0.dialog === 0 && d0.ch === 'akane' && d1.scene === 'CpuCharacterSelectScene' && d1.dialog === null && d1.ch === 'akane' && st.chars.join() === 'akane,kotaro' && st.ann === 'kotaro' && st.opp === 'kotaro' && st.cpuChar === 'kotaro',
+      JSON.stringify({ d0, d1, st }),
+    );
+    await ev(() => window.__p2like.app.toMenu(['MODE1']));
+  }
 
   // ---- パッド2台でキャラ選択・2P対戦・START 確認 ----
   const saveDevices = await ev(() => JSON.parse(JSON.stringify(window.__p2like.app.settings.devices)));
