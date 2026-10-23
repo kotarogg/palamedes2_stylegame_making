@@ -1,0 +1,836 @@
+{
+  "version": "v3.1.0-additional-candidate-r1",
+  "status": "technical_checked_PM_review_pending",
+  "notice": "追加定義のみ。共通マニフェスト・ゲーム座標・コードを変更しない。previewsは読み込み対象外。",
+  "assets": [
+    {
+      "id": "streak_crack_01",
+      "file": "assets/streak_crack_01.png",
+      "purpose": "ヒビ01・中央ジグザグ",
+      "classification": "new_candidate",
+      "canvas": [
+        32,
+        34
+      ],
+      "frame": [
+        0,
+        0,
+        32,
+        34
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        16,
+        17
+      ],
+      "ink_box": [
+        3,
+        0,
+        29,
+        34
+      ],
+      "colors_excluding_transparent": 2,
+      "palette": [
+        "#08172b",
+        "#fff8d9"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB PNG chunk rendering_intent=0",
+      "sha256": "b8b7865645b1708801bb0a6229be1187e3739df82d39335d351ad089d0345ea3"
+    },
+    {
+      "id": "streak_crack_02",
+      "file": "assets/streak_crack_02.png",
+      "purpose": "ヒビ02・左寄り分岐",
+      "classification": "new_candidate",
+      "canvas": [
+        32,
+        34
+      ],
+      "frame": [
+        0,
+        0,
+        32,
+        34
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        16,
+        17
+      ],
+      "ink_box": [
+        5,
+        0,
+        27,
+        34
+      ],
+      "colors_excluding_transparent": 2,
+      "palette": [
+        "#08172b",
+        "#fff8d9"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB PNG chunk rendering_intent=0",
+      "sha256": "fbeb041902512ae628bf2f83173bd6c8cb0e4cc929fba64a1ba4a4c461bcf08a"
+    },
+    {
+      "id": "streak_crack_03",
+      "file": "assets/streak_crack_03.png",
+      "purpose": "ヒビ03・右寄り分岐",
+      "classification": "new_candidate",
+      "canvas": [
+        32,
+        34
+      ],
+      "frame": [
+        0,
+        0,
+        32,
+        34
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        16,
+        17
+      ],
+      "ink_box": [
+        7,
+        0,
+        29,
+        34
+      ],
+      "colors_excluding_transparent": 2,
+      "palette": [
+        "#08172b",
+        "#fff8d9"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB PNG chunk rendering_intent=0",
+      "sha256": "8d407b3f9260e139b0f923d11197a2c09b1644978c5efb419aff4aabf6309f69"
+    },
+    {
+      "id": "label_launch_streak",
+      "file": "assets/label_launch_streak.png",
+      "purpose": "連続出し",
+      "classification": "new_candidate",
+      "canvas": [
+        80,
+        20
+      ],
+      "frame": [
+        0,
+        0,
+        80,
+        20
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        40,
+        10
+      ],
+      "ink_box": [
+        1,
+        0,
+        80,
+        19
+      ],
+      "colors_excluding_transparent": 16,
+      "palette": [
+        "#08172b",
+        "#1376c2",
+        "#1453a0",
+        "#16b6dc",
+        "#25cbd5",
+        "#53cdbc",
+        "#58d4e2",
+        "#84cba2",
+        "#90e3df",
+        "#b5cf8d",
+        "#d0efdc",
+        "#f5af24",
+        "#ffc940",
+        "#ffdf70",
+        "#fff0ac",
+        "#fff8d9"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB PNG chunk rendering_intent=0",
+      "sha256": "9e511e7129a803b43ea5092a325c2e3a33ba2c55b942938383da154c13cf9119"
+    },
+    {
+      "id": "label_role_chain",
+      "file": "assets/label_role_chain.png",
+      "purpose": "役連鎖",
+      "classification": "new_candidate",
+      "canvas": [
+        96,
+        24
+      ],
+      "frame": [
+        0,
+        0,
+        96,
+        24
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        48,
+        12
+      ],
+      "ink_box": [
+        3,
+        0,
+        95,
+        23
+      ],
+      "colors_excluding_transparent": 15,
+      "palette": [
+        "#08172b",
+        "#1453a0",
+        "#16b6dc",
+        "#25cbd5",
+        "#53cdbc",
+        "#58d4e2",
+        "#84cba2",
+        "#90e3df",
+        "#b5cf8d",
+        "#d0efdc",
+        "#f5af24",
+        "#ffc940",
+        "#ffdf70",
+        "#fff0ac",
+        "#fff8d9"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB PNG chunk rendering_intent=0",
+      "sha256": "e66c5f535d2447ef7322cfad14c21ee009c5d880827af556293472149c074548"
+    },
+    {
+      "id": "result_win_ja",
+      "file": "assets/result_win_ja.png",
+      "purpose": "勝利",
+      "classification": "new_candidate",
+      "canvas": [
+        160,
+        64
+      ],
+      "frame": [
+        0,
+        0,
+        160,
+        64
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "ink_box": [
+        3,
+        0,
+        158,
+        63
+      ],
+      "colors_excluding_transparent": 17,
+      "palette": [
+        "#08172b",
+        "#109ad2",
+        "#1376c2",
+        "#1453a0",
+        "#16b6dc",
+        "#25cbd5",
+        "#53cdbc",
+        "#58d4e2",
+        "#84cba2",
+        "#90e3df",
+        "#b5cf8d",
+        "#d0efdc",
+        "#f5af24",
+        "#ffc940",
+        "#ffdf70",
+        "#fff0ac",
+        "#fff8d9"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB PNG chunk rendering_intent=0",
+      "sha256": "58826ddee075a724dbc5f2e7d46f107954beda70d928bdf8e1b300589596bd9d"
+    },
+    {
+      "id": "result_lose_ja",
+      "file": "assets/result_lose_ja.png",
+      "purpose": "敗北",
+      "classification": "new_candidate",
+      "canvas": [
+        160,
+        64
+      ],
+      "frame": [
+        0,
+        0,
+        160,
+        64
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "ink_box": [
+        3,
+        0,
+        157,
+        63
+      ],
+      "colors_excluding_transparent": 13,
+      "palette": [
+        "#08172b",
+        "#109ad2",
+        "#1376c2",
+        "#1453a0",
+        "#16b6dc",
+        "#25cbd5",
+        "#53cdbc",
+        "#58d4e2",
+        "#84cba2",
+        "#90e3df",
+        "#b5cf8d",
+        "#d0efdc",
+        "#fff8d9"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB PNG chunk rendering_intent=0",
+      "sha256": "906e9fef16983d9139820b474ca1a3afd4d0b2c1835c162e4128cc7cc3944793"
+    },
+    {
+      "id": "result_draw_ja",
+      "file": "assets/result_draw_ja.png",
+      "purpose": "引き分け",
+      "classification": "new_candidate",
+      "canvas": [
+        160,
+        64
+      ],
+      "frame": [
+        0,
+        0,
+        160,
+        64
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "ink_box": [
+        1,
+        10,
+        160,
+        52
+      ],
+      "colors_excluding_transparent": 16,
+      "palette": [
+        "#08172b",
+        "#1376c2",
+        "#1453a0",
+        "#16b6dc",
+        "#25cbd5",
+        "#53cdbc",
+        "#58d4e2",
+        "#84cba2",
+        "#90e3df",
+        "#b5cf8d",
+        "#d0efdc",
+        "#f5af24",
+        "#ffc940",
+        "#ffdf70",
+        "#fff0ac",
+        "#fff8d9"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB PNG chunk rendering_intent=0",
+      "sha256": "d1091640424ebd58e1f898a846687a4eab62b00c5ba913eb61196f245b68c51a"
+    },
+    {
+      "id": "result_match_ja",
+      "file": "assets/result_match_ja.png",
+      "purpose": "対戦結果",
+      "classification": "new_candidate",
+      "canvas": [
+        160,
+        64
+      ],
+      "frame": [
+        0,
+        0,
+        160,
+        64
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "ink_box": [
+        1,
+        10,
+        160,
+        52
+      ],
+      "colors_excluding_transparent": 17,
+      "palette": [
+        "#08172b",
+        "#109ad2",
+        "#1376c2",
+        "#1453a0",
+        "#16b6dc",
+        "#25cbd5",
+        "#53cdbc",
+        "#58d4e2",
+        "#84cba2",
+        "#90e3df",
+        "#b5cf8d",
+        "#d0efdc",
+        "#f5af24",
+        "#ffc940",
+        "#ffdf70",
+        "#fff0ac",
+        "#fff8d9"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB PNG chunk rendering_intent=0",
+      "sha256": "a39e4b119694a52b740026dbadd6cbec3b78993bb8a5588ef6ea39ffcd8c8a7f"
+    }
+  ],
+  "reuse": {
+    "numeric": {
+      "source": "gfx/assets/legacy/display_numeric_sheet.png",
+      "sheet_id": "S12",
+      "sha256": "7a7586a355fb6fb3d53c806477702fc3273b0162f5e166b827d3c75fa0aa52aa",
+      "cell": [
+        36,
+        34
+      ],
+      "phase_y": {
+        "A": 0,
+        "B": 40,
+        "C": 80
+      },
+      "metrics": {
+        "0": {
+          "id_prefix": "display_0_",
+          "ink_box": [
+            1,
+            0,
+            35,
+            32
+          ],
+          "advance": 32
+        },
+        "1": {
+          "id_prefix": "display_1_",
+          "ink_box": [
+            5,
+            0,
+            31,
+            34
+          ],
+          "advance": 24
+        },
+        "2": {
+          "id_prefix": "display_2_",
+          "ink_box": [
+            1,
+            0,
+            35,
+            34
+          ],
+          "advance": 32
+        },
+        "3": {
+          "id_prefix": "display_3_",
+          "ink_box": [
+            1,
+            0,
+            34,
+            34
+          ],
+          "advance": 31
+        },
+        "4": {
+          "id_prefix": "display_4_",
+          "ink_box": [
+            1,
+            0,
+            35,
+            32
+          ],
+          "advance": 32
+        },
+        "5": {
+          "id_prefix": "display_5_",
+          "ink_box": [
+            1,
+            0,
+            34,
+            34
+          ],
+          "advance": 31
+        },
+        "6": {
+          "id_prefix": "display_6_",
+          "ink_box": [
+            1,
+            0,
+            35,
+            33
+          ],
+          "advance": 32
+        },
+        "7": {
+          "id_prefix": "display_7_",
+          "ink_box": [
+            1,
+            0,
+            35,
+            34
+          ],
+          "advance": 32
+        },
+        "8": {
+          "id_prefix": "display_8_",
+          "ink_box": [
+            1,
+            0,
+            35,
+            33
+          ],
+          "advance": 32
+        },
+        "9": {
+          "id_prefix": "display_9_",
+          "ink_box": [
+            1,
+            0,
+            35,
+            33
+          ],
+          "advance": 32
+        },
+        "×": {
+          "id_prefix": "display_times_",
+          "ink_box": [
+            1,
+            0,
+            35,
+            33
+          ],
+          "advance": 32
+        },
+        ".": {
+          "id_prefix": "display_dot_",
+          "ink_box": [
+            11,
+            22,
+            24,
+            34
+          ],
+          "advance": 11
+        }
+      }
+    },
+    "standalone": [
+      {
+        "id": "icon_kotaro",
+        "file": "assets/icon_kotaro.png",
+        "dimensions": [
+          64,
+          64
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "37c9f4ca728b6f5d8560ade526c20b714fb296294ca38355979a6743da4e1ccd"
+      },
+      {
+        "id": "icon_akane",
+        "file": "assets/icon_akane.png",
+        "dimensions": [
+          64,
+          64
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "c5f6a1bd8e5495eb2ed69c598d47ed65df3ea1397fd9e1197e4d0e9070f263b1"
+      },
+      {
+        "id": "icon_zunko",
+        "file": "assets/icon_zunko.png",
+        "dimensions": [
+          64,
+          64
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "2741c8a798117d8a10b6160f3540f48a915b7ddf0ce66501f5600f3e8806f76c"
+      },
+      {
+        "id": "menu_kotaro",
+        "file": "assets/menu_kotaro.png",
+        "dimensions": [
+          144,
+          168
+        ],
+        "origin": [
+          72,
+          167
+        ],
+        "sha256": "11ec4d4d68b1f213f8e69ff8b370489670ca541e7e19ab269be36578869e4059"
+      },
+      {
+        "id": "menu_akane",
+        "file": "assets/menu_akane.png",
+        "dimensions": [
+          144,
+          168
+        ],
+        "origin": [
+          72,
+          167
+        ],
+        "sha256": "8a9019a5435b59d6ed2e273c4fba000755e6cdbed99772429bfb625b7337e52c"
+      },
+      {
+        "id": "menu_zunko",
+        "file": "assets/menu_zunko.png",
+        "dimensions": [
+          144,
+          168
+        ],
+        "origin": [
+          72,
+          167
+        ],
+        "sha256": "6539db991f051827d3122afa9e0347fb3f1624e862110317b49ffd6bb6af2a48"
+      },
+      {
+        "id": "cursor_1p_focus",
+        "file": "assets/cursor_1p_focus.png",
+        "dimensions": [
+          96,
+          96
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "6b0eb374399fe576ac88c07892aa6b0d801be873ed7b3deb1b47a622b5abcb32"
+      },
+      {
+        "id": "dialog_panel",
+        "file": "assets/dialog_panel.png",
+        "dimensions": [
+          288,
+          112
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "d4e14525fc1d8826274b205b0e1533076dda0e09447fa2c94dbff421c2fb054f"
+      },
+      {
+        "id": "attack_stock_nekotaro_large",
+        "file": "assets/attack_stock_nekotaro_large.png",
+        "dimensions": [
+          16,
+          16
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "76edadbb9a738e7cb6ae5084008762dc516981237fd76a8447bf9b6b7dc66996"
+      },
+      {
+        "id": "attack_stock_nekotaro_small",
+        "file": "assets/attack_stock_nekotaro_small.png",
+        "dimensions": [
+          8,
+          8
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "aa2b2c6b61cab351612643b91f7bfe03acd1d3b03c96e274937d0aa0ff68239e"
+      },
+      {
+        "id": "attack_stock_nekotaro_large_xd",
+        "file": "assets/attack_stock_nekotaro_large_xd.png",
+        "dimensions": [
+          16,
+          16
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "d910e08284958f342f64932ecd8b5a5451aa4895c74bcfe160b8e12c272c01c9"
+      },
+      {
+        "id": "attack_stock_nekotaro_small_xd",
+        "file": "assets/attack_stock_nekotaro_small_xd.png",
+        "dimensions": [
+          8,
+          8
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "ba088f277eb9ee13a2f64bff003a346ff1606161e73153105eb422dea7f0f780"
+      },
+      {
+        "id": "attack_stock_cancel_burst_sheet",
+        "file": "assets/attack_stock_cancel_burst_sheet.png",
+        "dimensions": [
+          96,
+          24
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "d5017be8f971af8e394daf3f22fe14daf951a5cf70d79fa9a66f6bc95bae857c"
+      },
+      {
+        "id": "attack_stock_cancel_burst_small_sheet",
+        "file": "assets/attack_stock_cancel_burst_small_sheet.png",
+        "dimensions": [
+          48,
+          12
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "6a89802a9d25f0d6f3ff971237f55f77951265fb4588fe53126a96152213e0f5"
+      },
+      {
+        "id": "attack_stock_active_frame",
+        "file": "assets/attack_stock_active_frame.png",
+        "dimensions": [
+          22,
+          22
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "9a99fbe69470becf3c26667567d983a3b8d46cb6f7417b68d71a39d989c93ccb"
+      },
+      {
+        "id": "attack_stock_active_frame_bright",
+        "file": "assets/attack_stock_active_frame_bright.png",
+        "dimensions": [
+          22,
+          22
+        ],
+        "origin": [
+          0,
+          0
+        ],
+        "sha256": "da9ac7074ece3771e2bc84a4868d0d3195686a55b66b5f0a54e95f8127b693d7"
+      }
+    ],
+    "role_logo": "S7/role_00_Aを比較基準として使用。S7一式を変更しない。",
+    "results": [
+      "S9/show_win_A/B/C",
+      "S9/show_lose_A/B/C",
+      "S9/show_draw_A/B/C",
+      "S9/show_result_A/B/C"
+    ],
+    "countdown": [
+      "S9/show_countdown_3_A/B/C",
+      "S9/show_countdown_2_A/B/C",
+      "S9/show_countdown_1_A/B/C"
+    ]
+  },
+  "crack_alignment": {
+    "uncropped_digit_cell": [
+      36,
+      34
+    ],
+    "crack_canvas": [
+      32,
+      34
+    ],
+    "offset_in_digit_cell": [
+      2,
+      0
+    ],
+    "rule": "各数字セルでマスクしてからink_boxで切り出す。複数桁へは個別合成。ヒビ画像を数字の幅へ伸縮しない。縮小する場合は合成後に最近傍で等比縮小。",
+    "phase_policy": "同じヒビ画像をA/B/C共通で使用。3パターンは候補差分であり、連番アニメーションや段階的悪化を指定しない。"
+  },
+  "placement": "素材原点は各PNG左上(0,0)。ゲーム内配置は未指定。",
+  "static_only": true
+}

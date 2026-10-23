@@ -178,6 +178,7 @@ export class SingleSession {
       const carry: SingleCarry = {
         score: this.game.single.score,
         streakCount: p.streakRemaining > 0 ? p.streakCount : 0,
+        streakCutReserved: p.streakRemaining > 0 && p.streakCutReserved,
         chainCount: p.chainRemaining > 0 ? p.chainCount : 0,
       };
       this.stage++;

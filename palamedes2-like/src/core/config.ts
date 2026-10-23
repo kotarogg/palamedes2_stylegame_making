@@ -47,12 +47,12 @@ export type Difficulty = 'easy' | 'normal' | 'hard';
 export const NATURAL_RISE_MS: Record<Difficulty, number> = { easy: 7000, normal: 5000, hard: 3000 };
 export const DIFFICULTY_LABEL: Record<Difficulty, string> = { easy: '初級', normal: '中級', hard: '上級' };
 
-/** 連続取得の攻撃倍率（確定）。得点倍率とは別表 */
+/** 打ち上げ成功連鎖（連続取得）の攻撃倍率（v3.1.0 確定：1〜6回×1、7〜12回×1.25、13〜18回×1.5、19回以上×1.75）。得点倍率とは別表 */
 export const STREAK_ATTACK_TABLE: readonly StreakStep[] = [
   { minCount: 1, percent: 100 },
-  { minCount: 3, percent: 125 },
-  { minCount: 5, percent: 150 },
-  { minCount: 7, percent: 175 },
+  { minCount: 7, percent: 125 },
+  { minCount: 13, percent: 150 },
+  { minCount: 19, percent: 175 },
 ];
 
 /** 連続取得の得点倍率（確定）。MATCH画面には得点表示が無いため、現時点では保持のみ */
@@ -111,7 +111,9 @@ export const DEFAULT_CONFIG: GameConfig = {
     rotateMs: 220,
     bounceMs: 120,
     arcMs: 260,
-    descendMs: 700,
+    // v3.1.0：ミス帰還の「列の縦軸へ戻った後、空いている戻り位置へ到達する区間」を現行700msの1.6倍（所要時間）。
+    // 打ち上げ・反発・山なり帰還は変えない。帰還完了・描画・戻り位置の確保・操作制限はこの値で一致する
+    descendMs: 1120,
     riseMs: 250,
     bPoseMs: 150,
     roleIntroMs: 700,

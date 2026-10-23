@@ -27,6 +27,22 @@ export interface Assets {
   credits: CreditsText;
   /** 採用フォント（Noto Sans JP）の読込結果。false なら画面に警告を出す（黙って代替フォントへ退避しない） */
   fontLoaded: boolean;
+  /** v3.1.0 追加画像（additional_assets_v310.json の assets）。id → 定義。画像は images に同じ id で入る */
+  extra: Record<string, ExtraAssetDef>;
+}
+
+/** v3.1.0 追加画像の定義（静止1枚。原点は左上） */
+export interface ExtraAssetDef {
+  id: string;
+  file: string;
+  canvas: [number, number];
+  ink_box: [number, number, number, number];
+  sha256: string;
+}
+
+interface AdditionalAssetsV310 {
+  version: string;
+  assets: ExtraAssetDef[];
 }
 
 export const GFX_ROOT = 'gfx/';
@@ -74,22 +90,31 @@ async function loadFont(baseUrl: string, styles: FontStyles): Promise<boolean> {
 
 export async function loadAssets(baseUrl: string, darkAlpha: number): Promise<Assets> {
   const root = `${baseUrl}${GFX_ROOT}`;
-  const [raw, list, layoutData, fontStyles, credits] = await Promise.all([
+  const [raw, list, layoutData, fontStyles, credits, additional] = await Promise.all([
     loadJson<RawManifestV3>(`${root}data/graphics_manifest_v3.json`),
     loadJson<LoadingList>(`${root}data/game_loading_list.json`),
     loadJson<ScreenLayout>(`${baseUrl}data/screen_layout_v2.json`),
     loadJson<FontStyles>(`${root}data/font_styles.json`),
     loadJson<CreditsText>(`${root}data/credits_text.json`),
+    loadJson<AdditionalAssetsV310>(`${root}data/additional_assets_v310.json`),
   ]);
   const { manifest, targets } = normalizeManifest(raw, list);
   // 明示読込一覧の画像だけを読む。読み込み失敗・寸法違いは素材名を示して起動を止める
   const images = new Map<string, HTMLImageElement>();
-  const [, fontLoaded] = await Promise.all([
+  const [, , fontLoaded] = await Promise.all([
     Promise.all(
       targets.map(async (t) => {
         const img = await loadImage(`${root}${t.file}`);
         if (img.width !== t.width || img.height !== t.height) throw new Error(`${t.file}: size ${img.width}x${img.height} != manifest ${t.width}x${t.height}`);
         images.set(t.id, img);
+      }),
+    ),
+    // v3.1.0 追加画像（既存の共通マニフェストは変更しない。同じく寸法違いは起動を止める）
+    Promise.all(
+      additional.assets.map(async (a) => {
+        const img = await loadImage(`${root}${a.file}`);
+        if (img.width !== a.canvas[0] || img.height !== a.canvas[1]) throw new Error(`${a.file}: size ${img.width}x${img.height} != ${a.canvas.join('x')}`);
+        images.set(a.id, img);
       }),
     ),
     list.files.includes(fontStyles.file) ? loadFont(baseUrl, fontStyles) : Promise.resolve(false),
@@ -103,6 +128,7 @@ export async function loadAssets(baseUrl: string, darkAlpha: number): Promise<As
     fontStyles,
     credits,
     fontLoaded,
+    extra: Object.fromEntries(additional.assets.map((a) => [a.id, a])),
   };
 }
 

@@ -188,10 +188,11 @@ describe('受攻撃ブロック・攻撃波（ゲーム内）', () => {
     expect(grace.tick - t0).toBe(120);
     stepN(g, 30);
     g.step([atk(0, 4)]);
-    stepN(g, 100);
+    stepN(g, 210);
+    // v3.1.0：猶予4000ms（240tick）。追加受信で延長しない
     expect(evs(g, 'attackPinch', 0).map((e) => [e.state, e.tick - t0])).toEqual([
       ['grace', 120],
-      ['defeat', 240],
+      ['defeat', 360],
     ]);
     expect(g.result).toMatchObject({ winner: 1, outcome: 'win' });
     expect(g.players[0].board.height()).toBe(7); // 8段を描画してから負けない

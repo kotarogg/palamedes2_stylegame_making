@@ -417,16 +417,18 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     expect(evs(g.events, 'attackCancel').map((e) => e.tick)).toEqual([a.tick]);
   });
 
-  it('連続取得：成功取得から2秒以内の成功で継続し、宣言時の倍率に反映（5個×1.5）。受付時間切れは×1.0', () => {
+  it('連続取得：成功取得から2秒以内の成功で継続し、宣言時の倍率に反映（v3.1.0：8回継続中から5個で13回＝×1.5）。受付時間切れは×1.0', () => {
     const run = (waitTicks: number) => {
       const g = makeGame({ base: '1s', boards: { 0: { 2: ['2s', '3s', '4s', '5s', '6s', '1d'] }, 1: EMPTY } });
       toPlay(g);
       const T = g.config.timing;
+      g.players[0].streakCount = 8;
+      g.players[0].streakRemaining = g.ticks(2000);
       for (let i = 0; i < 5; i++) {
         g.step([cmd(0, 'launch')]);
         stepN(g, g.ticks(T.launchMs) + g.ticks(T.packMs));
       }
-      expect(evs(g.events, 'arrive').map((e) => e.streak)).toEqual([1, 2, 3, 4, 5]);
+      expect(evs(g.events, 'arrive').map((e) => e.streak)).toEqual([9, 10, 11, 12, 13]);
       stepN(g, waitTicks);
       g.step([cmd(0, 'declare')]);
       stepN(g, 400);
@@ -446,13 +448,13 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     setStock(g, 0, '1s', '2s', '3s', '4s');
     toPlay(g);
     const p = g.players[0];
-    p.streakCount = 4;
+    p.streakCount = 7;
     p.streakRemaining = 30;
     g.step([cmd(0, 'declare')]);
-    expect(evs(g.events, 'declare')[0]).toMatchObject({ streak: 4, streakPercent: 125 });
+    expect(evs(g.events, 'declare')[0]).toMatchObject({ streak: 7, streakPercent: 125 });
     stepN(g, 100); // 役処理中（30tickを超えても切れない）
     expect(p.role).not.toBeNull();
-    expect([p.streakCount, p.streakRemaining]).toEqual([4, 30]); // 宣言tickから停止
+    expect([p.streakCount, p.streakRemaining]).toEqual([7, 30]); // 宣言tickから停止
     while (p.role) g.step();
     stepN(g, 28);
     expect(g.streakActive(p)).toBe(true);

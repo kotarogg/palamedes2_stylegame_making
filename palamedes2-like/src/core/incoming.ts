@@ -35,7 +35,7 @@ export const DEFAULT_INCOMING_CONFIG: IncomingConfig = {
   stepIntervalMs: 400,
   waveGapMs: 450,
   pinchHeight: 7,
-  pinchGraceMs: 2000,
+  pinchGraceMs: 4000, // v3.1.0：攻撃ピンチ猶予 4000ms（1000/2000/3000ms で 3/2/1、4000ms で期限判定）
 };
 
 export interface IncomingStats {

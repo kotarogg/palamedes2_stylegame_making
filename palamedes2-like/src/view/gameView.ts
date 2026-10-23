@@ -178,6 +178,8 @@ export interface HudInfo {
   labels?: readonly [string, string];
   result?: ResultPlan | null;
   matchOver?: boolean;
+  /** v3.1.0 開始前待機（1000ms）中。READY 見出しをまだ出さない */
+  preStart?: boolean;
   /** プレイヤーごとのキャラクター（既定：1P コタロー／2P アカネ） */
   characters?: readonly Character[];
   /** 役名表示の予定（RoleNameDirector）。表示中のロゴと表示開始tick */
@@ -913,7 +915,7 @@ export class GameView {
       else if (r.kind === 'allStagesClear') banner('show_all_stages_complete');
       else if (r.kind === 'clear') banner('show_all_clear');
       else if (this.hud.matchOver) banner('show_result');
-    } else if (t < g.playStartTick) banner('show_ready');
+    } else if (t < g.playStartTick && !this.hud.preStart) banner('show_ready');
     else if (t < goEnd && !g.result) banner('show_go', 'go_banner');
     // MODE2 カウントダウン：数字のみ（枠・窓なし）。上から出現→停止→下へ消える。動きはコード側
     const cd = this.countdown;

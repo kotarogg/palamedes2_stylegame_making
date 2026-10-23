@@ -62,6 +62,8 @@ import { drawText, formatTime, TEXT_COLORS } from './view/text';
 
 export const W = 640;
 export const H = 360;
+/** v3.1.0 パズルシーンの開始前待機（表示準備完了後、試合開始処理へ進むまで） */
+export const PRESTART_MS = 1000;
 
 interface Scene {
   /** キー入力（生のキーコード）。メニュー操作として使う場合は MenuInput 経由の onNav を使う */
@@ -1041,6 +1043,13 @@ export class GameScene implements Scene {
   readonly debugQueue: Command[] = [];
   /** 開発版だけ：MODE1 対戦の計測（受攻撃の推移を1秒ごとに標本） */
   private recorder: RoundRecorder | null = null;
+  /**
+   * v3.1.0 開始前待機：盤面の表示準備（最初の描画）が済んでから PRESTART_MS 止めて、既存の試合開始処理（READY→GO）へ進む。
+   * シーン開始・新ラウンド・再戦で盤面を準備し直すたびに適用。待機中はゲームを進めず（操作・CPU・自然上昇・攻撃・プレイ時間）、
+   * 人の入力は読み捨てて解除後へ持ち越さない。null＝待機していない
+   */
+  private holdMs: number | null = PRESTART_MS;
+  private holdRendered = false;
 
   constructor(
     readonly app: App,
@@ -1124,6 +1133,7 @@ export class GameScene implements Scene {
 
   /** 1tick：入力収集→ロジック→ラウンド切替の隔離 */
   private step(): void {
+    if (this.holdMs !== null) return; // 新ラウンドの開始前待機に入った後は、同じフレームの残りのtickを進めない
     const s = this.session;
     const before = s.game;
     let cmds: Command[] = [];
@@ -1172,6 +1182,8 @@ export class GameScene implements Scene {
     this.staging.reset(this.game, this.stagingOpts());
     this.finalCursor = 0;
     this.recorded = false;
+    this.holdMs = PRESTART_MS;
+    this.holdRendered = false;
   }
 
   private recordIfDone(): void {
@@ -1372,7 +1384,24 @@ export class GameScene implements Scene {
 
   // ---- 進行・描画 ----
 
+  /** 開始前待機中か（自動検証用に公開） */
+  get preStartHolding(): boolean {
+    return this.holdMs !== null;
+  }
+
+  private updateHold(dtMs: number): boolean {
+    if (this.holdMs === null) return false;
+    // 人の入力は読み捨てる（キーのキュー・パッドの押下状態を更新）。CPU は思考させない
+    for (const c of this.controllers) if (!(c instanceof CpuController)) c.poll(this.game);
+    if (this.holdRendered) this.holdMs -= dtMs;
+    if (this.holdMs > 0) return true;
+    this.holdMs = null;
+    for (const c of this.controllers) c.reset?.();
+    return true;
+  }
+
   update(dtMs: number): void {
+    if (this.updateHold(dtMs)) return;
     // ゲームパッドの入力は毎フレーム取得（ロジックは固定ステップ）
     this.driver.advance(dtMs);
     this.director.sync();
@@ -1395,8 +1424,10 @@ export class GameScene implements Scene {
       matchOver: s instanceof Match && s.state === 'matchResult',
       characters: this.characters,
       roleLogo: (p, tick) => this.roleNames.logoAt(p, Math.floor(tick)),
+      preStart: this.holdMs !== null,
     };
     this.view.render(ctx, t);
+    this.holdRendered = true;
     const A = this.app.assets;
     const phase = (['A', 'B', 'C'] as const)[Math.floor(ms / 90) % 3];
     if (g.result && this.staging.acceptReady) {

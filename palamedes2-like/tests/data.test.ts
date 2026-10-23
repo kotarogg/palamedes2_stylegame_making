@@ -31,8 +31,10 @@ describe('第3版 採用グラフィック（graphics_manifest_v3：14シート�
     const pngs = list.files.filter((f) => f.endsWith('.png'));
     expect([...pngs].sort()).toEqual(entries.map((e) => e.file).sort());
     // 一覧外のPNGを同梱しない（旧版・見本を混ぜない）
+    // v3.1.0 追加画像（additional_assets_v310.json の9枚）は共通マニフェストとは別定義で同梱する
+    const extra = (JSON.parse(readFileSync(gfx('data/additional_assets_v310.json'), 'utf8')) as { assets: { file: string }[] }).assets.map((a) => a.file);
     const onDisk = [...readdirSync(gfx('assets')).filter((f) => f.endsWith('.png')).map((f) => `assets/${f}`), ...readdirSync(gfx('assets/legacy')).map((f) => `assets/legacy/${f}`)];
-    expect(onDisk.sort()).toEqual([...pngs].sort());
+    expect(onDisk.sort()).toEqual([...pngs, ...extra].sort());
   });
 
   it('再利用の9シート（S4〜S12）は第2.3版の採用PNGとバイト同一', () => {

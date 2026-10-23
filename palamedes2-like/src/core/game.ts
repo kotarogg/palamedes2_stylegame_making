@@ -124,6 +124,17 @@ export type GameEvent =
   /** 攻撃ピンチ猶予（2000ms）：grace＝開始、release＝6段以下へ下がり解除、defeat＝期限時も7段 */
   | { type: 'attackPinch'; tick: number; player: PlayerId; state: 'grace' | 'release' | 'defeat'; graceEnd: number }
   | { type: 'danger'; tick: number; player: PlayerId; state: 'grace' | 'release' | 'defeat'; graceEnd: number }
+  /**
+   * v3.1.0 ピンチ警告（自然上昇の危険猶予と攻撃ピンチ猶予をまとめた、プレイヤーごとの警告状態）。
+   * start＝警告開始（どちらかの猶予が始まり、それまで警告なし）、count＝有効な残り猶予が 3000/2000/1000ms 以下になった
+   * （value＝3/2/1）、end＝どちらの猶予も無くなった（解除・敗北）。残り猶予は両猶予の早い方（役処理中は止まる）
+   */
+  | { type: 'pinchWarn'; tick: number; player: PlayerId; state: 'start' | 'count' | 'end'; value: 3 | 2 | 1 | null; remainingMs: number | null }
+  /**
+   * v3.1.0 打ち上げ成功連鎖（連続取得）の連鎖切り。reserved＝有効な連鎖中の最初のミスで予約（成功数・倍率は維持）、
+   * ended＝予約中の再ミス（reason miss）または受付時間切れ（reason timeout）で終了（成功数0・予約解除）
+   */
+  | { type: 'streakCut'; tick: number; player: PlayerId; state: 'reserved' | 'ended'; reason: 'miss' | 'timeout'; count: number }
   | { type: 'score'; tick: number; player: PlayerId; delta: number; total: number; cause: ScoreCause }
   | { type: 'progress'; tick: number; player: PlayerId; units: number; total: number }
   | { type: 'levelUp'; tick: number; player: PlayerId; level: number; max: boolean }
@@ -185,6 +196,10 @@ export interface PlayerState {
   streakCount: number;
   /** 連続取得の受付残りtick（成功取得で2秒に更新。自分の成立役の処理中は停止） */
   streakRemaining: number;
+  /** v3.1.0 連鎖切り予約（有効な連鎖中の最初のミスで true。成功・役の宣言では解除しない） */
+  streakCutReserved: boolean;
+  /** v3.1.0 ピンチ警告の状態（表示・音へ伝えた最後の値） */
+  pinchWarn: { active: boolean; value: 3 | 2 | 1 | null };
   chainCount: number;
   /** 役連鎖の受付残りtick（自分の成立役の処理中は停止） */
   chainRemaining: number;
@@ -198,6 +213,8 @@ export type SingleKind = 'endless' | 'stage';
 export interface SingleCarry {
   score: number;
   streakCount: number;
+  /** v3.1.0：引き継ぐ連鎖の連鎖切り予約（連鎖を引き継がない場合は false） */
+  streakCutReserved?: boolean;
   chainCount: number;
 }
 
@@ -285,6 +302,7 @@ export class Game {
       this.single.score = carry.score;
       p.streakCount = carry.streakCount;
       p.streakRemaining = carry.streakCount > 0 ? this.ticks(tr.restore_streak_remaining_ms) : 0;
+      p.streakCutReserved = carry.streakCount > 0 && !!carry.streakCutReserved;
       p.chainCount = carry.chainCount;
       // 第3版 PM指定：役連鎖の受付は12000ms。ステージクリア時の最大復帰も同じ値（数値正本JSONの8000msより本指示を優先）
       p.chainRemaining = carry.chainCount > 0 ? this.ticks(this.config.chainWindowMs) : 0;
@@ -362,6 +380,8 @@ export class Game {
       graceRemaining: null,
       streakCount: 0,
       streakRemaining: 0,
+      streakCutReserved: false,
+      pinchWarn: { active: false, value: null },
       chainCount: 0,
       chainRemaining: 0,
       defeated: false,
@@ -416,7 +436,7 @@ export class Game {
       for (const p of this.players) {
         if (p.role) continue;
         if (p.chainRemaining > 0) p.chainRemaining--;
-        if (p.streakRemaining > 0) p.streakRemaining--;
+        if (p.streakRemaining > 0 && --p.streakRemaining === 0) this.endStreak(p, 'timeout');
       }
     }
     if (!this.single) {
@@ -425,6 +445,7 @@ export class Game {
       for (const p of this.players) this.processAttackSteps(p);
     }
     for (const p of this.players) this.processRise(p);
+    for (const p of this.players) this.updatePinchWarn(p);
     if (this.single && !this.players[0].board.isEmpty()) this.single.wasNonEmpty = true;
     this.resolveDefeat();
   }
@@ -867,6 +888,48 @@ export class Game {
     this.emit({ type: 'roundEnd', tick: this.tick, winner, outcome: this.result.outcome });
   }
 
+  /** v3.1.0：打ち上げ成功連鎖の終了（成功数0・倍率等倍・予約解除）。役成立連鎖には触れない */
+  private endStreak(p: PlayerState, reason: 'miss' | 'timeout'): void {
+    const count = p.streakCount;
+    p.streakCount = 0;
+    p.streakRemaining = 0;
+    p.streakCutReserved = false;
+    this.emit({ type: 'streakCut', tick: this.tick, player: p.id, state: 'ended', reason, count });
+  }
+
+  /** 有効な残り猶予（tick）：自然上昇の危険猶予と攻撃ピンチ猶予の早い方。どちらも無ければ null */
+  pinchRemainingTicks(p: PlayerState): number | null {
+    const xs = [p.graceRemaining, p.incoming.pinchRemaining].filter((x): x is number => x !== null);
+    return xs.length ? Math.max(0, Math.min(...xs)) : null;
+  }
+
+  /**
+   * v3.1.0 ピンチ警告：有効な残り猶予に同期して開始・3/2/1・終了を通知する（壁時計ではなくゲーム側の残り猶予）。
+   * 通常の危険猶予から攻撃ピンチへ移っただけでは start を出し直さない。後から始まった猶予で先行する期限を延ばさない（早い方を採る）
+   */
+  private updatePinchWarn(p: PlayerState): void {
+    const w = p.pinchWarn;
+    const rest = p.defeated ? null : this.pinchRemainingTicks(p);
+    if (rest === null) {
+      if (w.active) {
+        p.pinchWarn = { active: false, value: null };
+        this.emit({ type: 'pinchWarn', tick: this.tick, player: p.id, state: 'end', value: null, remainingMs: null });
+      }
+      return;
+    }
+    if (!w.active) {
+      p.pinchWarn = { active: true, value: null };
+      this.emit({ type: 'pinchWarn', tick: this.tick, player: p.id, state: 'start', value: null, remainingMs: rest * this.tickMs });
+    }
+    // 残り 3000ms 以下で 3、2000ms 以下で 2、1000ms 以下で 1（浮動小数の誤差を避けて tick で比較）
+    const step = (n: number) => rest <= this.ticks(n * 1000);
+    const value = rest > 0 ? (step(1) ? 1 : step(2) ? 2 : step(3) ? 3 : null) : null;
+    if (value !== null && value !== p.pinchWarn.value) {
+      p.pinchWarn = { active: true, value };
+      this.emit({ type: 'pinchWarn', tick: this.tick, player: p.id, state: 'count', value, remainingMs: rest * this.tickMs });
+    }
+  }
+
   // ---- 到達・帰還 ----
 
   private processArrivals(): void {
@@ -887,6 +950,7 @@ export class Game {
         p.roleStock = r.stock;
         discarded = r.discarded;
         // 連続取得：成功取得から次の成功取得まで2秒以内なら継続（失敗では更新・リセットしない）
+        // v3.1.0：予約中の成功も成功数・受付時間を更新する（予約は解除しない）
         p.streakCount = this.streakActive(p) ? p.streakCount + 1 : 1;
         p.streakRemaining = this.ticks(this.config.streakWindowMs);
         p.board.releaseReservation(f.col, f.piece.id);
@@ -898,6 +962,7 @@ export class Game {
         f.state = 'returning';
         f.returnEndTick = this.tick + this.t.bounceMs + this.t.arcMs + this.t.descendMs;
       }
+      const streakBefore = p.streakCount;
       this.emit({
         type: 'arrive',
         tick: this.tick,
@@ -916,6 +981,15 @@ export class Game {
         discarded,
         streak: success ? p.streakCount : 0,
       });
+      // v3.1.0 連鎖切り予約：ミスの反発が確定した時点（到達時の判定）で処理。受付時間は更新しない。
+      // 連鎖が有効でない状態のミスは何もしない（次の新しい連鎖へ予約を持ち越さない）
+      if (!success && this.streakActive(p)) {
+        if (p.streakCutReserved) this.endStreak(p, 'miss');
+        else {
+          p.streakCutReserved = true;
+          this.emit({ type: 'streakCut', tick: this.tick, player: p.id, state: 'reserved', reason: 'miss', count: streakBefore });
+        }
+      }
       if (success) {
         this.refreshRoleReady(p);
         if (this.single) {
