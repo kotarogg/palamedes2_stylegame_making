@@ -114,8 +114,11 @@ describe('CPU（確定：初級・中級・上級、見える情報だけで判�
   it('未来の生成ピースを参照しない：乱数源を変えても、新しいピースが出るまでの判断は同一', () => {
     const a = runCpu(1, 'hard', 600);
     const b = runCpu(999, 'hard', 600);
-    expect(a.log.length).toBeGreaterThan(5);
-    expect(a.log).toEqual(b.log);
+    // 新しいピース（上昇で追加される段）が出た時点より前の判断を比べる（v3.1.0 は手動上昇の判断があるため、600tick 全体ではなく出現前まで）
+    const firstNew = Math.min(...[a.g, b.g].map((g) => g.events.find((e) => e.type === 'rise')?.tick ?? Infinity));
+    const before = (log: string[]) => log.filter((l) => Number(l.split(':')[0]) < firstNew);
+    expect(before(a.log).length).toBeGreaterThan(5);
+    expect(before(a.log)).toEqual(before(b.log));
   });
 
   it('上級は初級より反応が速い（同じ盤面で成功取得10個に要する時間が短い）。CPUは不成立宣言をしない', () => {

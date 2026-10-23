@@ -1,0 +1,504 @@
+{
+ "version": "cpu-v3.1.0-initial",
+ "units": {
+  "pct": "確率（0〜100%）。抽選は seed 付き乱数で、判断機会ごとに1回",
+  "ms": "時間（ミリ秒）。ゲーム時間（60tick/秒）へ切り上げずに四捨五入で換算",
+  "order": "キャラクターは kotaro（コタロー）／akane（アカネ）／zunko（ずん子）"
+ },
+ "notes": {
+  "idleStop": "新たに目的地を探す機会につき1回抽選。当たれば ms 停止してから目的地を判断（停止後は再抽選しない）",
+  "bestPick": "取得可能な候補のうち、現在の目標（4ピース役／6ピース役）に対して最適な候補を選ぶ確率。外れは取得可能な候補からランダム",
+  "forget": "移動計画につき1回抽選。移動開始後の最初の実行可能な判断時点で ms 停止し再判断（同じ移動機会で再抽選しない。目的地なしの停止と重ねない）",
+  "sixChallenge": "6ピース役への取得経路が確認できる場合だけ抽選。hand3＝手元3、hand4Role＝手元4で役成立、hand5Role4＝手元5のうち4で役成立",
+  "declareFour": "4ピース役成立・6ピース役への経路なし（通常時）の宣言率。外れは役を維持できる1ピース取得後に再評価。手元5で経路なしは宣言。ピンチ中は100",
+  "declareSix": "6ピース役成立の宣言率（通常／ピンチとも）",
+  "manualRise": "残り段数（盤面に残る最長列の段数）0／1／2段での手動上昇の確率。見送ったら次の取得完了・盤面変化まで再抽選しない",
+  "pinchMarginMs": "ピンチ時計画の判断余裕（実際の停止時間ではない）：取得経路＋宣言から解除まで＋余裕 < 有効な残り猶予",
+  "mode2BestPick": "MODE2 の最適候補選択率（判断待ち・失念は MODE1 通常時を流用）",
+  "actionGapMs": "操作の間に入れる追加の固定待ち。既定0（表の停止以外に固定の思考待ちを足さない）"
+ },
+ "idleStop": {
+  "easy": {
+   "normal": {
+    "kotaro": {
+     "pct": 25,
+     "ms": 220
+    },
+    "akane": {
+     "pct": 20,
+     "ms": 200
+    },
+    "zunko": {
+     "pct": 25,
+     "ms": 240
+    }
+   },
+   "pinch": {
+    "kotaro": {
+     "pct": 15,
+     "ms": 140
+    },
+    "akane": {
+     "pct": 12,
+     "ms": 120
+    },
+    "zunko": {
+     "pct": 10,
+     "ms": 140
+    }
+   }
+  },
+  "normal": {
+   "normal": {
+    "kotaro": {
+     "pct": 12,
+     "ms": 140
+    },
+    "akane": {
+     "pct": 10,
+     "ms": 120
+    },
+    "zunko": {
+     "pct": 12,
+     "ms": 150
+    }
+   },
+   "pinch": {
+    "kotaro": {
+     "pct": 6,
+     "ms": 90
+    },
+    "akane": {
+     "pct": 5,
+     "ms": 80
+    },
+    "zunko": {
+     "pct": 4,
+     "ms": 90
+    }
+   }
+  },
+  "hard": {
+   "normal": {
+    "kotaro": {
+     "pct": 5,
+     "ms": 80
+    },
+    "akane": {
+     "pct": 4,
+     "ms": 70
+    },
+    "zunko": {
+     "pct": 5,
+     "ms": 90
+    }
+   },
+   "pinch": {
+    "kotaro": {
+     "pct": 2,
+     "ms": 50
+    },
+    "akane": {
+     "pct": 2,
+     "ms": 50
+    },
+    "zunko": {
+     "pct": 1,
+     "ms": 50
+    }
+   }
+  }
+ },
+ "bestPick": {
+  "easy": {
+   "normal": {
+    "kotaro": 80,
+    "akane": 78,
+    "zunko": 84
+   },
+   "pinch": {
+    "kotaro": 86,
+    "akane": 84,
+    "zunko": 90
+   }
+  },
+  "normal": {
+   "normal": {
+    "kotaro": 93,
+    "akane": 91,
+    "zunko": 95
+   },
+   "pinch": {
+    "kotaro": 96,
+    "akane": 95,
+    "zunko": 98
+   }
+  },
+  "hard": {
+   "normal": {
+    "kotaro": 98,
+    "akane": 97,
+    "zunko": 99
+   },
+   "pinch": {
+    "kotaro": 99,
+    "akane": 99,
+    "zunko": 100
+   }
+  }
+ },
+ "forget": {
+  "easy": {
+   "normal": {
+    "kotaro": {
+     "pct": 8,
+     "ms": 180
+    },
+    "akane": {
+     "pct": 10,
+     "ms": 160
+    },
+    "zunko": {
+     "pct": 6,
+     "ms": 200
+    }
+   },
+   "pinch": {
+    "kotaro": {
+     "pct": 5,
+     "ms": 120
+    },
+    "akane": {
+     "pct": 6,
+     "ms": 100
+    },
+    "zunko": {
+     "pct": 3,
+     "ms": 120
+    }
+   }
+  },
+  "normal": {
+   "normal": {
+    "kotaro": {
+     "pct": 3,
+     "ms": 120
+    },
+    "akane": {
+     "pct": 4,
+     "ms": 100
+    },
+    "zunko": {
+     "pct": 2,
+     "ms": 140
+    }
+   },
+   "pinch": {
+    "kotaro": {
+     "pct": 2,
+     "ms": 80
+    },
+    "akane": {
+     "pct": 2,
+     "ms": 70
+    },
+    "zunko": {
+     "pct": 1,
+     "ms": 90
+    }
+   }
+  },
+  "hard": {
+   "normal": {
+    "kotaro": {
+     "pct": 1,
+     "ms": 70
+    },
+    "akane": {
+     "pct": 2,
+     "ms": 60
+    },
+    "zunko": {
+     "pct": 1,
+     "ms": 80
+    }
+   },
+   "pinch": {
+    "kotaro": {
+     "pct": 1,
+     "ms": 50
+    },
+    "akane": {
+     "pct": 1,
+     "ms": 50
+    },
+    "zunko": {
+     "pct": 0,
+     "ms": 0
+    }
+   }
+  }
+ },
+ "sixChallenge": {
+  "easy": {
+   "normal": {
+    "hand3": {
+     "kotaro": 30,
+     "akane": 40,
+     "zunko": 25
+    },
+    "hand4Role": {
+     "kotaro": 25,
+     "akane": 35,
+     "zunko": 20
+    },
+    "hand5Role4": {
+     "kotaro": 65,
+     "akane": 75,
+     "zunko": 60
+    }
+   },
+   "pinch": {
+    "hand3": {
+     "kotaro": 15,
+     "akane": 25,
+     "zunko": 10
+    },
+    "hand4Role": {
+     "kotaro": 15,
+     "akane": 25,
+     "zunko": 10
+    },
+    "hand5Role4": {
+     "kotaro": 55,
+     "akane": 65,
+     "zunko": 50
+    }
+   }
+  },
+  "normal": {
+   "normal": {
+    "hand3": {
+     "kotaro": 55,
+     "akane": 65,
+     "zunko": 45
+    },
+    "hand4Role": {
+     "kotaro": 45,
+     "akane": 60,
+     "zunko": 35
+    },
+    "hand5Role4": {
+     "kotaro": 85,
+     "akane": 92,
+     "zunko": 80
+    }
+   },
+   "pinch": {
+    "hand3": {
+     "kotaro": 45,
+     "akane": 55,
+     "zunko": 35
+    },
+    "hand4Role": {
+     "kotaro": 40,
+     "akane": 50,
+     "zunko": 30
+    },
+    "hand5Role4": {
+     "kotaro": 80,
+     "akane": 88,
+     "zunko": 75
+    }
+   }
+  },
+  "hard": {
+   "normal": {
+    "hand3": {
+     "kotaro": 75,
+     "akane": 85,
+     "zunko": 65
+    },
+    "hand4Role": {
+     "kotaro": 65,
+     "akane": 80,
+     "zunko": 55
+    },
+    "hand5Role4": {
+     "kotaro": 96,
+     "akane": 99,
+     "zunko": 93
+    }
+   },
+   "pinch": {
+    "hand3": {
+     "kotaro": 75,
+     "akane": 85,
+     "zunko": 65
+    },
+    "hand4Role": {
+     "kotaro": 70,
+     "akane": 80,
+     "zunko": 60
+    },
+    "hand5Role4": {
+     "kotaro": 95,
+     "akane": 98,
+     "zunko": 92
+    }
+   }
+  }
+ },
+ "declareFour": {
+  "easy": {
+   "normal": {
+    "kotaro": 90,
+    "akane": 85,
+    "zunko": 95
+   },
+   "pinch": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   }
+  },
+  "normal": {
+   "normal": {
+    "kotaro": 95,
+    "akane": 90,
+    "zunko": 98
+   },
+   "pinch": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   }
+  },
+  "hard": {
+   "normal": {
+    "kotaro": 98,
+    "akane": 95,
+    "zunko": 100
+   },
+   "pinch": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   }
+  }
+ },
+ "declareSix": {
+  "easy": {
+   "normal": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   },
+   "pinch": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   }
+  },
+  "normal": {
+   "normal": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   },
+   "pinch": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   }
+  },
+  "hard": {
+   "normal": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   },
+   "pinch": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   }
+  }
+ },
+ "manualRise": {
+  "easy": {
+   "rows0": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   },
+   "rows1": {
+    "kotaro": 80,
+    "akane": 90,
+    "zunko": 70
+   },
+   "rows2": {
+    "kotaro": 35,
+    "akane": 50,
+    "zunko": 25
+   }
+  },
+  "normal": {
+   "rows0": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   },
+   "rows1": {
+    "kotaro": 90,
+    "akane": 95,
+    "zunko": 85
+   },
+   "rows2": {
+    "kotaro": 50,
+    "akane": 65,
+    "zunko": 40
+   }
+  },
+  "hard": {
+   "rows0": {
+    "kotaro": 100,
+    "akane": 100,
+    "zunko": 100
+   },
+   "rows1": {
+    "kotaro": 95,
+    "akane": 100,
+    "zunko": 90
+   },
+   "rows2": {
+    "kotaro": 65,
+    "akane": 80,
+    "zunko": 55
+   }
+  }
+ },
+ "pinchMarginMs": {
+  "easy": 500,
+  "normal": 350,
+  "hard": 200
+ },
+ "mode2BestPick": {
+  "easy": {
+   "kotaro": 80,
+   "akane": 78,
+   "zunko": 84
+  },
+  "normal": {
+   "kotaro": 93,
+   "akane": 91,
+   "zunko": 95
+  },
+  "hard": {
+   "kotaro": 98,
+   "akane": 97,
+   "zunko": 99
+  }
+ },
+ "actionGapMs": 0
+}

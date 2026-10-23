@@ -1117,7 +1117,7 @@ export class GameScene implements Scene {
         this.pads[p] = g;
         this.controllers.push(g);
       } else {
-        this.controllers.push(new CpuController(p, d.level, (Math.random() * 1e9) >>> 0));
+        this.controllers.push(new CpuController(p, d.level, (Math.random() * 1e9) >>> 0, this.characters[p]));
       }
     });
   }
