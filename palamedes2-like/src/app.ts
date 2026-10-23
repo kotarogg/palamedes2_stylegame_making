@@ -90,12 +90,20 @@ export interface AppDeps {
   dev: boolean;
 }
 
-/** CPU対戦の相手の順（第15章）：アカネ→ずん子→アカネ… 「次の相手へ」だけで進む。保存しない */
-export const CPU_ORDER: readonly Character[] = ['akane', 'zunko'];
+/**
+ * CPU対戦の相手の順（v3.1.0）：固定順「コタロー→アカネ→ずん子」から1Pのキャラを除いた2人を繰り返す。
+ * 「次の相手へ」だけで進む（次のラウンド・再戦では交代しない）。保存しない
+ */
+export const CPU_FIXED_ORDER: readonly Character[] = ['kotaro', 'akane', 'zunko'];
 
-export function nextCpuOpponent(c: Character): Character {
-  const i = CPU_ORDER.indexOf(c);
-  return CPU_ORDER[(i + 1) % CPU_ORDER.length];
+export function cpuOrderFor(me: Character): Character[] {
+  return CPU_FIXED_ORDER.filter((c) => c !== me);
+}
+
+export function nextCpuOpponent(me: Character, current: Character): Character {
+  const order = cpuOrderFor(me);
+  const i = order.indexOf(current);
+  return order[(i + 1) % order.length];
 }
 
 export class App {
@@ -104,8 +112,10 @@ export class App {
   scene: Scene;
   readonly menuInput: MenuInput;
   settingsSaved = true;
-  /** CPU対戦の現在の相手（メインメニューへ戻るとアカネへ戻す。保存しない） */
-  cpuOpponent: Character = CPU_ORDER[0];
+  /** CPU対戦の1Pのキャラ（キャラクター選択で決定。メニューへ戻るとコタローへ戻す。保存しない） */
+  cpuPlayer: Character = 'kotaro';
+  /** CPU対戦の現在の相手（1Pのキャラを除いた固定順の先頭から。保存しない） */
+  cpuOpponent: Character = cpuOrderFor('kotaro')[0];
   /** クレジットのページ位置（URLを開いて戻っても維持） */
   creditsPage = 0;
   /** 開発版だけ：人間のプレイの計測記録（第21章。製品画面には出さない） */
@@ -138,11 +148,12 @@ export class App {
     this.menuInput.clear();
   }
 
-  /** メインメニューへ（CPU対戦の相手順はアカネへ戻す） */
+  /** メインメニューへ（CPU対戦の1Pキャラはコタロー、相手順は先頭へ戻す） */
   toMenu(openPath: readonly string[] = []): void {
     this.bus.stopEffects();
     this.bus.playBgm('menu');
-    this.cpuOpponent = CPU_ORDER[0];
+    this.cpuPlayer = 'kotaro';
+    this.cpuOpponent = cpuOrderFor('kotaro')[0];
     this.setScene(new MenuScene(this, openPath));
   }
 
@@ -199,11 +210,11 @@ export class App {
 
   // ---- 試合開始 ----
 
-  /** characters：シングル＝コタロー、CPU対戦＝コタロー対現在の相手、2P対戦＝キャラ選択の結果 */
+  /** characters：シングル＝コタロー、CPU対戦＝1Pの選択キャラ対現在の相手、2P対戦＝キャラ選択の結果 */
   startGame(mode: GameMode, kind: 'single' | 'cpu' | '2p', singleMode?: SingleMode, characters?: readonly Character[], opts: { keepSelectVoices?: boolean } = {}): void {
     // キャラクター選択から：決定ボイス（select）だけは止めずに終端まで鳴らす。他の声・SEは止める
     this.bus.stopEffects(opts.keepSelectVoices ? ['select'] : []);
-    const chars: readonly Character[] = kind === 'single' ? ['kotaro'] : kind === 'cpu' ? ['kotaro', this.cpuOpponent] : (characters ?? ['kotaro', 'akane']);
+    const chars: readonly Character[] = kind === 'single' ? ['kotaro'] : kind === 'cpu' ? [this.cpuPlayer, this.cpuOpponent] : (characters ?? ['kotaro', 'akane']);
     this.setScene(new GameScene(this, mode, kind, singleMode, chars));
   }
 }
@@ -263,7 +274,7 @@ export class MenuScene implements Scene {
               { label: 'ステージクリア', desc: '全10ステージ。各ステージの消去ノルマを達成する', run: () => a.startGame('mode1', 'single', 'stage') },
             ],
           },
-          { label: 'CPU対戦', desc: 'コタローでCPUと対戦（相手はアカネ→東北ずん子の順）', run: () => a.startGame('mode1', 'cpu') },
+          { label: 'CPU対戦', desc: 'キャラクターを選んでCPUと対戦（相手は残る2人を順に）', run: () => a.setScene(new CpuCharacterSelectScene(a, 'mode1', 'kotaro')) },
           { label: '2P対戦', desc: '1台のPCで2人対戦（キャラクター選択へ）', run: () => a.setScene(new CharacterSelectScene(a, 'mode1')) },
         ],
       },
@@ -272,7 +283,7 @@ export class MenuScene implements Scene {
         desc: '場のカードへ出せるピースを打ち上げ、先に盤面を空にする',
         children: [
           { label: 'シングル', desc: '盤面を空にするまでのタイムを競う', run: () => a.startGame('mode2', 'single', 'mode2') },
-          { label: 'CPU対戦', desc: 'コタローでCPUと対戦（相手はアカネ→東北ずん子の順）', run: () => a.startGame('mode2', 'cpu') },
+          { label: 'CPU対戦', desc: 'キャラクターを選んでCPUと対戦（相手は残る2人を順に）', run: () => a.setScene(new CpuCharacterSelectScene(a, 'mode2', 'kotaro')) },
           { label: '2P対戦', desc: '1台のPCで2人対戦（キャラクター選択へ）', run: () => a.setScene(new CharacterSelectScene(a, 'mode2')) },
         ],
       },
@@ -491,6 +502,140 @@ export class CharacterSelectScene implements Scene {
     drawCharacterSelect(ctx, this.app.assets, this.sel.cursors, this.sel.locked, ms);
     drawText(ctx, `${this.mode === 'mode1' ? 'MODE1' : 'MODE2'} 2P対戦`, 572, 18, { align: 'right', size: 12, color: TEXT_COLORS.secondary });
     drawText(ctx, '左右：選択　発射キー／A：決定　B入れ替えキー／B／Esc：取消・戻る', 320, 346, { align: 'center', size: 9, color: TEXT_COLORS.secondary });
+  }
+}
+
+/** CPU対戦のキャラクター選択の状態（DOM非依存。テスト対象）。キャンセルで「メニューに戻りますか？」を出す */
+export class CpuCharacterSelect {
+  cursor: number;
+  /** 確認ポップアップ：null＝閉じている、0＝「戻らない」、1＝「戻る」（初期は「戻らない」） */
+  dialog: 0 | 1 | null = null;
+  confirmed = false;
+
+  constructor(initial: Character = 'kotaro') {
+    this.cursor = Math.max(0, SELECT_SLOTS.indexOf(initial));
+  }
+
+  get character(): Character {
+    return SELECT_SLOTS[this.cursor];
+  }
+
+  /** 入力1件。返り値：画面側の処理（効果音・遷移） */
+  input(act: SelectAction): 'move' | 'confirm' | 'open' | 'dialogMove' | 'stay' | 'leave' | 'none' {
+    if (this.confirmed) return 'none';
+    if (this.dialog !== null) {
+      // ポップアップ表示中は背後を操作させない
+      if (act === 'left' || act === 'right') {
+        this.dialog = this.dialog === 0 ? 1 : 0;
+        return 'dialogMove';
+      }
+      if (act === 'confirm') {
+        const leave = this.dialog === 1;
+        this.dialog = null;
+        return leave ? 'leave' : 'stay';
+      }
+      this.dialog = null; // ポップアップ内のキャンセル＝戻らない（選択位置は維持）
+      return 'stay';
+    }
+    if (act === 'left' || act === 'right') {
+      const n = SELECT_SLOTS.length;
+      this.cursor = (this.cursor + (act === 'left' ? -1 : 1) + n) % n;
+      return 'move';
+    }
+    if (act === 'confirm') {
+      this.confirmed = true;
+      return 'confirm';
+    }
+    this.dialog = 0;
+    return 'open';
+  }
+}
+
+/**
+ * CPU対戦のキャラクター選択（MODE1・MODE2）。1Pがコタロー／アカネ／ずん子から選ぶ。2Pカーソルは出さない。
+ * CPU は1Pと同じキャラにしない（固定順から1Pを除いた2人）。入力は1Pの機器（キーボードは1Pの割当と ←→／Enter／Esc）。
+ */
+export class CpuCharacterSelectScene implements Scene {
+  readonly rawKeys = true;
+  readonly sel: CpuCharacterSelect;
+  private pending: SelectAction[] = [];
+  private readonly keyboard: KeyboardController | null;
+
+  constructor(
+    private readonly app: App,
+    readonly mode: GameMode,
+    initial: Character,
+  ) {
+    this.sel = new CpuCharacterSelect(initial);
+    const d = app.settings.devices[0];
+    this.keyboard = d.kind === 'keyboard' ? new KeyboardController(0, app.settings.keys[0]) : null;
+    app.bus.playBgm('menu');
+  }
+
+  onKey(code: string, repeat: boolean): boolean {
+    const a = this.keyboard?.actionOf(code);
+    if (a) {
+      if (a === 'left' || a === 'right') this.pending.push(a);
+      else if (!repeat && a === 'launch') this.pending.push('confirm');
+      else if (!repeat && a === 'rotate') this.pending.push('back');
+      return true;
+    }
+    if (code === 'ArrowLeft' || code === 'ArrowRight') this.pending.push(code === 'ArrowLeft' ? 'left' : 'right');
+    else if (!repeat && (code === 'Enter' || code === 'NumpadEnter' || code === 'Space')) this.pending.push('confirm');
+    else if (!repeat && (code === 'Escape' || code === 'Backspace')) this.pending.push('back');
+    else return false;
+    return true;
+  }
+
+  onNav(ev: NavEvent): void {
+    if (ev.source.kind !== 'pad') return;
+    const d = this.app.settings.devices[0];
+    if (d.kind === 'gamepad' && d.index !== ev.source.index) return;
+    const act: SelectAction | null = ev.key === 'left' || ev.key === 'right' ? ev.key : ev.key === 'confirm' ? 'confirm' : ev.key === 'back' ? 'back' : null;
+    if (act) this.pending.push(act);
+  }
+
+  update(): void {
+    const bus = this.app.bus;
+    for (const act of this.pending.splice(0)) {
+      switch (this.sel.input(act)) {
+        case 'move':
+        case 'dialogMove':
+          bus.playSfx('ui_move');
+          break;
+        case 'open':
+        case 'stay':
+          bus.playSfx(act === 'back' ? 'ui_cancel' : 'ui_confirm');
+          break;
+        case 'leave':
+          bus.playSfx('ui_cancel');
+          return this.app.toMenu([this.mode === 'mode1' ? 'MODE1' : 'MODE2']);
+        case 'confirm': {
+          const me = this.sel.character;
+          bus.playSfx('ui_confirm');
+          bus.playVoice(me, 'select', VOICE_PRIORITY.start, 'select');
+          this.app.cpuPlayer = me;
+          this.app.cpuOpponent = cpuOrderFor(me)[0];
+          // 決定の入力は試合へ渡さない（同じフレームの残りの入力は捨てる）
+          return this.app.startGame(this.mode, 'cpu', undefined, undefined, { keepSelectVoices: true });
+        }
+        default:
+          break;
+      }
+    }
+  }
+
+  render(ctx: CanvasRenderingContext2D, ms: number): void {
+    drawCharacterSelect(ctx, this.app.assets, [this.sel.cursor, this.sel.cursor], [this.sel.confirmed, false], ms, 1);
+    drawText(ctx, `${this.mode === 'mode1' ? 'MODE1' : 'MODE2'} CPU対戦`, 572, 18, { align: 'right', size: 12, color: TEXT_COLORS.secondary });
+    drawText(ctx, `相手：${cpuOrderFor(this.sel.character).map((c) => CHARACTER_NAME[c]).join('→')}`, 320, 40, { align: 'center', size: 11, color: TEXT_COLORS.secondary });
+    drawText(ctx, '左右：選択　発射キー／A：決定　B入れ替えキー／B／Esc：戻る', 320, 346, { align: 'center', size: 9, color: TEXT_COLORS.secondary });
+    if (this.sel.dialog !== null) {
+      // 背後を暗くしてポップアップ
+      ctx.fillStyle = 'rgba(0,0,16,0.5)';
+      ctx.fillRect(0, 0, 640, 360);
+      drawConfirm(ctx, this.app.assets, 'メニューに戻りますか？', ['戻らない', '戻る'], this.sel.dialog);
+    }
   }
 }
 
@@ -1329,10 +1474,12 @@ export class GameScene implements Scene {
           ? [
               { label: '次の相手へ', act: 'next' },
               { label: '同じ相手と再戦', act: 'rematch' },
+              { label: 'キャラ選択へ', act: 'select' },
               { label: 'メニューへ', act: 'menu' },
             ]
           : [
               { label: '同じ相手に再挑戦', act: 'rematch' },
+              { label: 'キャラ選択へ', act: 'select' },
               { label: 'メニューへ', act: 'menu' },
             ];
       }
@@ -1366,10 +1513,12 @@ export class GameScene implements Scene {
         return this.app.toMenu();
       case 'next':
         // 「次の相手へ」だけが相手順を進める（新しい試合＝勝利数は0から）
-        this.app.cpuOpponent = nextCpuOpponent(this.app.cpuOpponent);
+        this.app.cpuOpponent = nextCpuOpponent(this.app.cpuPlayer, this.app.cpuOpponent);
         return this.app.startGame(this.mode, 'cpu');
       case 'select':
         this.app.bus.stopEffects();
+        // CPU対戦は現在の1Pキャラを選択位置にして戻る
+        if (this.kind === 'cpu') return this.app.setScene(new CpuCharacterSelectScene(this.app, this.mode, this.app.cpuPlayer));
         return this.app.setScene(new CharacterSelectScene(this.app, this.mode));
       case 'rematch': {
         const before = s.game;
@@ -1459,7 +1608,7 @@ export class GameScene implements Scene {
       const w = s.matchWinner;
       if (this.kind === 'cpu') {
         const opp = CHARACTER_NAME[this.characters[1]];
-        lines.push(w === 0 ? `勝利！　次の相手：${CHARACTER_NAME[nextCpuOpponent(this.app.cpuOpponent)]}` : `${w === null ? '引分け' : '敗北'}　相手：${opp}`);
+        lines.push(w === 0 ? `勝利！　次の相手：${CHARACTER_NAME[nextCpuOpponent(this.app.cpuPlayer, this.app.cpuOpponent)]}` : `${w === null ? '引分け' : '敗北'}　相手：${opp}`);
       } else lines.push(w === null ? '引分け' : `${w + 1}P WIN　${2 - w}P LOSE`);
       lines.push(`${s.wins[0]} − ${s.wins[1]}（${s.settings.firstTo}本先取・${this.mode === 'mode1' ? 'MODE1' : 'MODE2'}）`);
     } else if (g.mode === 'mode2') {

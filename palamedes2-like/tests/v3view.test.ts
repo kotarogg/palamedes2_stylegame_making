@@ -6,7 +6,7 @@ import { SoundDirector } from '../src/audio/director';
 import type { Command, Game, GameEvent } from '../src/core/game';
 import type { AnyGame } from '../src/core/match';
 import type { PlayerId } from '../src/core/types';
-import { CharacterSelect, creditPages, CPU_ORDER, nextCpuOpponent } from '../src/app';
+import { CharacterSelect, cpuOrderFor, CpuCharacterSelect, creditPages, nextCpuOpponent } from '../src/app';
 import { CHARACTER_SHEET, GameView } from '../src/view/gameView';
 import { crackerPose, planResult, RoleNameDirector, RoleNameSchedule } from '../src/view/presentation';
 import { counterAnchorOffset, DEFAULT_STOCK_VIEW, discardAnchorOffset, pendingGroupY, stockColumnLayout, stockGroupHeight, stockIcons } from '../src/view/stockLayout';
@@ -284,10 +284,45 @@ describe('キャラクター選択（S05）・CPU相手順', () => {
     expect(s.characters()).toEqual(['kotaro', 'akane']);
   });
 
-  it('CPU対戦の相手順：アカネ→ずん子→アカネ（「次の相手へ」だけで進む）', () => {
-    expect(CPU_ORDER).toEqual(['akane', 'zunko']);
-    expect(nextCpuOpponent('akane')).toBe('zunko');
-    expect(nextCpuOpponent('zunko')).toBe('akane');
+  it('v3.1.0 CPU対戦の相手順：固定順「コタロー→アカネ→ずん子」から自分を除いた2人を繰り返す（「次の相手へ」だけで進む）', () => {
+    expect(cpuOrderFor('kotaro')).toEqual(['akane', 'zunko']);
+    expect(cpuOrderFor('akane')).toEqual(['kotaro', 'zunko']);
+    expect(cpuOrderFor('zunko')).toEqual(['kotaro', 'akane']);
+    expect(nextCpuOpponent('kotaro', 'akane')).toBe('zunko');
+    expect(nextCpuOpponent('kotaro', 'zunko')).toBe('akane');
+    expect(nextCpuOpponent('akane', 'kotaro')).toBe('zunko');
+    expect(nextCpuOpponent('zunko', 'akane')).toBe('kotaro');
+    for (const me of ['kotaro', 'akane', 'zunko'] as const) expect(cpuOrderFor(me)).not.toContain(me);
+  });
+
+  it('v3.1.0 CPU対戦のキャラ選択：初期コタロー、左右で3人を循環、決定で確定。キャンセルで確認（初期「戻らない」）', () => {
+    const s = new CpuCharacterSelect();
+    expect(s.character).toBe('kotaro');
+    expect(s.input('right')).toBe('move');
+    expect(s.character).toBe('akane');
+    expect(s.input('left')).toBe('move');
+    expect(s.input('left')).toBe('move');
+    expect(s.character).toBe('zunko');
+    // キャンセル → 確認（初期は「戻らない」）。表示中は背後を操作させない
+    expect(s.input('back')).toBe('open');
+    expect(s.dialog).toBe(0);
+    expect(s.input('right')).toBe('dialogMove');
+    expect(s.character).toBe('zunko');
+    expect(s.dialog).toBe(1);
+    expect(s.input('left')).toBe('dialogMove');
+    expect(s.input('confirm')).toBe('stay'); // 戻らない：選択画面へ、位置を維持
+    expect([s.dialog, s.character]).toEqual([null, 'zunko']);
+    s.input('back');
+    expect(s.input('back')).toBe('stay'); // ポップアップ内のキャンセル＝戻らない
+    expect(s.character).toBe('zunko');
+    s.input('back');
+    s.input('right');
+    expect(s.input('confirm')).toBe('leave'); // 戻る：メニューへ
+    // キャラ選択へ戻る場合は現在の1Pキャラを選択位置にする
+    const back = new CpuCharacterSelect('akane');
+    expect(back.character).toBe('akane');
+    expect(back.input('confirm')).toBe('confirm');
+    expect(back.input('left')).toBe('none'); // 確定後は入力を受けない
   });
 
   it('クレジット：編集可能な本文をページに分け、リンクは選択できる項目として別ページ', () => {

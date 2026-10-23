@@ -177,6 +177,8 @@ export function drawCharacterSelect(
   cursors: readonly [number, number],
   locked: readonly [boolean, boolean],
   ms: number,
+  /** カーソルを出す人数（CPU対戦は1Pだけ。2Pカーソルは出さない） */
+  players: 1 | 2 = 2,
 ): void {
   drawBackground(ctx, assets);
   drawText(ctx, 'キャラクター選択', 240, 14, { size: 18, weight: 700 });
@@ -187,7 +189,7 @@ export function drawCharacterSelect(
     partAt(ctx, assets, `menu_${c}`, cx, 328);
   });
   // 1P／2Pのカーソル（決定済みは点滅しない）と「決定済み」
-  ([0, 1] as const).forEach((p) => {
+  ([0, 1] as const).slice(0, players).forEach((p) => {
     const cx = SLOT_X[cursors[p]];
     const on = locked[p] || Math.floor(ms / 400) % 2 === 0;
     part(ctx, assets, `cursor_${p + 1}p_focus`, cx - 48, 60, { alpha: on ? 1 : 0.55 });
