@@ -263,10 +263,10 @@ describe('修正R5：相殺の消失演出（数量と表示の整合）', () =>
     expect(g.events.filter((e) => e.type === 'blockStart').map((e) => (e as { player: number }).player)).toEqual([1]);
     expect(v.stockAfterimages(0, g.tick).map((a) => a.lines)).toEqual([2]);
     expect(v.stockAfterimages(1, g.tick)).toEqual([]);
-    // 2Pの列は右（x=604〜）、ラベルは列の外側
+    // v3.1.0：2Pの列は中央エリアの右側（x=352〜）、ラベルは列の中央側（1Pは右、2Pは左）
     const p2 = v.stockDrawPlan(1, g.tick);
-    expect(p2.entries.every((e) => e.x >= 600)).toBe(true);
-    expect(v.pendingCountLabel(0, g.tick)).toMatchObject({ text: '6', align: 'right' });
+    expect(p2.entries.every((e) => e.x >= 340)).toBe(true);
+    expect(v.pendingCountLabel(0, g.tick)).toMatchObject({ text: '6', align: 'left' });
     expect(v.pendingCountLabel(1, g.tick)).toBeNull(); // 待機0・相殺演出なし
   });
 

@@ -79,6 +79,77 @@ export function drawNumeric(
   ctx.restore();
 }
 
+/**
+ * v3.1.0 S12 数字の1文字（ink_box で切り出した 34px 高のセル）。crack を指定すると、切り出す前の数字セル（36×34）の (2,0) に
+ * ヒビ画像（32×34）を置き、数字の不透明部をマスクにして合成する（数字の外へはみ出さない。数字幅へ伸縮しない）。
+ * A/B/C の位相ごと・ヒビごとにキャッシュし、毎フレーム画像を作らない
+ */
+const glyphCache = new Map<string, { canvas: HTMLCanvasElement; w: number }>();
+export function numericGlyph(assets: Assets, ch: string, phase: Phase, crack: string | null): { canvas: HTMLCanvasElement; w: number } {
+  const key = `${ch}|${phase}|${crack ?? ''}`;
+  const hit = glyphCache.get(key);
+  if (hit) return hit;
+  const font = assets.atlas.manifest.display_font!;
+  const m = font.metrics[ch];
+  if (!m) throw new Error(`unsupported display glyph: ${ch}`);
+  const f = assets.atlas.frame(font.sheet, m.id_prefix + phase);
+  const w = m.ink_box[2] - m.ink_box[0];
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = 34;
+  const g = c.getContext('2d')!;
+  g.imageSmoothingEnabled = false;
+  g.drawImage(assets.images.get(font.sheet)!, f.x + m.ink_box[0], f.y, w, 34, 0, 0, w, 34);
+  if (crack) {
+    // マスク：既に描いた数字の不透明部だけにヒビを重ねる（切り出し後の相対位置は 2−ink_box.x0）
+    g.globalCompositeOperation = 'source-atop';
+    g.drawImage(assets.images.get(crack)!, 2 - m.ink_box[0], 0);
+    g.globalCompositeOperation = 'source-over';
+  }
+  const out = { canvas: c, w };
+  glyphCache.set(key, out);
+  return out;
+}
+
+/** 合成済みの数字列の自然な幅（34px高・既存 drawNumeric と同じく1文字ごとに2px詰める） */
+export function numericNaturalWidth(assets: Assets, text: string): number {
+  const font = assets.atlas.manifest.display_font!;
+  const ws = [...text].map((ch) => font.metrics[ch].ink_box[2] - font.metrics[ch].ink_box[0]);
+  return ws.reduce((a, b) => a + b, 0) - 2 * Math.max(0, ws.length - 1);
+}
+
+/**
+ * v3.1.0 S12 数字列を指定の高さで描く（縦横等比・最近傍。横だけ潰さない）。maxWidth に収まらなければ等比で縮める。
+ * crackDigits：数字（0〜9）にだけヒビを合成する（×・小数点には付けない）。返り値は描いた幅
+ */
+export function drawNumericScaled(
+  ctx: CanvasRenderingContext2D,
+  assets: Assets,
+  text: string,
+  x: number,
+  y: number,
+  height: number,
+  maxWidth: number,
+  align: 'left' | 'right' | 'center',
+  phase: Phase,
+  crackDigits: string | null = null,
+): number {
+  if (!assets.atlas.manifest.display_font) return 0;
+  const natural = numericNaturalWidth(assets, text);
+  const scale = Math.min(height / 34, maxWidth / natural);
+  const width = Math.round(natural * scale);
+  let dx = align === 'left' ? x : align === 'right' ? x - width : x - width / 2;
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  for (const ch of text) {
+    const gl = numericGlyph(assets, ch, phase, crackDigits && /[0-9]/.test(ch) ? crackDigits : null);
+    ctx.drawImage(gl.canvas, Math.round(dx), Math.round(y), Math.round(gl.w * scale), Math.round(34 * scale));
+    dx += (gl.w - 2) * scale;
+  }
+  ctx.restore();
+  return width;
+}
+
 /** 倍率の表示文字列（×1、×1.25、×2.5 など。値を丸めない） */
 export function multiplierText(num: number, den: number): string {
   const v = num / den;

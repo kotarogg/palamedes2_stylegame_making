@@ -41,6 +41,8 @@ export interface AudioLogEntry {
   channel?: VoiceChannel;
   /** 再生しなかった理由（重複・優先度・未取得など） */
   skipped?: string;
+  /** v3.1.0 イベント側のゲイン（dB。0 以外のときだけ記録） */
+  gainDb?: number;
 }
 
 /** 0〜100 → 線形ゲイン（0＝無音、100＝1.0）。聴感に合わせて二乗カーブ */
@@ -73,6 +75,8 @@ export interface AudioNodeRecord {
   loop: boolean;
   /** 途中停止を要求した時刻（終端まで鳴った・停止要求なしは null） */
   stoppedAt: number | null;
+  /** v3.1.0 イベント側のゲイン（dB） */
+  gainDb?: number;
 }
 
 interface Playing {
@@ -286,7 +290,7 @@ export class AudioBus {
   // ---- SE ----
 
   /** 効果音：同じIDの同一フレーム重複・最短間隔内は1回にまとめる。同時発音上限を超えたら鳴らさない */
-  playSfx(id: SfxId, delayMs = 0): boolean {
+  playSfx(id: SfxId, delayMs = 0, gainDb = 0): boolean {
     const t = this.now() + delayMs;
     const last = this.lastSfx.get(id);
     const minGap = Math.max(this.mix.sameFrameMs, SFX_MIN_INTERVAL_MS[id] ?? 0);
@@ -301,9 +305,9 @@ export class AudioBus {
     }
     this.lastSfx.set(id, t);
     const file = sfxFile(id);
-    const p = this.start(id, file, 'sfx', delayMs);
+    const p = this.start(id, file, 'sfx', delayMs, gainDb);
     this.sfxPlaying.push({ id, prio: 0, endT: t + (this.durationMs(file) ?? 200), src: p?.src ?? null, gain: p?.gain ?? null, rec: p?.rec, protected: RESULT_SFX.has(id) });
-    this.record({ t, kind: 'sfx', id, skipped: p || !this.ctx ? undefined : this.skipReason(file) });
+    this.record({ t, kind: 'sfx', id, skipped: p || !this.ctx ? undefined : this.skipReason(file), ...(gainDb !== 0 ? { gainDb } : {}) });
     return true;
   }
 
@@ -411,7 +415,7 @@ export class AudioBus {
     }
   }
 
-  private start(id: string, file: string, cat: 'sfx' | 'voice', delayMs: number): { src: AudioBufferSourceNode; gain: GainNode; rec: AudioNodeRecord } | null {
+  private start(id: string, file: string, cat: 'sfx' | 'voice', delayMs: number, gainDb = 0): { src: AudioBufferSourceNode; gain: GainNode; rec: AudioNodeRecord } | null {
     const ctx = this.ctx;
     const buf = this.buffers.get(file);
     if (!ctx || !this.bus || !buf) {
@@ -423,10 +427,13 @@ export class AudioBus {
       const src = ctx.createBufferSource();
       src.buffer = buf;
       const gain = ctx.createGain();
+      if (gainDb !== 0) gain.gain.value = dbToGain(gainDb);
       src.connect(gain).connect(this.bus[cat]);
       const at = ctx.currentTime + Math.max(0, delayMs) / 1000;
       src.start(at);
-      return { src, gain, rec: this.recordNode(id, cat, buf, false, at) };
+      const rec = this.recordNode(id, cat, buf, false, at);
+      if (gainDb !== 0) rec.gainDb = gainDb;
+      return { src, gain, rec };
     } catch {
       return null;
     }

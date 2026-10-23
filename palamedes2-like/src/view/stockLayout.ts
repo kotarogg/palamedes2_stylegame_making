@@ -18,8 +18,9 @@ export interface StockViewConfig {
 }
 
 export const DEFAULT_STOCK_VIEW: StockViewConfig = {
-  // 修正R1：上端を y=148 に（開始時の予約29＋待機28でも画面内に収まる。Xは維持）
-  origin: { 0: [20, 148], 1: [604, 148] },
+  // 修正R1：上端を y=148 に（開始時の予約29＋待機28でも画面内に収まる）。
+  // v3.1.0：中央エリア（x264〜376）の左右へ移動（PM初期配置基準 P1(272,148)、P2(352,148)）。盤面・キャラ・手役領域は動かさない
+  origin: { 0: [272, 148], 1: [352, 148] },
   groupGapPx: 6,
   blinkMs: 240,
   slideMs: 120,

@@ -13,7 +13,13 @@ import type { ManifestFrame } from './data';
 import { arcPoint, barY, CELL, cellX, columnCenterX, descentY, easeInOutSine, easeOutQuad, lerp, progress, Z, type BoardRect } from './geometry';
 import { characterPose, crackerPose, type ResultPlan } from './presentation';
 import { afterimageDurationMs, counterAnchorOffset, DEFAULT_STOCK_VIEW, discardAnchorOffset, FRAME_PAD, pendingGroupY, stockColumnLayout, stockGroupHeight, type StockDrawEntry, type StockViewConfig } from './stockLayout';
-import { drawNumeric, drawText, formatTime, multiplierText, numericPhase, TEXT_COLORS } from './text';
+import { drawNumericScaled, drawText, formatTime, multiplierText, numericNaturalWidth, numericPhase, TEXT_COLORS } from './text';
+
+/** v3.1.0 連鎖切り予約のヒビ（採用3種） */
+export const STREAK_CRACKS = ['streak_crack_01', 'streak_crack_02', 'streak_crack_03'] as const;
+/** v3.1.0 連続出しの数字の高さ（初期表示サイズ17px）・役連鎖の連鎖数の高さ（34px基準） */
+export const STREAK_DIGIT_PX = 17;
+export const ROLE_CHAIN_DIGIT_PX = 34;
 
 /** キャラクター → モーションシート（第3版：コタローS1・アカネS2・ずん子S13。プレイヤー番号では選ばない） */
 export const CHARACTER_SHEET: Record<Character, string> = { kotaro: 'S1', akane: 'S2', zunko: 'S13' };
@@ -162,6 +168,10 @@ interface PlayerVis {
   grace: { start: number; end: number } | null;
   pinch: { start: number; end: number } | null;
   stock: StockVis;
+  /** v3.1.0 ピンチの 3/2/1（表示開始tick）。null＝数字なし（到達0〜1000ms、解除・終了後） */
+  pinchCount: { value: 3 | 2 | 1; start: number } | null;
+  /** v3.1.0 連鎖切り予約中のヒビ画像（予約発生時に3種から1つ選び、予約中は固定）。null＝予約なし */
+  crack: string | null;
 }
 
 interface DrawItem {
@@ -247,6 +257,8 @@ export class GameView {
       grace: null,
       pinch: null,
       stock: { reservedPx: null, slideFromPx: null, endTick: null },
+      pinchCount: null,
+      crack: null,
     }));
   }
 
@@ -521,6 +533,14 @@ export class GameView {
       case 'attackPinch':
         v.pinch = e.state === 'grace' ? { start: e.tick, end: e.graceEnd } : null;
         break;
+      case 'pinchWarn':
+        // 3/2/1 はゲーム側の有効な残り猶予に同期（壁時計ではない）。解除・期限で消す
+        v.pinchCount = e.state === 'count' && e.value !== null ? { value: e.value, start: e.tick } : null;
+        break;
+      case 'streakCut':
+        // 予約発生時に3種から1つ（試合の乱数は使わず、発生tickとプレイヤーから決める）。終了で解除し、新しい連鎖へ残さない
+        v.crack = e.state === 'reserved' ? STREAK_CRACKS[(e.tick * 7 + e.player * 3) % STREAK_CRACKS.length] : null;
+        break;
       case 'roleEnd':
         v.role = null;
         break;
@@ -724,13 +744,47 @@ export class GameView {
       this.put(items, Z.ui, this.loop(fr, t, this.ticksOf(250)), board.x - 8, board.y - 8);
     }
     if (this.game.mode === 'mode1') this.collectMode1Player(items, p, t);
+    if (this.game.mode === 'mode1') this.collectPinchCount(items, p, t);
     // 勝敗表示（S9 160×64）：勝敗ありの対戦のみ。勝利数加算と同時に表示
     const r = this.hud.result;
     if (r && r.kind === 'versus' && t >= r.startTick) {
       const b = L.pRect(p, 'win_lose_banner');
-      const phase = this.s9Phase(t);
-      this.put(items, Z.result, this.frame('S9', `show_${r.winner === p ? 'win' : 'lose'}_${phase}`), b.x, b.y);
+      // v3.1.0：日本語見出し「勝利」「敗北」（静止1枚。位置・時間は既存の演出のまま）
+      this.put(items, Z.result, this.extraFrame(r.winner === p ? 'result_win_ja' : 'result_lose_ja'), b.x, b.y);
     }
+  }
+
+  /** v3.1.0 ピンチの 3/2/1（枠なしの S9 数字。既存の上から出現→停止→下へ消える動き）。表示は有効な残り猶予に同期。テスト・検証用に公開 */
+  pinchCountView(p: PlayerId, t: number): { value: 3 | 2 | 1; x: number; y: number; alpha: number } | null {
+    const g = this.mode1!;
+    const v = this.pv[p];
+    const st = g.players[p];
+    if (!v.pinchCount || g.result) return null;
+    const rest = g.pinchRemainingTicks(st);
+    if (rest === null) return null;
+    const b = this.assets.layout.pRect(p, 'win_lose_banner');
+    const fade = this.pvc.countdownFadeMs;
+    const off = this.pvc.countdownOffsetPx;
+    const el = (t - v.pinchCount.start) * g.tickMs;
+    // この数字が終わるまで（次の数字・期限まで）の残り：ゲーム側の残り猶予から求める（役処理中は止まる）
+    const toNext = rest * g.tickMs - (v.pinchCount.value - 1) * 1000;
+    let dy = 0;
+    let alpha = 1;
+    if (el < fade) {
+      const a = Math.max(0, el / fade);
+      dy = Math.round(-off * (1 - a));
+      alpha = a;
+    } else if (toNext < fade) {
+      const a = 1 - Math.max(0, toNext) / fade;
+      dy = Math.round(off * a);
+      alpha = 1 - a;
+    }
+    return { value: v.pinchCount.value, x: b.x, y: b.y + dy, alpha: Math.max(0, Math.min(1, alpha)) };
+  }
+
+  private collectPinchCount(items: DrawItem[], p: PlayerId, t: number): void {
+    const c = this.pinchCountView(p, t);
+    if (c) this.put(items, Z.banner, this.frame('S9', `show_countdown_${c.value}_${this.s9Phase(t)}`), c.x, c.y, { alpha: c.alpha });
   }
 
   private collectMode1Player(items: DrawItem[], p: PlayerId, t: number): void {
@@ -821,8 +875,8 @@ export class GameView {
     if (s.nextPending <= 0 && !this.stockAfterimages(p, t).some((a) => a.kind === 'counter')) return null;
     const [ox] = this.pvc.stock.origin[p];
     const sv = this.stockView(p, t);
-    // 列の外側（1P は左、2P は右。囲いの外）で待機群の上端にそろえる。盤面・キャラ・HUDと重ならない
-    return p === 0 ? { text: String(s.nextPending), x: ox - FRAME_PAD - 1, y: sv.pendingY, align: 'right' } : { text: String(s.nextPending), x: ox + 16 + FRAME_PAD + 1, y: sv.pendingY, align: 'left' };
+    // v3.1.0：列は中央エリアの左右。数字は列の中央側（1P は右、2P は左。囲いの外）で待機群の上端にそろえる（盤面枠に掛からない）
+    return p === 0 ? { text: String(s.nextPending), x: ox + 16 + FRAME_PAD + 1, y: sv.pendingY, align: 'left' } : { text: String(s.nextPending), x: ox - FRAME_PAD - 1, y: sv.pendingY, align: 'right' };
   }
 
   /** プレイヤーのモーションシート（テスト・検証用に公開） */
@@ -909,12 +963,12 @@ export class GameView {
     };
     const r = this.hud.result;
     if (r && t >= r.startTick) {
-      if (r.kind === 'draw') banner('show_draw');
+      if (r.kind === 'draw') this.put(items, Z.banner, this.extraFrame('result_draw_ja'), L.rect('ready_banner').x, L.rect('ready_banner').y);
       else if (r.kind === 'gameOver') banner('show_game_over');
       else if (r.kind === 'stageClear') banner('show_stage_clear');
       else if (r.kind === 'allStagesClear') banner('show_all_stages_complete');
       else if (r.kind === 'clear') banner('show_all_clear');
-      else if (this.hud.matchOver) banner('show_result');
+      else if (this.hud.matchOver) this.put(items, Z.banner, this.extraFrame('result_match_ja'), L.rect('ready_banner').x, L.rect('ready_banner').y);
     } else if (t < g.playStartTick && !this.hud.preStart) banner('show_ready');
     else if (t < goEnd && !g.result) banner('show_go', 'go_banner');
     // MODE2 カウントダウン：数字のみ（枠・窓なし）。上から出現→停止→下へ消える。動きはコード側
@@ -987,16 +1041,8 @@ export class GameView {
       const board = this.boards[p];
       if (g.mode === 'mode1') {
         const st = (g as Game).players[p];
-        // 倍率（S12枠なし数字）：対戦＝攻撃倍率、シングル＝得点倍率
-        const mr = L.pRect(p, 'multiplier');
-        const txt = this.isSingle
-          ? (() => {
-              const m = (g as Game).currentScoreMultiplier(st);
-              return multiplierText(m.num, m.den);
-            })()
-          : multiplierText((g as Game).currentStreakPercent(st), 100);
-        drawNumeric(ctx, this.assets, txt, mr.x, mr.y, mr.w, numericPhase(ms));
-        drawText(ctx, this.isSingle ? '得点倍率' : '攻撃倍率', mr.x + mr.w / 2, mr.y + 33, { align: 'center', size: 9, color: TEXT_COLORS.secondary });
+        this.drawStreak(ctx, p, st, ms);
+        this.drawRoleChain(ctx, p, st, ms);
         this.drawChainGauge(ctx, p, st);
         // 危険の残り時間：自然上昇の危険猶予と攻撃ピンチ猶予のうち早い期限（どちらも自分の役処理中は止まる）
         const rest = g.result ? null : this.dangerRemainingTicks(st);
@@ -1029,7 +1075,79 @@ export class GameView {
     const f = this.frame('S11', id);
     const h = Math.max(1, Math.round(f.h * ratio));
     ctx.drawImage(this.assets.images.get('S11')!, f.x, f.y + (f.h - h), f.w, h, r.x, r.y + (r.h - h), f.w, h);
-    if (st.chainCount > 0) drawText(ctx, `連鎖${st.chainCount}`, r.x + r.w / 2, r.y + r.h + 2, { align: 'center', size: 9, color: TEXT_COLORS.secondary });
+  }
+
+  /** v3.1.0 追加画像（静止1枚）をマニフェストの矩形と同じ形で扱う */
+  private extraFrame(id: string): ManifestFrame {
+    const d = this.assets.extra[id];
+    return { sheet: id, id, x: 0, y: 0, w: d.canvas[0], h: d.canvas[1], reserved: false };
+  }
+
+  /** v3.1.0 連続出しの表示位置（既存の倍率領域を基礎に）。テスト・検証用に公開 */
+  streakHudLayout(p: PlayerId): { label: { x: number; y: number; w: number; h: number }; numbers: { x: number; y: number; h: number; maxW: number; align: 'left' | 'right' }; text: { x: number; y: number; align: 'left' | 'right' } } {
+    const mr = this.assets.layout.pRect(p, 'multiplier');
+    const left = p === 0;
+    const lx = left ? mr.x : mr.x + mr.w - 80;
+    const nx = left ? mr.x + 2 : mr.x + mr.w - 2;
+    return {
+      label: { x: lx, y: mr.y - 22, w: 80, h: 20 },
+      numbers: { x: nx, y: mr.y + 1, h: STREAK_DIGIT_PX, maxW: mr.w - 4, align: left ? 'left' : 'right' },
+      text: { x: nx, y: mr.y + 20, align: left ? 'left' : 'right' },
+    };
+  }
+
+  /** v3.1.0 役連鎖の表示位置（連鎖ゲージの外側の縦帯）。テスト・検証用に公開 */
+  roleChainHudLayout(p: PlayerId): { label: { x: number; y: number; w: number; h: number }; digitsCenterX: number; digitsY: number; digitsH: number; maxW: number; plusY: number } {
+    const strip = p === 0 ? { x: 0, w: 48 } : { x: 592, w: 48 };
+    const cx = strip.x + strip.w / 2;
+    return { label: { x: strip.x, y: 136, w: 48, h: 12 }, digitsCenterX: cx, digitsY: 152, digitsH: ROLE_CHAIN_DIGIT_PX, maxW: strip.w - 2, plusY: 190 };
+  }
+
+  /** 連続出し：見出し＋成功数（ヒビは予約中だけ。倍率には付けない）＋倍率（対戦＝攻撃倍率、シングル＝得点倍率）。小さく補助的に */
+  private drawStreak(ctx: CanvasRenderingContext2D, p: PlayerId, st: PlayerState, ms: number): void {
+    const g = this.mode1!;
+    const lay = this.streakHudLayout(p);
+    const phase = numericPhase(ms);
+    const lbl = this.assets.images.get('label_launch_streak');
+    if (lbl) ctx.drawImage(lbl, lay.label.x, lay.label.y);
+    const active = g.streakActive(st);
+    const count = active ? st.streakCount : 0;
+    const crack = active && st.streakCutReserved ? (this.pv[p].crack ?? STREAK_CRACKS[p]) : null;
+    const mul = this.isSingle
+      ? (() => {
+          const m = g.currentScoreMultiplier(st);
+          return multiplierText(m.num, m.den);
+        })()
+      : multiplierText(g.currentStreakPercent(st), 100);
+    const n = lay.numbers;
+    // 成功数 → 少し空けて倍率（右側のプレイヤーは右寄せで同じ並び）。収まらなければ倍率側を等比で縮める（横だけ潰さない）
+    const gap = 8;
+    const k = n.h / 34;
+    const countW = Math.round(numericNaturalWidth(this.assets, String(count)) * k);
+    const mulW = Math.round(Math.min(numericNaturalWidth(this.assets, mul) * k, n.maxW - countW - gap));
+    const x0 = n.align === 'left' ? n.x : n.x - countW - gap - mulW;
+    drawNumericScaled(ctx, this.assets, String(count), x0, n.y, n.h, countW, 'left', phase, crack);
+    drawNumericScaled(ctx, this.assets, mul, x0 + countW + gap, n.y, n.h, mulW, 'left', phase);
+    drawText(ctx, this.isSingle ? '回　得点倍率' : '回　攻撃倍率', lay.text.x, lay.text.y, { align: lay.text.align, size: 9, color: TEXT_COLORS.secondary });
+  }
+
+  /** 役連鎖：見出し＋連鎖数（34px）＋攻撃加算「＋○」（対戦のみ。シングルへは流用しない） */
+  private drawRoleChain(ctx: CanvasRenderingContext2D, p: PlayerId, st: PlayerState, ms: number): void {
+    const g = this.mode1!;
+    const lay = this.roleChainHudLayout(p);
+    const lbl = this.assets.images.get('label_role_chain');
+    if (lbl) {
+      ctx.save();
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(lbl, lay.label.x, lay.label.y, lay.label.w, lay.label.h); // 96×24 を縦横等比 1/2・最近傍
+      ctx.restore();
+    }
+    const count = st.chainRemaining > 0 ? st.chainCount : 0;
+    drawNumericScaled(ctx, this.assets, String(count), lay.digitsCenterX, lay.digitsY, lay.digitsH, lay.maxW, 'center', numericPhase(ms));
+    if (!this.isSingle) {
+      const bonus = count > 0 ? Math.min(count - 1, g.config.chainBonusMax) : 0;
+      drawText(ctx, `＋${bonus}`, lay.digitsCenterX, lay.plusY, { align: 'center', size: 16, weight: 800, color: '#f2b950' });
+    }
   }
 
   private drawWins(ctx: CanvasRenderingContext2D, p: PlayerId, t: number): void {

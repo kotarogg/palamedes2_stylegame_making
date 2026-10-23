@@ -156,7 +156,12 @@ export function drawResultPanel(
   hint = '',
 ): void {
   drawReadingPanel(ctx, assets);
-  if (headId) drawFrame(ctx, assets, assets.atlas.frame('S9', `${headId}_${phase}`), 240, 42);
+  // v3.1.0：対戦の最終結果は日本語見出し「対戦結果」（静止1枚、extra:＜id＞）。シングルの見出しは既存のまま
+  if (headId?.startsWith('extra:')) {
+    const id = headId.slice(6);
+    const img = assets.images.get(id);
+    if (img) ctx.drawImage(img, 240, 42);
+  } else if (headId) drawFrame(ctx, assets, assets.atlas.frame('S9', `${headId}_${phase}`), 240, 42);
   let ly = 110;
   for (const l of lines) {
     drawText(ctx, l, 320, ly, { align: 'center', size: 14, maxWidth: 500 });

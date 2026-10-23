@@ -6,11 +6,15 @@
 // 役名表示（第13章 B4・B5）：宣言時に表示リスト・代表役・開始時刻を確定し、先頭ロゴと代表役ボイスを同時開始。
 // 時間はすべて設定値（PM指定初期値）。
 import type { AudioBus } from '../audio/audioBus';
-import { roleVoiceLine, VOICE_PRIORITY, type Character } from '../audio/audioMap';
+import { ROLE_ALT_ATTACK_VOICE_PCT, roleVoiceLine, VOICE_PRIORITY, type Character } from '../audio/audioMap';
+import { createSeededRng, type Rng } from '../core/rng';
 import type { GameEvent } from '../core/game';
 import type { AnyGame } from '../core/match';
 import type { Mode2Event } from '../core/mode2';
 import type { PlayerId } from '../core/types';
+
+/** 役宣言の代表ボイス：role＝代表役名ボイス、attack＝代替の攻撃ボイス（v3.1.0） */
+export type RoleVoiceKind = 'role' | 'attack';
 
 export interface PresentationConfig {
   /** 敗者 lose_fall モーション（納品4コマ×160ms＝640ms）。落下はこの後から */
@@ -171,30 +175,35 @@ export interface RoleShow {
  */
 export class RoleNameSchedule {
   current: RoleShow | null = null;
-  private pending: { logos: number[]; holdTicks: number } | null = null;
+  private pending: { logos: number[]; holdTicks: number; voice: RoleVoiceKind } | null = null;
 
   constructor(
     private readonly ticks: (ms: number) => number,
     private readonly cfg: RoleNameConfig = DEFAULT_ROLE_NAME,
-    private readonly onHeadStart: (logo: number, tick: number) => void = () => undefined,
+    private readonly onHeadStart: (logo: number, tick: number, voice: RoleVoiceKind) => void = () => undefined,
   ) {}
 
-  private start(logos: number[], holdTicks: number, tick: number): void {
+  private start(logos: number[], holdTicks: number, tick: number, voice: RoleVoiceKind): void {
     const waitEnd = tick + holdTicks + this.ticks(this.cfg.headWaitMs);
     this.current = { logos, headStart: tick, waitEnd, end: waitEnd + this.ticks(this.cfg.followMs) * Math.max(0, logos.length - 1) };
-    this.onHeadStart(logos[0], tick);
+    this.onHeadStart(logos[0], tick, voice);
   }
 
-  /** 宣言（logos は既存の表示順。voiceMs は代表役ボイスの取得済みファイル尺。音量0・ミュートでも同じ） */
-  declare(logos: number[], voiceMs: number | null, tick: number): void {
+  /** この tick に宣言したら先頭ロゴ（と代表ボイス）がすぐ始まるか（前の表示の待ち中なら後になる） */
+  startsNow(tick: number): boolean {
+    return !(this.current && tick < this.current.waitEnd);
+  }
+
+  /** 宣言（logos は既存の表示順。voiceMs は代表ボイスの取得済みファイル尺。音量0・ミュートでも同じ。voice＝役名／代替の攻撃ボイス） */
+  declare(logos: number[], voiceMs: number | null, tick: number, voice: RoleVoiceKind = 'role'): void {
     if (logos.length === 0) return;
     const holdTicks = this.ticks(Math.max(this.cfg.headMinMs, voiceMs ?? 0));
     if (this.current && tick < this.current.waitEnd) {
-      this.pending = { logos, holdTicks };
+      this.pending = { logos, holdTicks, voice };
       return;
     }
     this.pending = null;
-    this.start(logos, holdTicks, tick);
+    this.start(logos, holdTicks, tick, voice);
   }
 
   update(tick: number): void {
@@ -203,7 +212,7 @@ export class RoleNameSchedule {
     if (this.pending && tick >= c.waitEnd) {
       const p = this.pending;
       this.pending = null;
-      this.start(p.logos, p.holdTicks, c.waitEnd);
+      this.start(p.logos, p.holdTicks, c.waitEnd, p.voice);
       return;
     }
     if (tick >= c.end) this.current = null;
@@ -229,17 +238,30 @@ export class RoleNameSchedule {
   }
 }
 
-/** 試合の役名表示：宣言イベントを読み、プレイヤーごとの予定を進め、先頭ロゴの開始と同時に代表役ボイスを鳴らす */
+/**
+ * 試合の役名表示：宣言イベントを読み、プレイヤーごとの予定を進め、先頭ロゴの開始と同時に代表ボイスを鳴らす。
+ * v3.1.0：宣言ごとに1回だけ抽選し、20%で代表役名ボイスの代わりに攻撃ボイス（両方は鳴らさない）。
+ * 前回が代替（攻撃ボイス）なら次回は役名ボイス。履歴はプレイヤー別で、新ラウンド（reset）で消す。
+ * 複数役の成立でも代表ボイスは1本（既存の表示順の先頭役）
+ */
 export class RoleNameDirector {
   private cursor = 0;
   schedules: RoleNameSchedule[] = [];
+  /** プレイヤー別：前回の宣言が代替の攻撃ボイスだったか */
+  private lastAlt: boolean[] = [false, false];
+  private readonly rng: Rng;
+  /** 抽選の記録（自動検証用） */
+  readonly voiceLog: { player: PlayerId; tick: number; voice: RoleVoiceKind; forced: boolean }[] = [];
 
   constructor(
     private game: AnyGame,
     private readonly bus: AudioBus | null,
     private characters: readonly Character[],
     private readonly cfg: RoleNameConfig = DEFAULT_ROLE_NAME,
+    seed = 1,
+    private readonly altPct: number = ROLE_ALT_ATTACK_VOICE_PCT,
   ) {
+    this.rng = createSeededRng(seed >>> 0);
     this.reset(game, characters);
   }
 
@@ -247,7 +269,18 @@ export class RoleNameDirector {
     this.game = game;
     if (characters) this.characters = characters;
     this.cursor = 0;
-    this.schedules = game.players.map((_, i) => new RoleNameSchedule((ms) => game.ticks(ms), this.cfg, (logo) => this.bus?.playVoice(this.characters[i], roleVoiceLine(logo), VOICE_PRIORITY.role)));
+    this.lastAlt = [false, false];
+    this.schedules = game.players.map(
+      (_, i) =>
+        new RoleNameSchedule((ms) => game.ticks(ms), this.cfg, (logo, _tick, voice) =>
+          this.bus?.playVoice(this.characters[i], voice === 'attack' ? 'attack' : roleVoiceLine(logo), VOICE_PRIORITY.role),
+        ),
+    );
+  }
+
+  /** 宣言SEと代表ボイスが同時か（SoundDirector の宣言SEのゲインに使う）。宣言を取り込む前に問い合わせる */
+  voiceStartsNow(p: PlayerId, tick: number): boolean {
+    return this.schedules[p]?.startsNow(tick) ?? true;
   }
 
   /** 毎フレーム（描画前）。結果へ移行したら役名表示・表示待ちを終了する */
@@ -256,8 +289,15 @@ export class RoleNameDirector {
     while (this.cursor < ev.length) {
       const e = ev[this.cursor++];
       if (e.type === 'declare') {
-        const voiceMs = this.bus?.voiceDurationMs(this.characters[e.player], roleVoiceLine(e.logos[0])) ?? null;
-        this.schedules[e.player].declare(e.logos, voiceMs, e.tick);
+        // 宣言イベントにつき1回だけ抽選（乱数は1つ消費）。前回が代替なら今回は役名ボイスに固定
+        const hit = this.rng.next() * 100 < this.altPct;
+        const forced = this.lastAlt[e.player];
+        const voice: RoleVoiceKind = hit && !forced ? 'attack' : 'role';
+        this.lastAlt[e.player] = voice === 'attack';
+        this.voiceLog.push({ player: e.player, tick: e.tick, voice, forced: forced && hit });
+        const line = voice === 'attack' ? 'attack' : roleVoiceLine(e.logos[0]);
+        const voiceMs = this.bus?.voiceDurationMs(this.characters[e.player], line) ?? null;
+        this.schedules[e.player].declare(e.logos, voiceMs, e.tick, voice);
       } else if (e.type === 'roundEnd') for (const s of this.schedules) s.stop();
     }
     if (this.game.result) return;
@@ -329,9 +369,9 @@ export class Staging {
     this.once('result', () => {
       switch (plan.kind) {
         case 'versus': {
-          // 勝利音は全体に1回。人がすべて負けた（CPUに敗北）場合は敗北音
-          const humanLost = this.opts.humans.length > 0 && this.opts.humans.every((h) => h === plan.loser);
-          b?.playSfx(humanLost ? 'lose' : 'win');
+          // v3.1.0：結果SEは人間側の勝敗に応じ、対応する演出の時刻で鳴らす。敗北SE＝敗者演出の開始（ここ）、勝利SE＝勝者演出の開始。
+          // CPU対戦：人が負けたら敗北SEだけ、人が勝ったら勝利SEだけ。2P：敗北SE・勝利SEを各1回。人がいない場合は勝利SEだけ
+          if (this.opts.humans.includes(plan.loser!)) b?.playSfx('lose');
           b?.playVoice(ch(plan.loser!), 'lose', VOICE_PRIORITY.result, 'result');
           return;
         }
@@ -348,7 +388,11 @@ export class Staging {
     });
     if (plan.loser !== null && plan.fallEndTick > plan.fallStartTick && g.tick >= plan.fallStartTick) this.once('fall', () => b?.playSfx('character_fall'));
     if (plan.kind === 'versus' && plan.winnerTick !== null && g.tick >= plan.winnerTick && plan.winner !== null) {
-      this.once('winner', () => b?.playVoice(ch(plan.winner!), 'win', VOICE_PRIORITY.result, 'result'));
+      this.once('winner', () => {
+        // 勝者演出の開始：勝利SE＋勝利ボイス（結果開始では勝利SEを鳴らさないので二重にならない）
+        if (this.opts.humans.length === 0 || this.opts.humans.includes(plan.winner!)) b?.playSfx('win');
+        b?.playVoice(ch(plan.winner!), 'win', VOICE_PRIORITY.result, 'result');
+      });
     }
     if (plan.crackerTick !== null && g.tick >= plan.crackerTick) this.once('cracker', () => b?.playSfx('result_cracker'));
   }

@@ -3,7 +3,7 @@
 // 一時停止は無い。プレイ中の Esc／START は「試合を終了してメニューへ戻る」確認で、確認中もゲームは進む（そのプレイヤーの入力だけがダイアログへ）。
 import type { AudioBus } from './audio/audioBus';
 import { VOICE_PRIORITY, type BgmId, type Character } from './audio/audioMap';
-import { SoundDirector } from './audio/director';
+import { DEFAULT_DIRECTOR_OPTIONS, SoundDirector } from './audio/director';
 import { DIFFICULTY_LABEL, type Difficulty } from './core/config';
 import { FixedStepDriver } from './core/driver';
 import type { Command, Game } from './core/game';
@@ -1221,8 +1221,13 @@ export class GameScene implements Scene {
     app.bus.playBgm(this.bgm);
     this.buildControllers();
     this.view = new GameView(this.game, app.assets);
-    this.director = new SoundDirector(app.bus, this.game, characters);
-    this.roleNames = new RoleNameDirector(this.game, app.bus, characters);
+    // v3.1.0：役名表示の予定（代替攻撃ボイスの抽選を含む）と、宣言SEのゲイン（代表ボイスと同時なら −2dB）を接続
+    this.roleNames = new RoleNameDirector(this.game, app.bus, characters, undefined, (Math.random() * 4294967295) >>> 0);
+    this.director = new SoundDirector(app.bus, this.game, characters, {
+      ...DEFAULT_DIRECTOR_OPTIONS,
+      voiceWithDeclare: (p, tick) => this.roleNames.voiceStartsNow(p, tick),
+      seed: (Math.random() * 4294967295) >>> 0,
+    });
     this.staging = new Staging(this.game, app.bus, this.stagingOpts());
     this.driver = new FixedStepDriver({ tickMs: 1000 / 60, step: () => this.step() });
   }
@@ -1605,6 +1610,7 @@ export class GameScene implements Scene {
     let choices = this.finalChoices().map((c) => c.label);
     let hint = '';
     if (s instanceof Match) {
+      head = 'extra:result_match_ja'; // 対戦（CPU・2P）の最終結果
       const w = s.matchWinner;
       if (this.kind === 'cpu') {
         const opp = CHARACTER_NAME[this.characters[1]];

@@ -87,7 +87,26 @@ export type Character = 'kotaro' | 'akane' | 'zunko';
 /** 第3版：選択できる3キャラ（キャラクター選択の並び：左からコタロー／アカネ／ずん子） */
 export const CHARACTERS: readonly Character[] = ['kotaro', 'akane', 'zunko'];
 
-export type VoiceLine = 'attack' | 'damage' | 'role_fail' | 'win' | 'lose' | 'ready' | 'go' | 'select' | `role_${string}`;
+export type VoiceLine = 'attack' | 'damage' | 'role_fail' | 'win' | 'lose' | 'ready' | 'go' | 'select' | 'pinch' | `role_${string}`;
+
+/**
+ * v3.1.0 ピンチボイスの受け入れ先：未納品のため空（実音声を鳴らさない・必須読み込みに入れない）。
+ * 素材を登録すれば（例 kotaro: true で voice/voice_kotaro_pinch.wav を任意読込）有効化できる
+ */
+export const PINCH_VOICE_REGISTERED: Partial<Record<Character, boolean>> = {};
+
+/** v3.1.0 ピンチボイスの設定：到達ごとの発言確率（%）と、同じピンチ中の上限回数 */
+export const PINCH_VOICE = { pct: 30, maxPerPinch: 1 } as const;
+
+/** v3.1.0 役宣言で、代表役名ボイスの代わりに攻撃ボイスを使う確率（%）。前回が代替なら次回は役名 */
+export const ROLE_ALT_ATTACK_VOICE_PCT = 20;
+
+/**
+ * v3.1.0 イベント側のゲイン（dB）。素材ファイルは再ノーマライズしない。
+ * roleAvailable：成立可能通知、declareWithVoice：役名または代替攻撃ボイスと同時に鳴る宣言SE、
+ * allClearWithStageClear：同じクリア処理でステージ達成音が続く全消しSE
+ */
+export const EVENT_GAIN_DB = { roleAvailable: -3, declareWithVoice: -2, allClearWithStageClear: -3 } as const;
 
 /** 役名ボイス：役名ロゴの表示順R01〜R16（logo index 0〜15）に対応 */
 export const roleVoiceLine = (logoIndex: number): VoiceLine => `role_${String(logoIndex + 1).padStart(2, '0')}`;
@@ -123,4 +142,9 @@ export function allAudioFiles(): string[] {
   const out = new Set<string>([...Object.values(BGM_FILES), ...SFX_IDS.map(sfxFile)]);
   for (const c of CHARACTERS) for (const l of VOICE_LINES) out.add(voiceFile(c, l));
   return [...out];
+}
+
+/** 任意読込（登録済みのピンチボイスだけ。未登録なら空）。必須の一覧（allAudioFiles）には含めない */
+export function optionalAudioFiles(): string[] {
+  return CHARACTERS.filter((c) => PINCH_VOICE_REGISTERED[c]).map((c) => voiceFile(c, 'pinch'));
 }

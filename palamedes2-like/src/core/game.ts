@@ -138,7 +138,8 @@ export type GameEvent =
   | { type: 'score'; tick: number; player: PlayerId; delta: number; total: number; cause: ScoreCause }
   | { type: 'progress'; tick: number; player: PlayerId; units: number; total: number }
   | { type: 'levelUp'; tick: number; player: PlayerId; level: number; max: boolean }
-  | { type: 'allClear'; tick: number; player: PlayerId; bonus: number }
+  /** 全消し。stageClearPending＝同じクリア処理でステージ達成が確定している（音量調整用。ゲーム処理は不変） */
+  | { type: 'allClear'; tick: number; player: PlayerId; bonus: number; stageClearPending: boolean }
   | { type: 'quotaReached'; tick: number; player: PlayerId; stage: number }
   | { type: 'stageClear'; tick: number; player: PlayerId; stage: number; bonus: number; final: boolean }
   | { type: 'roundEnd'; tick: number; winner: PlayerId | null; outcome: RoundOutcome };
@@ -707,7 +708,7 @@ export class Game {
     if (this.flights.some((f) => f.player === p.id)) return;
     s.wasNonEmpty = false;
     const bonus = this.balance.scoring.all_clear_bonus;
-    this.emit({ type: 'allClear', tick: this.tick, player: p.id, bonus });
+    this.emit({ type: 'allClear', tick: this.tick, player: p.id, bonus, stageClearPending: s.clearPending });
     this.addScore(p, bonus, 'allClear');
   }
 

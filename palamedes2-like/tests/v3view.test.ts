@@ -37,8 +37,9 @@ describe('受攻撃ストックの配置（第10章）', () => {
 
   it('修正R1：開始時の予約1〜29 × 現ブロック残量1〜予約 × 待機0〜(29−残量)、破棄・相殺の残像を含め、全要素が画面内（640×360）', () => {
     const cfg = DEFAULT_STOCK_VIEW;
-    expect(cfg.origin[0]).toEqual([20, 148]);
-    expect(cfg.origin[1]).toEqual([604, 148]);
+    // v3.1.0：中央エリア（x264〜376）の左右。PM初期配置基準 P1(272,148)、P2(352,148)
+    expect(cfg.origin[0]).toEqual([272, 148]);
+    expect(cfg.origin[1]).toEqual([352, 148]);
     let cases = 0;
     let maxBottom = 0;
     for (const side of [0, 1] as const) {
@@ -49,7 +50,8 @@ describe('受攻撃ストックの配置（第10章）', () => {
             const pendingY = top + pendingGroupY(stockGroupHeight(reserved), null, null, cfg);
             const check = (after: Parameters<typeof stockColumnLayout>[5], label: string) => {
               for (const e of stockColumnLayout(x0, top, pendingY, cur, pend, after, cfg)) {
-                const ok = e.x >= 0 && e.y >= 0 && e.x + e.w <= 640 && e.y + e.h <= 360;
+                // 囲い・小爆発の余白も含めて中央エリア（x264〜376）と画面内（下端360）に収まる。ネコタロー（x298〜346）と重ならない
+                const ok = e.x >= 264 && e.y >= 0 && e.x + e.w <= 376 && e.y + e.h <= 360 && (e.x + e.w <= 298 || e.x >= 346);
                 if (!ok) throw new Error(`画面外 side=${side} reserved=${reserved} cur=${cur} pend=${pend} ${label}: ${JSON.stringify(e)}`);
                 maxBottom = Math.max(maxBottom, e.y + e.h);
               }
@@ -70,9 +72,9 @@ describe('受攻撃ストックの配置（第10章）', () => {
     }
     expect(cases).toBeGreaterThan(8000);
     expect(maxBottom).toBeLessThanOrEqual(360);
-    // 列は盤面枠（1P x48〜、2P 〜x592）と重ならない（囲い±3px を含む）
-    expect(cfg.origin[0][0] + 16 + 3).toBeLessThanOrEqual(48);
-    expect(cfg.origin[1][0] - 3).toBeGreaterThanOrEqual(592);
+    // 列は盤面枠（1P 〜x264、2P x376〜）と重ならない（囲い±3px を含む）
+    expect(cfg.origin[0][0] - 3).toBeGreaterThanOrEqual(264);
+    expect(cfg.origin[1][0] + 16 + 3).toBeLessThanOrEqual(376);
   });
 
   it('修正R1：PMの再現状態（予約29・残量5＝block3＋wave2・待機24）で待機群の下端が360以内（旧 y=228 では410）', () => {
@@ -354,7 +356,7 @@ describe('段階SE（第12章）', () => {
     const game = { events, mode: 'mode1', playing: false, players: [] } as unknown as AnyGame;
     new SoundDirector(bus, game, ['kotaro', 'zunko']).sync();
     expect(sfx).toEqual(['launch_success_1', 'launch_success_3', 'launch_success_5', 'role_declare_1', 'role_declare_5', 'counter', 'field_rise', 'attack_row', 'field_rise', 'attack_row']);
-    // 役ボイスは役名表示側（先頭ロゴ開始と同時）。被攻撃ボイスは波の最初だけ、話者は2Pのキャラ
-    expect(voice).toEqual(['zunko_damage']);
+    // 役ボイスは役名表示側（先頭ロゴ開始と同時）。v3.1.0：通常の与ダメ・被ダメボイスは鳴らさない
+    expect(voice).toEqual([]);
   });
 });
