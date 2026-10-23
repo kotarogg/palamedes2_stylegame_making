@@ -1,5 +1,5 @@
 {
- "about": "第3版プレイ版の必須素材（画像49・JSON5・フォント・OFL・音声114）。scripts/check-release.mjs が照合する",
+ "about": "第3版プレイ版の必須素材（画像49・JSON5・フォント・OFL・音声114）。scripts/check-release.mjs が照合する　v3.1.0：追加画像9（additional_assets_v310.json）と定義JSONを追加。",
  "files": [
   {
    "path": "gfx/assets/akane_sheet.png",
@@ -854,6 +854,56 @@
    "size": 16750124,
    "sha256": null,
    "note": "BGM原本（共有ドライブ）のファイルサイズ。SHA-256は作業環境で取得できないため未記載"
+  },
+  {
+   "path": "gfx/data/additional_assets_v310.json",
+   "size": 17316,
+   "sha256": "968a3ff46391a0b061e5c9a2efd0d77317d726e78b6a6417c0244c14b4a26aba"
+  },
+  {
+   "path": "gfx/assets/streak_crack_01.png",
+   "size": 243,
+   "sha256": "b8b7865645b1708801bb0a6229be1187e3739df82d39335d351ad089d0345ea3"
+  },
+  {
+   "path": "gfx/assets/streak_crack_02.png",
+   "size": 271,
+   "sha256": "fbeb041902512ae628bf2f83173bd6c8cb0e4cc929fba64a1ba4a4c461bcf08a"
+  },
+  {
+   "path": "gfx/assets/streak_crack_03.png",
+   "size": 244,
+   "sha256": "8d407b3f9260e139b0f923d11197a2c09b1644978c5efb419aff4aabf6309f69"
+  },
+  {
+   "path": "gfx/assets/label_launch_streak.png",
+   "size": 1324,
+   "sha256": "9e511e7129a803b43ea5092a325c2e3a33ba2c55b942938383da154c13cf9119"
+  },
+  {
+   "path": "gfx/assets/label_role_chain.png",
+   "size": 1648,
+   "sha256": "e66c5f535d2447ef7322cfad14c21ee009c5d880827af556293472149c074548"
+  },
+  {
+   "path": "gfx/assets/result_win_ja.png",
+   "size": 4057,
+   "sha256": "58826ddee075a724dbc5f2e7d46f107954beda70d928bdf8e1b300589596bd9d"
+  },
+  {
+   "path": "gfx/assets/result_lose_ja.png",
+   "size": 3087,
+   "sha256": "906e9fef16983d9139820b474ca1a3afd4d0b2c1835c162e4128cc7cc3944793"
+  },
+  {
+   "path": "gfx/assets/result_draw_ja.png",
+   "size": 2931,
+   "sha256": "d1091640424ebd58e1f898a846687a4eab62b00c5ba913eb61196f245b68c51a"
+  },
+  {
+   "path": "gfx/assets/result_match_ja.png",
+   "size": 3278,
+   "sha256": "a39e4b119694a52b740026dbadd6cbec3b78993bb8a5588ef6ea39ffcd8c8a7f"
   }
  ]
 }

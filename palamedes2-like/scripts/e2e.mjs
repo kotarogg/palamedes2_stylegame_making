@@ -803,6 +803,7 @@ try {
     // 2P を7段にしてピンチ（攻撃ピンチ猶予 2500ms 残り＝数字3）
     while (p1.board.height() < 7) for (const c of p1.board.cols) if (c.length < 7) c.push({ kind: 'piece', piece: g.factory.make(1 + (c.length % 6), 'spade') });
     p1.incoming.pinchRemaining = g.ticks(2500);
+    v.pv[1].height = p1.board.height(); // 検査用に足した段を表示の段数にも反映（上昇イベントを経ないため）
     sc.step();
     for (let i = 0; i < 12; i++) sc.step(); // 3 の出現（150ms）を終える
     const c = document.createElement('canvas');

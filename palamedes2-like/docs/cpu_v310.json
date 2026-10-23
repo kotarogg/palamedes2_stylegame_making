@@ -1,0 +1,3404 @@
+{
+ "date": "2026-10-23T10:08:03.016Z",
+ "limitTicks": 18000,
+ "idleLimitTicks": 480,
+ "rows": [
+  {
+   "mode": "mode1",
+   "level": "easy",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 293.18333333333334,
+   "outcome": "win",
+   "declares": [
+    62,
+    61
+   ],
+   "declareIntervalSec": [
+    4.6806010928961745,
+    4.715277777777778
+   ],
+   "sixRoles": [
+    17,
+    20
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    331,
+    340
+   ],
+   "misses": [
+    30,
+    33
+   ],
+   "pinchStarts": [
+    29,
+    28
+   ],
+   "pinchReleases": [
+    28,
+    28
+   ],
+   "manualRises": [
+    19,
+    23
+   ],
+   "longestIdleSec": [
+    0.21666666666666667,
+    0.2
+   ],
+   "rolls": {
+    "idleStop:miss": 537,
+    "bestPick:hit": 503,
+    "bestPick:miss": 143,
+    "forget:miss": 402,
+    "idleStop:hit": 134,
+    "sixChallenge:miss": 113,
+    "manualRise:miss": 37,
+    "manualRise:hit": 40,
+    "sixChallenge:hit": 42,
+    "declareSix:hit": 37,
+    "forget:hit": 27,
+    "declareFour:hit": 7,
+    "declareFour:miss": 2
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "easy",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 61.78333333333333,
+   "outcome": "win",
+   "declares": [
+    13,
+    12
+   ],
+   "declareIntervalSec": [
+    4.8500000000000005,
+    4.765151515151515
+   ],
+   "sixRoles": [
+    4,
+    5
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    69,
+    76
+   ],
+   "misses": [
+    8,
+    11
+   ],
+   "pinchStarts": [
+    3,
+    6
+   ],
+   "pinchReleases": [
+    3,
+    6
+   ],
+   "manualRises": [
+    9,
+    2
+   ],
+   "longestIdleSec": [
+    0.21666666666666667,
+    0.2
+   ],
+   "rolls": {
+    "idleStop:miss": 109,
+    "bestPick:hit": 113,
+    "forget:miss": 91,
+    "sixChallenge:miss": 20,
+    "manualRise:miss": 12,
+    "bestPick:miss": 21,
+    "idleStop:hit": 36,
+    "manualRise:hit": 11,
+    "declareFour:hit": 3,
+    "forget:hit": 6,
+    "sixChallenge:hit": 10,
+    "declareSix:hit": 9
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "easy",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 3,
+   "decided": false,
+   "seconds": 300,
+   "outcome": null,
+   "declares": [
+    65,
+    62
+   ],
+   "declareIntervalSec": [
+    4.57890625,
+    4.753551912568305
+   ],
+   "sixRoles": [
+    13,
+    24
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    328,
+    351
+   ],
+   "misses": [
+    28,
+    41
+   ],
+   "pinchStarts": [
+    20,
+    22
+   ],
+   "pinchReleases": [
+    20,
+    22
+   ],
+   "manualRises": [
+    38,
+    22
+   ],
+   "longestIdleSec": [
+    0.21666666666666667,
+    0.2
+   ],
+   "rolls": {
+    "idleStop:miss": 542,
+    "bestPick:miss": 113,
+    "forget:miss": 408,
+    "bestPick:hit": 546,
+    "sixChallenge:miss": 118,
+    "manualRise:miss": 48,
+    "idleStop:hit": 139,
+    "declareFour:hit": 16,
+    "manualRise:hit": 58,
+    "forget:hit": 34,
+    "sixChallenge:hit": 43,
+    "declareSix:hit": 37,
+    "declareFour:miss": 1
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "easy",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": false,
+   "seconds": 300,
+   "outcome": null,
+   "declares": [
+    64,
+    64
+   ],
+   "declareIntervalSec": [
+    4.644708994708995,
+    4.635978835978836
+   ],
+   "sixRoles": [
+    21,
+    11
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    337,
+    333
+   ],
+   "misses": [
+    23,
+    34
+   ],
+   "pinchStarts": [
+    28,
+    34
+   ],
+   "pinchReleases": [
+    27,
+    33
+   ],
+   "manualRises": [
+    11,
+    15
+   ],
+   "longestIdleSec": [
+    0.2,
+    0.21666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 543,
+    "bestPick:hit": 502,
+    "bestPick:miss": 141,
+    "forget:miss": 420,
+    "idleStop:hit": 129,
+    "sixChallenge:miss": 103,
+    "manualRise:miss": 22,
+    "manualRise:hit": 25,
+    "sixChallenge:hit": 38,
+    "declareFour:hit": 14,
+    "declareSix:hit": 32,
+    "forget:hit": 36,
+    "declareFour:miss": 1
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "easy",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 71.25,
+   "outcome": "win",
+   "declares": [
+    14,
+    16
+   ],
+   "declareIntervalSec": [
+    4.906410256410256,
+    4.314444444444445
+   ],
+   "sixRoles": [
+    4,
+    3
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    84,
+    80
+   ],
+   "misses": [
+    9,
+    6
+   ],
+   "pinchStarts": [
+    6,
+    6
+   ],
+   "pinchReleases": [
+    6,
+    5
+   ],
+   "manualRises": [
+    7,
+    8
+   ],
+   "longestIdleSec": [
+    0.2,
+    0.21666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 131,
+    "bestPick:hit": 125,
+    "forget:miss": 100,
+    "sixChallenge:miss": 24,
+    "manualRise:miss": 10,
+    "bestPick:miss": 31,
+    "idleStop:hit": 34,
+    "manualRise:hit": 15,
+    "forget:hit": 8,
+    "sixChallenge:hit": 11,
+    "declareSix:hit": 7,
+    "declareFour:miss": 1,
+    "declareFour:hit": 2
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "easy",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 101.23333333333333,
+   "outcome": "win",
+   "declares": [
+    22,
+    20
+   ],
+   "declareIntervalSec": [
+    4.576984126984127,
+    4.81140350877193
+   ],
+   "sixRoles": [
+    6,
+    8
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    109,
+    115
+   ],
+   "misses": [
+    4,
+    12
+   ],
+   "pinchStarts": [
+    13,
+    13
+   ],
+   "pinchReleases": [
+    13,
+    13
+   ],
+   "manualRises": [
+    6,
+    9
+   ],
+   "longestIdleSec": [
+    0.2,
+    0.21666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 173,
+    "bestPick:miss": 51,
+    "forget:miss": 144,
+    "bestPick:hit": 171,
+    "sixChallenge:miss": 35,
+    "manualRise:miss": 12,
+    "idleStop:hit": 53,
+    "declareFour:hit": 3,
+    "manualRise:hit": 13,
+    "sixChallenge:hit": 17,
+    "declareSix:hit": 14,
+    "forget:hit": 8
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "easy",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 253.1,
+   "outcome": "win",
+   "declares": [
+    54,
+    54
+   ],
+   "declareIntervalSec": [
+    4.681446540880503,
+    4.581132075471698
+   ],
+   "sixRoles": [
+    10,
+    13
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    278,
+    292
+   ],
+   "misses": [
+    30,
+    28
+   ],
+   "pinchStarts": [
+    20,
+    22
+   ],
+   "pinchReleases": [
+    20,
+    22
+   ],
+   "manualRises": [
+    21,
+    16
+   ],
+   "longestIdleSec": [
+    0.23333333333333334,
+    0.21666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 455,
+    "bestPick:hit": 465,
+    "bestPick:miss": 91,
+    "forget:miss": 346,
+    "idleStop:hit": 115,
+    "sixChallenge:miss": 96,
+    "manualRise:miss": 52,
+    "manualRise:hit": 34,
+    "sixChallenge:hit": 31,
+    "declareSix:hit": 23,
+    "declareFour:hit": 12,
+    "forget:hit": 27
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "easy",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 161.85,
+   "outcome": "win",
+   "declares": [
+    34,
+    34
+   ],
+   "declareIntervalSec": [
+    4.753030303030303,
+    4.624747474747475
+   ],
+   "sixRoles": [
+    9,
+    9
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    177,
+    181
+   ],
+   "misses": [
+    12,
+    14
+   ],
+   "pinchStarts": [
+    8,
+    19
+   ],
+   "pinchReleases": [
+    8,
+    19
+   ],
+   "manualRises": [
+    22,
+    8
+   ],
+   "longestIdleSec": [
+    0.23333333333333334,
+    0.21666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 277,
+    "bestPick:hit": 276,
+    "forget:miss": 228,
+    "sixChallenge:miss": 54,
+    "manualRise:miss": 30,
+    "bestPick:miss": 62,
+    "idleStop:hit": 81,
+    "manualRise:hit": 27,
+    "forget:hit": 14,
+    "sixChallenge:hit": 24,
+    "declareSix:hit": 18,
+    "declareFour:hit": 9,
+    "declareFour:miss": 1
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "easy",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 281.26666666666665,
+   "outcome": "win",
+   "declares": [
+    61,
+    59
+   ],
+   "declareIntervalSec": [
+    4.613888888888889,
+    4.693103448275862
+   ],
+   "sixRoles": [
+    15,
+    15
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    317,
+    319
+   ],
+   "misses": [
+    30,
+    39
+   ],
+   "pinchStarts": [
+    24,
+    30
+   ],
+   "pinchReleases": [
+    24,
+    30
+   ],
+   "manualRises": [
+    11,
+    18
+   ],
+   "longestIdleSec": [
+    0.23333333333333334,
+    0.21666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 502,
+    "bestPick:miss": 92,
+    "forget:miss": 371,
+    "bestPick:hit": 505,
+    "sixChallenge:miss": 104,
+    "manualRise:miss": 48,
+    "idleStop:hit": 136,
+    "declareFour:hit": 14,
+    "manualRise:hit": 27,
+    "sixChallenge:hit": 35,
+    "declareSix:hit": 30,
+    "forget:hit": 24,
+    "declareFour:miss": 2
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "normal",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 148.1,
+   "outcome": "win",
+   "declares": [
+    32,
+    31
+   ],
+   "declareIntervalSec": [
+    4.47741935483871,
+    4.751666666666667
+   ],
+   "sixRoles": [
+    15,
+    18
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    185,
+    181
+   ],
+   "misses": [
+    21,
+    18
+   ],
+   "pinchStarts": [
+    16,
+    15
+   ],
+   "pinchReleases": [
+    16,
+    15
+   ],
+   "manualRises": [
+    12,
+    7
+   ],
+   "longestIdleSec": [
+    0.13333333333333333,
+    0.11666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 334,
+    "bestPick:hit": 326,
+    "bestPick:miss": 25,
+    "forget:miss": 222,
+    "idleStop:hit": 32,
+    "sixChallenge:miss": 27,
+    "sixChallenge:hit": 37,
+    "declareSix:hit": 33,
+    "manualRise:hit": 18,
+    "manualRise:miss": 18,
+    "forget:hit": 5,
+    "declareFour:hit": 2
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "normal",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 85.31666666666666,
+   "outcome": "win",
+   "declares": [
+    18,
+    19
+   ],
+   "declareIntervalSec": [
+    4.511764705882353,
+    4.447222222222222
+   ],
+   "sixRoles": [
+    6,
+    9
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    102,
+    106
+   ],
+   "misses": [
+    10,
+    10
+   ],
+   "pinchStarts": [
+    10,
+    13
+   ],
+   "pinchReleases": [
+    10,
+    13
+   ],
+   "manualRises": [
+    9,
+    1
+   ],
+   "longestIdleSec": [
+    0.13333333333333333,
+    0.11666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 188,
+    "bestPick:hit": 187,
+    "forget:miss": 122,
+    "idleStop:hit": 20,
+    "sixChallenge:miss": 19,
+    "manualRise:hit": 10,
+    "bestPick:miss": 14,
+    "sixChallenge:hit": 17,
+    "forget:hit": 4,
+    "declareSix:hit": 15,
+    "manualRise:miss": 3,
+    "declareFour:hit": 3
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "normal",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 69.31666666666666,
+   "outcome": "win",
+   "declares": [
+    14,
+    14
+   ],
+   "declareIntervalSec": [
+    4.75,
+    4.9423076923076925
+   ],
+   "sixRoles": [
+    4,
+    11
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    86,
+    87
+   ],
+   "misses": [
+    16,
+    8
+   ],
+   "pinchStarts": [
+    7,
+    5
+   ],
+   "pinchReleases": [
+    7,
+    5
+   ],
+   "manualRises": [
+    7,
+    8
+   ],
+   "longestIdleSec": [
+    0.13333333333333333,
+    0.11666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 152,
+    "bestPick:hit": 148,
+    "forget:miss": 106,
+    "sixChallenge:miss": 8,
+    "manualRise:hit": 13,
+    "bestPick:miss": 11,
+    "idleStop:hit": 21,
+    "manualRise:miss": 6,
+    "sixChallenge:hit": 18,
+    "declareFour:hit": 3,
+    "declareSix:hit": 15,
+    "forget:hit": 3,
+    "declareFour:miss": 1
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "normal",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 279.4,
+   "outcome": "win",
+   "declares": [
+    60,
+    61
+   ],
+   "declareIntervalSec": [
+    4.631920903954803,
+    4.499444444444444
+   ],
+   "sixRoles": [
+    34,
+    25
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    341,
+    330
+   ],
+   "misses": [
+    25,
+    24
+   ],
+   "pinchStarts": [
+    26,
+    42
+   ],
+   "pinchReleases": [
+    26,
+    42
+   ],
+   "manualRises": [
+    29,
+    16
+   ],
+   "longestIdleSec": [
+    0.11666666666666667,
+    0.13333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 616,
+    "bestPick:hit": 598,
+    "bestPick:miss": 42,
+    "forget:miss": 400,
+    "idleStop:hit": 61,
+    "sixChallenge:miss": 59,
+    "sixChallenge:hit": 68,
+    "declareSix:hit": 59,
+    "manualRise:hit": 44,
+    "manualRise:miss": 21,
+    "declareFour:hit": 11,
+    "forget:hit": 11
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "normal",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 291.56666666666666,
+   "outcome": "win",
+   "declares": [
+    63,
+    62
+   ],
+   "declareIntervalSec": [
+    4.5639784946236555,
+    4.6775956284153
+   ],
+   "sixRoles": [
+    30,
+    26
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    350,
+    351
+   ],
+   "misses": [
+    28,
+    38
+   ],
+   "pinchStarts": [
+    26,
+    35
+   ],
+   "pinchReleases": [
+    26,
+    35
+   ],
+   "manualRises": [
+    27,
+    14
+   ],
+   "longestIdleSec": [
+    0.11666666666666667,
+    0.13333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 647,
+    "bestPick:hit": 625,
+    "forget:miss": 395,
+    "idleStop:hit": 56,
+    "sixChallenge:miss": 68,
+    "manualRise:hit": 39,
+    "sixChallenge:hit": 70,
+    "declareSix:hit": 56,
+    "declareFour:hit": 18,
+    "bestPick:miss": 44,
+    "forget:hit": 14,
+    "manualRise:miss": 14,
+    "declareFour:miss": 2
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "normal",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 81.26666666666667,
+   "outcome": "win",
+   "declares": [
+    16,
+    17
+   ],
+   "declareIntervalSec": [
+    4.913333333333333,
+    4.445833333333334
+   ],
+   "sixRoles": [
+    9,
+    11
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    100,
+    103
+   ],
+   "misses": [
+    9,
+    7
+   ],
+   "pinchStarts": [
+    10,
+    8
+   ],
+   "pinchReleases": [
+    10,
+    7
+   ],
+   "manualRises": [
+    10,
+    8
+   ],
+   "longestIdleSec": [
+    0.11666666666666667,
+    0.13333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 185,
+    "bestPick:hit": 174,
+    "forget:miss": 123,
+    "sixChallenge:miss": 11,
+    "manualRise:hit": 18,
+    "bestPick:miss": 17,
+    "idleStop:hit": 20,
+    "manualRise:miss": 9,
+    "sixChallenge:hit": 23,
+    "declareFour:hit": 4,
+    "forget:hit": 5,
+    "declareSix:hit": 20
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "normal",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": false,
+   "seconds": 300,
+   "outcome": null,
+   "declares": [
+    64,
+    65
+   ],
+   "declareIntervalSec": [
+    4.694444444444445,
+    4.60703125
+   ],
+   "sixRoles": [
+    27,
+    26
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    366,
+    360
+   ],
+   "misses": [
+    44,
+    42
+   ],
+   "pinchStarts": [
+    25,
+    31
+   ],
+   "pinchReleases": [
+    24,
+    31
+   ],
+   "manualRises": [
+    26,
+    21
+   ],
+   "longestIdleSec": [
+    0.15,
+    0.13333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 665,
+    "bestPick:hit": 659,
+    "bestPick:miss": 34,
+    "forget:miss": 458,
+    "idleStop:hit": 62,
+    "sixChallenge:miss": 81,
+    "manualRise:hit": 46,
+    "manualRise:miss": 32,
+    "sixChallenge:hit": 61,
+    "declareSix:hit": 53,
+    "declareFour:hit": 12,
+    "forget:hit": 9
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "normal",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 138.46666666666667,
+   "outcome": "win",
+   "declares": [
+    29,
+    30
+   ],
+   "declareIntervalSec": [
+    4.67797619047619,
+    4.482758620689655
+   ],
+   "sixRoles": [
+    10,
+    13
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    163,
+    165
+   ],
+   "misses": [
+    22,
+    12
+   ],
+   "pinchStarts": [
+    10,
+    12
+   ],
+   "pinchReleases": [
+    10,
+    12
+   ],
+   "manualRises": [
+    16,
+    15
+   ],
+   "longestIdleSec": [
+    0.15,
+    0.13333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 286,
+    "bestPick:hit": 298,
+    "forget:miss": 208,
+    "idleStop:hit": 42,
+    "sixChallenge:miss": 40,
+    "manualRise:hit": 30,
+    "bestPick:miss": 20,
+    "sixChallenge:hit": 26,
+    "declareSix:hit": 23,
+    "manualRise:miss": 22,
+    "forget:hit": 4,
+    "declareFour:hit": 7
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "normal",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": false,
+   "seconds": 300,
+   "outcome": null,
+   "declares": [
+    63,
+    64
+   ],
+   "declareIntervalSec": [
+    4.747311827956989,
+    4.628306878306878
+   ],
+   "sixRoles": [
+    28,
+    31
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    363,
+    368
+   ],
+   "misses": [
+    40,
+    36
+   ],
+   "pinchStarts": [
+    29,
+    33
+   ],
+   "pinchReleases": [
+    28,
+    33
+   ],
+   "manualRises": [
+    20,
+    11
+   ],
+   "longestIdleSec": [
+    0.15,
+    0.13333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 666,
+    "bestPick:hit": 634,
+    "forget:miss": 436,
+    "sixChallenge:miss": 67,
+    "manualRise:hit": 31,
+    "manualRise:miss": 25,
+    "bestPick:miss": 44,
+    "declareSix:hit": 59,
+    "idleStop:hit": 68,
+    "sixChallenge:hit": 72,
+    "declareFour:hit": 10,
+    "forget:hit": 11
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "hard",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 1,
+   "decided": false,
+   "seconds": 300,
+   "outcome": null,
+   "declares": [
+    63,
+    63
+   ],
+   "declareIntervalSec": [
+    4.746236559139785,
+    4.720430107526882
+   ],
+   "sixRoles": [
+    36,
+    42
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    372,
+    375
+   ],
+   "misses": [
+    39,
+    33
+   ],
+   "pinchStarts": [
+    45,
+    31
+   ],
+   "pinchReleases": [
+    45,
+    31
+   ],
+   "manualRises": [
+    7,
+    19
+   ],
+   "longestIdleSec": [
+    0.08333333333333333,
+    0.06666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 725,
+    "bestPick:hit": 716,
+    "forget:miss": 463,
+    "forget:hit": 3,
+    "sixChallenge:miss": 23,
+    "sixChallenge:hit": 88,
+    "declareSix:hit": 78,
+    "manualRise:miss": 6,
+    "manualRise:hit": 26,
+    "idleStop:hit": 27,
+    "declareFour:hit": 13,
+    "bestPick:miss": 16
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "hard",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 82.83333333333333,
+   "outcome": "win",
+   "declares": [
+    17,
+    17
+   ],
+   "declareIntervalSec": [
+    4.921875,
+    4.65625
+   ],
+   "sixRoles": [
+    11,
+    13
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    104,
+    107
+   ],
+   "misses": [
+    11,
+    7
+   ],
+   "pinchStarts": [
+    5,
+    11
+   ],
+   "pinchReleases": [
+    4,
+    11
+   ],
+   "manualRises": [
+    8,
+    4
+   ],
+   "longestIdleSec": [
+    0.08333333333333333,
+    0.06666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 202,
+    "bestPick:hit": 200,
+    "forget:miss": 126,
+    "sixChallenge:miss": 6,
+    "declareFour:hit": 4,
+    "manualRise:hit": 12,
+    "sixChallenge:hit": 27,
+    "declareSix:hit": 24,
+    "idleStop:hit": 9,
+    "bestPick:miss": 2,
+    "manualRise:miss": 4,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "hard",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 114.23333333333333,
+   "outcome": "win",
+   "declares": [
+    24,
+    23
+   ],
+   "declareIntervalSec": [
+    4.594927536231884,
+    4.911363636363636
+   ],
+   "sixRoles": [
+    10,
+    17
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    142,
+    139
+   ],
+   "misses": [
+    16,
+    9
+   ],
+   "pinchStarts": [
+    12,
+    8
+   ],
+   "pinchReleases": [
+    12,
+    7
+   ],
+   "manualRises": [
+    6,
+    7
+   ],
+   "longestIdleSec": [
+    0.08333333333333333,
+    0.06666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 273,
+    "bestPick:hit": 260,
+    "forget:miss": 168,
+    "sixChallenge:hit": 32,
+    "declareSix:hit": 27,
+    "manualRise:miss": 2,
+    "manualRise:hit": 12,
+    "idleStop:hit": 9,
+    "bestPick:miss": 8,
+    "forget:hit": 4,
+    "declareFour:hit": 4,
+    "sixChallenge:miss": 9
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "hard",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 170.4,
+   "outcome": "win",
+   "declares": [
+    35,
+    35
+   ],
+   "declareIntervalSec": [
+    4.731862745098039,
+    4.8426470588235295
+   ],
+   "sixRoles": [
+    25,
+    15
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    214,
+    210
+   ],
+   "misses": [
+    17,
+    29
+   ],
+   "pinchStarts": [
+    20,
+    24
+   ],
+   "pinchReleases": [
+    20,
+    24
+   ],
+   "manualRises": [
+    16,
+    6
+   ],
+   "longestIdleSec": [
+    0.06666666666666667,
+    0.08333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 408,
+    "bestPick:hit": 399,
+    "forget:miss": 260,
+    "forget:hit": 4,
+    "sixChallenge:hit": 50,
+    "declareSix:hit": 40,
+    "manualRise:hit": 22,
+    "bestPick:miss": 9,
+    "idleStop:hit": 16,
+    "sixChallenge:miss": 9,
+    "declareFour:hit": 2,
+    "manualRise:miss": 1
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "hard",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 216.78333333333333,
+   "outcome": "win",
+   "declares": [
+    47,
+    47
+   ],
+   "declareIntervalSec": [
+    4.539130434782609,
+    4.598550724637681
+   ],
+   "sixRoles": [
+    27,
+    18
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    270,
+    264
+   ],
+   "misses": [
+    20,
+    32
+   ],
+   "pinchStarts": [
+    31,
+    32
+   ],
+   "pinchReleases": [
+    31,
+    32
+   ],
+   "manualRises": [
+    6,
+    2
+   ],
+   "longestIdleSec": [
+    0.06666666666666667,
+    0.08333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 521,
+    "bestPick:hit": 505,
+    "forget:miss": 322,
+    "sixChallenge:hit": 62,
+    "declareFour:hit": 9,
+    "manualRise:hit": 8,
+    "bestPick:miss": 7,
+    "declareSix:hit": 45,
+    "manualRise:miss": 5,
+    "idleStop:hit": 16,
+    "sixChallenge:miss": 15,
+    "forget:hit": 3
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "hard",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 165.51666666666668,
+   "outcome": "win",
+   "declares": [
+    35,
+    35
+   ],
+   "declareIntervalSec": [
+    4.639705882352941,
+    4.599019607843138
+   ],
+   "sixRoles": [
+    21,
+    17
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    204,
+    211
+   ],
+   "misses": [
+    16,
+    25
+   ],
+   "pinchStarts": [
+    16,
+    20
+   ],
+   "pinchReleases": [
+    16,
+    20
+   ],
+   "manualRises": [
+    18,
+    8
+   ],
+   "longestIdleSec": [
+    0.06666666666666667,
+    0.08333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 405,
+    "bestPick:hit": 395,
+    "forget:miss": 235,
+    "sixChallenge:hit": 50,
+    "declareSix:hit": 38,
+    "manualRise:hit": 26,
+    "idleStop:hit": 13,
+    "bestPick:miss": 10,
+    "manualRise:miss": 1,
+    "forget:hit": 3,
+    "declareFour:hit": 6,
+    "sixChallenge:miss": 16,
+    "declareFour:miss": 1
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "hard",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 118.31666666666666,
+   "outcome": "win",
+   "declares": [
+    25,
+    25
+   ],
+   "declareIntervalSec": [
+    4.584722222222222,
+    4.570138888888889
+   ],
+   "sixRoles": [
+    13,
+    13
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    143,
+    147
+   ],
+   "misses": [
+    12,
+    14
+   ],
+   "pinchStarts": [
+    13,
+    15
+   ],
+   "pinchReleases": [
+    13,
+    15
+   ],
+   "manualRises": [
+    4,
+    5
+   ],
+   "longestIdleSec": [
+    0.08333333333333333,
+    0.08333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 279,
+    "bestPick:hit": 271,
+    "forget:miss": 168,
+    "forget:hit": 2,
+    "sixChallenge:miss": 24,
+    "sixChallenge:hit": 32,
+    "declareSix:hit": 26,
+    "manualRise:miss": 8,
+    "manualRise:hit": 9,
+    "declareFour:hit": 5,
+    "idleStop:hit": 12,
+    "bestPick:miss": 1
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "hard",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 48.71666666666667,
+   "outcome": "win",
+   "declares": [
+    10,
+    11
+   ],
+   "declareIntervalSec": [
+    4.525925925925926,
+    4.253333333333333
+   ],
+   "sixRoles": [
+    5,
+    2
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    66,
+    61
+   ],
+   "misses": [
+    8,
+    4
+   ],
+   "pinchStarts": [
+    5,
+    4
+   ],
+   "pinchReleases": [
+    5,
+    3
+   ],
+   "manualRises": [
+    4,
+    6
+   ],
+   "longestIdleSec": [
+    0,
+    0.08333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 123,
+    "bestPick:hit": 126,
+    "forget:miss": 72,
+    "sixChallenge:miss": 9,
+    "declareFour:hit": 3,
+    "manualRise:miss": 6,
+    "sixChallenge:hit": 11,
+    "declareSix:hit": 7,
+    "manualRise:hit": 10,
+    "idleStop:hit": 4
+   }
+  },
+  {
+   "mode": "mode1",
+   "level": "hard",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 48.916666666666664,
+   "outcome": "win",
+   "declares": [
+    10,
+    10
+   ],
+   "declareIntervalSec": [
+    5.027777777777778,
+    4.442592592592593
+   ],
+   "sixRoles": [
+    7,
+    6
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    60,
+    62
+   ],
+   "misses": [
+    6,
+    4
+   ],
+   "pinchStarts": [
+    2,
+    5
+   ],
+   "pinchReleases": [
+    1,
+    5
+   ],
+   "manualRises": [
+    7,
+    3
+   ],
+   "longestIdleSec": [
+    0,
+    0.08333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 119,
+    "bestPick:hit": 111,
+    "forget:miss": 79,
+    "sixChallenge:miss": 9,
+    "manualRise:hit": 10,
+    "manualRise:miss": 4,
+    "sixChallenge:hit": 14,
+    "declareSix:hit": 13,
+    "bestPick:miss": 1,
+    "declareFour:hit": 1,
+    "idleStop:hit": 3,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "easy",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 24.883333333333333,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    43,
+    40
+   ],
+   "misses": [
+    1,
+    6
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.3,
+    0.6
+   ],
+   "rolls": {
+    "idleStop:miss": 71,
+    "bestPick:hit": 63,
+    "forget:miss": 36,
+    "bestPick:miss": 20,
+    "idleStop:hit": 12,
+    "forget:hit": 5
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "easy",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 35.483333333333334,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    46,
+    45
+   ],
+   "misses": [
+    4,
+    4
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.48333333333333334,
+    0.9
+   ],
+   "rolls": {
+    "idleStop:miss": 71,
+    "bestPick:hit": 60,
+    "bestPick:miss": 25,
+    "forget:miss": 52,
+    "idleStop:hit": 20,
+    "forget:hit": 4
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "easy",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 32.8,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    48,
+    48
+   ],
+   "misses": [
+    8,
+    6
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.5166666666666667,
+    0.5
+   ],
+   "rolls": {
+    "idleStop:miss": 71,
+    "bestPick:miss": 19,
+    "forget:miss": 46,
+    "bestPick:hit": 62,
+    "idleStop:hit": 26,
+    "forget:hit": 6
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "easy",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 25.8,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    44,
+    41
+   ],
+   "misses": [
+    2,
+    7
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.9666666666666667,
+    0.6333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 72,
+    "bestPick:hit": 56,
+    "forget:miss": 35,
+    "bestPick:miss": 21,
+    "idleStop:hit": 13,
+    "forget:hit": 6
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "easy",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 35.733333333333334,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    45,
+    49
+   ],
+   "misses": [
+    4,
+    7
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    3.1166666666666667,
+    0.21666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 64,
+    "bestPick:hit": 65,
+    "bestPick:miss": 24,
+    "forget:miss": 46,
+    "idleStop:hit": 30,
+    "forget:hit": 9
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "easy",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 33.61666666666667,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    49,
+    48
+   ],
+   "misses": [
+    8,
+    6
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.5333333333333333,
+    0.36666666666666664
+   ],
+   "rolls": {
+    "idleStop:miss": 66,
+    "bestPick:miss": 16,
+    "forget:miss": 48,
+    "bestPick:hit": 57,
+    "idleStop:hit": 31,
+    "forget:hit": 6
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "easy",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 27.716666666666665,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    46,
+    44
+   ],
+   "misses": [
+    4,
+    6
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.5666666666666667,
+    1.4833333333333334
+   ],
+   "rolls": {
+    "idleStop:miss": 75,
+    "bestPick:hit": 64,
+    "forget:miss": 41,
+    "bestPick:miss": 17,
+    "idleStop:hit": 15,
+    "forget:hit": 4
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "easy",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 30.266666666666666,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    47,
+    46
+   ],
+   "misses": [
+    5,
+    5
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.6333333333333333,
+    1.0666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 68,
+    "bestPick:hit": 62,
+    "bestPick:miss": 18,
+    "forget:miss": 50,
+    "idleStop:hit": 25,
+    "forget:hit": 4
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "easy",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 38.96666666666667,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    48,
+    47
+   ],
+   "misses": [
+    6,
+    7
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    1.5,
+    0.21666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 64,
+    "bestPick:miss": 10,
+    "forget:miss": 52,
+    "bestPick:hit": 69,
+    "idleStop:hit": 32,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "normal",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 29.066666666666666,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    49,
+    44
+   ],
+   "misses": [
+    7,
+    6
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    1.0666666666666667,
+    3.3
+   ],
+   "rolls": {
+    "idleStop:miss": 87,
+    "bestPick:hit": 68,
+    "forget:miss": 41,
+    "idleStop:hit": 6,
+    "bestPick:miss": 5,
+    "forget:hit": 3
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "normal",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 28.783333333333335,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    47,
+    51
+   ],
+   "misses": [
+    6,
+    9
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    1.3166666666666667,
+    0.5
+   ],
+   "rolls": {
+    "idleStop:miss": 86,
+    "bestPick:hit": 74,
+    "forget:miss": 55,
+    "bestPick:miss": 8,
+    "idleStop:hit": 12,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "normal",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 27.283333333333335,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    47,
+    46
+   ],
+   "misses": [
+    5,
+    6
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    1.3333333333333333,
+    0.4666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 82,
+    "bestPick:hit": 77,
+    "forget:miss": 41,
+    "idleStop:hit": 11,
+    "bestPick:miss": 6,
+    "forget:hit": 4
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "normal",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 27.033333333333335,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    47,
+    51
+   ],
+   "misses": [
+    5,
+    12
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    1.6666666666666667,
+    0.9
+   ],
+   "rolls": {
+    "idleStop:miss": 91,
+    "bestPick:hit": 72,
+    "forget:miss": 45,
+    "idleStop:hit": 7,
+    "bestPick:miss": 5,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "normal",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 29.083333333333332,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    43,
+    49
+   ],
+   "misses": [
+    7,
+    7
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    1.4166666666666667,
+    0.3
+   ],
+   "rolls": {
+    "idleStop:miss": 81,
+    "bestPick:hit": 73,
+    "forget:miss": 44,
+    "bestPick:miss": 6,
+    "idleStop:hit": 11,
+    "forget:hit": 2
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "normal",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 28.933333333333334,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    47,
+    45
+   ],
+   "misses": [
+    8,
+    3
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.7333333333333333,
+    0.45
+   ],
+   "rolls": {
+    "idleStop:miss": 74,
+    "bestPick:hit": 77,
+    "forget:miss": 42,
+    "idleStop:hit": 18,
+    "bestPick:miss": 6,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "normal",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 29,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    51,
+    48
+   ],
+   "misses": [
+    9,
+    9
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.5666666666666667,
+    2.4
+   ],
+   "rolls": {
+    "idleStop:miss": 93,
+    "bestPick:hit": 77,
+    "forget:miss": 49,
+    "idleStop:hit": 6,
+    "bestPick:miss": 6
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "normal",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 32.8,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    47,
+    49
+   ],
+   "misses": [
+    8,
+    7
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.9166666666666666,
+    1.6333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 86,
+    "bestPick:hit": 81,
+    "forget:miss": 47,
+    "bestPick:miss": 2,
+    "idleStop:hit": 10,
+    "forget:hit": 2
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "normal",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 31.166666666666668,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    51,
+    45
+   ],
+   "misses": [
+    9,
+    3
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.5333333333333333,
+    1.3333333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 80,
+    "bestPick:hit": 73,
+    "forget:miss": 41,
+    "idleStop:hit": 16,
+    "bestPick:miss": 2,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "hard",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 34.96666666666667,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    49,
+    52
+   ],
+   "misses": [
+    8,
+    10
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    1.5,
+    0.8666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 98,
+    "bestPick:hit": 73,
+    "forget:miss": 38,
+    "idleStop:hit": 3,
+    "bestPick:miss": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "hard",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 30.383333333333333,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    46,
+    48
+   ],
+   "misses": [
+    7,
+    6
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.4666666666666667,
+    0.7166666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 94,
+    "bestPick:hit": 74,
+    "forget:miss": 52,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "hard",
+   "chars": [
+    "kotaro",
+    "akane"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 38.75,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    52,
+    46
+   ],
+   "misses": [
+    11,
+    4
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    1,
+    1.1666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 89,
+    "bestPick:hit": 75,
+    "forget:miss": 41,
+    "idleStop:hit": 9,
+    "bestPick:miss": 1,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "hard",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 26.383333333333333,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    46,
+    47
+   ],
+   "misses": [
+    10,
+    5
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    1.5833333333333333,
+    0.85
+   ],
+   "rolls": {
+    "idleStop:miss": 90,
+    "bestPick:hit": 74,
+    "forget:miss": 42,
+    "idleStop:hit": 3,
+    "bestPick:miss": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "hard",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 30.383333333333333,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    46,
+    48
+   ],
+   "misses": [
+    7,
+    6
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.4666666666666667,
+    0.7166666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 94,
+    "bestPick:hit": 74,
+    "forget:miss": 52,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "hard",
+   "chars": [
+    "akane",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 33.36666666666667,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    53,
+    45
+   ],
+   "misses": [
+    11,
+    3
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.5666666666666667,
+    2.033333333333333
+   ],
+   "rolls": {
+    "idleStop:miss": 90,
+    "bestPick:hit": 70,
+    "forget:miss": 42,
+    "idleStop:hit": 8,
+    "bestPick:miss": 3,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "hard",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 1,
+   "decided": true,
+   "seconds": 30.883333333333333,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    48,
+    50
+   ],
+   "misses": [
+    7,
+    8
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    1.45,
+    0.8666666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 95,
+    "bestPick:hit": 76,
+    "forget:miss": 39,
+    "idleStop:hit": 3
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "hard",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 2,
+   "decided": true,
+   "seconds": 30.383333333333333,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    46,
+    48
+   ],
+   "misses": [
+    7,
+    6
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.4666666666666667,
+    0.7166666666666667
+   ],
+   "rolls": {
+    "idleStop:miss": 94,
+    "bestPick:hit": 74,
+    "forget:miss": 52,
+    "forget:hit": 1
+   }
+  },
+  {
+   "mode": "mode2",
+   "level": "hard",
+   "chars": [
+    "zunko",
+    "kotaro"
+   ],
+   "seed": 3,
+   "decided": true,
+   "seconds": 35.46666666666667,
+   "outcome": "win",
+   "declares": [
+    0,
+    0
+   ],
+   "declareIntervalSec": [
+    null,
+    null
+   ],
+   "sixRoles": [
+    0,
+    0
+   ],
+   "fails": [
+    0,
+    0
+   ],
+   "launches": [
+    49,
+    44
+   ],
+   "misses": [
+    9,
+    2
+   ],
+   "pinchStarts": [
+    0,
+    0
+   ],
+   "pinchReleases": [
+    0,
+    0
+   ],
+   "manualRises": [
+    0,
+    0
+   ],
+   "longestIdleSec": [
+    0.5833333333333334,
+    0.4
+   ],
+   "rolls": {
+    "idleStop:miss": 88,
+    "bestPick:hit": 75,
+    "forget:miss": 40,
+    "idleStop:hit": 5,
+    "bestPick:miss": 1
+   }
+  }
+ ]
+}

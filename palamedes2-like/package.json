@@ -1,8 +1,8 @@
 {
   "name": "palamedes2-like",
-  "version": "3.0.0-rc.1",
+  "version": "3.1.0",
   "private": true,
-  "description": "コタローくんパズル 第3版統合候補 v3.0.0-rc1",
+  "description": "コタローくんパズル 第3版 v3.1.0",
   "type": "module",
   "engines": {
     "node": ">=22.12"
