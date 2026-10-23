@@ -778,7 +778,7 @@ export class Game {
     if (p.riseCountdown > 0) return;
     if (this.tick < p.manualRiseEndTick) return; // 手動上昇中は自然上昇の実行を待機（重ねて実行しない）
     if (p.board.height() >= danger) {
-      // 7段のまま自然上昇時刻：上昇を保留し、3秒の危険猶予を開始
+      // 7段のまま自然上昇時刻：上昇を保留し、危険猶予（4000ms）を開始
       p.riseHeld = true;
       p.graceRemaining = this.ticks(this.config.dangerGraceMs);
       this.emit({ type: 'danger', tick: this.tick, player: p.id, state: 'grace', graceEnd: this.tick + p.graceRemaining });

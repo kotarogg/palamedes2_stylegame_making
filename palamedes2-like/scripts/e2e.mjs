@@ -697,9 +697,41 @@ try {
 
   // ==== v3.1.0 ====
   // ---- 開始前待機：表示準備後 1000ms はゲームを進めない。待機中の操作を解除後へ持ち越さない ----
+  /**
+   * 修正R1：開始前待機の間、描画のたびに画面を調べ、READY・GO（S9 の A/B/C 全位相）が描かれていないこと。
+   * 待機が終わった後に READY が描かれることも確かめる（待機中の判定が見逃しでないことの確認）
+   */
+  const holdBannerSampler = () =>
+    ev(
+      () =>
+        new Promise((resolve) => {
+          const ids = ['A', 'B', 'C'].flatMap((ph) => [`show_ready_${ph}`, `show_go_${ph}`]);
+          const out = { frames: 0, drawn: [], readyAfter: false, tickMax: 0 };
+          let afterFrames = 0;
+          const tick = () => {
+            const sc = window.__p2like.gameScene();
+            if (!sc) return resolve(out);
+            const drawn = ids.filter((id) => {
+              const m = window.__cmp('S9', id, 240, 144);
+              return m.opaque > 0 && m.bad === 0;
+            });
+            if (sc.preStartHolding) {
+              out.frames++;
+              out.tickMax = Math.max(out.tickMax, sc.game.tick);
+              out.drawn.push(...drawn);
+            } else {
+              if (drawn.some((d) => d.startsWith('show_ready'))) out.readyAfter = true;
+              if (++afterFrames > 30 || out.readyAfter) return resolve(out);
+            }
+            requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }),
+    );
   {
     const tH = await now();
     await ev(() => window.__p2like.app.startGame('mode1', '2p'));
+    const samp0 = holdBannerSampler();
     await wait(120);
     const h0 = await ev(() => ({ holding: window.__p2like.gameScene().preStartHolding, tick: window.__p2like.game().tick }));
     await page.keyboard.press('KeyF'); // 1P 発射（待機中）
@@ -713,6 +745,30 @@ try {
     await wait(300);
     const after = await ev(() => ({ launches: window.__p2like.game().events.filter((e) => e.type === 'launch').length, tick: window.__p2like.game().tick }));
     const readyAfter = (await logSince(tH)).some((e) => e.kind === 'voice' && e.id.endsWith('_ready') && !e.skipped);
+    const s0 = await samp0;
+    // 新ラウンド（勝敗の後、決定で次のラウンド）と再戦（同じキャラで再戦＝同じ処理）でも同じ
+    await wait(900);
+    await ev(() => {
+      const sc = window.__p2like.gameScene();
+      sc.game.players[0].defeated = true;
+      sc.step();
+    });
+    await wait(2300);
+    await key('Enter', 0);
+    const s1 = await holdBannerSampler();
+    await waitPlaying();
+    await ev(() => {
+      const sc = window.__p2like.gameScene();
+      sc.session.rematch();
+      sc.onNewRound();
+    });
+    const s2 = await holdBannerSampler();
+    const round = await ev(() => window.__p2like.gameScene().session.round);
+    check(
+      'v3.1.0 修正R1：開始前待機中は READY・GO とも描かない（最初・新ラウンド・再戦。画素照合、全位相）。待機後に既存の READY→GO へ進む',
+      [s0, s1, s2].every((x) => x.frames >= 20 && x.drawn.length === 0 && x.tickMax === 0 && x.readyAfter) && round === 1,
+      JSON.stringify({ s0, s1, s2, round }),
+    );
     check(
       'v3.1.0 開始前待機：表示後1000msはゲームを進めない（tick 0・READY前）。待機中の発射を解除後へ持ち越さない',
       h0.holding && h0.tick === 0 && h1.holding && h1.tick === 0 && voiceDuringHold.length === 0 && released >= 1000 && released < 1800 && after.launches === 0 && readyAfter,
@@ -777,7 +833,8 @@ try {
   }
 
   // ---- 代表状態：連続出し（予約中のヒビ）・役連鎖・中央の受攻撃ストック（最大＋相殺）・ピンチ3 ----
-  await wait(700); // GO の見出しが消えてから
+  await waitPlaying(); // 再戦の開始前待機が終わり、GO の見出しが消えてから
+  await wait(900);
   const v310 = await ev(() => {
     const sc = window.__p2like.gameScene();
     const g = sc.game;

@@ -212,3 +212,52 @@ describe('v3.1.0 打ち上げ成功連鎖：攻撃倍率表と連鎖切り予約
     expect(p.chainCount).toBe(1);
   });
 });
+
+describe('v3.1.0 修正R2：自然上昇の危険猶予も4000ms（3/2/1 は開始1000ms後から）', () => {
+  it('自然上昇から開始：到達0〜1000ms未満は数字なし、1000/2000/3000msで 3/2/1、4000msで敗北。通常周期は変更しない', () => {
+    expect(DEFAULT_CONFIG.dangerGraceMs).toBe(4000);
+    const g = makeGame({ boards: { 0: rows(7), 1: EMPTY } }, testConfig({ naturalRiseIntervalMs: 1000 }));
+    toPlay(g);
+    while (!evs(g, 'danger', 0).length) g.step();
+    const t0 = evs(g, 'danger', 0)[0].tick;
+    stepN(g, 300);
+    expect(evs(g, 'pinchWarn', 0).map((e) => [e.state, e.value, e.tick - t0])).toEqual([
+      ['start', null, 0],
+      ['count', 3, 60],
+      ['count', 2, 120],
+      ['count', 1, 180],
+      ['end', null, 240],
+    ]);
+    expect(evs(g, 'danger', 0).at(-1)).toMatchObject({ state: 'defeat', tick: t0 + 240 });
+  });
+
+  it('攻撃ピンチが先・自然上昇の猶予が後：先行する攻撃ピンチの期限で判定（後の猶予で延長しない）。start は1回', () => {
+    const g = makeGame({ boards: { 0: rows(7), 1: EMPTY } }, testConfig({ naturalRiseIntervalMs: 7000 }));
+    const t0 = startAttackPinch(g);
+    g.players[0].riseCountdown = 30; // 攻撃ピンチの30tick後に自然上昇の時刻（7段のまま → 自然上昇の危険猶予も開始）
+    stepN(g, 400);
+    expect(evs(g, 'danger', 0)[0]).toMatchObject({ state: 'grace' });
+    expect(evs(g, 'danger', 0)[0].tick).toBeGreaterThan(t0);
+    const defeat = Math.min(...[...evs(g, 'danger', 0), ...evs(g, 'attackPinch', 0)].filter((e) => e.state === 'defeat').map((e) => e.tick));
+    expect(defeat).toBe(t0 + 240);
+    expect(evs(g, 'pinchWarn', 0).filter((e) => e.state === 'start')).toHaveLength(1);
+    expect(evs(g, 'pinchWarn', 0).filter((e) => e.state === 'count').map((e) => e.tick - t0)).toEqual([60, 120, 180]);
+  });
+
+  it('自然上昇の猶予中は役処理で止まり、解除で終了する', () => {
+    const g = makeGame({ boards: { 0: rows(7), 1: EMPTY } }, testConfig({ naturalRiseIntervalMs: 1000 }));
+    toPlay(g);
+    while (!evs(g, 'danger', 0).length) g.step();
+    stepN(g, 30);
+    const p = g.players[0];
+    const before = p.graceRemaining!;
+    setStock(g, 0, '1s', '2s', '3s', '4s');
+    g.step([cmd(0, 'declare')]);
+    stepN(g, g.ticks(g.config.timing.roleIntroMs) - 2);
+    expect(p.graceRemaining).toBe(before);
+    while (p.role) g.step();
+    stepN(g, 2);
+    expect(evs(g, 'pinchWarn', 0).at(-1)).toMatchObject({ state: 'end' });
+    expect(g.result).toBeNull();
+  });
+});

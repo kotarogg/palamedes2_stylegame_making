@@ -919,6 +919,18 @@ export class GameView {
     if (label) items.push({ z: Z.ui + 3, draw: (ctx) => drawText(ctx, label.text, label.x, label.y, { align: label.align, size: 10, weight: 700, box: true }) });
   }
 
+  /**
+   * 開始の見出し（READY／GO）。v3.1.0 修正R1：開始前待機（1000ms）中は READY・GO とも出さず、
+   * 待機の後に既存の READY→GO へ進む。テスト・検証用に公開
+   */
+  startBanner(t: number): 'show_ready' | 'show_go' | null {
+    const g = this.game;
+    if (this.hud.preStart || (this.hud.result && t >= this.hud.result.startTick)) return null;
+    if (t < g.playStartTick) return 'show_ready';
+    if (t < g.playStartTick + g.ticks(g.config.timing.goMs) && !g.result) return 'show_go';
+    return null;
+  }
+
   private s9Phase(t: number): 'A' | 'B' | 'C' {
     return (['A', 'B', 'C'] as const)[Math.floor(t / this.ticksOf(90)) % 3];
   }
@@ -969,8 +981,10 @@ export class GameView {
       else if (r.kind === 'allStagesClear') banner('show_all_stages_complete');
       else if (r.kind === 'clear') banner('show_all_clear');
       else if (this.hud.matchOver) this.put(items, Z.banner, this.extraFrame('result_match_ja'), L.rect('ready_banner').x, L.rect('ready_banner').y);
-    } else if (t < g.playStartTick && !this.hud.preStart) banner('show_ready');
-    else if (t < goEnd && !g.result) banner('show_go', 'go_banner');
+    } else {
+      const sb = this.startBanner(t);
+      if (sb) banner(sb, sb === 'show_go' ? 'go_banner' : 'ready_banner');
+    }
     // MODE2 カウントダウン：数字のみ（枠・窓なし）。上から出現→停止→下へ消える。動きはコード側
     const cd = this.countdown;
     if (cd && !g.result && t >= cd.start && t < cd.end) {

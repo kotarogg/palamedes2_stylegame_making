@@ -224,16 +224,16 @@ describe('受攻撃ブロック・攻撃波（ゲーム内）', () => {
     expect(evs(g, 'danger', 0).map((e) => e.state)).toEqual(['grace']);
   });
 
-  it('自然上昇の危険猶予が先に期限を迎えれば、その早い期限で敗北（攻撃ピンチの2000msで延長しない）', () => {
+  it('自然上昇の危険猶予が先に期限を迎えれば、その早い期限で敗北（後から始まる攻撃ピンチの4000msで延長しない）', () => {
     const g = makeGame({ boards: { 0: rows(7), 1: EMPTY } }, testConfig({ naturalRiseIntervalMs: NATURAL_RISE_MS.normal }));
     toPlay(g);
     g.players[0].riseCountdown = 1;
-    g.step(); // 自然上昇時刻：7段 → 3秒の危険猶予
+    g.step(); // 自然上昇時刻：7段 → 4秒の危険猶予
     const t0 = g.tick;
     stepN(g, 140);
-    g.step([atk(0, 2)]); // 攻撃ピンチ猶予は 140+1+120 で開始されるが、自然の猶予（180）が先
-    stepN(g, 200);
-    expect(g.result?.tick).toBe(t0 + 180);
+    g.step([atk(0, 2)]); // 攻撃ピンチ猶予は 140+1+120 で開始されるが、自然の猶予（240）が先
+    stepN(g, 300);
+    expect(g.result?.tick).toBe(t0 + 240);
   });
 
   it('左右を入れ替えても結果が対称', () => {

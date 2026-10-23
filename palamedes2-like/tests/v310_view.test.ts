@@ -133,3 +133,22 @@ describe('v3.1.0 受攻撃ストックの中央配置', () => {
     expect(a.x).toBeLessThan(b.x);
   });
 });
+
+describe('v3.1.0 修正R1：開始前待機中は READY・GO を出さない', () => {
+  it('待機中（tick 0）は見出しなし → 待機後に READY → GO。新ラウンド（reset）でも同じ', () => {
+    const g = makeGame({ boards: { 0: EMPTY, 1: EMPTY } });
+    const v = new GameView(g, fakeAssets());
+    v.hud = { preStart: true };
+    for (const t of [0, 0.5, 1]) expect(v.startBanner(t)).toBeNull();
+    v.hud = { preStart: false };
+    expect(v.startBanner(0)).toBe('show_ready');
+    expect(v.startBanner(g.playStartTick)).toBe('show_go');
+    expect(v.startBanner(g.playStartTick + g.ticks(g.config.timing.goMs))).toBeNull();
+    // 新ラウンド・再戦（盤面を準備し直す）：待機中は同じく出さない
+    const g2 = makeGame({ boards: { 0: EMPTY, 1: EMPTY } });
+    v.reset(g2);
+    v.hud = { preStart: true };
+    expect(v.startBanner(0)).toBeNull();
+    expect(v.startBanner(g2.playStartTick)).toBeNull();
+  });
+});

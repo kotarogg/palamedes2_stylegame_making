@@ -78,7 +78,7 @@ export interface GameConfig {
   manualRiseMaxHeight: number;
   /** 危険状態の段数（確定：7段） */
   dangerHeight: number;
-  /** 危険猶予（確定：3秒） */
+  /** 危険猶予（自然上昇の危険猶予。v3.1.0 修正R2：攻撃ピンチ猶予と同じ4000msに統一。1000/2000/3000ms で 3/2/1） */
   dangerGraceMs: number;
   /** 連続取得の受付時間（確定：成功取得から次の成功取得まで2秒。自分の成立役の処理中は停止＝共有ノート17） */
   streakWindowMs: number;
@@ -130,7 +130,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   initialRows: 3,
   manualRiseMaxHeight: 7,
   dangerHeight: 7,
-  dangerGraceMs: 3000,
+  dangerGraceMs: 4000,
   streakWindowMs: 2000,
   streakAttackTable: STREAK_ATTACK_TABLE,
   streakScoreTable: STREAK_SCORE_TABLE,

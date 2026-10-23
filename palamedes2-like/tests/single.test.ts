@@ -196,7 +196,7 @@ describe('MODE1シングル：ステージクリア', () => {
   it('危険猶予切れはゲームオーバー（勝者なし）', () => {
     const g = single({ kind: 'stage', stage: 1 }, { cols: rows(7) }, testConfig({ naturalRiseIntervalMs: 500 }));
     toPlay(g);
-    stepN(g, 600);
+    stepN(g, 700); // 自然上昇の危険猶予4000ms（v3.1.0 修正R2）
     expect(g.result).toMatchObject({ winner: null, outcome: 'gameOver' });
   });
 });

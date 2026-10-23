@@ -599,12 +599,12 @@ describe('危険状態・敗北（確定）', () => {
     return g;
   };
 
-  it('7段のまま自然上昇時刻：上昇を保留し3秒の猶予。猶予終了時も7段なら8段目の追加直前に敗北', () => {
+  it('7段のまま自然上昇時刻：上昇を保留し4秒の猶予（v3.1.0 修正R2）。猶予終了時も7段なら8段目の追加直前に敗北', () => {
     const g = dangerGame();
     stepN(g, g.ticks(500));
     const grace = evs(g.events, 'danger')[0];
     expect(grace.state).toBe('grace');
-    expect(grace.graceEnd - grace.tick).toBe(g.ticks(3000));
+    expect(grace.graceEnd - grace.tick).toBe(g.ticks(4000));
     stepUntil(g, grace.graceEnd + 10);
     const dz = evs(g.events, 'danger');
     expect(dz.map((e) => [e.state, e.tick])).toEqual([
