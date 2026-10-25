@@ -1,5 +1,5 @@
 {
- "about": "第3版プレイ版の必須素材（画像49・JSON5・フォント・OFL・音声114）。scripts/check-release.mjs が照合する　v3.1.0：追加画像9（additional_assets_v310.json）と定義JSONを追加。",
+ "about": "第3版プレイ版の必須素材（画像49・JSON5・フォント・OFL・音声117）。scripts/check-release.mjs が照合する　v3.1.0：追加画像9（additional_assets_v310.json）と定義JSONを追加。　v3.1.0ボイス：差替え11本・ピンチボイス3本追加（ボイス75）。",
  "files": [
   {
    "path": "gfx/assets/akane_sheet.png",
@@ -479,8 +479,8 @@
   },
   {
    "path": "assets/audio/voice/voice_akane_attack.wav",
-   "size": 53290,
-   "sha256": "b7be587390bb886e37ebefd4c5e67cfaa07ef5443787244cd5e574418d8a54b8"
+   "size": 110740,
+   "sha256": "5f76b2603d4ab4d67902addcc940056e27315e10109d36e28b9b186b7ab4d0dc"
   },
   {
    "path": "assets/audio/voice/voice_akane_damage.wav",
@@ -494,8 +494,13 @@
   },
   {
    "path": "assets/audio/voice/voice_akane_lose.wav",
-   "size": 119666,
-   "sha256": "c292ad76a5e7273dae06fe4c21c73dc2384e658ac160a5590ed8532147f0fd3c"
+   "size": 139424,
+   "sha256": "b6128366614b794600b768590456e431211b1658e441c8f560bdc48ed534831e"
+  },
+  {
+   "path": "assets/audio/voice/voice_akane_pinch.wav",
+   "size": 125540,
+   "sha256": "d258dab3426975471a20712e46c568fdb2f566ffe2a085bc7ea9619a7cbc1b07"
   },
   {
    "path": "assets/audio/voice/voice_akane_ready.wav",
@@ -544,8 +549,8 @@
   },
   {
    "path": "assets/audio/voice/voice_akane_role_09.wav",
-   "size": 77040,
-   "sha256": "56684082c27f5721e9acf42bc828e7c97e05e0a2dcd1d1e57bad3c0df53a3bc8"
+   "size": 78252,
+   "sha256": "c37a46fb61e539dd273d2d71b262a772a5d955ac2ab6d616df0e2817bf354203"
   },
   {
    "path": "assets/audio/voice/voice_akane_role_10.wav",
@@ -584,18 +589,18 @@
   },
   {
    "path": "assets/audio/voice/voice_akane_role_fail.wav",
-   "size": 44888,
-   "sha256": "7a395f4032060b9264ea5cd3a00c20676ccf7897d1ef12f6dc9fb51497568a62"
+   "size": 114434,
+   "sha256": "e8cf3d85becd5e9d78da64f100b23579234d1b1af8339f044e42bd96834da2a3"
   },
   {
    "path": "assets/audio/voice/voice_akane_select.wav",
-   "size": 96798,
-   "sha256": "85f0e7981497c365810945f121d497830f1386846609a701cf1fe9d62a86837b"
+   "size": 137246,
+   "sha256": "ba97a2d2988e8ef83f8d9a3c0427a988ea246078a6d95a50c4d4f5d067265579"
   },
   {
    "path": "assets/audio/voice/voice_akane_win.wav",
-   "size": 67964,
-   "sha256": "359bfcb7f31fdcec66b8f8c836723438a8402f7a22f19f50490ccd2306dd2c15"
+   "size": 117804,
+   "sha256": "402533b06a7bbb44f693d35c0ce68a35d2c4e08069c7c0636038f5a141e6b0b1"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_attack.wav",
@@ -616,6 +621,11 @@
    "path": "assets/audio/voice/voice_kotaro_lose.wav",
    "size": 140204,
    "sha256": "8844fe593aea7d88f8d0533de4abde9f9ee64c8ab94595c30aacfb2ea0738530"
+  },
+  {
+   "path": "assets/audio/voice/voice_kotaro_pinch.wav",
+   "size": 146958,
+   "sha256": "111c3fe158980475fd6e0bba4e7f89c91f4273eb913d65d592f57b5004539e40"
   },
   {
    "path": "assets/audio/voice/voice_kotaro_ready.wav",
@@ -719,8 +729,8 @@
   },
   {
    "path": "assets/audio/voice/voice_zunko_attack.wav",
-   "size": 52842,
-   "sha256": "b04341cf547fb7cdf90035b9391f3e076cd971f2019bc315f8708bd2fe08f95e"
+   "size": 104660,
+   "sha256": "45d66021ecdbcc0447eb07edf1465c0fcf9871e206da2e5c9619d102dbad7436"
   },
   {
    "path": "assets/audio/voice/voice_zunko_damage.wav",
@@ -734,8 +744,13 @@
   },
   {
    "path": "assets/audio/voice/voice_zunko_lose.wav",
-   "size": 112590,
-   "sha256": "ff5a536175b59acf73da9076fe73b08dbb37f94f091f34935732169eb9b197ac"
+   "size": 145392,
+   "sha256": "8dc27ce8eb9a5fefc27927c01f9589c492ec0a283c6bc4c29f4df042e0e2998b"
+  },
+  {
+   "path": "assets/audio/voice/voice_zunko_pinch.wav",
+   "size": 112418,
+   "sha256": "cc9d2f3aab1869331df7b9ce4d44db1fa7cdec8986ec56e7d75ae48c5ee1a6e2"
   },
   {
    "path": "assets/audio/voice/voice_zunko_ready.wav",
@@ -824,18 +839,18 @@
   },
   {
    "path": "assets/audio/voice/voice_zunko_role_fail.wav",
-   "size": 29360,
-   "sha256": "326194b7af7124aff364420b5d84cd552d06e35d7921d85a23064ec702d45c19"
+   "size": 68426,
+   "sha256": "81b8dbc782d0fbd13ff5232c8363c82ad97dfb0f36d76801521534ad892a03fd"
   },
   {
    "path": "assets/audio/voice/voice_zunko_select.wav",
-   "size": 73436,
-   "sha256": "d86fc9cd7ddd5c76c7d82353da1e6663cd7235741064e2f11a9b1486a2d53a88"
+   "size": 129076,
+   "sha256": "443f2be070e229eaa31e86dff61b646ed36a204805ffe43f002466d0578836ed"
   },
   {
    "path": "assets/audio/voice/voice_zunko_win.wav",
-   "size": 63394,
-   "sha256": "9e1088315c62739807ee05973a4c36b544fe2b265b1e1b899f53dfbc12919b97"
+   "size": 131842,
+   "sha256": "4a34d63ca3423c9405950f0963799878655cdf4f9782d45b0f853d7e3e771cec"
   },
   {
    "path": "assets/audio/bgm/bgm_menu.wav",

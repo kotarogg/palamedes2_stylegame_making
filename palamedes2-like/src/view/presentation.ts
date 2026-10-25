@@ -283,6 +283,18 @@ export class RoleNameDirector {
     return this.schedules[p]?.startsNow(tick) ?? true;
   }
 
+  /**
+   * v3.1.0 これから代表ボイスが始まる予定があるか（ピンチボイスを鳴らさない判定に使う）：
+   * 表示待ちの宣言がある、またはまだ取り込んでいない宣言イベントがある（同じフレームで後から代表ボイスが始まる）
+   */
+  roleVoiceImminent(): boolean {
+    if (this.game.result) return false;
+    if (this.schedules.some((s) => s.hasPending)) return true;
+    const ev = this.game.events as ReadonlyArray<GameEvent | Mode2Event>;
+    for (let i = this.cursor; i < ev.length; i++) if (ev[i].type === 'declare') return true;
+    return false;
+  }
+
   /** 毎フレーム（描画前）。結果へ移行したら役名表示・表示待ちを終了する */
   update(): void {
     const ev = this.game.events as ReadonlyArray<GameEvent | Mode2Event>;

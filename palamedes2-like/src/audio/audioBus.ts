@@ -87,6 +87,8 @@ interface Playing {
   gain: GainNode | null;
   rec?: AudioNodeRecord;
   protected?: boolean;
+  /** v3.1.0 低優先度の任意ボイス（ピンチ）。他の声の開始で止める */
+  optional?: boolean;
 }
 
 export class AudioBus {
@@ -334,13 +336,42 @@ export class AudioBus {
     }
     if (channel !== 'result' && channel !== 'select') this.stopChannel(channel);
     if (channel === 'result') this.stopChannel('main');
+    this.stopOptional(); // v3.1.0：重要な声が始まるときは、鳴っている任意ボイス（ピンチ）を止める
+    return this.startVoice(c, line, prio, channel, delayMs, t, false);
+  }
+
+  /**
+   * v3.1.0 低優先度の任意ボイス（ピンチボイス）。main で再生する。
+   * どのチャンネルでも声が鳴っている（遅延開始の予約を含む）なら鳴らさずに捨てる（先行する声を中断しない・後から再生しない）。
+   * 再生後に他の声（playVoice）が始まれば止められる。素材の尺は変えない（固定長で切らない）
+   */
+  playOptionalVoice(c: Character, line: VoiceLine, prio: number): boolean {
+    const t = this.now();
+    const id = `${c}_${line}`;
+    for (const ch of Object.keys(this.voices) as VoiceChannel[]) this.voices[ch] = this.voices[ch].filter((p) => p.endT > t);
+    if ((Object.keys(this.voices) as VoiceChannel[]).some((ch) => this.voices[ch].length > 0)) {
+      this.record({ t, kind: 'voice', id, channel: 'main', skipped: 'busy' });
+      return false;
+    }
+    return this.startVoice(c, line, prio, 'main', 0, t, true);
+  }
+
+  private startVoice(c: Character, line: VoiceLine, prio: number, channel: VoiceChannel, delayMs: number, t: number, optional: boolean): boolean {
+    const id = `${c}_${line}`;
     const file = voiceFile(c, line);
     const p = this.start(id, file, 'voice', delayMs);
     const dur = this.durationMs(file) ?? 600;
-    this.voices[channel].push({ id, prio, endT: t + dur, src: p?.src ?? null, gain: p?.gain ?? null, rec: p?.rec });
+    this.voices[channel].push({ id, prio, endT: t + dur, src: p?.src ?? null, gain: p?.gain ?? null, rec: p?.rec, ...(optional ? { optional } : {}) });
     this.record({ t, kind: 'voice', id, channel, skipped: p || !this.ctx ? undefined : this.skipReason(file) });
     this.updateDuck(t, dur);
     return true;
+  }
+
+  private stopOptional(): void {
+    for (const ch of Object.keys(this.voices) as VoiceChannel[]) {
+      for (const p of this.voices[ch]) if (p.optional) this.stopNode(p);
+      this.voices[ch] = this.voices[ch].filter((p) => !p.optional);
+    }
   }
 
   /**

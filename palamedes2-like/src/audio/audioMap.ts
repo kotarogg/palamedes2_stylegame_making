@@ -90,10 +90,9 @@ export const CHARACTERS: readonly Character[] = ['kotaro', 'akane', 'zunko'];
 export type VoiceLine = 'attack' | 'damage' | 'role_fail' | 'win' | 'lose' | 'ready' | 'go' | 'select' | 'pinch' | `role_${string}`;
 
 /**
- * v3.1.0 ピンチボイスの受け入れ先：未納品のため空（実音声を鳴らさない・必須読み込みに入れない）。
- * 素材を登録すれば（例 kotaro: true で voice/voice_kotaro_pinch.wav を任意読込）有効化できる
+ * v3.1.0 ピンチボイスの登録（3キャラとも納品済み・必須読込）。false にしたキャラは抽選も再生もしない
  */
-export const PINCH_VOICE_REGISTERED: Partial<Record<Character, boolean>> = {};
+export const PINCH_VOICE_REGISTERED: Partial<Record<Character, boolean>> = { kotaro: true, akane: true, zunko: true };
 
 /** v3.1.0 ピンチボイスの設定：到達ごとの発言確率（%）と、同じピンチ中の上限回数 */
 export const PINCH_VOICE = { pct: 30, maxPerPinch: 1 } as const;
@@ -122,29 +121,29 @@ export const VOICE_LINES: readonly VoiceLine[] = [
   'ready',
   'go',
   'select',
+  'pinch',
   ...Array.from({ length: 16 }, (_, i) => roleVoiceLine(i)),
 ];
 
-/** 通常の声の優先度（補完：結果＞開始＞役名＞攻撃・被攻撃＞不成立）。低い声は鳴っている高い声を切らない */
-export const VOICE_PRIORITY: Record<'result' | 'start' | 'role' | 'attack' | 'fail', number> = {
+/**
+ * 通常の声の優先度（補完：結果＞開始＞役名＞攻撃・被攻撃＞不成立＞ピンチ）。低い声は鳴っている高い声を切らない。
+ * pinch は最低（AudioBus.playOptionalVoice：他の声が鳴っていれば捨て、他の声が始まれば止める）
+ */
+export const VOICE_PRIORITY: Record<'result' | 'start' | 'role' | 'attack' | 'fail' | 'pinch', number> = {
   result: 50,
   start: 40,
   role: 30,
   attack: 20,
   fail: 10,
+  pinch: 5,
 };
 
 /**
- * 必須音源の重複なし一覧（第3版：BGM3・SE39・ボイス72＝114本）。読み込み対象（旧版・原音・試聴・候補は含めない）。
+ * 必須音源の重複なし一覧（v3.1.0：BGM3・SE39・ボイス75（3キャラ×25、ピンチ含む）＝117本）。読み込み対象（旧版・原音・試聴・候補は含めない）。
  * 本数は固定値ではなく、この一覧から算出する。
  */
 export function allAudioFiles(): string[] {
   const out = new Set<string>([...Object.values(BGM_FILES), ...SFX_IDS.map(sfxFile)]);
   for (const c of CHARACTERS) for (const l of VOICE_LINES) out.add(voiceFile(c, l));
   return [...out];
-}
-
-/** 任意読込（登録済みのピンチボイスだけ。未登録なら空）。必須の一覧（allAudioFiles）には含めない */
-export function optionalAudioFiles(): string[] {
-  return CHARACTERS.filter((c) => PINCH_VOICE_REGISTERED[c]).map((c) => voiceFile(c, 'pinch'));
 }

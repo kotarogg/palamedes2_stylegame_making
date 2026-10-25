@@ -1226,6 +1226,7 @@ export class GameScene implements Scene {
     this.director = new SoundDirector(app.bus, this.game, characters, {
       ...DEFAULT_DIRECTOR_OPTIONS,
       voiceWithDeclare: (p, tick) => this.roleNames.voiceStartsNow(p, tick),
+      roleVoiceImminent: () => this.roleNames.roleVoiceImminent(),
       seed: (Math.random() * 4294967295) >>> 0,
     });
     this.staging = new Staging(this.game, app.bus, this.stagingOpts());

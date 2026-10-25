@@ -3,7 +3,9 @@
 プレイ版フォルダからの相対パス。SHA-256 は組込んだファイルの実測値（画像はマニフェスト graphics_manifest_v3.json、音声は audio_events_v3.csv 記載値と一致を確認済み）。
 BGM 3本と採用フォントは作業環境で取得できない大容量ファイルのため、共有ドライブ原本のファイルサイズで照合（SHA-256 未記載）。
 
-合計 170 件（画像 49・JSON 5・フォント関連 2・SE 39・ボイス 72・BGM 3）
+合計 173 件（画像 49・JSON 5・フォント関連 2・SE 39・ボイス 75・BGM 3）
+
+v3.1.0 ボイス更新（2026-10-25）：アカネ6本・ずん子5本を差し替え、ピンチボイス3本（akane／zunko／kotaro）を追加。SHA-256 は納品 voice_manifest.csv の candidates/A と一致を確認済み。v3.1.0 の追加画像9と定義JSONの一覧は scripts/release-expected.json を参照。
 
 | パス | バイト | SHA-256 |
 |---|---:|---|
@@ -102,10 +104,11 @@ BGM 3本と採用フォントは作業環境で取得できない大容量ファ
 | assets/audio/sfx/sfx_ui_invalid.wav | 15,404 | 60170f674cbdbacb153eb32dbc78f9230b64800c1c5b931cae5815ca7acc66f6 |
 | assets/audio/sfx/sfx_ui_move.wav | 6,284 | 1799d18f04c21724c5bf72db1c34238ac2dc15ecc482b0dd22547baae320b2d8 |
 | assets/audio/sfx/sfx_win.wav | 169,004 | 82c1fd2e0427427994e7fbad76161b7e095ac56b70ea22414b7a4bf79c12a2a5 |
-| assets/audio/voice/voice_akane_attack.wav | 53,290 | b7be587390bb886e37ebefd4c5e67cfaa07ef5443787244cd5e574418d8a54b8 |
+| assets/audio/voice/voice_akane_attack.wav | 110,740 | 5f76b2603d4ab4d67902addcc940056e27315e10109d36e28b9b186b7ab4d0dc |
 | assets/audio/voice/voice_akane_damage.wav | 27,058 | 6fe27f872aec745f73315106094f92091c89efca52fca3672878752776a7867b |
 | assets/audio/voice/voice_akane_go.wav | 38,702 | 585af57099b9c76fc90a8217d30c80a56b5a0e0a8929698ce4429fd016b21b97 |
-| assets/audio/voice/voice_akane_lose.wav | 119,666 | c292ad76a5e7273dae06fe4c21c73dc2384e658ac160a5590ed8532147f0fd3c |
+| assets/audio/voice/voice_akane_lose.wav | 139,424 | b6128366614b794600b768590456e431211b1658e441c8f560bdc48ed534831e |
+| assets/audio/voice/voice_akane_pinch.wav | 125,540 | d258dab3426975471a20712e46c568fdb2f566ffe2a085bc7ea9619a7cbc1b07 |
 | assets/audio/voice/voice_akane_ready.wav | 49,022 | 4c450fae84604b4dd6d3188d8b7b6b68498b81e915f06fdf30ef8cdd5f4313cb |
 | assets/audio/voice/voice_akane_role_01.wav | 80,592 | b53ae123324b661f5d5e8c18d0555ebe99e0b6f0ce9a5c51cd053dc7a5053da4 |
 | assets/audio/voice/voice_akane_role_02.wav | 74,864 | 0eddb04f0259571ce28d895ee7a646a347b7d3d7bc5601570852d24dec8b3ba0 |
@@ -115,7 +118,7 @@ BGM 3本と採用フォントは作業環境で取得できない大容量ファ
 | assets/audio/voice/voice_akane_role_06.wav | 102,578 | 3fa97131bb0a43025c46d894e30af9676aa2160e010f7c3189d889fd77863090 |
 | assets/audio/voice/voice_akane_role_07.wav | 126,408 | 2f9152c766f07cacf14889bebaa7d43eaea665e6db84671b20944c374cd7a71e |
 | assets/audio/voice/voice_akane_role_08.wav | 92,874 | 76c3e6b45249741142f630dfe7e4c0711a5b6f6fad7ca09f94a3b059177ed09f |
-| assets/audio/voice/voice_akane_role_09.wav | 77,040 | 56684082c27f5721e9acf42bc828e7c97e05e0a2dcd1d1e57bad3c0df53a3bc8 |
+| assets/audio/voice/voice_akane_role_09.wav | 78,252 | c37a46fb61e539dd273d2d71b262a772a5d955ac2ab6d616df0e2817bf354203 |
 | assets/audio/voice/voice_akane_role_10.wav | 99,722 | b2469285618cd9142a671e76d6eb850fe7355ef4f58d1815c23cd74212c62272 |
 | assets/audio/voice/voice_akane_role_11.wav | 83,046 | beb2b0c4bb8efafb27fd86dce6ba7fb9d2718139359d6879cb6947fe54d08828 |
 | assets/audio/voice/voice_akane_role_12.wav | 83,052 | bba1cf9f52cbc9320e9870832bbcaa5f8902ed42ad35269b1aa0b7809dd6859c |
@@ -123,13 +126,14 @@ BGM 3本と採用フォントは作業環境で取得できない大容量ファ
 | assets/audio/voice/voice_akane_role_14.wav | 130,732 | 7660ccb6483669b64ed959e75a37f2b95abf1c0acefbe0db68c7bc2164fa2e2b |
 | assets/audio/voice/voice_akane_role_15.wav | 147,828 | 8769e8c61818cfd60c7dab9a9a63b57a75ef13365c765ed0626404b73656edf1 |
 | assets/audio/voice/voice_akane_role_16.wav | 171,942 | 3478414ab3608daa606d1d0dde88265ef62af4e538090346a77937dc579c23f5 |
-| assets/audio/voice/voice_akane_role_fail.wav | 44,888 | 7a395f4032060b9264ea5cd3a00c20676ccf7897d1ef12f6dc9fb51497568a62 |
-| assets/audio/voice/voice_akane_select.wav | 96,798 | 85f0e7981497c365810945f121d497830f1386846609a701cf1fe9d62a86837b |
-| assets/audio/voice/voice_akane_win.wav | 67,964 | 359bfcb7f31fdcec66b8f8c836723438a8402f7a22f19f50490ccd2306dd2c15 |
+| assets/audio/voice/voice_akane_role_fail.wav | 114,434 | e8cf3d85becd5e9d78da64f100b23579234d1b1af8339f044e42bd96834da2a3 |
+| assets/audio/voice/voice_akane_select.wav | 137,246 | ba97a2d2988e8ef83f8d9a3c0427a988ea246078a6d95a50c4d4f5d067265579 |
+| assets/audio/voice/voice_akane_win.wav | 117,804 | 402533b06a7bbb44f693d35c0ce68a35d2c4e08069c7c0636038f5a141e6b0b1 |
 | assets/audio/voice/voice_kotaro_attack.wav | 169,964 | 46d74d41337cdd6af6bec55bfad5c6ac4c675a22ca7c2b9949f962da86586959 |
 | assets/audio/voice/voice_kotaro_damage.wav | 202,604 | 9a6632b123f0123f2652137b54de1d547939f7ef826c4d4c8c3ae46bec9c8cb1 |
 | assets/audio/voice/voice_kotaro_go.wav | 92,204 | e3009d326537bda1be9f3ce10e05a730737cc7f87868eb0e793b1fd2cd3ade57 |
 | assets/audio/voice/voice_kotaro_lose.wav | 140,204 | 8844fe593aea7d88f8d0533de4abde9f9ee64c8ab94595c30aacfb2ea0738530 |
+| assets/audio/voice/voice_kotaro_pinch.wav | 146,958 | 111c3fe158980475fd6e0bba4e7f89c91f4273eb913d65d592f57b5004539e40 |
 | assets/audio/voice/voice_kotaro_ready.wav | 114,284 | a050881d5a5da6394e35c60174fdd7efc0b0754a3056f5d77bb3b09b1f930a78 |
 | assets/audio/voice/voice_kotaro_role_01.wav | 125,324 | 760186694c0ab7956b40a00de4ed04fecd4b7330b1b071725a2c7964c0b553c0 |
 | assets/audio/voice/voice_kotaro_role_02.wav | 150,572 | 56378ae485646ac439d1614c9fb5bddf191f82280709a6721add2af01712d3a0 |
@@ -150,10 +154,11 @@ BGM 3本と採用フォントは作業環境で取得できない大容量ファ
 | assets/audio/voice/voice_kotaro_role_fail.wav | 88,844 | 08e8bbbd3373965270c61fd929ad8f4104967720f108d97158295f6f81efeca3 |
 | assets/audio/voice/voice_kotaro_select.wav | 186,284 | 9078d290db92380941c70c7b15be9511743ef5292740c7d5f055414742a287f8 |
 | assets/audio/voice/voice_kotaro_win.wav | 151,724 | 0ac789916b80c1edaded9aace758b95ff6ac548f6dc326a35b262164eed29adc |
-| assets/audio/voice/voice_zunko_attack.wav | 52,842 | b04341cf547fb7cdf90035b9391f3e076cd971f2019bc315f8708bd2fe08f95e |
+| assets/audio/voice/voice_zunko_attack.wav | 104,660 | 45d66021ecdbcc0447eb07edf1465c0fcf9871e206da2e5c9619d102dbad7436 |
 | assets/audio/voice/voice_zunko_damage.wav | 18,082 | 93d1c4edfdd0295719b9aa64c6754698312d782a7b06d50beed2577ec0e3bf09 |
 | assets/audio/voice/voice_zunko_go.wav | 37,198 | a7ff505cd074a265cce7d5fc5b79cf90395f11c977c2598433465c74e718255e |
-| assets/audio/voice/voice_zunko_lose.wav | 112,590 | ff5a536175b59acf73da9076fe73b08dbb37f94f091f34935732169eb9b197ac |
+| assets/audio/voice/voice_zunko_lose.wav | 145,392 | 8dc27ce8eb9a5fefc27927c01f9589c492ec0a283c6bc4c29f4df042e0e2998b |
+| assets/audio/voice/voice_zunko_pinch.wav | 112,418 | cc9d2f3aab1869331df7b9ce4d44db1fa7cdec8986ec56e7d75ae48c5ee1a6e2 |
 | assets/audio/voice/voice_zunko_ready.wav | 49,134 | c108577648717a5dd294481a89e8b71d2fbe274c9876da8b7baffd940aaca75c |
 | assets/audio/voice/voice_zunko_role_01.wav | 74,680 | d84a87166e1a7b2a9b43259f7087974656cc7fb5f695db317bd35acaf9877a4e |
 | assets/audio/voice/voice_zunko_role_02.wav | 67,734 | 6a0bd18008c2b03c6e4b65c29b2b634492e1329e118234400ff3a0a8d81abc07 |
@@ -171,9 +176,9 @@ BGM 3本と採用フォントは作業環境で取得できない大容量ファ
 | assets/audio/voice/voice_zunko_role_14.wav | 110,920 | 4f629616208f7cf7e4681e15803a6f5656f6dd302a90c9896ac9c5f8a9b5fef3 |
 | assets/audio/voice/voice_zunko_role_15.wav | 127,928 | 1b20fda874bda8044765d679c24ea0785ae7e09a1d161f3c88aff16a1fb8c149 |
 | assets/audio/voice/voice_zunko_role_16.wav | 153,126 | a85b6250bba3d3d37323e1f8f9a1b2157be1d8c303f2a66895430c823b6a3dae |
-| assets/audio/voice/voice_zunko_role_fail.wav | 29,360 | 326194b7af7124aff364420b5d84cd552d06e35d7921d85a23064ec702d45c19 |
-| assets/audio/voice/voice_zunko_select.wav | 73,436 | d86fc9cd7ddd5c76c7d82353da1e6663cd7235741064e2f11a9b1486a2d53a88 |
-| assets/audio/voice/voice_zunko_win.wav | 63,394 | 9e1088315c62739807ee05973a4c36b544fe2b265b1e1b899f53dfbc12919b97 |
+| assets/audio/voice/voice_zunko_role_fail.wav | 68,426 | 81b8dbc782d0fbd13ff5232c8363c82ad97dfb0f36d76801521534ad892a03fd |
+| assets/audio/voice/voice_zunko_select.wav | 129,076 | 443f2be070e229eaa31e86dff61b646ed36a204805ffe43f002466d0578836ed |
+| assets/audio/voice/voice_zunko_win.wav | 131,842 | 4a34d63ca3423c9405950f0963799878655cdf4f9782d45b0f853d7e3e771cec |
 | assets/audio/bgm/bgm_menu.wav | 12,053,804 | （原本サイズで照合） |
 | assets/audio/bgm/bgm_puzzle_single.wav | 16,588,844 | （原本サイズで照合） |
 | assets/audio/bgm/bgm_puzzle_versus.wav | 16,750,124 | （原本サイズで照合） |

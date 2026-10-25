@@ -15,6 +15,13 @@ export interface DirectorOptions {
   voiceWithDeclare?: (player: PlayerId, tick: number) => boolean;
   /** v3.1.0 ピンチボイスの抽選用乱数の seed（ゲームの乱数列へ影響させない） */
   seed?: number;
+  /** v3.1.0 ピンチボイスの抽選用乱数（テストで差し替え。指定時は seed より優先） */
+  rng?: Rng;
+  /**
+   * v3.1.0 これから始まる代表ボイス（役名／代替の攻撃ボイス）が予定されているか。
+   * 予定があればピンチボイスは鳴らさない（後から切られる重なりを作らない）。未接続なら予定なしとみなす
+   */
+  roleVoiceImminent?: () => boolean;
 }
 
 export const DEFAULT_DIRECTOR_OPTIONS: DirectorOptions = { attachDelayMs: 120 };
@@ -23,8 +30,10 @@ export class SoundDirector {
   private cursor = 0;
   private ended = false;
   private readonly rng: Rng;
-  /** v3.1.0 同じピンチ中に鳴らしたピンチボイスの回数（プレイヤー別。ピンチ終了で0） */
-  private pinchVoices: number[] = [0, 0];
+  /** v3.1.0 同じピンチ中のピンチボイスの抽選回数（プレイヤー別。外れ・再生不可でも数える。ピンチ終了・新ラウンドで0） */
+  private pinchRolls: number[] = [0, 0];
+  /** v3.1.0 ピンチボイスの抽選記録（自動検証用）。result：played／miss（外れ）／busy（他の声と競合して捨てた） */
+  readonly pinchLog: { player: PlayerId; tick: number; result: 'played' | 'miss' | 'busy' }[] = [];
 
   constructor(
     private readonly bus: AudioBus,
@@ -33,7 +42,7 @@ export class SoundDirector {
     private characters: readonly Character[],
     private readonly opts: DirectorOptions = DEFAULT_DIRECTOR_OPTIONS,
   ) {
-    this.rng = createSeededRng((opts.seed ?? 1) >>> 0);
+    this.rng = opts.rng ?? createSeededRng((opts.seed ?? 1) >>> 0);
   }
 
   setCharacters(c: readonly Character[]): void {
@@ -44,7 +53,7 @@ export class SoundDirector {
     this.game = game;
     this.cursor = 0;
     this.ended = false;
-    this.pinchVoices = [0, 0];
+    this.pinchRolls = [0, 0];
   }
 
   private char(p: PlayerId): Character {
@@ -117,9 +126,9 @@ export class SoundDirector {
         // 3/2/1 の表示開始で countdown を各1回。解除・ラウンド終了の後は鳴らさない（イベントが出ない。結果移行後は ended）
         if (e.state === 'start') {
           b.playSfx('danger');
-          this.pinchVoice(e.player);
+          this.pinchVoice(e.player, e.tick);
         } else if (e.state === 'count') b.playSfx('countdown');
-        else this.pinchVoices[e.player] = 0;
+        else this.pinchRolls[e.player] = 0; // 解除：次のピンチ到達は新しい機会（鳴っているピンチボイスは止めない）
         return;
       case 'levelUp':
         b.playSfx('level_up');
@@ -147,14 +156,19 @@ export class SoundDirector {
   }
 
   /**
-   * v3.1.0 ピンチボイス：到達ごとに30%、同じピンチ中1回まで。素材未納品（未登録）の間は抽選も再生もしない（被ダメボイスで代用しない）。
-   * 優先度は低く（勝敗・READY・GO 等を中断しない）、鳴らせなければ捨てる（後からキュー再生しない）
+   * v3.1.0 ピンチボイス：ピンチ到達（pinchWarn start）ごとに1回だけ抽選し30%。同じ連続したピンチ中は再抽選しない
+   * （外れ・競合で鳴らせなかった場合も同じ。自然上昇⇔攻撃ピンチへ原因が移っても start は出ないので上限は戻らない）。
+   * 優先度は最低：他の声が鳴っている・代表ボイスが予定されているときは捨て、後からキュー再生しない
    */
-  private pinchVoice(p: PlayerId): void {
+  private pinchVoice(p: PlayerId, tick: number): void {
     const c = this.char(p);
-    if (!PINCH_VOICE_REGISTERED[c] || this.pinchVoices[p] >= PINCH_VOICE.maxPerPinch) return;
-    if (this.rng.next() * 100 >= PINCH_VOICE.pct) return;
-    this.pinchVoices[p]++;
-    this.bus.playVoice(c, 'pinch', VOICE_PRIORITY.fail);
+    if (!PINCH_VOICE_REGISTERED[c] || this.pinchRolls[p] >= PINCH_VOICE.maxPerPinch) return;
+    this.pinchRolls[p]++;
+    if (this.rng.next() * 100 >= PINCH_VOICE.pct) {
+      this.pinchLog.push({ player: p, tick, result: 'miss' });
+      return;
+    }
+    const ok = !(this.opts.roleVoiceImminent?.() ?? false) && this.bus.playOptionalVoice(c, 'pinch', VOICE_PRIORITY.pinch);
+    this.pinchLog.push({ player: p, tick, result: ok ? 'played' : 'busy' });
   }
 }

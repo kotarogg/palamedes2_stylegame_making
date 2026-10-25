@@ -9,15 +9,15 @@ import { characterPose, planResult, readyDurationMs } from '../src/view/presenta
 import { resolveScale } from '../src/view/scale';
 import { ROOT } from './helpers';
 
-describe('音声素材の一覧（第3版 必須114本）', () => {
-  it('BGM3・SE39・ボイス72（3キャラ×24）の一覧。リポジトリには効果音とボイスが実在する（BGMを含む必須114本の実在は納品検査 check-release／e2e が担う）', () => {
+describe('音声素材の一覧（v3.1.0 必須117本）', () => {
+  it('BGM3・SE39・ボイス75（3キャラ×25、ピンチ含む）の一覧。リポジトリには効果音とボイスが実在する（BGMを含む必須117本の実在は納品検査 check-release／e2e が担う）', () => {
     const files = allAudioFiles();
-    expect(files).toHaveLength(114);
-    expect(new Set(files).size).toBe(114);
+    expect(files).toHaveLength(117);
+    expect(new Set(files).size).toBe(117);
     expect(new Set(SFX_IDS.map((id) => sfxFile(id))).size).toBe(39);
     expect(files.filter((f) => f.startsWith('sfx/'))).toHaveLength(39);
-    expect(files.filter((f) => f.startsWith('voice/'))).toHaveLength(72);
-    for (const c of ['kotaro', 'akane', 'zunko']) expect(files.filter((f) => f.startsWith(`voice/voice_${c}_`)), c).toHaveLength(24);
+    expect(files.filter((f) => f.startsWith('voice/'))).toHaveLength(75);
+    for (const c of ['kotaro', 'akane', 'zunko']) expect(files.filter((f) => f.startsWith(`voice/voice_${c}_`)), c).toHaveLength(25);
     // 置き換えた旧音（成功音・成立音・連鎖音・旧上昇音）は収録しない
     for (const old of ['sfx/sfx_piece_success.wav', 'sfx/sfx_role_success.wav', 'sfx/sfx_chain.wav', 'sfx/sfx_field_rise.wav']) {
       expect(files).not.toContain(old);

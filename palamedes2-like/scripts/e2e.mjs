@@ -1,7 +1,7 @@
 // ブラウザ検査（第3版 第20章）：ビルド済み dist を配信し、Chromium で操作・画素照合・音声ログ・実ノード・スクリーンショット・エラー収集。
 // 使い方: npm run build && npm run e2e
 //   E2E_ROOT=<展開した配布物のwww> で配布物そのものを検証できる。
-//   既定は「納品検査」：必須114本（BGM3・SE39・ボイス72）の HTTP200・デコード成功・欠落なし、採用フォントの読込を必須とする。
+//   既定は「納品検査」：必須117本（BGM3・SE39・ボイス75）の HTTP200・デコード成功・欠落なし、採用フォントの読込を必須とする。
 //   E2E_MODE=fallback（--fallback）は開発用の「フォールバック検査」：BGM 3本の未配置と、採用フォント未配置を許容し、結果にその旨を明記する。
 //   E2E_FONT_STANDIN=<@fontsource-variable/noto-sans-jp の package> を付けると、同じ書体の代用で画面を撮る（フォールバック検査のみ。結果に明記）。
 // ここでの操作はすべて模擬入力（キーボードイベント・模擬ゲームパッド）。実機・実パッド・聴感の検証ではない。
@@ -23,8 +23,8 @@ const fontPresent = existsSync(join(ROOT, 'gfx/fonts/NotoSansJP-VF.ttf'));
 const MODE = process.env.E2E_MODE === 'fallback' || process.argv.includes('--fallback') ? 'fallback' : 'release';
 const STANDIN = MODE === 'fallback' && !fontPresent ? (process.env.E2E_FONT_STANDIN ?? null) : null;
 const allowMissingBgm = MODE === 'fallback';
-const REQUIRED_AUDIO = 114;
-const NON_BGM = 111;
+const REQUIRED_AUDIO = 117;
+const NON_BGM = 114;
 console.log(MODE === 'release' ? `== 納品検査（必須${REQUIRED_AUDIO}音源・採用フォント）==` : '== フォールバック検査（BGM・フォント未配置を許容。納品合格ではない）==');
 if (STANDIN) console.log('   画面のフォントは同じ書体（Noto Sans JP 可変）の代用：Fontsource 分割版。配布物には含めない');
 
@@ -198,7 +198,7 @@ try {
     `png=${pngs.length} json=${jsons.join(',')}`,
   );
   const wavs = ok('.wav');
-  check(`音声：SE39＋ボイス72（計${NON_BGM}）を HTTP200 で取得`, wavs.filter((p) => !p.includes('/bgm/')).length === NON_BGM, `wav200=${wavs.length}`);
+  check(`音声：SE39＋ボイス75（ピンチ3本を含む。計${NON_BGM}）を HTTP200 で取得`, wavs.filter((p) => !p.includes('/bgm/')).length === NON_BGM, `wav200=${wavs.length}`);
   const bgm200 = wavs.filter((p) => p.includes('/bgm/')).length;
   if (allowMissingBgm) check(`［フォールバック］BGM 3曲（配信物に存在${bgmPresent.length}曲）`, bgm200 === bgmPresent.length, `未配置${3 - bgmPresent.length}曲は404を許容（無音で継続）`);
   else check(`［納品］BGM 3曲を HTTP200 で取得（必須${REQUIRED_AUDIO}本）`, bgm200 === 3 && wavs.length === REQUIRED_AUDIO, `bgm200=${bgm200} wav200=${wavs.length}`);
@@ -1342,6 +1342,29 @@ try {
   if (allowMissingBgm)
     check(`［フォールバック］音声：未配置はBGMのみ、SE・ボイス${NON_BGM}本はデコード成功`, au.missing.every((f) => f.startsWith('bgm/')) && au.missing.length === 3 - bgmPresent.length && au.decoded === NON_BGM + bgmPresent.length, JSON.stringify(au));
   else check(`［納品］音声：必須${REQUIRED_AUDIO}本すべてデコード成功・欠落なし`, au.missing.length === 0 && au.decoded === REQUIRED_AUDIO && au.state === 'running', JSON.stringify(au));
+  // v3.1.0 採用ボイス：ピンチ3本が実ブラウザでデコード・再生ノード作成でき、実尺のまま（固定長で切らない）。READY 中は鳴らさない（数値・状態の確認で、聴感ではない）
+  const pinchRt = await ev(async () => {
+    const b = window.__p2like.bus;
+    const out = [];
+    for (const c of ['kotaro', 'akane', 'zunko']) {
+      b.stopEffects();
+      const n0 = b.nodes.length;
+      const played = b.playOptionalVoice(c, 'pinch', 5);
+      const rec = b.nodes.slice(n0).find((n) => n.id === `${c}_pinch`);
+      out.push({ c, played, dur: rec ? Math.round(rec.duration * 1e6) / 1e6 : null, durMs: b.voiceDurationMs(c, 'pinch') });
+    }
+    b.stopEffects();
+    b.playVoice('akane', 'ready', 40, 'announce');
+    const busy = b.playOptionalVoice('zunko', 'pinch', 5);
+    b.stopEffects();
+    return { out, busy, missing: [...b.missing].filter((f) => f.includes('pinch')) };
+  });
+  const PINCH_SEC = { kotaro: 1.53, akane: 1.306896, zunko: 1.170208 };
+  check(
+    'v3.1.0 ピンチボイス3本：実デコード・再生ノード作成・実尺どおり。READY 中は鳴らさない（状態確認。聴感は未確認）',
+    pinchRt.missing.length === 0 && pinchRt.out.every((o) => o.played && o.dur !== null && Math.abs(o.dur - PINCH_SEC[o.c]) < 0.001) && pinchRt.busy === false,
+    JSON.stringify(pinchRt),
+  );
   const allLog = await ev(() => window.__p2like.bus.log.map((e) => e.id));
   check('旧成功音・旧成立音・連鎖音は一度も要求されない（新旧SEの二重発音なし）', !allLog.some((id) => OLD_SFX.includes(id)));
   writeFileSync(new URL('scale.json', OUT), JSON.stringify(scaleRows, null, 1));

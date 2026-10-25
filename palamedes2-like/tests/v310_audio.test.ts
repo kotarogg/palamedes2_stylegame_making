@@ -1,7 +1,7 @@
 // v3.1.0 音声：与ダメ／被ダメボイスなし、役名との排他（20%代替・連続代替なし）、ピンチ到達音とカウント、ゲイン、結果SEの時刻、相殺音
 import { describe, expect, it } from 'vitest';
 import { AudioBus, DEFAULT_MIX } from '../src/audio/audioBus';
-import { EVENT_GAIN_DB, PINCH_VOICE_REGISTERED, optionalAudioFiles } from '../src/audio/audioMap';
+import { EVENT_GAIN_DB } from '../src/audio/audioMap';
 import { SoundDirector } from '../src/audio/director';
 import type { Command, Game, GameEvent } from '../src/core/game';
 import type { PlayerId } from '../src/core/types';
@@ -18,6 +18,7 @@ function recBus() {
   const bus = {
     playSfx: (id: string, delay = 0, gainDb = 0) => (sfx.push({ id, delay, gainDb, tick }), true),
     playVoice: (c: string, line: string) => (voice.push({ id: `${c}_${line}`, tick }), true),
+    playOptionalVoice: (c: string, line: string) => (voice.push({ id: `${c}_${line}`, tick }), true),
     voiceDurationMs: () => 800,
     stopPlaySounds: () => undefined,
   } as unknown as AudioBus;
@@ -168,19 +169,6 @@ describe('v3.1.0 警告SE・ピンチボイス', () => {
     stepN(g, 150);
     d.sync();
     expect(r.ids().filter((x) => x === 'danger')).toHaveLength(1);
-  });
-
-  it('ピンチボイスは未納品（未登録）：抽選も再生もせず、必須読み込みにも入れない（被ダメボイスで代用しない）', () => {
-    expect(Object.keys(PINCH_VOICE_REGISTERED)).toEqual([]);
-    expect(optionalAudioFiles()).toEqual([]);
-    const g = makeGame({ boards: { 0: rows(7), 1: EMPTY } });
-    toPlay(g);
-    const r = recBus();
-    const d = new SoundDirector(r.bus, g, ['kotaro', 'akane']);
-    g.step([atk(0, 3)]);
-    stepN(g, 300);
-    d.sync();
-    expect(r.voice).toEqual([]);
   });
 });
 
