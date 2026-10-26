@@ -1,0 +1,177 @@
+{
+  "status": "PASS_SELF_INSPECTION_PM_REVIEW_PENDING",
+  "required_png": 3,
+  "previews": 5,
+  "glyph_count": 313,
+  "atlas_size": [
+    512,
+    160
+  ],
+  "source_missing_glyphs": 0,
+  "corpus_missing_glyphs": 0,
+  "duplicates": 0,
+  "NFC": true,
+  "ASCII_codepoints": 95,
+  "ASCII_space_advance": 8,
+  "ASCII_glyph_ink_width_max": 8,
+  "font_white_only": true,
+  "native_font_size": 16,
+  "font_scaling": false,
+  "pixel_edits": [
+    "撃",
+    "続",
+    "鎖",
+    "|"
+  ],
+  "original_vertical_bar_18px": "manually shortened to14px within16px cell; not an unresolved overflow",
+  "shared_icon_focus_colors": 6,
+  "all_alpha": "0/255",
+  "all_asset_sRGB": true,
+  "glyph_cell_overflow": 0,
+  "body_lines": 4,
+  "body_line_step": 22,
+  "body_longest_script_line_fullwidth_chars": 9,
+  "six_piece_width": 154,
+  "single_return_outline_bbox": [
+    396,
+    310,
+    506,
+    344
+  ],
+  "versus_return_outline_bbox": [
+    224,
+    272,
+    416,
+    288
+  ],
+  "cat_rect_top": 296,
+  "cat_gap_actual_px": 8,
+  "minimum_cat_gap_spec": 6,
+  "blackout_other_pixels": "all black",
+  "4x_nearest_pixel_comparison": "exact match",
+  "reference_commit": "c244855ed36730bd41c00f1e9c6249b8b1dc2492",
+  "read_only_reference_assets_hash_match": 18,
+  "reuse": [
+    {
+      "file": "player_frame_p2.png",
+      "sha256": "b92519d5d2f1608ad4a3ae717ea12b48ec5ad6e8c206a55eb588ca8b3b93a81a",
+      "git_blob": "fed3eb81c40c4fd7d3732052d657b5e715dea6db",
+      "source": "palamedes2-like/public/gfx/assets/player_frame_p2.png"
+    },
+    {
+      "file": "player_frame_p1.png",
+      "sha256": "0e532201eb16c9b4448877123017b71528bb3fdb0c187416c6546d2254c0758e",
+      "git_blob": "f9c2babbcc435026a02d7d349b31f21493c7a247",
+      "source": "palamedes2-like/public/gfx/assets/player_frame_p1.png"
+    },
+    {
+      "file": "stock_frame.png",
+      "sha256": "96494f6b146e918ac0e9f73912943fe42649a2e29c72d8107aa342854c8a64f0",
+      "git_blob": "190431f91de94ecf1ecd7628b73e14bb933f0310",
+      "source": "palamedes2-like/public/gfx/assets/stock_frame.png"
+    },
+    {
+      "file": "pieces_and_smallpieces_sheet.png",
+      "sha256": "60df1bbea86ec1ccf4f2e36c896687372a9edb79603421f98a499f7ce4d5a758",
+      "git_blob": "1c3ba9c40a28efee820d9f324461db5b78716fc1",
+      "source": "palamedes2-like/public/gfx/assets/legacy/pieces_and_smallpieces_sheet.png"
+    },
+    {
+      "file": "role_name_sheet.png",
+      "sha256": "d43012d7440fc95f1605b44560ef19f5190641c3539f7c8ad82b0f3d20cb394a",
+      "git_blob": "52fb18797dc758a17d1084ca78da47560e02e95d",
+      "source": "palamedes2-like/public/gfx/assets/legacy/role_name_sheet.png"
+    },
+    {
+      "file": "kotaro_sheet.png",
+      "sha256": "1b143f5b1ea1a3fa286ef44883d9e2df64b61b67e0cde15cc7b4e572ad94aea5",
+      "git_blob": "adc4e0edfaecf0ac09c6cb356e263e9d17f02ce7",
+      "source": "palamedes2-like/public/gfx/assets/kotaro_sheet.png"
+    },
+    {
+      "file": "controls_sheet.png",
+      "sha256": "421ddddc697f11fbcd2704c41bcccafe64ef988929204e5cea66bb973e91e9dc",
+      "git_blob": "c912c13805b36280fb4236ed3fa122b1bcb1aec8",
+      "source": "palamedes2-like/public/gfx/assets/controls_sheet.png"
+    },
+    {
+      "file": "info_panel.png",
+      "sha256": "509732aebc94fba7be86ab36c592dee6d1e1a3f1f873aafc5fa3abb7b5242422",
+      "git_blob": "e03493dbcbae2693a87b3317fb95ee3b5bac459b",
+      "source": "palamedes2-like/public/gfx/assets/info_panel.png"
+    },
+    {
+      "file": "display_numeric_sheet.png",
+      "sha256": "7a7586a355fb6fb3d53c806477702fc3273b0162f5e166b827d3c75fa0aa52aa",
+      "git_blob": "b496ecb739e0991f64ee9e8324afcf5885068017",
+      "source": "palamedes2-like/public/gfx/assets/legacy/display_numeric_sheet.png"
+    },
+    {
+      "file": "akane_sheet.png",
+      "sha256": "77bc79bc66d7296ce2faaac164651a1c1ffa442cbcb89e49138b42e02cb665fd",
+      "git_blob": "88d70b65da91ca7e702db00169b02b2122226d09",
+      "source": "palamedes2-like/public/gfx/assets/akane_sheet.png"
+    },
+    {
+      "file": "attack_stock_nekotaro_small.png",
+      "sha256": "aa2b2c6b61cab351612643b91f7bfe03acd1d3b03c96e274937d0aa0ff68239e",
+      "git_blob": "23b7e3a751a773827fb83f07a80efbc12c32b692",
+      "source": "palamedes2-like/public/gfx/assets/attack_stock_nekotaro_small.png"
+    },
+    {
+      "file": "background_common.png",
+      "sha256": "e65bf513a45771788a4d7c78c55fe15eb14c9bdd8cf2cdee114c2f88deee9464",
+      "git_blob": "7c6ce68ac33aa6afd238e16fcdf8f9d89390ded3",
+      "source": "palamedes2-like/public/gfx/assets/background_common.png"
+    },
+    {
+      "file": "center_frame.png",
+      "sha256": "d46098deab8c1eb48fec10baf997e0c3f658ff0be36db6ec24aab45e5c70b0b7",
+      "git_blob": "7539a77d5199a61e6b89f2bdce8deeb915fee489",
+      "source": "palamedes2-like/public/gfx/assets/center_frame.png"
+    },
+    {
+      "file": "gameplay_frames_sheet.png",
+      "sha256": "ae89e2cc0075b45e5ad39caf6798f1d983e9b1529982ae3787dfbd601cfc40c9",
+      "git_blob": "92bf3a85df82cc887ac5d7b80e9acc0bb79a04ff",
+      "source": "palamedes2-like/public/gfx/assets/legacy/gameplay_frames_sheet.png"
+    },
+    {
+      "file": "attack_stock_nekotaro_large.png",
+      "sha256": "76edadbb9a738e7cb6ae5084008762dc516981237fd76a8447bf9b6b7dc66996",
+      "git_blob": "44916fdce0033f280f863abf8b7ee7ba1f3f69c6",
+      "source": "palamedes2-like/public/gfx/assets/attack_stock_nekotaro_large.png"
+    },
+    {
+      "file": "ui_common_sheet.png",
+      "sha256": "6a637ca1b6b0ba575f0340c7070d3846ae198431d868563f019034293c30d161",
+      "git_blob": "7da0c54b4e9225de646600aeff4725a197366327",
+      "source": "palamedes2-like/public/gfx/assets/legacy/ui_common_sheet.png"
+    },
+    {
+      "file": "zunko_sheet.png",
+      "sha256": "0277b9aa5c71e883d142a7633fee60a57ff15cea476fc8722cc526799705f376",
+      "git_blob": "519d76eed06f728c1fa518382193a3120be36c14",
+      "source": "palamedes2-like/public/gfx/assets/zunko_sheet.png"
+    },
+    {
+      "file": "nekotaro_sheet.png",
+      "sha256": "711cc650455439ae318b4aad318ff6697af1e678bacd043b182d2d3eae1e7b77",
+      "git_blob": "f1a95371e9eb32a225637c26b41a5d5be74b3eb9",
+      "source": "palamedes2-like/public/gfx/assets/nekotaro_sheet.png"
+    }
+  ],
+  "unfinished_graphics": [],
+  "PM_decisions_needed_to_continue": [],
+  "PM_acceptance_pending": [
+    "16px字形の読みやすさ",
+    "操作アイコンの直感性",
+    "指定レイアウト見本の採否"
+  ],
+  "not_performed": [
+    "ゲームへの組み込み",
+    "入力・タイマー・教材の実行・音声検証",
+    "実行時暗転レイヤーの動作確認"
+  ],
+  "image_generation_model_used": false
+}

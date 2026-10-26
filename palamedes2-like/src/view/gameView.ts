@@ -194,6 +194,12 @@ export interface HudInfo {
   characters?: readonly Character[];
   /** 役名表示の予定（RoleNameDirector）。表示中のロゴと表示開始tick */
   roleLogo?: (p: PlayerId, tick: number) => { logo: number; since: number } | null;
+  /** 遊び方・デモ：READY／GO の見出しを出さない（教材は入力受付の開始から始める） */
+  hideStartBanner?: boolean;
+  /** 遊び方・デモ：シングルの情報欄（得点・Lv）を描かない（右パネルは説明に使う。info_panel の枠は描く） */
+  hideSingleInfo?: boolean;
+  /** 遊び方の教材：連続出しの倍率を攻撃倍率で表示（既定のシングルは得点倍率）。値は本体の現在値 */
+  streakRate?: 'score' | 'attack';
 }
 
 export class GameView {
@@ -306,6 +312,11 @@ export class GameView {
   /** 盤面ピースの基準Y（ライン消去後の段数推移ではピースは動かない） */
   pieceBar(p: PlayerId, t: number): number {
     return this.bar(p, t, true);
+  }
+
+  /** 列の最上段ピースの矩形（遊び方の注目枠用。描画と同じ基準Y） */
+  topPieceRect(p: PlayerId, col: number, t: number): { x: number; y: number; w: number; h: number } {
+    return { x: cellX(this.boards[p], col), y: this.pieceBar(p, t), w: CELL, h: CELL };
   }
 
   private bar(p: PlayerId, t: number, piecesOnly: boolean): number {
@@ -925,7 +936,7 @@ export class GameView {
    */
   startBanner(t: number): 'show_ready' | 'show_go' | null {
     const g = this.game;
-    if (this.hud.preStart || (this.hud.result && t >= this.hud.result.startTick)) return null;
+    if (this.hud.preStart || this.hud.hideStartBanner || (this.hud.result && t >= this.hud.result.startTick)) return null;
     if (t < g.playStartTick) return 'show_ready';
     if (t < g.playStartTick + g.ticks(g.config.timing.goMs) && !g.result) return 'show_go';
     return null;
@@ -1070,7 +1081,9 @@ export class GameView {
       if (!this.isSingle && this.hud.wins) this.drawWins(ctx, p, t);
       if (this.hud.labels && !this.isSingle) drawText(ctx, this.hud.labels[p], p === 0 ? 4 : 636, 4, { align: p === 0 ? 'left' : 'right', size: 10, color: TEXT_COLORS.secondary });
     });
-    if (this.isSingle) this.drawSingleInfo(ctx);
+    if (this.isSingle) {
+      if (!this.hud.hideSingleInfo) this.drawSingleInfo(ctx);
+    }
     else if (this.hud.firstTo) drawText(ctx, `${this.hud.firstTo}本先取 R${this.hud.round ?? 1}`, 320, 124, { align: 'center', size: 10, color: TEXT_COLORS.secondary });
   }
 
@@ -1127,7 +1140,8 @@ export class GameView {
     const active = g.streakActive(st);
     const count = active ? st.streakCount : 0;
     const crack = active && st.streakCutReserved ? (this.pv[p].crack ?? STREAK_CRACKS[p]) : null;
-    const mul = this.isSingle
+    const scoreRate = this.isSingle && this.hud.streakRate !== 'attack';
+    const mul = scoreRate
       ? (() => {
           const m = g.currentScoreMultiplier(st);
           return multiplierText(m.num, m.den);
@@ -1142,7 +1156,7 @@ export class GameView {
     const x0 = n.align === 'left' ? n.x : n.x - countW - gap - mulW;
     drawNumericScaled(ctx, this.assets, String(count), x0, n.y, n.h, countW, 'left', phase, crack);
     drawNumericScaled(ctx, this.assets, mul, x0 + countW + gap, n.y, n.h, mulW, 'left', phase);
-    drawText(ctx, this.isSingle ? '回　得点倍率' : '回　攻撃倍率', lay.text.x, lay.text.y, { align: lay.text.align, size: 9, color: TEXT_COLORS.secondary });
+    drawText(ctx, scoreRate ? '回　得点倍率' : '回　攻撃倍率', lay.text.x, lay.text.y, { align: lay.text.align, size: 9, color: TEXT_COLORS.secondary });
   }
 
   /** 役連鎖：見出し＋連鎖数（34px）＋攻撃加算「＋○」（対戦のみ。シングルへは流用しない） */

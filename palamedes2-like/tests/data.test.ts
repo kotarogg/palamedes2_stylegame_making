@@ -34,7 +34,9 @@ describe('第3版 採用グラフィック（graphics_manifest_v3：14シート�
     // v3.1.0 追加画像（additional_assets_v310.json の9枚）は共通マニフェストとは別定義で同梱する
     const extra = (JSON.parse(readFileSync(gfx('data/additional_assets_v310.json'), 'utf8')) as { assets: { file: string }[] }).assets.map((a) => a.file);
     const onDisk = [...readdirSync(gfx('assets')).filter((f) => f.endsWith('.png')).map((f) => `assets/${f}`), ...readdirSync(gfx('assets/legacy')).map((f) => `assets/legacy/${f}`)];
-    expect(onDisk.sort()).toEqual([...pngs, ...extra].sort());
+    // 遊び方・放置デモ用UI（tutorial_assets.json の3枚）も別定義で同梱する
+    const tutorial = (JSON.parse(readFileSync(gfx('data/tutorial_assets.json'), 'utf8')) as { assets: { file: string }[] }).assets.map((a) => a.file);
+    expect(onDisk.sort()).toEqual([...pngs, ...extra, ...tutorial].sort());
   });
 
   it('再利用の9シート（S4〜S12）は第2.3版の採用PNGとバイト同一', () => {

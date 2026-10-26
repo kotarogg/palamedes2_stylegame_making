@@ -252,6 +252,11 @@ export interface GameOptions {
   setup?: (g: Game) => void;
   /** 乱数源の差し替え（既定は seed からの mulberry32） */
   rngFactory?: (stream: 'base' | 'p1' | 'p2') => Rng;
+  /**
+   * 上昇で追加する1行の供給（遊び方の教材の補充日程用）。null を返したら既定どおり乱数で生成する。
+   * 追加の処理（高さ・上限・タイマー・イベント）は通常の上昇と同じ
+   */
+  rowSource?: (player: PlayerId, kind: RiseKind) => ReadonlyArray<{ n: number; suit: Piece['suit'] }> | null;
 }
 
 export interface RoundResult {
@@ -278,11 +283,13 @@ export class Game {
   private readonly t: Record<keyof GameConfig['timing'], number>;
   private readonly balance: Mode1Balance;
   private pendingSends: Array<{ to: PlayerId; lines: number }> = [];
+  private readonly rowSource: GameOptions['rowSource'];
 
   constructor(opts: GameOptions = {}) {
     this.config = opts.config ?? DEFAULT_CONFIG;
     this.seed = opts.seed ?? 1;
     this.balance = opts.single?.balance ?? MODE1_BALANCE;
+    this.rowSource = opts.rowSource;
     const mk =
       opts.rngFactory ??
       ((s: 'base' | 'p1' | 'p2') => createSeededRng((this.seed * 2654435761 + { base: 0, p1: 1, p2: 2 }[s] * 97) >>> 0));
@@ -390,7 +397,9 @@ export class Game {
     };
   }
 
-  private newRow(p: PlayerState): Piece[] {
+  private newRow(p: PlayerState, kind?: RiseKind): Piece[] {
+    const fixed = kind ? this.rowSource?.(p.id, kind) : null;
+    if (fixed) return fixed.map((k) => this.factory.make(k.n, k.suit));
     return Array.from({ length: 6 }, () => this.factory.create(p.rng));
   }
 
@@ -730,7 +739,7 @@ export class Game {
 
   private addRows(p: PlayerState, rows: number, kind: RiseKind): void {
     const heightBefore = p.board.height();
-    for (let i = 0; i < rows; i++) p.board.appendRow(this.newRow(p));
+    for (let i = 0; i < rows; i++) p.board.appendRow(this.newRow(p, kind));
     this.emit({
       type: 'rise',
       tick: this.tick,

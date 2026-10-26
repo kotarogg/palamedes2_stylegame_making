@@ -1,0 +1,229 @@
+{
+  "format": "tutorial_ui_assets_v1",
+  "status": "self_checked_PM_review_pending",
+  "date_jst": "2026-10-26",
+  "design_source": "Demo_UI_Design_20261026.md",
+  "assets": [
+    {
+      "id": "tutorial_font_16",
+      "file": "assets/tutorial_font_16.png",
+      "dimensions": [
+        512,
+        160
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "colors_excluding_transparent": 1,
+      "palette": [
+        "#ffffff"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB",
+      "sha256": "4defdcb09b8f462b8953908f088814dca0b8cba6e6de4878e665530ee80fd9bc",
+      "cell": [
+        16,
+        16
+      ],
+      "columns": 32,
+      "glyph_count": 313,
+      "frames": "data/tutorial_font_16.json",
+      "purpose": "16px共通本文・見出し・案内用の白マスク",
+      "line_height": 22,
+      "ascii_advance": 8,
+      "fullwidth_advance": 16
+    },
+    {
+      "id": "tutorial_action_icons",
+      "file": "assets/tutorial_action_icons.png",
+      "dimensions": [
+        144,
+        24
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "colors_excluding_transparent": 6,
+      "palette": [
+        "#0b1f35",
+        "#147a94",
+        "#30c8df",
+        "#a5c5c5",
+        "#f2b950",
+        "#fff1d6"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB",
+      "sha256": "f32c20b843527813ad2fc831e88a833919d16373922b0fa8b62036cd2191f6c8",
+      "cell": [
+        24,
+        24
+      ],
+      "frames": [
+        {
+          "id": "move_left",
+          "rect": [
+            0,
+            0,
+            24,
+            24
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "purpose": "左移動"
+        },
+        {
+          "id": "move_right",
+          "rect": [
+            24,
+            0,
+            24,
+            24
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "purpose": "右移動"
+        },
+        {
+          "id": "column_cycle",
+          "rect": [
+            48,
+            0,
+            24,
+            24
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "purpose": "列循環・上から下へ"
+        },
+        {
+          "id": "launch",
+          "rect": [
+            72,
+            0,
+            24,
+            24
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "purpose": "打ち上げ・単ピースを場へ"
+        },
+        {
+          "id": "declare_role",
+          "rect": [
+            96,
+            0,
+            24,
+            24
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "purpose": "役宣言・複数ピースから星の合図"
+        },
+        {
+          "id": "raise",
+          "rect": [
+            120,
+            0,
+            24,
+            24
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "purpose": "せり上がり・下段から補充"
+        }
+      ],
+      "text_or_button_labels": false
+    },
+    {
+      "id": "tutorial_focus_frame",
+      "file": "assets/tutorial_focus_frame.png",
+      "dimensions": [
+        24,
+        24
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "colors_excluding_transparent": 3,
+      "palette": [
+        "#0b1f35",
+        "#f2b950",
+        "#fff1d6"
+      ],
+      "alpha": [
+        0,
+        255
+      ],
+      "color_space": "sRGB",
+      "sha256": "c14cd82d9c4a8bb11bd6b793899bcf14ba83625a7f511d9168f2d168de61c336",
+      "frames": [
+        {
+          "id": "focus",
+          "rect": [
+            0,
+            0,
+            24,
+            24
+          ],
+          "origin": [
+            0,
+            0
+          ]
+        }
+      ],
+      "nine_slice": {
+        "left": 4,
+        "top": 4,
+        "right": 4,
+        "bottom": 4,
+        "center": [
+          4,
+          4,
+          16,
+          16
+        ]
+      },
+      "purpose": "注意箇所の角印。成立光と区別。点滅位相画像なし"
+    }
+  ],
+  "shared_icon_focus_palette": [
+    "#0b1f35",
+    "#147a94",
+    "#30c8df",
+    "#a5c5c5",
+    "#f2b950",
+    "#fff1d6"
+  ],
+  "read_policy": "assetsとdataのみ実装用。previews・licenses・納品報告をゲーム画像として自動収集しない。",
+  "coordinates": "すべて素材内相対座標。ゲーム配置を含めない。配置は設計書と指定レイアウト見本を参照。",
+  "frame_interpolation": "nearest_neighbor_only",
+  "font_tint": {
+    "body": "#fff1d6",
+    "heading": "#f2b950",
+    "secondary": "#a5c5c5",
+    "return_outline": "#0b1f35"
+  },
+  "font_outline": "戻る案内のみ表示側で1px暗色縁取り。フォントPNGへ焼かない。"
+}

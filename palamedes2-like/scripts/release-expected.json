@@ -1,5 +1,5 @@
 {
- "about": "第3版プレイ版の必須素材（画像49・JSON5・フォント・OFL・音声117）。scripts/check-release.mjs が照合する　v3.1.0：追加画像9（additional_assets_v310.json）と定義JSONを追加。　v3.1.0ボイス：差替え11本・ピンチボイス3本追加（ボイス75）。",
+ "about": "第3版プレイ版の必須素材（画像49・JSON5・フォント・OFL・音声117）。scripts/check-release.mjs が照合する　v3.1.0：追加画像9（additional_assets_v310.json）と定義JSONを追加。　v3.1.0ボイス：差替え11本・ピンチボイス3本追加（ボイス75）。　遊び方・放置デモ：tutorial_assets.json の3画像・定義JSON2件・フォント権利表記を追加。",
  "files": [
   {
    "path": "gfx/assets/akane_sheet.png",
@@ -263,8 +263,8 @@
   },
   {
    "path": "gfx/data/credits_text.json",
-   "size": 742,
-   "sha256": "b146592e94c9487f2f623267ce313f66e1dca8709e274d6800ff1faa995d52d6"
+   "size": 812,
+   "sha256": "aa95792ee3b6c1baca49ee78591da2369f80b443d3234e4e98f05d46a7f0bacb"
   },
   {
    "path": "data/screen_layout_v2.json",
@@ -919,6 +919,36 @@
    "path": "gfx/assets/result_match_ja.png",
    "size": 3278,
    "sha256": "a39e4b119694a52b740026dbadd6cbec3b78993bb8a5588ef6ea39ffcd8c8a7f"
+  },
+  {
+   "path": "gfx/assets/tutorial_font_16.png",
+   "size": 12009,
+   "sha256": "4defdcb09b8f462b8953908f088814dca0b8cba6e6de4878e665530ee80fd9bc"
+  },
+  {
+   "path": "gfx/assets/tutorial_action_icons.png",
+   "size": 825,
+   "sha256": "f32c20b843527813ad2fc831e88a833919d16373922b0fa8b62036cd2191f6c8"
+  },
+  {
+   "path": "gfx/assets/tutorial_focus_frame.png",
+   "size": 200,
+   "sha256": "c14cd82d9c4a8bb11bd6b793899bcf14ba83625a7f511d9168f2d168de61c336"
+  },
+  {
+   "path": "gfx/data/tutorial_assets.json",
+   "size": 4834,
+   "sha256": "bc60b58c1449d8d25cd3bc796f53a45d2235f9f2b9bd8d07fa5261e9a7404323"
+  },
+  {
+   "path": "gfx/data/tutorial_font_16.json",
+   "size": 84531,
+   "sha256": "c6186c8e653d897fce80d6951dc4439e16980dc0bd81202acda76deee32d796e"
+  },
+  {
+   "path": "gfx/fonts/tutorial_font_attribution.txt",
+   "size": 273,
+   "sha256": "97b1f495e6afa41b7592c6e6046b2b664f400c6135e1e8191913e6e0c46325f7"
   }
  ]
 }

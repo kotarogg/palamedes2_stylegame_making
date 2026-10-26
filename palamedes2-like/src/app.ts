@@ -59,13 +59,21 @@ import { GameView } from './view/gameView';
 import { readyDurationMs, RoleNameDirector, Staging } from './view/presentation';
 import { fixedScaleChoices, MAX_FIXED_SCALE } from './view/scale';
 import { drawText, formatTime, TEXT_COLORS } from './view/text';
+import { drawBitmapText, TUTORIAL_COLORS } from './view/bitmapFont';
+import { TUTORIAL_SCRIPT } from './demo/lesson';
+import { DEMO } from './demo/stages';
+import { DemoScene, HelpMenuScene, PadEdges } from './demo/scenes';
 
 export const W = 640;
 export const H = 360;
 /** v3.1.0 パズルシーンの開始前待機（表示準備完了後、試合開始処理へ進むまで） */
 export const PRESTART_MS = 1000;
 
-interface Scene {
+export interface Scene {
+  /** マウスのクリック（画面上の押下） */
+  onPointer?(): void;
+  /** 非アクティブ（タブの切替・ウィンドウのフォーカス喪失）と復帰 */
+  onVisibility?(hidden: boolean): void;
   /** キー入力（生のキーコード）。メニュー操作として使う場合は MenuInput 経由の onNav を使う */
   onKey?(code: string, repeat: boolean): boolean;
   onNav(ev: NavEvent): void;
@@ -157,6 +165,41 @@ export class App {
     this.setScene(new MenuScene(this, openPath));
   }
 
+  /** タイトルへ（放置デモの終了・完走）。fadeIn：黒からのフェードイン */
+  toTitle(fadeIn = false): void {
+    this.bus.stopEffects();
+    this.setScene(new TitleScene(this, fadeIn));
+  }
+
+  /** 放置デモ（タイトル無操作・オプションの「デモ再生」） */
+  startDemo(by: 'idle' | 'option'): void {
+    this.setScene(new DemoScene(this, by));
+  }
+
+  /** 遊び方の目次（呼出元：メインメニュー／オプション） */
+  openHelp(from: 'menu' | 'options'): void {
+    this.setScene(new HelpMenuScene(this, from));
+  }
+
+  /** 遊び方を閉じて呼出元へ */
+  leaveHelp(from: 'menu' | 'options'): void {
+    if (from === 'options') this.setScene(new OptionsScene(this, 'top', OPTIONS_HELP_ROW));
+    else this.toMenu(['遊び方']);
+  }
+
+  /** 遊び方：文章の操作一覧（従来の説明頁） */
+  openHelpText(back: () => void): void {
+    this.setScene(new HelpScene(this, back));
+  }
+
+  onPointer(): void {
+    this.scene.onPointer?.();
+  }
+
+  onVisibility(hidden: boolean): void {
+    this.scene.onVisibility?.(hidden);
+  }
+
   saveSettings(): void {
     this.settingsSaved = saveSettings(this.settings);
     this.bus.setVolumes(this.settings.audio);
@@ -226,22 +269,76 @@ export class App {
  * BGMはメニュー曲（自動再生を強制しない。有効化後に鳴り、タイトル→メニューで再始動しない）。
  */
 export class TitleScene implements Scene {
-  constructor(private readonly app: App) {
+  /** 無操作の経過（タイトルの描画完了から。有効なボタン・方向入力・クリックで0へ。マウス移動では戻さない） */
+  idleMs = 0;
+  private rendered = false;
+  private fadeMs: number;
+  /** 無操作20秒：暗転（フェードアウト→黒）してからデモへ。途中の入力で取り消す。null＝暗転していない */
+  leavingMs: number | null = null;
+  private readonly pads: PadEdges;
+
+  constructor(
+    private readonly app: App,
+    fadeIn = false,
+  ) {
     app.bus.playBgm('menu');
+    this.fadeMs = fadeIn ? DEMO.fadeInMs : 0;
+    this.pads = new PadEdges(app.deps.pads);
+  }
+
+  private touch(): void {
+    this.idleMs = 0;
+    this.leavingMs = null;
+  }
+
+  onKey(_code: string, repeat: boolean): boolean {
+    if (!repeat) this.touch();
+    return false; // 決定などは MenuInput 経由の onNav で扱う
+  }
+
+  onPointer(): void {
+    this.touch();
   }
 
   onNav(ev: NavEvent): void {
+    this.touch();
     if (ev.key !== 'confirm' && ev.key !== 'start') return;
     this.app.bus.playSfx('ui_confirm');
     this.app.setScene(new MenuScene(this.app));
   }
 
-  update(): void {}
+  update(dtMs: number): void {
+    if (this.pads.poll()) this.touch();
+    if (!this.rendered) return;
+    if (this.fadeMs > 0) {
+      this.fadeMs = Math.max(0, this.fadeMs - dtMs);
+      return;
+    }
+    this.idleMs += dtMs;
+    if (this.idleMs < DEMO.idleMs) return;
+    this.leavingMs = (this.leavingMs ?? 0) + dtMs;
+    if (this.leavingMs >= DEMO.fadeOutMs + DEMO.blackMs) this.app.startDemo('idle');
+  }
 
   render(ctx: CanvasRenderingContext2D, ms: number): void {
     drawTitle(ctx, this.app.assets, ms);
+    drawBitmapText(ctx, this.app.assets.tutorial?.font, TUTORIAL_SCRIPT.title_hint, 320, TITLE_HINT_Y, { align: 'center', color: TUTORIAL_COLORS.secondary, outline: TUTORIAL_COLORS.outline });
+    const dark = this.leavingMs !== null ? Math.min(1, this.leavingMs / DEMO.fadeOutMs) : this.fadeMs / DEMO.fadeInMs;
+    if (dark > 0) {
+      ctx.save();
+      ctx.globalAlpha = dark;
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
+    this.rendered = true;
   }
 }
+
+/** タイトルの「しばらくするとデモが始まります」の位置（文字の上端） */
+export const TITLE_HINT_Y = 340;
+/** オプション最上位の「遊び方」の行番号 */
+const OPTIONS_HELP_ROW = 5;
 
 // ---------------------------------------------------------------- メインメニュー
 
@@ -288,14 +385,15 @@ export class MenuScene implements Scene {
         ],
       },
       { label: 'オプション', desc: '音・操作・対戦・表示・クレジット', run: () => a.setScene(new OptionsScene(a)) },
-      { label: '遊び方', desc: '操作とルールの説明', run: () => a.setScene(new HelpScene(a)) },
+      { label: '遊び方', desc: '操作とルールの説明（実演・役一覧・MODE2）', run: () => a.openHelp('menu') },
     ];
     this.stack = [{ title: 'メインメニュー', items: root, cursor: 0 }];
     for (const label of openPath) {
       const t = this.top;
       const i = t.items.findIndex((x) => x.label === label);
-      if (i < 0 || !t.items[i].children) break;
+      if (i < 0) break;
       t.cursor = i;
+      if (!t.items[i].children) break;
       this.stack.push({ title: `${t.title === 'メインメニュー' ? '' : `${t.title} › `}${label}`, items: t.items[i].children!, cursor: 0 });
     }
     app.bus.playBgm('menu');
@@ -696,6 +794,8 @@ class OptionsScene implements Scene {
           { label: '対戦', note: '先取本数・自然上昇の速さ・NPCの強さ', confirm: () => this.go('match') },
           { label: '表示', note: '画面倍率と全画面', confirm: () => this.go('display') },
           { label: 'クレジット', note: '制作・音声・素材・フォントの表記とリンク', confirm: () => this.app.setScene(new CreditsScene(this.app)) },
+          { label: '遊び方', note: '操作とルールの説明（メインメニューの「遊び方」と同じ）', confirm: () => this.app.openHelp('options') },
+          { label: 'デモ再生', note: '説明とデモプレイを最初から再生（ボタンを押すとタイトルへ）', confirm: () => this.app.startDemo('option') },
           { label: '設定初期化', note: 'すべての設定を初期値に戻します（記録は消えません）', confirm: () => (this.confirmReset = 0) },
           { label: '戻る', confirm: () => this.app.toMenu() },
         ];
@@ -1100,7 +1200,7 @@ const HELP_PAGES: { title: string; lines: string[] }[] = [
       '光っている間に役宣言：合計翻数ぶんラインを上から消す',
       '受けた攻撃は2秒後にまとめて処理：0.4秒ごとに1段、3段ごとに小休止',
       '待機中（枠の下）の攻撃だけを自分の攻撃で相殺できる',
-      '7段で自然上昇の時刻→3秒、攻撃で7段→2秒の猶予。6段以下に戻せなければ負け',
+      '7段で自然上昇・攻撃を迎えると4秒の猶予（1秒後から3・2・1）。6段以下に戻せなければ負け',
       '連続取得（2秒以内）で倍率アップ、役連鎖（12秒以内）で攻撃が増える',
     ],
   },
@@ -1130,7 +1230,10 @@ const HELP_PAGES: { title: string; lines: string[] }[] = [
 class HelpScene implements Scene {
   private page = 0;
 
-  constructor(private readonly app: App) {}
+  constructor(
+    private readonly app: App,
+    private readonly back: () => void,
+  ) {}
 
   onNav(ev: NavEvent): void {
     if (ev.key === 'left' || ev.key === 'right' || ev.key === 'confirm') {
@@ -1139,7 +1242,7 @@ class HelpScene implements Scene {
       this.app.bus.playSfx('ui_move');
     } else if (ev.key === 'back') {
       this.app.bus.playSfx('ui_cancel');
-      this.app.toMenu();
+      this.back();
     }
   }
 

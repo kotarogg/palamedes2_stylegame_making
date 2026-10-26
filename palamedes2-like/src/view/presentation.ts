@@ -329,6 +329,8 @@ export interface StagingOptions {
   characters: readonly Character[];
   /** 人が操作するプレイヤー（結果SEの勝敗の選択に使う） */
   humans: readonly PlayerId[];
+  /** 遊び方の教材：READY／GO の音を鳴らさない（教材は入力受付の開始から始める）。結果の音は従来どおり */
+  skipStart?: boolean;
 }
 
 /** 開始と結果の音声キューを1回ずつ発火する */
@@ -364,6 +366,10 @@ export class Staging {
   update(): void {
     const g = this.game;
     const b = this.bus;
+    if (this.opts.skipStart) {
+      this.fired.add('ready');
+      this.fired.add('go');
+    }
     this.once('ready', () => {
       b?.playSfx('ready');
       b?.playVoice(this.opts.announcer, 'ready', VOICE_PRIORITY.start, 'announce');

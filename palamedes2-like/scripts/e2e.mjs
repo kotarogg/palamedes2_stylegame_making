@@ -193,8 +193,8 @@ try {
   const pngs = ok('.png');
   const jsons = ok('.json').map((p) => p.split('/').pop()).sort();
   check(
-    '明示読込一覧の49PNG＋v3.1.0追加9PNG（additional_assets_v310.json）だけを取得（旧版・見本・previews を読まない）、JSON6件',
-    pngs.length === 58 && pngs.every((p) => p.includes('/gfx/assets/')) && jsons.join() === 'additional_assets_v310.json,credits_text.json,font_styles.json,game_loading_list.json,graphics_manifest_v3.json,screen_layout_v2.json',
+    '明示読込一覧の49PNG＋v3.1.0追加9PNG＋遊び方UI3PNG（tutorial_assets.json）だけを取得（旧版・見本・previews を読まない）、JSON8件',
+    pngs.length === 61 && pngs.every((p) => p.includes('/gfx/assets/')) && jsons.join() === 'additional_assets_v310.json,credits_text.json,font_styles.json,game_loading_list.json,graphics_manifest_v3.json,screen_layout_v2.json,tutorial_assets.json,tutorial_font_16.json',
     `png=${pngs.length} json=${jsons.join(',')}`,
   );
   const wavs = ok('.wav');
@@ -1160,7 +1160,7 @@ try {
   // ---- オプション（S19〜S24）・遊び方（S25） ----
   await ev(() => (window.__p2like.scene().stack[0].cursor = 2));
   await key('Enter', 200);
-  check('オプション：音／操作／対戦／表示／クレジット／設定初期化／戻る', (await sceneName()) === 'OptionsScene' && (await ev(() => window.__p2like.scene().rows().map((r) => r.label).join())) === '音,操作,対戦,表示,クレジット,設定初期化,戻る');
+  check('オプション：音／操作／対戦／表示／クレジット／遊び方／デモ再生／設定初期化／戻る', (await sceneName()) === 'OptionsScene' && (await ev(() => window.__p2like.scene().rows().map((r) => r.label).join())) === '音,操作,対戦,表示,クレジット,遊び方,デモ再生,設定初期化,戻る');
   await shot('S19_options');
   await key('Enter'); // 音
   await key('ArrowLeft'); // BGM 100→90
@@ -1215,18 +1215,252 @@ try {
   await key('Escape', 200);
   await ev(() => (window.__p2like.scene().stack[0].cursor = 3));
   await key('Enter');
-  check('遊び方画面', (await sceneName()) === 'HelpScene');
+  check('遊び方：メインメニューの既存入口から目次へ', (await sceneName()) === 'HelpMenuScene');
   await shot('S25_help');
   await key('Escape');
   // 設定初期化の確認
   await ev(() => (window.__p2like.scene().stack[0].cursor = 2));
   await key('Enter');
-  for (let i = 0; i < 5; i++) await key('ArrowDown');
+  for (let i = 0; i < 7; i++) await key('ArrowDown');
   await key('Enter', 200);
   await shot('S26_confirm_reset');
   check('設定初期化の確認ダイアログ', (await ev(() => window.__p2like.scene().confirmReset)) === 0);
   await key('Escape');
   await toMenu();
+
+  // ---- 遊び方・放置デモ（タイトル無操作20秒・オプションのデモ再生・説明実演・SINGLE自動・対戦・暗転・割込み・後始末） ----
+  // 早送り：シーンの update を固定刻みで直接呼ぶ（教材・ゲームは本編の固定tickで進む。描画は rAF のまま）
+  const ff = (ms) =>
+    ev((ms) => {
+      const a = window.__p2like.app;
+      const seen = [];
+      for (let t = 0; t < ms; t += 1000 / 60) {
+        a.scene.update(1000 / 60);
+        const sc = a.scene;
+        const id = sc.constructor.name === 'DemoScene' ? `${sc.chapterId}:${sc.phase}` : sc.constructor.name;
+        if (seen[seen.length - 1] !== id) seen.push(id);
+      }
+      return seen;
+    }, ms);
+  const raf = () => ev(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+  /** 論理座標の矩形内で、黒（RGB合計<30）でない画素の数（キャンバスは実画素倍率） */
+  const litPixels = (x, y, w, h) =>
+    ev(([x, y, w, h]) => {
+      const src = document.querySelector('canvas');
+      const k = src.width / 640;
+      // 表示用キャンバスから直接読まず、読み取り用の写しから調べる（表示側の性能警告を出さない）
+      const c = document.createElement('canvas');
+      c.width = Math.round(w * k);
+      c.height = Math.round(h * k);
+      const g = c.getContext('2d', { willReadFrequently: true });
+      g.drawImage(src, Math.round(x * k), Math.round(y * k), c.width, c.height, 0, 0, c.width, c.height);
+      const d = g.getImageData(0, 0, c.width, c.height).data;
+      let n = 0;
+      for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] >= 30) n++;
+      return n;
+    }, [x, y, w, h]);
+  {
+    // タイトル無操作：描画完了から20秒。マウス移動ではリセットしない
+    await ev(() => window.__p2like.app.toTitle());
+    await raf();
+    await ev(() => (window.__p2like.scene().idleMs = 18800));
+    await page.mouse.move(100, 100);
+    await page.mouse.move(400, 300);
+    await wait(1600);
+    const leaving = await ev(() => ({ scene: window.__p2like.scene().constructor.name, leaving: window.__p2like.scene().leavingMs }));
+    await wait(800);
+    const idle = await ev(() => ({ scene: window.__p2like.scene().constructor.name, by: window.__p2like.scene().startedBy, ch: window.__p2like.scene().chapterId }));
+    check('タイトルの無操作20秒で暗転（600ms＋黒300ms）して放置デモ（マウス移動ではリセットしない）。最初は説明（基本操作）', leaving.scene === 'TitleScene' && leaving.leaving > 0 && idle.scene === 'DemoScene' && idle.by === 'idle' && idle.ch === 'basic', JSON.stringify({ leaving, idle }));
+    // 押しっぱなし（キーリピート）では終了しない。新しいキーで暗転してタイトルへ。終了操作は消費（タイトルの決定へ渡さない）
+    await ev(() => window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Enter', repeat: true, bubbles: true })));
+    await wait(100);
+    const afterRepeat = await ev(() => window.__p2like.scene().ending);
+    await key('Enter', 100);
+    const ending = await ev(() => ({ ending: window.__p2like.scene().ending, phase: window.__p2like.scene().phase }));
+    await wait(1300);
+    check('デモ中：保持入力（リピート）では終了せず、新しい決定入力で暗転→タイトル。その入力でメニューへ進まない', afterRepeat === false && ending.ending && (await sceneName()) === 'TitleScene', JSON.stringify({ afterRepeat, ending, scene: await sceneName() }));
+    // タイトルに戻ったら20秒を再計測（キー入力でリセット）
+    await ev(() => (window.__p2like.scene().idleMs = 18800));
+    await key('KeyQ', 50);
+    const reset = await ev(() => window.__p2like.scene().idleMs);
+    check('タイトル：有効なキー入力で無操作時間をリセット', reset < 300, String(reset));
+
+    // オプションの「デモ再生」：最初の説明から。開始に使った決定入力・押したままのパッドを持ち越さない
+    await toMenu();
+    await ev(() => (window.__p2like.scene().stack[0].cursor = 2));
+    await key('Enter', 150);
+    await ev(() => (window.__p2like.scene().cursor = 6));
+    await ev(() => {
+      window.__padOn = true;
+      window.__pad.buttons[0].pressed = true; // 押したまま開始
+    });
+    await key('Enter', 300);
+    const opt = await ev(() => ({ scene: window.__p2like.scene().constructor.name, by: window.__p2like.scene().startedBy, ch: window.__p2like.scene().chapterId, ending: window.__p2like.scene().ending }));
+    await ev(() => (window.__pad.axes[0] = 0.3)); // 小さな傾き（ドリフト相当）
+    await wait(300);
+    const drift = await ev(() => window.__p2like.scene().ending);
+    check('オプション「デモ再生」：最初の説明から。開始の決定・押したままのボタン・小さな傾きでは終了しない', opt.scene === 'DemoScene' && opt.by === 'option' && opt.ch === 'basic' && !opt.ending && drift === false, JSON.stringify({ opt, drift }));
+    await ev(() => {
+      window.__pad.axes[0] = 0;
+      window.__pad.buttons[0].pressed = false;
+    });
+    await wait(100);
+    await pad(2, 50);
+    const padEnd = await ev(() => window.__p2like.scene().ending);
+    check('パッドの新しいボタン押下で終了（暗転へ）', padEnd === true);
+    await wait(1300);
+    await ev(() => (window.__padOn = false));
+    // クリックで終了
+    await ev(() => window.__p2like.app.startDemo('option'));
+    await wait(200);
+    await page.mouse.click(640, 360);
+    const clickEnd = await ev(() => window.__p2like.scene().ending);
+    await wait(1300);
+    check('マウスクリックで終了してタイトルへ', clickEnd === true && (await sceneName()) === 'TitleScene');
+
+    // 非アクティブ：進行と音を止め、復帰でタイトルへ
+    await ev(() => window.__p2like.app.startDemo('option'));
+    await ff(3000);
+    const hid = await ev(() => {
+      const a = window.__p2like.app;
+      a.onVisibility(true);
+      const tick = a.scene.stage.game.tick;
+      const n = window.__p2like.bus.log.length;
+      a.scene.update(1000);
+      return { tick, after: a.scene.stage.game.tick, logs: window.__p2like.bus.log.length - n, bgm: window.__p2like.bus.currentBgm };
+    });
+    await ev(() => window.__p2like.app.onVisibility(false));
+    check('非アクティブ中は進行・音を止め、復帰でタイトルへ（本編は変更なし）', hid.tick === hid.after && hid.logs === 0 && hid.bgm === null && (await sceneName()) === 'TitleScene', JSON.stringify(hid));
+
+    // 完走：説明（基本操作→役成立〜連続出し・役連鎖→ピンチ）→SINGLE→対戦→暗転してタイトル
+    await ev(() => window.__p2like.app.startDemo('option'));
+    const seq = [];
+    let lessonCheck = null;
+    for (let i = 0; i < 400; i++) {
+      seq.push(...(await ff(1000)));
+      const st = await ev(() => {
+        const sc = window.__p2like.app.scene;
+        if (sc.constructor.name !== 'DemoScene' || !sc.stage) return null;
+        const g = sc.stage.game ?? sc.stage.match?.game;
+        const ev = g?.events ?? [];
+        return {
+          ch: sc.chapterId,
+          phase: sc.phase,
+          maxStreak: Math.max(0, ...ev.filter((e) => e.type === 'arrive' && e.success).map((e) => e.streak)),
+          chains: ev.filter((e) => e.type === 'declare').map((e) => e.chainCount),
+          gen: sc.generation,
+        };
+      });
+      if (st?.ch === 'roles' && st.phase === 'fadeOut') lessonCheck = st;
+      if (!st) break;
+    }
+    const chapters = [...new Set(seq.filter((s) => s.includes(':')).map((s) => s.split(':')[0]))];
+    check('放置デモの章順：基本操作→4/4/6→ピンチ→SINGLE→対戦→タイトル（完走後はタイトルで20秒を再計測）', chapters.join() === 'basic,roles,pinch,single,versus' && (await sceneName()) === 'TitleScene', `${chapters.join()} → ${await sceneName()}`);
+    check('4/4/6 教材（ブラウザ）：連続取得14回・役連鎖3回が実処理で成立', lessonCheck?.maxStreak === 14 && lessonCheck.chains.join() === '1,2,3', JSON.stringify(lessonCheck));
+
+    // 暗転中も戻る案内を残す（シングル形式：右下2行／対戦形式：中央1行）。案内以外は黒
+    await ev(() => window.__p2like.app.startDemo('option'));
+    const toPhase = (want) =>
+      ev((want) => {
+        const a = window.__p2like.app;
+        for (let i = 0; i < 60 * 400; i++) {
+          a.scene.update(1000 / 60);
+          if (`${a.scene.chapterId}:${a.scene.phase}` === want) return true;
+        }
+        return false;
+      }, want);
+    const freeze = () => ev(() => {
+      const sc = window.__p2like.app.scene;
+      window.__savedUpdate = sc.update;
+      sc.update = () => undefined; // 描画を調べる間だけ進行を止める
+    });
+    const unfreeze = () => ev(() => (window.__p2like.app.scene.update = window.__savedUpdate));
+    await toPhase('basic:black');
+    await freeze();
+    await raf();
+    const singleBlack = { hint: await litPixels(396, 308, 168, 38), outside: await litPixels(64, 128, 300, 200) };
+    await shot('DEMO_blackout_single');
+    await unfreeze();
+    await toPhase('versus:play');
+    await freeze();
+    await raf();
+    await shot('DEMO_versus');
+    const versusHint = await litPixels(222, 270, 196, 20);
+    await unfreeze();
+    await toPhase('versus:black');
+    await freeze();
+    await raf();
+    const versusBlack = { hint: await litPixels(222, 270, 196, 20), outside: await litPixels(0, 0, 640, 260) };
+    await shot('DEMO_blackout_versus');
+    await unfreeze();
+    check('暗転中も戻る案内を残し、形式の位置を保つ（シングル右下2行／対戦中央1行）。案内以外は黒', singleBlack.hint > 50 && singleBlack.outside === 0 && versusHint > 50 && versusBlack.hint > 50 && versusBlack.outside === 0, JSON.stringify({ singleBlack, versusHint, versusBlack }));
+    await ff(2000);
+
+    // 教材の画面（説明パネル・注目枠）と収録外文字
+    await ev(() => window.__p2like.app.startDemo('option'));
+    await toPhase('roles:play');
+    await ff(9000);
+    await raf();
+    await shot('DEMO_roles_lesson');
+    await toPhase('single:play');
+    await ff(8000);
+    await raf();
+    await shot('DEMO_single_auto');
+    await ev(() => window.__p2like.app.scene.interrupt());
+    await ff(1500);
+    const missing = await ev(() => [...window.__p2like.demo.missingGlyphs]);
+    check('説明・案内の文字はすべて共通ビットマップフォントに収録（収録外の代替描画なし）', missing.length === 0, missing.join(','));
+
+    // 遊び方：目次（5項目＋操作一覧）→役一覧（16役）→戻る→目次→戻る→呼出元
+    await toMenu();
+    await ev(() => (window.__p2like.scene().stack[0].cursor = 3));
+    await key('Enter', 150);
+    const items = await ev(() => window.__p2like.scene().constructor.name);
+    await key('ArrowDown');
+    await key('ArrowDown');
+    await key('ArrowDown');
+    await key('Enter', 150);
+    const roles = [];
+    for (let i = 0; i < 16; i++) {
+      roles.push(await ev(() => ({ i: window.__p2like.scene().index, ...window.__p2like.scene().info() })));
+      if (i === 15) await shot('HELP_roles_16');
+      await key('ArrowRight', 60);
+    }
+    check('役一覧：1役ずつ16役、役名ロゴは本体の表示名対応どおり（R01〜R16）', items === 'HelpMenuScene' && roles.map((r) => r.logos.join('+')).join() === [...Array(16).keys()].join(), JSON.stringify(roles.map((r) => [r.logos, r.clear, r.attack])));
+    check('役一覧の値は本体の役データ：フォーカード消去1/基本攻撃0、フラッシュ3/2、スーパーストレート3/2', roles[0].clear === 1 && roles[0].attack === 0 && roles[12].clear === 3 && roles[12].attack === 2 && roles[6].clear === 3 && roles[6].attack === 2);
+    await key('Escape', 150);
+    const backToc = await sceneName();
+    await key('Escape', 150);
+    const backMenu = await sceneName();
+    // オプションから入った場合はオプションへ戻る
+    await ev(() => (window.__p2like.scene().stack[0].cursor = 2));
+    await key('Enter', 150);
+    await ev(() => (window.__p2like.scene().cursor = 5));
+    await key('Enter', 150);
+    const fromOpt = await sceneName();
+    await key('Escape', 150);
+    check('遊び方：戻るで目次→呼出元（メインメニュー／オプション）へ。放置デモのタイトル復帰と混同しない', backToc === 'HelpMenuScene' && backMenu === 'MenuScene' && fromOpt === 'HelpMenuScene' && (await sceneName()) === 'OptionsScene', [backToc, backMenu, fromOpt, await sceneName()].join());
+    await toMenu();
+  }
+
+  // 音声の有効化前もデモは進む（無音は locked、素材欠落は missing として区別）
+  {
+    const p2 = await (await newContext()).newPage();
+    watch(p2);
+    await p2.goto(`http://127.0.0.1:${PORT}/`);
+    await p2.waitForSelector('body[data-ready]');
+    const r = await ev(() => {
+      const a = window.__p2like.app;
+      a.startDemo('idle');
+      for (let i = 0; i < 60 * 20; i++) a.scene.update(1000 / 60);
+      const log = window.__p2like.bus.log;
+      // 重複抑制など論理的に鳴らさなかった記録（skipped）は除き、鳴らすはずだった要求がすべて locked
+      const req = log.filter((e) => !e.skipped);
+      return { unlocked: window.__p2like.bus.unlocked, ch: a.scene.chapterId, tick: a.scene.stage?.game?.tick ?? 0, locked: req.filter((e) => e.locked).length, missing: log.filter((e) => e.skipped === 'missing').length, total: req.length };
+    }, undefined, p2);
+    check('音声の有効化前でもデモは進行し、未解除の無音（locked）と素材欠落（missing）を区別して記録', !r.unlocked && r.tick > 60 && r.locked === r.total && r.total > 0 && r.missing === 0, JSON.stringify(r));
+    await p2.close();
+  }
 
   // ---- BGM：画面遷移で不要な再始動なし、ループ再生 ----
   const bgmAll = await ev(() => window.__p2like.bus.nodes.filter((n) => n.kind === 'bgm').map((n) => ({ ...n })));
@@ -1348,9 +1582,10 @@ try {
     const out = [];
     for (const c of ['kotaro', 'akane', 'zunko']) {
       b.stopEffects();
-      const n0 = b.nodes.length;
+      // 記録は最新500件で切り詰めるため、件数ではなく再生開始時刻で今回のノードを探す
+      const t0 = b.ctx.currentTime;
       const played = b.playOptionalVoice(c, 'pinch', 5);
-      const rec = b.nodes.slice(n0).find((n) => n.id === `${c}_pinch`);
+      const rec = [...b.nodes].reverse().find((n) => n.id === `${c}_pinch` && n.start >= t0);
       out.push({ c, played, dur: rec ? Math.round(rec.duration * 1e6) / 1e6 : null, durMs: b.voiceDurationMs(c, 'pinch') });
     }
     b.stopEffects();

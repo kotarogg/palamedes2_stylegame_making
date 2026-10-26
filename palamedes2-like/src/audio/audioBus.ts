@@ -43,6 +43,8 @@ export interface AudioLogEntry {
   skipped?: string;
   /** v3.1.0 イベント側のゲイン（dB。0 以外のときだけ記録） */
   gainDb?: number;
+  /** 音声の有効化前（ブラウザの再生許可待ち）で無音だった。素材欠落（skipped: 'missing'）とは区別する */
+  locked?: true;
 }
 
 /** 0〜100 → 線形ゲイン（0＝無音、100＝1.0）。聴感に合わせて二乗カーブ */
@@ -243,7 +245,7 @@ export class AudioBus {
   playBgm(id: BgmId): void {
     if (this.bgmId === id && (this.bgmSrc || !this.ctx)) return;
     this.bgmId = id;
-    this.record({ t: this.now(), kind: 'bgm', id });
+    this.record({ t: this.now(), kind: 'bgm', id, ...(this.ctx ? {} : { locked: true as const }) });
     this.fadeOutBgm();
     const ctx = this.ctx;
     const buf = this.buffers.get(BGM_FILES[id]);
@@ -309,7 +311,7 @@ export class AudioBus {
     const file = sfxFile(id);
     const p = this.start(id, file, 'sfx', delayMs, gainDb);
     this.sfxPlaying.push({ id, prio: 0, endT: t + (this.durationMs(file) ?? 200), src: p?.src ?? null, gain: p?.gain ?? null, rec: p?.rec, protected: RESULT_SFX.has(id) });
-    this.record({ t, kind: 'sfx', id, skipped: p || !this.ctx ? undefined : this.skipReason(file), ...(gainDb !== 0 ? { gainDb } : {}) });
+    this.record({ t, kind: 'sfx', id, skipped: p || !this.ctx ? undefined : this.skipReason(file), ...(gainDb !== 0 ? { gainDb } : {}), ...(this.ctx ? {} : { locked: true as const }) });
     return true;
   }
 
@@ -362,7 +364,7 @@ export class AudioBus {
     const p = this.start(id, file, 'voice', delayMs);
     const dur = this.durationMs(file) ?? 600;
     this.voices[channel].push({ id, prio, endT: t + dur, src: p?.src ?? null, gain: p?.gain ?? null, rec: p?.rec, ...(optional ? { optional } : {}) });
-    this.record({ t, kind: 'voice', id, channel, skipped: p || !this.ctx ? undefined : this.skipReason(file) });
+    this.record({ t, kind: 'voice', id, channel, skipped: p || !this.ctx ? undefined : this.skipReason(file), ...(this.ctx ? {} : { locked: true as const }) });
     this.updateDuck(t, dur);
     return true;
   }

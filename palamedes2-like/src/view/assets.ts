@@ -1,5 +1,6 @@
 // ブラウザでの素材読込。PNG・JSON・フォントは public/ 配下から実行時に取得する。
 // 第3版：gfx/data/graphics_manifest_v3.json と gfx/data/game_loading_list.json（明示読込一覧）に従う。
+import type { BitmapFont, BitmapFontDef } from './bitmapFont';
 import { Layout, normalizeManifest, SpriteAtlas, type LoadingList, type ManifestFrame, type RawManifestV3, type ScreenLayout } from './data';
 
 export interface FontStyles {
@@ -29,6 +30,29 @@ export interface Assets {
   fontLoaded: boolean;
   /** v3.1.0 追加画像（additional_assets_v310.json の assets）。id → 定義。画像は images に同じ id で入る */
   extra: Record<string, ExtraAssetDef>;
+  /** 遊び方・放置デモ用UI（tutorial_assets.json）。読込前・検証環境では無い */
+  tutorial?: TutorialAssets;
+}
+
+/** 遊び方・放置デモ用UI（tutorial_assets.json の3画像。画像は images に同じ id で入る） */
+export interface TutorialAssets {
+  font: BitmapFont;
+  /** 操作アイコン（24×24）：move_left／move_right／column_cycle／launch／declare_role／raise */
+  icons: Record<string, ManifestFrame>;
+  /** 注目枠（24×24、9-slice 外周4px） */
+  focus: ManifestFrame;
+  focusSlice: number;
+}
+
+interface TutorialAssetsJson {
+  format: string;
+  assets: {
+    id: string;
+    file: string;
+    dimensions: [number, number];
+    frames?: string | { id: string; rect: [number, number, number, number] }[];
+    nine_slice?: { left: number };
+  }[];
 }
 
 /** v3.1.0 追加画像の定義（静止1枚。原点は左上） */
@@ -90,13 +114,15 @@ async function loadFont(baseUrl: string, styles: FontStyles): Promise<boolean> {
 
 export async function loadAssets(baseUrl: string, darkAlpha: number): Promise<Assets> {
   const root = `${baseUrl}${GFX_ROOT}`;
-  const [raw, list, layoutData, fontStyles, credits, additional] = await Promise.all([
+  const [raw, list, layoutData, fontStyles, credits, additional, tutorialDef, tutorialFont] = await Promise.all([
     loadJson<RawManifestV3>(`${root}data/graphics_manifest_v3.json`),
     loadJson<LoadingList>(`${root}data/game_loading_list.json`),
     loadJson<ScreenLayout>(`${baseUrl}data/screen_layout_v2.json`),
     loadJson<FontStyles>(`${root}data/font_styles.json`),
     loadJson<CreditsText>(`${root}data/credits_text.json`),
     loadJson<AdditionalAssetsV310>(`${root}data/additional_assets_v310.json`),
+    loadJson<TutorialAssetsJson>(`${root}data/tutorial_assets.json`),
+    loadJson<BitmapFontDef>(`${root}data/tutorial_font_16.json`),
   ]);
   const { manifest, targets } = normalizeManifest(raw, list);
   // 明示読込一覧の画像だけを読む。読み込み失敗・寸法違いは素材名を示して起動を止める
@@ -118,6 +144,14 @@ export async function loadAssets(baseUrl: string, darkAlpha: number): Promise<As
       }),
     ),
     list.files.includes(fontStyles.file) ? loadFont(baseUrl, fontStyles) : Promise.resolve(false),
+    // 遊び方・放置デモ用UI（既存マニフェストは変更しない。寸法違いは起動を止める）
+    Promise.all(
+      tutorialDef.assets.map(async (a) => {
+        const img = await loadImage(`${root}${a.file}`);
+        if (img.width !== a.dimensions[0] || img.height !== a.dimensions[1]) throw new Error(`${a.file}: size ${img.width}x${img.height} != ${a.dimensions.join('x')}`);
+        images.set(a.id, img);
+      }),
+    ),
   ]);
   return {
     atlas: new SpriteAtlas(manifest),
@@ -129,6 +163,19 @@ export async function loadAssets(baseUrl: string, darkAlpha: number): Promise<As
     credits,
     fontLoaded,
     extra: Object.fromEntries(additional.assets.map((a) => [a.id, a])),
+    tutorial: tutorialAssets(tutorialDef, tutorialFont, images),
+  };
+}
+
+function tutorialAssets(def: TutorialAssetsJson, font: BitmapFontDef, images: Map<string, HTMLImageElement>): TutorialAssets {
+  const frame = (sheet: string, id: string, r: [number, number, number, number]): ManifestFrame => ({ sheet, id, x: r[0], y: r[1], w: r[2], h: r[3], reserved: false });
+  const icons = def.assets.find((a) => a.id === 'tutorial_action_icons')!;
+  const focus = def.assets.find((a) => a.id === 'tutorial_focus_frame')!;
+  return {
+    font: { def: font, image: images.get('tutorial_font_16')! },
+    icons: Object.fromEntries((icons.frames as { id: string; rect: [number, number, number, number] }[]).map((f) => [f.id, frame('tutorial_action_icons', f.id, f.rect)])),
+    focus: frame('tutorial_focus_frame', 'focus', [0, 0, focus.dimensions[0], focus.dimensions[1]]),
+    focusSlice: focus.nine_slice?.left ?? 4,
   };
 }
 

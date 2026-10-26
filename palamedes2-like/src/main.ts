@@ -4,6 +4,7 @@
 import { App, GameScene, H, W } from './app';
 import { AudioBus } from './audio/audioBus';
 import { allAudioFiles } from './audio/audioMap';
+import { missingGlyphs } from './view/bitmapFont';
 import { DEFAULT_VIEW_CONFIG } from './core/config';
 import { browserPads } from './input/controller';
 import { loadSettings, type AppSettings } from './input/settings';
@@ -139,7 +140,14 @@ async function boot(): Promise<void> {
     if (app.onKey(e.code, e.repeat)) e.preventDefault();
     else if (e.code === 'Space' || e.code.startsWith('Arrow') || e.code === 'Tab') e.preventDefault();
   });
-  window.addEventListener('pointerdown', onFirstInput);
+  window.addEventListener('pointerdown', () => {
+    onFirstInput();
+    app.onPointer();
+  });
+  // 非アクティブ（タブ切替・最小化・フォーカス喪失）：放置デモは進行と音を止め、復帰でタイトルへ（本編の動作は変えない）
+  document.addEventListener('visibilitychange', () => app.onVisibility(document.hidden));
+  window.addEventListener('blur', () => app.onVisibility(true));
+  window.addEventListener('focus', () => app.onVisibility(false));
   window.addEventListener('gamepadconnected', () => fit());
 
   // 自動検証用のフック（通常の操作経路やメニューには出さない）
@@ -151,6 +159,8 @@ async function boot(): Promise<void> {
     gameScene: () => (app.scene instanceof GameScene ? app.scene : null),
     // 自動検証用：S12 数字の合成（v3.1.0 ヒビのマスク確認）
     numeric: { numericGlyph, drawNumericScaled },
+    // 自動検証用：遊び方・放置デモ（収録外の文字の記録）
+    demo: { missingGlyphs },
     ...(DEV ? { metrics: () => app.devMetrics } : {}),
   };
 
