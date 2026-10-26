@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-26T08:37:55.896Z",
+  "date": "2026-10-26T09:38:07.242Z",
   "mode": "fallback",
   "root": "dist",
   "bgmPresent": [],
@@ -10,7 +10,7 @@
     {
       "name": "起動（画像49・JSON5・フォント・音声読込）→タイトル",
       "pass": true,
-      "detail": "734ms"
+      "detail": "1292ms"
     },
     {
       "name": "明示読込一覧の49PNG＋v3.1.0追加9PNG＋遊び方UI3PNG（tutorial_assets.json）だけを取得（旧版・見本・previews を読まない）、JSON8件",
@@ -65,7 +65,7 @@
     {
       "name": "修正R6・タイトルはメニュー曲（自動再生を強制せず、有効化後にデコード完了を待って開始）。タイトル→メニューで再始動しない",
       "pass": true,
-      "detail": "{\"wait\":{\"ok\":true,\"waitedMs\":3,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":0.47,\"nodes\":[]}},\"bgmNodes0\":[]}"
+      "detail": "{\"wait\":{\"ok\":true,\"waitedMs\":6,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":0.551,\"nodes\":[]}},\"bgmNodes0\":[]}"
     },
     {
       "name": "メインメニュー（MODE1／MODE2／オプション／遊び方）：両脇の menu_kotaro・menu_akane を原寸・原点どおりに描画（画素一致）",
@@ -80,7 +80,7 @@
     {
       "name": "パッドだけで MODE1 CPU対戦を開始：1Pコタロー対アカネ、READY／GO の担当はアカネ（同じ話者）・実ノードで再生開始",
       "pass": true,
-      "detail": "{\"padStart\":{\"chars\":[\"kotaro\",\"akane\"],\"ann\":\"akane\"},\"readyNode\":{\"id\":\"akane_ready\",\"kind\":\"voice\",\"start\":2.7022222222222223,\"duration\":0.5098185941043084,\"loop\":false,\"stoppedAt\":null},\"goNode\":{\"id\":\"akane_go\",\"kind\":\"voice\",\"start\":3.8922448979591837,\"duration\":0.402312925170068,\"loop\":false,\"stoppedAt\":null}}"
+      "detail": "{\"padStart\":{\"chars\":[\"kotaro\",\"akane\"],\"ann\":\"akane\"},\"readyNode\":{\"id\":\"akane_ready\",\"kind\":\"voice\",\"start\":2.8502494331065757,\"duration\":0.5098185941043084,\"loop\":false,\"stoppedAt\":null},\"goNode\":{\"id\":\"akane_go\",\"kind\":\"voice\",\"start\":4.03156462585034,\"duration\":0.402312925170068,\"loop\":false,\"stoppedAt\":null}}"
     },
     {
       "name": "対戦BGM（versus）を要求",
@@ -95,12 +95,12 @@
     {
       "name": "役宣言：代表役（先頭ロゴ）と代表ボイス（役名、または20%で代替の攻撃ボイス。両方は鳴らさない）を同時開始。役宣言SEは連鎖段階 se_role_declare_0N（代表ボイスと同時なので −2dB）、旧成立音・連鎖音を鳴らさない",
       "pass": true,
-      "detail": "{\"decl\":{\"tick\":237,\"logos\":[15],\"chain\":1},\"roleShow\":{\"logo\":15,\"since\":237},\"altKind\":\"role\",\"repVoices\":[{\"t\":6169.100000000093,\"kind\":\"voice\",\"id\":\"kotaro_role_16\",\"channel\":\"main\"}],\"declSfxE\":{\"t\":6168.600000000093,\"kind\":\"sfx\",\"id\":\"role_declare_1\",\"gainDb\":-2},\"declSfx\":[\"attack_row\",\"role_declare_1\",\"piece_launch\"]}"
+      "detail": "{\"decl\":{\"tick\":238,\"logos\":[15],\"chain\":1},\"roleShow\":{\"logo\":15,\"since\":238},\"altKind\":\"role\",\"repVoices\":[{\"t\":6980.600000000006,\"kind\":\"voice\",\"id\":\"kotaro_role_16\",\"channel\":\"main\"}],\"declSfxE\":{\"t\":6980.199999999997,\"kind\":\"sfx\",\"id\":\"role_declare_1\",\"gainDb\":-2},\"declSfx\":[\"attack_row\",\"role_declare_1\"]}"
     },
     {
       "name": "Esc：終了確認ダイアログ（dialog_panel）、確認中もゲームは進行（一時停止なし）",
       "pass": true,
-      "detail": "dialog=1 tick 265→296"
+      "detail": "dialog=1 tick 267→298"
     },
     {
       "name": "「続ける」でダイアログを閉じる",
@@ -110,7 +110,7 @@
     {
       "name": "v3.1.0 勝敗演出：敗者ボイス→（640ms）落下開始で se_character_fall→（700ms＋200ms）勝者演出の開始で勝利SE・勝者ボイス・クラッカーSEが同時（人が勝ったCPU対戦は敗北SEなし、勝利SEは1回）",
       "pass": true,
-      "detail": "{\"order\":[0,616,1516,1517,1517],\"plan1\":{\"kind\":\"versus\",\"winner\":0,\"loser\":1,\"startTick\":313,\"fallStartTick\":351,\"fallEndTick\":393,\"winnerTick\":405,\"crackerTick\":405,\"crackerToward\":0,\"acceptTick\":423}}"
+      "detail": "{\"order\":[0,616,1516,1516,1517],\"plan1\":{\"kind\":\"versus\",\"winner\":0,\"loser\":1,\"startTick\":316,\"fallStartTick\":354,\"fallEndTick\":396,\"winnerTick\":408,\"crackerTick\":408,\"crackerToward\":0,\"acceptTick\":426}}"
     },
     {
       "name": "接着音 sfx_attack_row：実適用1ラインにつき1回（実ノード）",
@@ -135,7 +135,7 @@
     {
       "name": "B1：CPU対戦の第2ラウンドでも CPU が開始直後から操作（1.5秒以内）",
       "pass": true,
-      "detail": "{\"round\":2,\"wins\":[1,0],\"firstCpuCmd\":8}"
+      "detail": "{\"round\":2,\"wins\":[1,0],\"firstCpuCmd\":1}"
     },
     {
       "name": "CPU対戦で勝利：次の相手へ／同じ相手と再戦／キャラ選択へ／メニューへ",
@@ -185,7 +185,7 @@
     {
       "name": "修正R3：両者決定でただちに 2P対戦開始（固定待機なし。1P ずん子・2P コタロー）。READY担当は両者のどちらか",
       "pass": true,
-      "detail": "{\"scene\":\"GameScene\",\"chars\":[\"zunko\",\"kotaro\"],\"ann\":\"zunko\"}"
+      "detail": "{\"scene\":\"GameScene\",\"chars\":[\"zunko\",\"kotaro\"],\"ann\":\"kotaro\"}"
     },
     {
       "name": "R2：1P終了確認中も 2P（←・,）の移動と発射は 2P へ届き、1P の確認カーソルは動かない",
@@ -205,7 +205,7 @@
     {
       "name": "修正R3・R6：ほぼ同時の確定でもコタロー・アカネの確定ボイスが各1回、途中停止せず終端まで再生（AudioContext時刻で判定。READYと重なっても止まらない、試合開始は待たない）",
       "pass": true,
-      "detail": "{\"selScene\":{\"scene\":\"GameScene\",\"chars\":[\"kotaro\",\"akane\"]},\"wait\":{\"ok\":true,\"waitedMs\":1872,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":42.223,\"nodes\":[{\"id\":\"kotaro_select\",\"start\":1.672,\"end\":3.612,\"duration\":1.94,\"stoppedAt\":null,\"loop\":false},{\"id\":\"kotaro_select\",\"start\":27.402,\"end\":29.342,\"duration\":1.94,\"stoppedAt\":null,\"loop\":false},{\"id\":\"kotaro_select\",\"start\":40.231,\"end\":42.171,\"duration\":1.94,\"stoppedAt\":null,\"loop\":false},{\"id\":\"akane_select\",\"start\":40.231,\"end\":41.66,\"duration\":1.429,\"stoppedAt\":null,\"loop\":false}]}},\"selDone\":[{\"id\":\"kotaro_select\",\"intact\":true},{\"id\":\"akane_select\",\"intact\":true}],\"readyHeard\":true}"
+      "detail": "{\"selScene\":{\"scene\":\"GameScene\",\"chars\":[\"kotaro\",\"akane\"]},\"wait\":{\"ok\":true,\"waitedMs\":1864,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":42.652,\"nodes\":[{\"id\":\"kotaro_select\",\"start\":1.791,\"end\":3.731,\"duration\":1.94,\"stoppedAt\":null,\"loop\":false},{\"id\":\"kotaro_select\",\"start\":27.542,\"end\":29.482,\"duration\":1.94,\"stoppedAt\":null,\"loop\":false},{\"id\":\"kotaro_select\",\"start\":40.673,\"end\":42.613,\"duration\":1.94,\"stoppedAt\":null,\"loop\":false},{\"id\":\"akane_select\",\"start\":40.673,\"end\":42.101,\"duration\":1.429,\"stoppedAt\":null,\"loop\":false}]}},\"selDone\":[{\"id\":\"kotaro_select\",\"intact\":true},{\"id\":\"akane_select\",\"intact\":true}],\"readyHeard\":true}"
     },
     {
       "name": "修正R3：メニュー復帰で声を持ち越さない",
@@ -225,12 +225,12 @@
     {
       "name": "v3.1.0 修正R1：開始前待機中は READY・GO とも描かない（最初・新ラウンド・再戦。画素照合、全位相）。待機後に既存の READY→GO へ進む",
       "pass": true,
-      "detail": "{\"s0\":{\"frames\":60,\"drawn\":[],\"readyAfter\":true,\"tickMax\":0},\"s1\":{\"frames\":59,\"drawn\":[],\"readyAfter\":true,\"tickMax\":0},\"s2\":{\"frames\":60,\"drawn\":[],\"readyAfter\":true,\"tickMax\":0},\"round\":1}"
+      "detail": "{\"s0\":{\"frames\":61,\"drawn\":[],\"readyAfter\":true,\"tickMax\":0},\"s1\":{\"frames\":59,\"drawn\":[],\"readyAfter\":true,\"tickMax\":0},\"s2\":{\"frames\":60,\"drawn\":[],\"readyAfter\":true,\"tickMax\":0},\"round\":1}"
     },
     {
       "name": "v3.1.0 開始前待機：表示後1000msはゲームを進めない（tick 0・READY前）。待機中の発射を解除後へ持ち越さない",
       "pass": true,
-      "detail": "{\"h0\":{\"holding\":true,\"tick\":0},\"h1\":{\"holding\":true,\"tick\":0},\"voiceDuringHold\":0,\"released\":1014,\"after\":{\"launches\":0,\"tick\":107},\"readyAfter\":true}"
+      "detail": "{\"h0\":{\"holding\":true,\"tick\":0},\"h1\":{\"holding\":true,\"tick\":0},\"voiceDuringHold\":0,\"released\":1028,\"after\":{\"launches\":0,\"tick\":107},\"readyAfter\":true}"
     },
     {
       "name": "v3.1.0 ヒビ：数字セルの(2,0)へ重ね、数字の不透明部でマスク（全数字×3種×A/B/C で数字外0px・数字内に残る）。17px 縮小・複数桁でも外へ出ない",
@@ -295,12 +295,12 @@
     {
       "name": "R3：ステージクリアで sfx_stage_clear が途中停止せず終端まで再生。シングル成功はクラッカーあり",
       "pass": true,
-      "detail": "{\"outcome\":\"stageClear\",\"plan\":{\"kind\":\"stageClear\",\"winner\":0,\"loser\":null,\"startTick\":133,\"fallStartTick\":133,\"fallEndTick\":133,\"winnerTick\":133,\"crackerTick\":133,\"crackerToward\":0,\"acceptTick\":193},\"wait\":{\"ok\":true,\"waitedMs\":1321,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":87.261,\"nodes\":[{\"id\":\"stage_clear\",\"start\":86.123,\"end\":87.243,\"duration\":1.12,\"stoppedAt\":null,\"loop\":false}]}}}"
+      "detail": "{\"outcome\":\"stageClear\",\"plan\":{\"kind\":\"stageClear\",\"winner\":0,\"loser\":null,\"startTick\":133,\"fallStartTick\":133,\"fallEndTick\":133,\"winnerTick\":133,\"crackerTick\":133,\"crackerToward\":0,\"acceptTick\":193},\"wait\":{\"ok\":true,\"waitedMs\":1319,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":87.98,\"nodes\":[{\"id\":\"stage_clear\",\"start\":86.851,\"end\":87.971,\"duration\":1.12,\"stoppedAt\":null,\"loop\":false}]}}}"
     },
     {
       "name": "R3：最終面クリア＋全消し同時で sfx_all_stages_clear・sfx_all_clear とも終端まで再生",
       "pass": true,
-      "detail": "{\"outcome\":\"allStagesClear\",\"wait\":{\"ok\":true,\"waitedMs\":2373,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":92.381,\"nodes\":[{\"id\":\"all_clear\",\"start\":90.192,\"end\":90.912,\"duration\":0.72,\"stoppedAt\":null,\"loop\":false},{\"id\":\"all_stages_clear\",\"start\":90.192,\"end\":92.352,\"duration\":2.16,\"stoppedAt\":null,\"loop\":false}]}}}"
+      "detail": "{\"outcome\":\"allStagesClear\",\"wait\":{\"ok\":true,\"waitedMs\":2367,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":93.1,\"nodes\":[{\"id\":\"all_clear\",\"start\":90.921,\"end\":91.641,\"duration\":0.72,\"stoppedAt\":null,\"loop\":false},{\"id\":\"all_stages_clear\",\"start\":90.921,\"end\":93.081,\"duration\":2.16,\"stoppedAt\":null,\"loop\":false}]}}}"
     },
     {
       "name": "MODE2 シングル：42個から開始",
@@ -315,7 +315,7 @@
     {
       "name": "MODE2 CPU対戦：CPUが打ち上げて残数が減る",
       "pass": true,
-      "detail": "{\"mode\":\"mode2\",\"r\":[42,19]}"
+      "detail": "{\"mode\":\"mode2\",\"r\":[42,33]}"
     },
     {
       "name": "MODE2：両者（シングルは本人）が出せないと 3・2・1 のカウントダウン",
@@ -370,7 +370,7 @@
     {
       "name": "タイトルの無操作20秒で暗転（600ms＋黒300ms）して放置デモ（マウス移動ではリセットしない）。最初は説明（基本操作）",
       "pass": true,
-      "detail": "{\"leaving\":{\"scene\":\"TitleScene\",\"leaving\":433.29999999998836},\"idle\":{\"scene\":\"DemoScene\",\"by\":\"idle\",\"ch\":\"basic\"}}"
+      "detail": "{\"leaving\":{\"scene\":\"TitleScene\",\"leaving\":450},\"idle\":{\"scene\":\"DemoScene\",\"by\":\"idle\",\"ch\":\"basic\"}}"
     },
     {
       "name": "デモ中：保持入力（リピート）では終了せず、新しい決定入力で暗転→タイトル。その入力でメニューへ進まない",
@@ -380,7 +380,7 @@
     {
       "name": "タイトル：有効なキー入力で無操作時間をリセット",
       "pass": true,
-      "detail": "66.60000000000582"
+      "detail": "66.69999999999709"
     },
     {
       "name": "オプション「デモ再生」：最初の説明から。開始の決定・押したままのボタン・小さな傾きでは終了しない",
@@ -400,7 +400,7 @@
     {
       "name": "非アクティブ中は進行・音を止め、復帰でタイトルへ（本編は変更なし）",
       "pass": true,
-      "detail": "{\"tick\":162,\"after\":162,\"logs\":0,\"bgm\":null}"
+      "detail": "{\"tick\":163,\"after\":163,\"logs\":0,\"bgm\":null}"
     },
     {
       "name": "放置デモの章順：基本操作→4/4/6→ピンチ→SINGLE→対戦→タイトル（完走後はタイトルで20秒を再計測）",
@@ -411,6 +411,11 @@
       "name": "4/4/6 教材（ブラウザ）：連続取得14回・役連鎖3回が実処理で成立",
       "pass": true,
       "detail": "{\"ch\":\"roles\",\"phase\":\"fadeOut\",\"maxStreak\":14,\"chains\":[1,2,3],\"gen\":2}"
+    },
+    {
+      "name": "修正R1：対戦デモの決着後、中央の「対戦結果」を描かない。左右の敗北（1P）／勝利（2P）は描き、敗者の落下・勝者ボイス・クラッカーは鳴る",
+      "pass": true,
+      "detail": "{\"winner\":1,\"banner\":null,\"match\":{\"opaque\":5947,\"bad\":5946},\"lose0\":{\"opaque\":7084,\"bad\":0},\"win1\":{\"opaque\":6419,\"bad\":0},\"log\":[\"result_cracker\",\"result_cracker\",\"result_cracker\",\"character_fall\",\"akane_lose\",\"character_fall\",\"zunko_win\",\"result_cracker\",\"character_fall\",\"akane_lose\",\"character_fall\",\"zunko_win\",\"result_cracker\"]}"
     },
     {
       "name": "暗転中も戻る案内を残し、形式の位置を保つ（シングル右下2行／対戦中央1行）。案内以外は黒",
@@ -564,6 +569,7 @@
     "screens/S26_confirm_reset.png",
     "screens/DEMO_blackout_single.png",
     "screens/DEMO_versus.png",
+    "screens/DEMO_versus_result.png",
     "screens/DEMO_blackout_versus.png",
     "screens/DEMO_roles_lesson.png",
     "screens/DEMO_single_auto.png",

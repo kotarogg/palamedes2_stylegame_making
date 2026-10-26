@@ -942,6 +942,21 @@ export class GameView {
     return null;
   }
 
+  /**
+   * 結果の中央見出し（S9 の id、または 'extra:<追加画像id>'）。結果中でなければ null。
+   * 対戦の「対戦結果」は hud.matchOver のときだけ（放置デモの対戦は出さない）。テスト・検証用に公開
+   */
+  resultBanner(t: number): string | null {
+    const r = this.hud.result;
+    if (!r || t < r.startTick) return null;
+    if (r.kind === 'draw') return 'extra:result_draw_ja';
+    if (r.kind === 'gameOver') return 'show_game_over';
+    if (r.kind === 'stageClear') return 'show_stage_clear';
+    if (r.kind === 'allStagesClear') return 'show_all_stages_complete';
+    if (r.kind === 'clear') return 'show_all_clear';
+    return this.hud.matchOver ? 'extra:result_match_ja' : null;
+  }
+
   private s9Phase(t: number): 'A' | 'B' | 'C' {
     return (['A', 'B', 'C'] as const)[Math.floor(t / this.ticksOf(90)) % 3];
   }
@@ -984,15 +999,11 @@ export class GameView {
       const r = L.rect(rectId);
       this.put(items, Z.banner, this.frame('S9', `${id}_${phase}`), r.x, r.y + dy, { alpha });
     };
-    const r = this.hud.result;
-    if (r && t >= r.startTick) {
-      if (r.kind === 'draw') this.put(items, Z.banner, this.extraFrame('result_draw_ja'), L.rect('ready_banner').x, L.rect('ready_banner').y);
-      else if (r.kind === 'gameOver') banner('show_game_over');
-      else if (r.kind === 'stageClear') banner('show_stage_clear');
-      else if (r.kind === 'allStagesClear') banner('show_all_stages_complete');
-      else if (r.kind === 'clear') banner('show_all_clear');
-      else if (this.hud.matchOver) this.put(items, Z.banner, this.extraFrame('result_match_ja'), L.rect('ready_banner').x, L.rect('ready_banner').y);
-    } else {
+    const rb = this.resultBanner(t);
+    if (rb) {
+      if (rb.startsWith('extra:')) this.put(items, Z.banner, this.extraFrame(rb.slice(6)), L.rect('ready_banner').x, L.rect('ready_banner').y);
+      else banner(rb);
+    } else if (!(this.hud.result && t >= this.hud.result.startTick)) {
       const sb = this.startBanner(t);
       if (sb) banner(sb, sb === 'show_go' ? 'go_banner' : 'ready_banner');
     }

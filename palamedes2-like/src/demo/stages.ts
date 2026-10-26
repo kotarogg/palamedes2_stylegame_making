@@ -341,8 +341,26 @@ export class VersusDemoStage implements Stage {
     if (this.game.result && this.presenter.staging.acceptReady) this.resultMs += dtMs;
   }
 
+  /**
+   * 対戦デモの HUD。修正R1：中央の「対戦結果」見出しは出さない（matchOver を渡さない）。左右の勝利／敗北、敗者の落下、
+   * 勝者モーション・ボイス、クラッカーは結果演出（hud.result）のまま。本編の結果画面は変えない
+   */
+  hud(): HudInfo {
+    return { wins: this.match.wins, firstTo: 1, round: this.match.round, matchOver: false };
+  }
+
+  /** 描画中の GameView（検証用） */
+  get view(): GameView {
+    return this.presenter.view;
+  }
+
+  /** 結果演出の予定（検証用） */
+  get resultPlan() {
+    return this.presenter.staging.plan;
+  }
+
   render(ctx: CanvasRenderingContext2D): void {
-    this.presenter.render(ctx, this.game.tick + this.driver.alpha, { wins: this.match.wins, firstTo: 1, round: this.match.round, matchOver: this.match.state === 'matchResult' });
+    this.presenter.render(ctx, this.game.tick + this.driver.alpha, this.hud());
   }
 }
 

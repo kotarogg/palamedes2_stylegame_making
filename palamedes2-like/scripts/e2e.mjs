@@ -1387,6 +1387,67 @@ try {
     await shot('DEMO_versus');
     const versusHint = await litPixels(222, 270, 196, 20);
     await unfreeze();
+    // 修正R1：決着後（勝者演出・クラッカーの後）も中央の「対戦結果」は描かない。左右の勝利／敗北は描く
+    await ev(() => {
+      const sc = window.__p2like.app.scene;
+      for (let i = 0; i < 60 * 120; i++) {
+        const st = sc.stage;
+        const plan = st.resultPlan;
+        if (plan && plan.crackerTick !== null && st.game.tick >= plan.crackerTick + 40) return;
+        sc.update(1000 / 60);
+      }
+    });
+    await freeze();
+    await raf();
+    await shot('DEMO_versus_result');
+    const r1 = await ev(() => {
+      const A = window.__p2like.app.assets;
+      const L = A.layout;
+      const n = Number(document.getElementById('screen').dataset.scale) || 1;
+      const st = window.__p2like.app.scene.stage;
+      const cmp = (id, x, y) => {
+        const im = A.images.get(id);
+        const t = document.createElement('canvas');
+        t.width = im.width;
+        t.height = im.height;
+        const tg = t.getContext('2d', { willReadFrequently: true });
+        tg.drawImage(im, 0, 0);
+        const a = tg.getImageData(0, 0, im.width, im.height).data;
+        const s2 = document.createElement('canvas');
+        s2.width = im.width;
+        s2.height = im.height;
+        const sg = s2.getContext('2d', { willReadFrequently: true });
+        sg.imageSmoothingEnabled = false;
+        sg.drawImage(document.getElementById('screen'), x * n, y * n, im.width * n, im.height * n, 0, 0, im.width, im.height);
+        const b = sg.getImageData(0, 0, im.width, im.height).data;
+        let opaque = 0;
+        let bad = 0;
+        for (let i = 0; i < a.length; i += 4) {
+          if (a[i + 3] < 255) continue;
+          opaque++;
+          if (Math.abs(a[i] - b[i]) > 2 || Math.abs(a[i + 1] - b[i + 1]) > 2 || Math.abs(a[i + 2] - b[i + 2]) > 2) bad++;
+        }
+        return { opaque, bad };
+      };
+      const rb = L.rect('ready_banner');
+      const w0 = L.pRect(0, 'win_lose_banner');
+      const w1 = L.pRect(1, 'win_lose_banner');
+      return {
+        winner: st.game.result?.winner,
+        banner: st.view.resultBanner(st.game.tick),
+        match: cmp('result_match_ja', rb.x, rb.y),
+        lose0: cmp('result_lose_ja', w0.x, w0.y),
+        win1: cmp('result_win_ja', w1.x, w1.y),
+        log: window.__p2like.bus.log.filter((e) => ['akane_lose', 'character_fall', 'zunko_win', 'result_cracker'].includes(e.id)).map((e) => e.id),
+      };
+    });
+    await unfreeze();
+    const drawn = (c) => c.opaque > 0 && c.bad / c.opaque < 0.02;
+    check(
+      '修正R1：対戦デモの決着後、中央の「対戦結果」を描かない。左右の敗北（1P）／勝利（2P）は描き、敗者の落下・勝者ボイス・クラッカーは鳴る',
+      r1.winner === 1 && r1.banner === null && !drawn(r1.match) && r1.match.bad / r1.match.opaque > 0.3 && drawn(r1.lose0) && drawn(r1.win1) && ['akane_lose', 'character_fall', 'zunko_win', 'result_cracker'].every((id) => r1.log.includes(id)),
+      JSON.stringify(r1),
+    );
     await toPhase('versus:black');
     await freeze();
     await raf();
