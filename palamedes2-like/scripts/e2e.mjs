@@ -832,7 +832,7 @@ try {
     );
   }
 
-  // ---- 代表状態：連続出し（予約中のヒビ）・役連鎖・中央の受攻撃ストック（最大＋相殺）・ピンチ3 ----
+  // ---- 代表状態：打上連鎖（予約中のヒビ）・役連鎖・中央の受攻撃ストック（最大＋相殺）・ピンチ3 ----
   await waitPlaying(); // 再戦の開始前待機が終わり、GO の見出しが消えてから
   await wait(900);
   const v310 = await ev(() => {
@@ -894,13 +894,34 @@ try {
     };
     const sl0 = v.streakHudLayout(0);
     const sl1 = v.streakHudLayout(1);
+    // v3.2.0 見出し「打上連鎖」（共通ビットマップフォント・金色）の画素数
+    const gold = (r) => {
+      const d = c.getContext('2d', { willReadFrequently: true }).getImageData(r.x, r.y, r.w, r.h).data;
+      let n = 0;
+      for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - 0xf2) < 24 && Math.abs(d[i + 1] - 0xb9) < 24 && Math.abs(d[i + 2] - 0x50) < 32) n++;
+      return n;
+    };
+    // v3.2.0 対戦では攻撃倍率（数値・見出し）と「回」を描かない：成功数の右側の領域が、連鎖なし（成功数0）の描画と同じ
+    const rateRect = { x: sl0.numbers.x + 30, y: sl0.numbers.y, w: sl0.numbers.maxW - 30, h: 34 };
+    const grab = () => c.getContext('2d', { willReadFrequently: true }).getImageData(rateRect.x, rateRect.y, rateRect.w, rateRect.h).data;
+    const withStreak = grab();
+    const saved = p0.streakRemaining;
+    p0.streakRemaining = 0;
+    v.render(c.getContext('2d', { willReadFrequently: true }), g.tick);
+    const noStreak = grab();
+    p0.streakRemaining = saved;
+    v.render(c.getContext('2d', { willReadFrequently: true }), g.tick);
+    let rateDiff = 0;
+    for (let i = 0; i < withStreak.length; i += 4) if (Math.abs(withStreak[i] - noStreak[i]) + Math.abs(withStreak[i + 1] - noStreak[i + 1]) + Math.abs(withStreak[i + 2] - noStreak[i + 2]) > 6) rateDiff++;
     const pc = v.pinchCountView(1, g.tick);
     const f3 = pc ? A.atlas.frame('S9', `show_countdown_${pc.value}_${v.s9Phase(g.tick)}`) : null;
     const plans = [0, 1].map((p) => v.stockDrawPlan(p, g.tick));
     return {
       png: big.toDataURL('image/png'),
-      label0: cmpImg(img('label_launch_streak'), 0, 0, 80, 20, sl0.label.x, sl0.label.y),
-      label1: cmpImg(img('label_launch_streak'), 0, 0, 80, 20, sl1.label.x, sl1.label.y),
+      label0: gold(sl0.label),
+      label1: gold(sl1.label),
+      rateDiff,
+      missing: [...window.__p2like.demo.missingGlyphs].filter((ch) => '打上連鎖'.includes(ch)),
       pinch: pc,
       pinchPx: f3 ? cmpImg(A.images.get('S9'), f3.x, f3.y, f3.w, f3.h, pc.x, pc.y) : null,
       stock: plans.map((pl) => ({ n: pl.entries.length, minX: Math.min(...pl.entries.map((e) => e.x)), maxX: Math.max(...pl.entries.map((e) => e.x + e.w)), maxY: Math.max(...pl.entries.map((e) => e.y + e.h)), label: pl.label })),
@@ -911,9 +932,9 @@ try {
   writeFileSync(new URL('screens/V310_hud_stock_pinch.png', OUT), Buffer.from(v310.png.split(',')[1], 'base64'));
   shots.push('screens/V310_hud_stock_pinch.png');
   check(
-    'v3.1.0 連続出し（見出し・成功数17px・攻撃倍率、1P予約中のヒビ）：見出しを原寸で描画（画素一致）。成功数12＝×1.25、19＝×1.75',
-    v310.label0.bad === 0 && v310.label0.opaque > 0 && v310.label1.bad === 0 && v310.mult.join() === '125,175',
-    JSON.stringify({ label0: v310.label0, label1: v310.label1, mult: v310.mult }),
+    'v3.2.0 打上連鎖（見出しは共通フォントで「打上連鎖」・成功数17px、1P予約中のヒビ）：対戦では攻撃倍率の見出し・数値・「回」を描かない（成功数の右側が連鎖なしと同じ）。倍率の計算は維持（12＝×1.25、19＝×1.75）',
+    v310.label0 > 20 && v310.label1 > 20 && v310.missing.length === 0 && v310.rateDiff === 0 && v310.mult.join() === '125,175',
+    JSON.stringify({ label0: v310.label0, label1: v310.label1, rateDiff: v310.rateDiff, missing: v310.missing, mult: v310.mult }),
   );
   check(
     'v3.1.0 受攻撃ストックの中央配置：1P（予約29＋待機22＋相殺12）・2P（予約10＋待機11＋相殺3）とも中央エリア x264〜376・下端360以内。数字は列の中央側',
@@ -930,13 +951,25 @@ try {
   // ---- 日本語の結果見出し（勝利・敗北／対戦結果） ----
   {
     const firstTo = await ev(() => window.__p2like.gameScene().session.settings.firstTo);
+    const bannerDuring = [];
     for (let i = 0; i < firstTo; i++) {
       await ev(() => {
         const sc = window.__p2like.gameScene();
         sc.game.players[0].defeated = true;
         sc.step();
       });
-      await wait(2300);
+      // v3.2.0：勝敗演出中（受付前）は中央の見出しを出さない（左右の勝利・敗北と重ねない）
+      const during = [];
+      for (let k = 0; k < 8; k++) {
+        await wait(250);
+        during.push(await ev(() => {
+          const sc = window.__p2like.gameScene();
+          return sc.staging.acceptReady ? 'accept' : String(sc.view.resultBanner(sc.game.tick));
+        }));
+      }
+      if (i === firstTo - 1) bannerDuring.push(...during);
+      await page.waitForFunction(() => window.__p2like.gameScene()?.staging.acceptReady, undefined, { timeout: 8000, polling: 50 });
+      await wait(200);
       if (i === 0) await shot('V310_round_result_ja');
       if (i < firstTo - 1) {
         await key('Enter', 400);
@@ -974,9 +1007,13 @@ try {
         }
         return { opaque, bad };
       };
-      return { state: sc.session.state, match: cmp('result_match_ja', 240, 42) };
+      return { state: sc.session.state, match: cmp('result_match_ja', 240, 42), choices: sc.finalChoices().map((c) => c.label) };
     });
-    check('v3.1.0 対戦の最終結果の見出し「対戦結果」（result_match_ja、原寸・画素一致）', heads.state === 'matchResult' && heads.match.bad === 0 && heads.match.opaque > 0, JSON.stringify(heads));
+    check(
+      'v3.2.0 対戦の最終結果：勝敗演出中は中央「対戦結果」を出さない（HUD見出しなし）。演出後の結果パネルに「対戦結果」（原寸・画素一致）と再戦・戻る',
+      bannerDuring.every((b) => b === 'null' || b === 'accept') && bannerDuring.includes('null') && heads.state === 'matchResult' && heads.match.bad === 0 && heads.match.opaque > 0 && heads.choices.length >= 2,
+      JSON.stringify({ bannerDuring, heads }),
+    );
   }
   await ev(() => window.__p2like.app.toMenu(['MODE1']));
 
@@ -1124,6 +1161,14 @@ try {
   });
   await key('KeyF', 2600);
   await shot('S18_mode2_clear');
+  {
+    const nr = await ev(() => {
+      const sc = window.__p2like.gameScene();
+      const g = sc.game;
+      return { outcome: g.result?.outcome, refresh: g.refreshCount, label: sc.view.noResetLabel(g.tick), count: window.__p2like.app.records.mode2NoReset };
+    });
+    check('v3.2.0 MODE2 シングル：場の更新0回のクリアで「ノーリセットクリア」をクリア演出の中に付記し、達成回数を記録', nr.outcome === 'clear' && nr.refresh === 0 && nr.label?.text === 'ノーリセットクリア！' && nr.count >= 1, JSON.stringify(nr));
+  }
   check('MODE2 シングル：盤面を空にしてクリア', (await ev(() => window.__p2like.game().result?.outcome)) === 'clear');
   await toMenu();
   await ev(() => window.__p2like.app.startGame('mode2', 'cpu'));
@@ -1470,7 +1515,9 @@ try {
     await ev(() => window.__p2like.app.scene.interrupt());
     await ff(1500);
     const missing = await ev(() => [...window.__p2like.demo.missingGlyphs]);
-    check('説明・案内の文字はすべて共通ビットマップフォントに収録（収録外の代替描画なし）', missing.length === 0, missing.join(','));
+    // v3.2.0：新しい台本（目次「連鎖説明」・MODE2説明）の13字は共通フォントに未収録（素材待ち。PMへ追加を依頼）。それ以外の代替描画がないこと
+    const PENDING_GLYPHS = [...'、んウダリ切後新明更残説離'].map((ch) => `U+${ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}`);
+    check('説明・案内の文字は共通ビットマップフォントに収録。未収録は素材待ちの13字だけ（代替描画で表示）', missing.every((ch) => PENDING_GLYPHS.includes(ch)), `未収録：${missing.map((u) => String.fromCodePoint(parseInt(u.slice(2), 16))).join('')}`);
 
     // 遊び方：目次（5項目＋操作一覧）→役一覧（16役）→戻る→目次→戻る→呼出元
     await toMenu();
@@ -1501,6 +1548,131 @@ try {
     const fromOpt = await sceneName();
     await key('Escape', 150);
     check('遊び方：戻るで目次→呼出元（メインメニュー／オプション）へ。放置デモのタイトル復帰と混同しない', backToc === 'HelpMenuScene' && backMenu === 'MenuScene' && fromOpt === 'HelpMenuScene' && (await sceneName()) === 'OptionsScene', [backToc, backMenu, fromOpt, await sceneName()].join());
+    await toMenu();
+  }
+
+  // ---- v3.2.0：メニューの戻る→タイトル、遊び方目次の順、MODE2説明（固定盤面・固定入力で完走）、説明パネルの内線、補助表示 ----
+  {
+    await toMenu();
+    await raf();
+    await key('Escape', 300);
+    const t1 = await ev(() => ({ scene: window.__p2like.scene().constructor.name, idle: window.__p2like.scene().idleMs }));
+    await wait(400);
+    const t2 = await sceneName();
+    check('v3.2.0 メインメニュー最上位の戻る（Esc）でタイトルへ。無操作デモ待機は0から。戻る入力でメニューへ再進入しない', t1.scene === 'TitleScene' && t1.idle < 1000 && t2 === 'TitleScene', JSON.stringify({ t1, t2 }));
+
+    await toMenu();
+    await ev(() => (window.__p2like.scene().stack[0].cursor = 3));
+    await key('Enter', 150);
+    await raf();
+    await shot('V320_help_menu');
+    const toc = await ev(() => {
+      const sc = window.__p2like.scene();
+      return { scene: sc.constructor.name, n: window.__p2like.app.assets && 6 };
+    });
+    // 各項目の行き先：操作一覧→説明文、基本操作・連鎖説明・MODE1→教材、役一覧→一覧、MODE2→MODE2説明
+    const dest = [];
+    for (let i = 0; i < 6; i++) {
+      await ev((i) => {
+        const sc = window.__p2like.scene();
+        sc.cursor = i;
+      }, i);
+      await key('Enter', 200);
+      dest.push(await ev(() => {
+        const sc = window.__p2like.scene();
+        return `${sc.constructor.name}:${sc.stage?.constructor.name ?? ''}`;
+      }));
+      await key('Escape', 200);
+      if ((await sceneName()) !== 'HelpMenuScene') await key('Escape', 200);
+    }
+    check(
+      'v3.2.0 遊び方目次の順「操作一覧→基本操作→連鎖説明→役一覧→MODE1→MODE2」と各行き先',
+      toc.scene === 'HelpMenuScene' && dest[1] === 'HelpLessonScene:LessonStage' && dest[2] === 'HelpLessonScene:LessonStage' && dest[3].startsWith('RoleListScene') && dest[4] === 'HelpLessonScene:LessonStage' && dest[5] === 'HelpLessonScene:Mode2Stage' && !dest[0].startsWith('HelpLessonScene'),
+      JSON.stringify(dest),
+    );
+
+    // MODE2 説明：通常の Mode2Game で最後までクリア。頁は実イベントに同期
+    await ev(() => (window.__p2like.scene().cursor = 5));
+    await key('Enter', 200);
+    const advance = (want) =>
+      ev((want) => {
+        const sc = window.__p2like.scene();
+        sc.__pages ??= [];
+        for (let i = 0; i < 60 * 120; i++) {
+          const r = sc.stage.runner;
+          if (sc.__pages.at(-1) !== r.page) sc.__pages.push(r.page);
+          if (want === 'choice' ? sc.choice !== null : r.page === want && !(want === 'm2_refresh' && r.game.phase !== 'countdown')) break;
+          sc.update(1000 / 60);
+        }
+        const r = sc.stage.runner;
+        const g = r.game;
+        return { page: r.page, pages: sc.__pages, tick: g.tick, elapsed: g.elapsedMs(), refresh: g.refreshCount, remaining: g.remaining(g.players[0]), result: g.result?.outcome ?? null, problems: r.problems, choice: sc.choice };
+      }, want);
+    await raf();
+    await shot('V320_mode2_lesson_intro');
+    const a = await advance('m2_refresh');
+    await raf();
+    await shot('V320_mode2_lesson_countdown');
+    const b = await advance('m2_suit');
+    await raf();
+    await shot('V320_mode2_lesson_suit');
+    const c = await advance('m2_rule');
+    await raf();
+    await shot('V320_mode2_lesson_rule');
+    // 説明パネルの内線（info_panel の横線 y164）が見えない：説明パネルの面の色と同じ
+    const rule = await ev(() => {
+      const cv = document.getElementById('screen');
+      const n = Number(cv.dataset.scale) || 1;
+      const t = document.createElement('canvas');
+      t.width = 168;
+      t.height = 1;
+      const tg = t.getContext('2d', { willReadFrequently: true });
+      tg.imageSmoothingEnabled = false;
+      tg.drawImage(cv, 396 * n, 164 * n, 168 * n, n, 0, 0, 168, 1);
+      const d = tg.getImageData(0, 0, 168, 1).data;
+      let off = 0;
+      for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - 20) + Math.abs(d[i + 1] - 43) + Math.abs(d[i + 2] - 65) > 9) off++;
+      return off;
+    });
+    const d = await advance('m2_clear');
+    await raf();
+    await shot('V320_mode2_lesson_clear');
+    const e = await advance('choice');
+    await raf();
+    await shot('V320_mode2_lesson_choice');
+    const want = ['m2_intro', 'm2_refresh', 'm2_suit', 'm2_number', 'm2_adjacent', 'm2_rule', 'm2_clear', 'm2_versus'];
+    check(
+      'v3.2.0 MODE2説明：固定盤面・固定入力を通常の Mode2Game へ渡し、場の更新1回（カウントダウン中）→同じ記号→同じ数字→1と6→クリア条件→クリア→対戦の補足→「もう一度／戻る」。頁は実イベント順',
+      a.page === 'm2_refresh' && b.refresh === 1 && d.result === 'clear' && d.remaining === 0 && e.choice !== null && JSON.stringify(e.pages) === JSON.stringify(want) && e.problems.length === 0,
+      JSON.stringify({ a, b, c, d, e }),
+    );
+    check('v3.2.0 説明パネルの不要な内線を描かない（外枠は維持）：横線 y164 が面の色', rule === 0, `違う画素 ${rule}/168`);
+    const missing2 = await ev(() => [...window.__p2like.demo.missingGlyphs]);
+    check('v3.2.0 MODE2説明・目次の文字：未収録は素材待ちの13字だけ（代替描画で表示。素材待ち）', missing2.every((ch) => [...'、んウダリ切後新明更残説離'].some((p) => `U+${p.codePointAt(0).toString(16).toUpperCase()}` === ch)), `未収録：${missing2.map((u) => String.fromCodePoint(parseInt(u.slice(2), 16))).join('')}`);
+    await key('Escape', 200);
+    await key('Escape', 200);
+
+    // 本編 SINGLE の情報枠は従来どおり線あり。出せるピースの補助表示（人間側、既定ON）
+    await ev(() => window.__p2like.app.startGame('mode1', 'single', 'endless'));
+    await waitPlaying();
+    await wait(600);
+    await raf();
+    await shot('V320_assist_single');
+    const as = await ev(() => {
+      const sc = window.__p2like.gameScene();
+      const cv = document.getElementById('screen');
+      const n = Number(cv.dataset.scale) || 1;
+      const t = document.createElement('canvas');
+      t.width = 168;
+      t.height = 1;
+      const tg = t.getContext('2d', { willReadFrequently: true });
+      tg.drawImage(cv, 396 * n, 164 * n, 168 * n, n, 0, 0, 168, 1);
+      const d = tg.getImageData(0, 0, 168, 1).data;
+      let off = 0;
+      for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - 20) + Math.abs(d[i + 1] - 43) + Math.abs(d[i + 2] - 65) > 9) off++;
+      return { on: window.__p2like.app.settings.assist, hud: sc.view.hud.assist, targets: sc.view.assistTargets(0).length, singleRule: off };
+    });
+    check('v3.2.0 補助表示：既定ON、人間（1P）の出せる最上段を囲む。本編SINGLEの情報枠の線は維持', as.on === true && as.hud.join() === '0' && as.targets > 0 && as.singleRule > 100, JSON.stringify(as));
     await toMenu();
   }
 

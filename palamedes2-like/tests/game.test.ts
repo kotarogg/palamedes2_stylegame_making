@@ -204,12 +204,21 @@ describe('左右移動中の入力保持（確定）', () => {
     g.step([cmd(0, 'declare')]);
     stepN(g, g.ticks(g.config.timing.charMoveMs));
     expect(evs(g.events, 'declare')).toHaveLength(1);
+    // v3.2.0：左右移動の保持は受付から2tick（期限tickを含む）。移動終了の2tick前の入力は実行、それより前は期限切れ
     const h = makeGame();
     toPlay(h);
     h.step([cmd(0, 'left')]);
+    const end = h.players[0].charMoveEndTick;
+    while (h.tick + 1 < end - 2) h.step();
     h.step([cmd(0, 'left')]);
     stepN(h, g.ticks(g.config.timing.charMoveMs) * 2 + 1);
     expect(h.players[0].selectedCol).toBe(0);
+    const k = makeGame();
+    toPlay(k);
+    k.step([cmd(0, 'left')]);
+    k.step([cmd(0, 'left')]); // 移動開始の直後（終了の4tick前）＝期限切れ
+    stepN(k, g.ticks(g.config.timing.charMoveMs) * 2 + 1);
+    expect(k.players[0].selectedCol).toBe(1);
   });
 
   it('手動上昇は保持対象外：移動中でも即時に実行（要確認事項の暫定扱い）', () => {

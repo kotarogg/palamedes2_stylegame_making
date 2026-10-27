@@ -86,6 +86,11 @@ export interface GameConfig {
   streakScoreTable: readonly StreakStep[];
   /** 役連鎖の受付時間（第3版 PM指定：8000ms→12000ms。ステージクリア時の最大復帰もこの値） */
   chainWindowMs: number;
+  /**
+   * v3.2.0 移動の先行入力：移動終了前の左右入力を保持する期限（受付tickから、期限tickを含む）。初期値2tick（60Hzで約33.3ms）。
+   * 試遊後に調整する設定値（通常のオプションには出さない）。移動時間・最短周期は変えない
+   */
+  moveBufferTicks: number;
   /** 役連鎖の追加攻撃の上限（確定：+4） */
   chainBonusMax: number;
   /** 通常攻撃力1ライン分で相殺できる待機攻撃ライン数（確定：2） */
@@ -135,6 +140,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   streakAttackTable: STREAK_ATTACK_TABLE,
   streakScoreTable: STREAK_SCORE_TABLE,
   chainWindowMs: 12000,
+  moveBufferTicks: 2,
   chainBonusMax: 4,
   counterPerLine: 2,
   declareBelowMinIsFailure: true,

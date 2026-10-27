@@ -33,7 +33,7 @@ import {
 import { CpuController } from './input/cpu';
 import { defaultSettings, DEVICE_CHOICES, deviceLabel, sameDevice, saveSettings, type AppSettings, type DeviceChoice, type DisplayScale } from './input/settings';
 import { MenuInput, type NavEvent, type NavKey } from './ui/menuInput';
-import { loadRecords, saveRecords, submitEndless, submitMode2, submitStage, type Records } from './ui/records';
+import { loadRecords, saveRecords, submitEndless, submitMode2, submitMode2NoReset, submitStage, type Records } from './ui/records';
 import {
   ACCENT,
   CHARACTER_NAME,
@@ -74,6 +74,8 @@ export interface Scene {
   onPointer?(): void;
   /** 非アクティブ（タブの切替・ウィンドウのフォーカス喪失）と復帰 */
   onVisibility?(hidden: boolean): void;
+  /** v3.2.0 キーを離した（先行入力：自動反復の予約を残さない） */
+  onKeyUp?(code: string): void;
   /** キー入力（生のキーコード）。メニュー操作として使う場合は MenuInput 経由の onNav を使う */
   onKey?(code: string, repeat: boolean): boolean;
   onNav(ev: NavEvent): void;
@@ -194,6 +196,10 @@ export class App {
 
   onPointer(): void {
     this.scene.onPointer?.();
+  }
+
+  onKeyUp(code: string): void {
+    this.scene.onKeyUp?.(code);
   }
 
   onVisibility(hidden: boolean): void {
@@ -423,10 +429,10 @@ export class MenuScene implements Scene {
         return;
       }
       case 'back':
-        if (this.stack.length > 1) {
-          this.stack.pop();
-          bus.playSfx('ui_cancel');
-        }
+        bus.playSfx('ui_cancel');
+        if (this.stack.length > 1) this.stack.pop();
+        // v3.2.0：最上位の戻るでタイトルへ（無操作デモの待機は0から。戻る入力でタイトルの決定へ進まない）
+        else this.app.toTitle();
         return;
       default:
         return;
@@ -942,11 +948,24 @@ class OptionsScene implements Scene {
             change: () => this.toggleFullscreen(),
             confirm: () => this.toggleFullscreen(),
           },
+          {
+            label: '出せるピースの表示',
+            value: s.assist ? 'オン' : 'オフ',
+            arrows: true,
+            note: '今の場へ出せる各列の一番上のピースを囲む（MODE1・MODE2、1P/2P共通）',
+            change: () => this.toggleAssist(),
+            confirm: () => this.toggleAssist(),
+          },
           back,
         );
         return rows;
       }
     }
+  }
+
+  private toggleAssist(): void {
+    this.s.assist = !this.s.assist;
+    this.changed();
   }
 
   private toggleFullscreen(): void {
@@ -1446,7 +1465,11 @@ export class GameScene implements Scene {
     const g = this.game;
     const out = g.result!.outcome;
     if (g.mode === 'mode2') {
-      if (out === 'clear') submitMode2(r, (g as Mode2Game).elapsedMs());
+      if (out === 'clear') {
+        // 最短クリアは従来どおり全クリアが対象（専用最速・補正タイムは作らない）。ノーリセットは達成回数だけ1回加算
+        submitMode2(r, (g as Mode2Game).elapsedMs());
+        if ((g as Mode2Game).noResetAchiever() === 0) submitMode2NoReset(r);
+      }
     } else {
       const s = (g as Game).single!;
       if (s.kind === 'endless') submitEndless(r, s.score, s.level);
@@ -1516,6 +1539,18 @@ export class GameScene implements Scene {
     }
     for (const k of this.keyboards) if (k?.handleKey(code, repeat)) return true;
     return false;
+  }
+
+  onKeyUp(code: string): void {
+    for (const k of this.keyboards) if (k?.handleKeyUp(code)) return;
+  }
+
+  /** v3.2.0 フォーカス喪失：移動予約・入力キューを破棄（ゲームの進行は従来どおり） */
+  onVisibility(hidden: boolean): void {
+    if (!hidden) return;
+    const g = this.game as { clearInputBuffers?: () => void };
+    g.clearInputBuffers?.();
+    for (const k of this.keyboards) k?.clear();
   }
 
   /** 開発ビルドのみ：攻撃注入（1/2＝1Pへ+1/+10、9/0＝2Pへ+10/+1） */
@@ -1679,7 +1714,12 @@ export class GameScene implements Scene {
       round: s instanceof Match ? s.round : undefined,
       labels: this.devices.length === 2 ? [this.playerLabel(0), this.playerLabel(1)] : undefined,
       result: this.staging.plan,
-      matchOver: s instanceof Match && s.state === 'matchResult',
+      // v3.2.0：最終結果でも勝敗演出中は中央「対戦結果」を出さない（左右の勝利・敗北と重ねない）。
+      // 「対戦結果」は演出後の結果パネルの見出しとして表示し、再戦・戻る操作は従来どおり
+      matchOver: false,
+      // v3.2.0 出せるピースの補助表示：人間のプレイヤーだけ（オプションで共通ON/OFF）
+      assist: this.app.settings.assist ? this.humans() : [],
+      noReset: g.mode === 'mode2' && g.result ? (g as Mode2Game).noResetAchiever() : null,
       characters: this.characters,
       roleLogo: (p, tick) => this.roleNames.logoAt(p, Math.floor(tick)),
       preStart: this.holdMs !== null,
@@ -1726,6 +1766,7 @@ export class GameScene implements Scene {
       head = 'show_all_clear';
       lines.push(`クリアタイム ${formatTime(m2.elapsedMs())}`);
       if (r.mode2Single) lines.push(`ベスト ${formatTime(r.mode2Single.bestMs)}`);
+      if (m2.noResetAchiever() === 0) lines.push(`ノーリセットクリア！（達成 ${r.mode2NoReset}回）`);
     } else {
       const sg = (g as Game).single!;
       const out = g.result!.outcome;

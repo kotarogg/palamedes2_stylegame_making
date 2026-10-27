@@ -137,7 +137,7 @@ export function assignKey(all: KeyBindings[], player: PlayerId, action: Action, 
 
 /** キーボード1系統分。keydown を次tickまでキューに積む */
 export class KeyboardController implements Controller {
-  private queue: Action[] = [];
+  private queue: Command[] = [];
   private lookup = new Map<string, Action>();
 
   constructor(
@@ -163,7 +163,16 @@ export class KeyboardController implements Controller {
     if (!action) return false;
     // キーリピートは左右移動のみ（他の操作は押すたびに1回）
     if (repeat && action !== 'left' && action !== 'right') return true;
-    this.queue.push(action);
+    // v3.2.0：リピートは新しい押下と区別して渡す（予約の上書き・期限延長をしない）
+    this.queue.push(repeat ? { player: this.player, type: action, repeat: true } : { player: this.player, type: action });
+    return true;
+  }
+
+  /** v3.2.0 キーを離した：左右なら自動反復でできた移動予約を捨てる指示を渡す。処理したキーなら true */
+  handleKeyUp(code: string): boolean {
+    const action = this.lookup.get(code);
+    if (!action) return false;
+    if (action === 'left' || action === 'right') this.queue.push({ player: this.player, type: 'cancelRepeat' });
     return true;
   }
 
@@ -176,7 +185,7 @@ export class KeyboardController implements Controller {
   }
 
   poll(): Command[] {
-    const out = this.queue.map((type) => ({ player: this.player, type }));
+    const out = this.queue;
     this.queue = [];
     return out;
   }
@@ -261,9 +270,12 @@ export class GamepadController implements Controller {
       } else if (down && (a === 'left' || a === 'right')) {
         const hs = this.holdStart.get(a) ?? t;
         if (t - hs >= this.repeatDelayMs && t - (this.lastRepeat.get(a) ?? t) >= this.repeatMs) {
-          out.push({ player: this.player, type: a });
+          // v3.2.0：内部反復は新しい押下と区別（予約の上書き・期限延長をしない）
+          out.push({ player: this.player, type: a, repeat: true });
           this.lastRepeat.set(a, t);
         }
+      } else if (!down && was && (a === 'left' || a === 'right')) {
+        out.push({ player: this.player, type: 'cancelRepeat' }); // 離した：自動反復の予約を残さない
       }
       this.prev.set(a, down);
     }

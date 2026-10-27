@@ -9,6 +9,7 @@ import { Board } from './board';
 import { DEFAULT_CONFIG, DEFAULT_MODE2_CONFIG, msToTicks, type GameConfig, type Mode2Config } from './config';
 import type { Command, Flight, LockKind, RoundResult } from './game';
 import { isLaunchSuccess, kindFromIndex, PieceFactory } from './pieces';
+import { clear as clearHeld, MOVE_ACTIONS, neutralizeSimultaneous, offer, release, take, type InputLogEntry } from './inputBuffer';
 import { createSeededRng, randomInt, type Rng } from './rng';
 import type { Piece, PlayerId } from './types';
 
@@ -54,6 +55,9 @@ export interface Mode2Player {
   selectedCol: number;
   charMoveEndTick: number;
   buffered: Mode2Action | null;
+  /** v3.2.0 保持の受付tick・自動反復か（MODE1 と同じ先行入力） */
+  bufferedTick: number;
+  bufferedRepeat: boolean;
   lockUntil: number;
   lockKind: LockKind | null;
   /** シングルの完了tick（経過時間の記録用） */
@@ -102,6 +106,8 @@ export class Mode2Game {
   phase: Mode2Phase = 'play';
   /** カウントダウンの開始tick */
   countdownStart = 0;
+  /** v3.2.0 詰まり解消のための場の更新（cardRefresh）の回数。成功による通常の場の変化は数えない。ラウンドごと */
+  refreshCount = 0;
   readonly playStartTick: number;
   private readonly baseRng: Rng;
   private readonly t: Record<keyof GameConfig['timing'], number>;
@@ -149,13 +155,25 @@ export class Mode2Game {
     return Math.max(0, end - this.playStartTick) * this.tickMs;
   }
 
+  /**
+   * v3.2.0 ノーリセットクリア：ラウンド開始から最後の成功確定まで、詰まり解消の場の更新が0回で全ピースを出し切り、
+   * シングルのクリア、または対戦の勝利になった（引分けは対象外）。打ち上げ失敗は失格条件にしない。達成者を返す
+   */
+  noResetAchiever(): PlayerId | null {
+    const r = this.result;
+    if (!r || this.refreshCount !== 0) return null;
+    if (r.outcome === 'clear') return 0;
+    if (r.outcome === 'win' && r.winner !== null) return r.winner;
+    return null;
+  }
+
   remaining(p: Mode2Player): number {
     // 盤面上のピース＋予約空白（飛行中のピースはまだ盤面から出ていない扱い）
     return p.board.allIds().length;
   }
 
   private makePlayer(id: PlayerId): Mode2Player {
-    return { id, board: new Board(), selectedCol: 2, charMoveEndTick: 0, buffered: null, lockUntil: 0, lockKind: null, finishedTick: null };
+    return { id, board: new Board(), selectedCol: 2, charMoveEndTick: 0, buffered: null, bufferedTick: -1, bufferedRepeat: false, lockUntil: 0, lockKind: null, finishedTick: null };
   }
 
   isLocked(p: Mode2Player): boolean {
@@ -197,7 +215,7 @@ export class Mode2Game {
         if (this.flights.some((f) => f.state === 'outbound')) return;
         if (this.players.some((p) => this.canPlay(p))) return;
         this.phase = 'waitReturn';
-        for (const p of this.players) p.buffered = null;
+        this.clearInputBuffers();
         this.emit({ type: 'stuck', tick: this.tick });
         this.processStuck();
         return;
@@ -250,24 +268,54 @@ export class Mode2Game {
       this.base = this.factory.make(k.n, k.suit);
     }
     this.phase = 'play';
+    this.refreshCount++;
     this.emit({ type: 'cardRefresh', tick: this.tick, base: this.base, baseBefore: before });
   }
 
   // ---- 入力 ----
 
+  /** v3.2.0 入力の予約・消費・破棄の記録（開発時の検査用。最新500件） */
+  readonly inputLog: InputLogEntry[] = [];
+
+  private inputLogger(p: Mode2Player) {
+    return (e: Omit<InputLogEntry, 'tick' | 'player'>) => {
+      this.inputLog.push({ tick: this.tick, player: p.id, ...e });
+      if (this.inputLog.length > 500) this.inputLog.splice(0, this.inputLog.length - 500);
+    };
+  }
+
+  /** 予約の破棄（詰まり・ラウンド終了・画面遷移・フォーカス喪失） */
+  clearInputBuffers(): void {
+    for (const p of this.players) {
+      if (p.buffered) this.inputLogger(p)({ event: 'discard', action: p.buffered, reason: 'state' });
+      clearHeld(p);
+    }
+  }
+
   private processInputs(p: Mode2Player, cmds: readonly Command[]): void {
     if (p.finishedTick !== null) return;
+    const log = this.inputLogger(p);
     if (p.buffered && !this.isMoving(p)) {
-      const a = p.buffered;
-      p.buffered = null;
-      if (!this.isLocked(p)) this.act(p, a);
+      const a = take(p, this.tick, this.config.moveBufferTicks, log);
+      if (a) {
+        if (this.isLocked(p)) log({ event: 'discard', action: a, reason: 'locked' });
+        else if (MOVE_ACTIONS.has(a) && ((a === 'left' && p.selectedCol === 0) || (a === 'right' && p.selectedCol === 5))) log({ event: 'discard', action: a, reason: 'edge' });
+        else {
+          log({ event: 'consume', action: a });
+          this.act(p, a);
+        }
+      }
     }
-    for (const c of cmds) {
+    for (const c of neutralizeSimultaneous(cmds, log)) {
+      if (c.type === 'cancelRepeat') {
+        release(p, log);
+        continue;
+      }
       if (!MODE2_ACTIONS.has(c.type)) continue; // MODE2にB・宣言・手動上昇はない
       const a = c.type as Mode2Action;
       if (this.isLocked(p)) continue;
       if (this.isMoving(p)) {
-        p.buffered = a;
+        offer(p, a, 'repeat' in c && !!c.repeat, this.tick, log);
         continue;
       }
       this.act(p, a);
@@ -363,9 +411,11 @@ export class Mode2Game {
     for (const p of done) p.finishedTick ??= this.tick;
     if (this.players.length === 1) {
       this.result = { winner: 0, tick: this.tick, outcome: 'clear' };
+      this.clearInputBuffers(); // v3.2.0 ラウンド終了で移動の予約を破棄
     } else {
       const winner = done.length === 2 ? null : done[0].id;
       this.result = { winner, tick: this.tick, outcome: winner === null ? 'draw' : 'win' };
+      this.clearInputBuffers(); // v3.2.0 ラウンド終了で移動の予約を破棄
     }
     this.emit({ type: 'roundEnd', tick: this.tick, winner: this.result.winner, outcome: this.result.outcome });
   }

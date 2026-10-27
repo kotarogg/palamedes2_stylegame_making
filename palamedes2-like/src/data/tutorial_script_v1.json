@@ -1,56 +1,497 @@
 {
-  "about": "遊び方・放置デモの説明台本（Demo_UI_Design_20261026.md 第5・8・10節）。lines の各要素が1行（改行位置は台本の指定どおり。語の途中で改行しない・自動の折返しや縮小はしない）。heading は見出し。数値（消去ライン数・基本攻撃など）はここへ書かず、本体の役データから表示する",
+  "about": "遊び方・放置デモの説明台本（Demo_UI_Design_20261026.md 第5・8・10節）。lines の各要素が1行（改行位置は台本の指定どおり。語の途中で改行しない・自動の折返しや縮小はしない）。heading は見出し。数値（消去ライン数・基本攻撃など）はここへ書かず、本体の役データから表示する　v3.2.0：「連続出し」を「打上連鎖」へ改称。MODE2説明は指示書 第9節の台本（固定盤面・固定入力と実イベントで同期）",
   "pages": {
-    "basic_move": { "heading": "基本操作", "lines": ["左右に動いて", "列を選ぼう"] },
-    "rotate": { "heading": "列入れ替え", "lines": ["一番上のピースを", "列の一番下へ"] },
-    "success1": { "heading": "打ち上げ成功", "lines": ["同じ数字か", "となりの数字なら", "打ち上げ成功！"] },
-    "success2": { "heading": "打ち上げ成功", "lines": ["同じ記号でも", "打ち上げ成功！", "１と６もとなり"] },
-    "fail": { "heading": "打ち上げ失敗", "lines": ["条件に合わないと", "元の場所へ戻る"] },
-    "rise": { "heading": "せり上がり", "lines": ["自分でせり上げて", "ピースを補充できる"] },
-    "role_ready": { "heading": "役成立", "lines": ["集めたピースで", "役ができると光る"] },
-    "declare": { "heading": "役宣言", "lines": ["役を宣言すると", "手役を使って", "ラインを消せる"] },
-    "line_clear": { "heading": "ライン消去", "lines": ["役によって", "消せるライン数が", "変わる"] },
-    "streak": { "heading": "連続出し", "lines": ["続けて打ち上げ", "成功すると", "連続出し！"] },
-    "streak_rate": { "heading": "連続出し", "lines": ["連続出しで", "攻撃倍率アップ", "対戦で力を発揮！"] },
-    "flush": { "heading": "役宣言", "lines": ["数字が違っても", "記号をそろえると", "フラッシュ！"] },
-    "chain": { "heading": "役連鎖", "lines": ["役も続けて宣言！", "猶予内なら", "役連鎖になる"] },
-    "chain3": { "heading": "役連鎖", "lines": ["３回続けて宣言", "役連鎖が３連鎖に！"] },
-    "limit": { "heading": "せり上がり", "lines": ["せり上げすぎに", "注意しよう"] },
-    "natural": { "heading": "せり上がり", "lines": ["時間がたつと", "自動でせり上がる"] },
-    "pinch": { "heading": "ピンチ", "lines": ["７段のまま次の", "自然上昇を迎えると", "ピンチ！"] },
-    "avoid": { "heading": "ピンチ", "lines": ["役を宣言して", "６段以下へ戻そう"] },
-    "miss": { "heading": "ミス", "lines": ["猶予がなくなると", "ミス！", "打ち上げ失敗とは", "別のミス条件だよ"] },
-    "single_intro": { "heading": "MODE1", "lines": ["ひたすら", "自動プレイ中"] },
-    "mode2_success": { "heading": "MODE2", "lines": ["同じ数字か", "となりの数字なら", "打ち上げ成功！"] },
-    "mode2_goal": { "heading": "MODE2", "lines": ["先に全部出すと勝ち"] },
-    "mode2_refresh": { "heading": "MODE2", "lines": ["両者とも出せない", "場が変わる", "シングルは自分だけ"] },
-    "mode2_flight": { "heading": "MODE2", "lines": ["飛行中は判定を待つ"] },
-    "mode2_none": { "heading": "MODE2", "lines": ["役・攻撃・", "入替・上昇なし"] }
+    "basic_move": {
+      "heading": "基本操作",
+      "lines": [
+        "左右に動いて",
+        "列を選ぼう"
+      ]
+    },
+    "rotate": {
+      "heading": "列入れ替え",
+      "lines": [
+        "一番上のピースを",
+        "列の一番下へ"
+      ]
+    },
+    "success1": {
+      "heading": "打ち上げ成功",
+      "lines": [
+        "同じ数字か",
+        "となりの数字なら",
+        "打ち上げ成功！"
+      ]
+    },
+    "success2": {
+      "heading": "打ち上げ成功",
+      "lines": [
+        "同じ記号でも",
+        "打ち上げ成功！",
+        "１と６もとなり"
+      ]
+    },
+    "fail": {
+      "heading": "打ち上げ失敗",
+      "lines": [
+        "条件に合わないと",
+        "元の場所へ戻る"
+      ]
+    },
+    "rise": {
+      "heading": "せり上がり",
+      "lines": [
+        "自分でせり上げて",
+        "ピースを補充できる"
+      ]
+    },
+    "role_ready": {
+      "heading": "役成立",
+      "lines": [
+        "集めたピースで",
+        "役ができると光る"
+      ]
+    },
+    "declare": {
+      "heading": "役宣言",
+      "lines": [
+        "役を宣言すると",
+        "手役を使って",
+        "ラインを消せる"
+      ]
+    },
+    "line_clear": {
+      "heading": "ライン消去",
+      "lines": [
+        "役によって",
+        "消せるライン数が",
+        "変わる"
+      ]
+    },
+    "streak": {
+      "heading": "打上連鎖",
+      "lines": [
+        "続けて打ち上げ",
+        "成功すると",
+        "打上連鎖！"
+      ]
+    },
+    "streak_rate": {
+      "heading": "打上連鎖",
+      "lines": [
+        "打上連鎖で",
+        "攻撃倍率アップ",
+        "対戦で力を発揮！"
+      ]
+    },
+    "flush": {
+      "heading": "役宣言",
+      "lines": [
+        "数字が違っても",
+        "記号をそろえると",
+        "フラッシュ！"
+      ]
+    },
+    "chain": {
+      "heading": "役連鎖",
+      "lines": [
+        "役も続けて宣言！",
+        "猶予内なら",
+        "役連鎖になる"
+      ]
+    },
+    "chain3": {
+      "heading": "役連鎖",
+      "lines": [
+        "３回続けて宣言",
+        "役連鎖が３連鎖に！"
+      ]
+    },
+    "limit": {
+      "heading": "せり上がり",
+      "lines": [
+        "せり上げすぎに",
+        "注意しよう"
+      ]
+    },
+    "natural": {
+      "heading": "せり上がり",
+      "lines": [
+        "時間がたつと",
+        "自動でせり上がる"
+      ]
+    },
+    "pinch": {
+      "heading": "ピンチ",
+      "lines": [
+        "７段のまま次の",
+        "自然上昇を迎えると",
+        "ピンチ！"
+      ]
+    },
+    "avoid": {
+      "heading": "ピンチ",
+      "lines": [
+        "役を宣言して",
+        "６段以下へ戻そう"
+      ]
+    },
+    "miss": {
+      "heading": "ミス",
+      "lines": [
+        "猶予がなくなると",
+        "ミス！",
+        "打ち上げ失敗とは",
+        "別のミス条件だよ"
+      ]
+    },
+    "single_intro": {
+      "heading": "MODE1",
+      "lines": [
+        "ひたすら",
+        "自動プレイ中"
+      ]
+    },
+    "m2_intro": {
+      "heading": "MODE2",
+      "lines": [
+        "６列から選んで",
+        "場へ出そう",
+        "となりの数字なら成功！"
+      ]
+    },
+    "m2_refresh": {
+      "heading": "場の更新",
+      "lines": [
+        "出せるピースがないと",
+        "カウントダウン",
+        "その後、場が変わる"
+      ]
+    },
+    "m2_suit": {
+      "heading": "打ち上げ成功",
+      "lines": [
+        "同じ記号なら",
+        "数字が離れていても",
+        "打ち上げ成功！"
+      ]
+    },
+    "m2_number": {
+      "heading": "打ち上げ成功",
+      "lines": [
+        "同じ数字でも",
+        "打ち上げ成功！"
+      ]
+    },
+    "m2_adjacent": {
+      "heading": "打ち上げ成功",
+      "lines": [
+        "１と６も",
+        "となりの数字！"
+      ]
+    },
+    "m2_rule": {
+      "heading": "クリア条件",
+      "lines": [
+        "全部出し切るとクリア",
+        "役・攻撃・列入れ替え",
+        "せり上がりはない"
+      ]
+    },
+    "m2_clear": {
+      "heading": "クリア！",
+      "lines": [
+        "残りピースが０！",
+        "全部出し切ったよ"
+      ]
+    },
+    "m2_versus": {
+      "heading": "対戦では",
+      "lines": [
+        "先に全部出すと勝ち",
+        "場の更新は",
+        "両者とも出せない時"
+      ]
+    }
   },
-  "return_hint": { "two_lines": ["ボタンを押すと", "タイトルへ"], "one_line": "ボタンを押すとタイトルへ" },
+  "return_hint": {
+    "two_lines": [
+      "ボタンを押すと",
+      "タイトルへ"
+    ],
+    "one_line": "ボタンを押すとタイトルへ"
+  },
   "title_hint": "しばらくするとデモが始まります",
-  "help_menu": ["基本操作", "MODE1", "連続出し・役連鎖", "役一覧", "MODE2"],
-  "help_choices": { "again": "もう一度", "back": "戻る", "role_select": "左右で役を選ぶ" },
+  "help_menu": [
+    "操作一覧",
+    "基本操作",
+    "連鎖説明",
+    "役一覧",
+    "MODE1",
+    "MODE2"
+  ],
+  "help_choices": {
+    "again": "もう一度",
+    "back": "戻る",
+    "role_select": "左右で役を選ぶ"
+  },
   "role_list": {
-    "categories": { "number": "数字役", "suit": "属性役", "combo": "複合役" },
-    "labels": { "condition": "成立条件", "clear": "消去", "attack": "基本攻撃", "lines_unit": "ライン" },
+    "categories": {
+      "number": "数字役",
+      "suit": "属性役",
+      "combo": "複合役"
+    },
+    "labels": {
+      "condition": "成立条件",
+      "clear": "消去",
+      "attack": "基本攻撃",
+      "lines_unit": "ライン"
+    },
     "roles": [
-      { "logo": 0, "name": "フォーカード", "category": "number", "condition": ["同じ数字を４個"], "example": ["4s", "4h", "4s", "4h"] },
-      { "logo": 1, "name": "ニコニコ", "category": "number", "condition": ["ペアを２組"], "example": ["2s", "2h", "5s", "5h"] },
-      { "logo": 2, "name": "ストレート", "category": "number", "condition": ["１・２・３・４", "３・４・５・６"], "example": ["1s", "2h", "3s", "4h"] },
-      { "logo": 3, "name": "ハイストレート", "category": "number", "condition": ["２・３・４・５"], "example": ["2s", "3h", "4s", "5h"] },
-      { "logo": 4, "name": "フルカード", "category": "number", "condition": ["同じ数字を６個"], "example": ["3s", "3h", "3s", "3h", "3s", "3h"] },
-      { "logo": 5, "name": "ニコニコニコ", "category": "number", "condition": ["３個組を２組"], "example": ["2s", "2h", "2s", "6h", "6s", "6h"] },
-      { "logo": 6, "name": "スーパーストレート", "category": "number", "condition": ["１から６まで"], "example": ["1h", "2s", "3h", "4s", "5h", "6s"] },
-      { "logo": 7, "name": "フォーブラック", "category": "suit", "condition": ["黒の記号", "４個"], "example": ["1s", "3c", "5s", "6c"] },
-      { "logo": 8, "name": "フォーレッド", "category": "suit", "condition": ["赤の記号", "４個"], "example": ["1h", "3d", "5h", "6d"] },
-      { "logo": 9, "name": "オールブラック", "category": "suit", "condition": ["黒の記号", "６個"], "example": ["1s", "1c", "3s", "4c", "5s", "6c"] },
-      { "logo": 10, "name": "オールレッド", "category": "suit", "condition": ["赤の記号", "６個"], "example": ["1h", "1d", "3h", "4d", "5h", "6d"] },
-      { "logo": 11, "name": "オールマーク", "category": "suit", "condition": ["４種類の記号"], "example": ["1s", "3h", "5c", "6d"] },
-      { "logo": 12, "name": "フラッシュ", "category": "suit", "condition": ["全部同じ記号"], "example": ["2h", "3h", "5h", "6h"] },
-      { "logo": 13, "name": "ストレートフラッシュ", "category": "combo", "condition": ["１・２・３・４", "全部同じ記号"], "example": ["1s", "2s", "3s", "4s"] },
-      { "logo": 14, "name": "ハイストレートフラッシュ", "category": "combo", "condition": ["２・３・４・５", "全部同じ記号"], "example": ["2d", "3d", "4d", "5d"] },
-      { "logo": 15, "name": "スーパーストレートフラッシュ", "category": "combo", "condition": ["１から６まで", "全部同じ記号"], "example": ["1c", "2c", "3c", "4c", "5c", "6c"] }
+      {
+        "logo": 0,
+        "name": "フォーカード",
+        "category": "number",
+        "condition": [
+          "同じ数字を４個"
+        ],
+        "example": [
+          "4s",
+          "4h",
+          "4s",
+          "4h"
+        ]
+      },
+      {
+        "logo": 1,
+        "name": "ニコニコ",
+        "category": "number",
+        "condition": [
+          "ペアを２組"
+        ],
+        "example": [
+          "2s",
+          "2h",
+          "5s",
+          "5h"
+        ]
+      },
+      {
+        "logo": 2,
+        "name": "ストレート",
+        "category": "number",
+        "condition": [
+          "１・２・３・４",
+          "３・４・５・６"
+        ],
+        "example": [
+          "1s",
+          "2h",
+          "3s",
+          "4h"
+        ]
+      },
+      {
+        "logo": 3,
+        "name": "ハイストレート",
+        "category": "number",
+        "condition": [
+          "２・３・４・５"
+        ],
+        "example": [
+          "2s",
+          "3h",
+          "4s",
+          "5h"
+        ]
+      },
+      {
+        "logo": 4,
+        "name": "フルカード",
+        "category": "number",
+        "condition": [
+          "同じ数字を６個"
+        ],
+        "example": [
+          "3s",
+          "3h",
+          "3s",
+          "3h",
+          "3s",
+          "3h"
+        ]
+      },
+      {
+        "logo": 5,
+        "name": "ニコニコニコ",
+        "category": "number",
+        "condition": [
+          "３個組を２組"
+        ],
+        "example": [
+          "2s",
+          "2h",
+          "2s",
+          "6h",
+          "6s",
+          "6h"
+        ]
+      },
+      {
+        "logo": 6,
+        "name": "スーパーストレート",
+        "category": "number",
+        "condition": [
+          "１から６まで"
+        ],
+        "example": [
+          "1h",
+          "2s",
+          "3h",
+          "4s",
+          "5h",
+          "6s"
+        ]
+      },
+      {
+        "logo": 7,
+        "name": "フォーブラック",
+        "category": "suit",
+        "condition": [
+          "黒の記号",
+          "４個"
+        ],
+        "example": [
+          "1s",
+          "3c",
+          "5s",
+          "6c"
+        ]
+      },
+      {
+        "logo": 8,
+        "name": "フォーレッド",
+        "category": "suit",
+        "condition": [
+          "赤の記号",
+          "４個"
+        ],
+        "example": [
+          "1h",
+          "3d",
+          "5h",
+          "6d"
+        ]
+      },
+      {
+        "logo": 9,
+        "name": "オールブラック",
+        "category": "suit",
+        "condition": [
+          "黒の記号",
+          "６個"
+        ],
+        "example": [
+          "1s",
+          "1c",
+          "3s",
+          "4c",
+          "5s",
+          "6c"
+        ]
+      },
+      {
+        "logo": 10,
+        "name": "オールレッド",
+        "category": "suit",
+        "condition": [
+          "赤の記号",
+          "６個"
+        ],
+        "example": [
+          "1h",
+          "1d",
+          "3h",
+          "4d",
+          "5h",
+          "6d"
+        ]
+      },
+      {
+        "logo": 11,
+        "name": "オールマーク",
+        "category": "suit",
+        "condition": [
+          "４種類の記号"
+        ],
+        "example": [
+          "1s",
+          "3h",
+          "5c",
+          "6d"
+        ]
+      },
+      {
+        "logo": 12,
+        "name": "フラッシュ",
+        "category": "suit",
+        "condition": [
+          "全部同じ記号"
+        ],
+        "example": [
+          "2h",
+          "3h",
+          "5h",
+          "6h"
+        ]
+      },
+      {
+        "logo": 13,
+        "name": "ストレートフラッシュ",
+        "category": "combo",
+        "condition": [
+          "１・２・３・４",
+          "全部同じ記号"
+        ],
+        "example": [
+          "1s",
+          "2s",
+          "3s",
+          "4s"
+        ]
+      },
+      {
+        "logo": 14,
+        "name": "ハイストレートフラッシュ",
+        "category": "combo",
+        "condition": [
+          "２・３・４・５",
+          "全部同じ記号"
+        ],
+        "example": [
+          "2d",
+          "3d",
+          "4d",
+          "5d"
+        ]
+      },
+      {
+        "logo": 15,
+        "name": "スーパーストレートフラッシュ",
+        "category": "combo",
+        "condition": [
+          "１から６まで",
+          "全部同じ記号"
+        ],
+        "example": [
+          "1c",
+          "2c",
+          "3c",
+          "4c",
+          "5c",
+          "6c"
+        ]
+      }
     ]
   }
 }

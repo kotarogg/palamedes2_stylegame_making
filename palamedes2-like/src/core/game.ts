@@ -15,6 +15,7 @@ import { DEFAULT_CONFIG, msToTicks, streakPercent, type GameConfig } from './con
 import { cancelPending, createIncoming, receive, totalIncoming, tryEndBlock, tryStartBlock, tryStartWave, type IncomingState } from './incoming';
 import { isLaunchSuccess, PieceFactory } from './pieces';
 import { evaluateStock, roleLogoIndices, type RoleResult } from './roles';
+import { clear as clearHeld, MOVE_ACTIONS, neutralizeSimultaneous, offer, release, take, type InputLogEntry } from './inputBuffer';
 import { createSeededRng, type Rng } from './rng';
 import { pushRoleStock } from './stock';
 import type { Piece, PlayerId } from './types';
@@ -25,7 +26,10 @@ export type Action = 'left' | 'right' | 'launch' | 'rotate' | 'declare' | 'manua
 const BUFFERABLE: ReadonlySet<Action> = new Set<Action>(['left', 'right', 'launch', 'rotate', 'declare']);
 
 export type Command =
-  | { player: PlayerId; type: Action }
+  /** repeat＝キーリピート・パッドの自動反復（新しい押下と区別する。v3.2.0 先行入力） */
+  | { player: PlayerId; type: Action; repeat?: boolean }
+  /** v3.2.0 左右キー・方向を離した：自動反復でできた移動予約を捨てる */
+  | { player: PlayerId; type: 'cancelRepeat' }
   /** 検証用イベント注入（待機攻撃ストックへの直接加算。開発ビルドのみ） */
   | { player: PlayerId; type: 'debugAttack'; lines: number };
 
@@ -181,6 +185,10 @@ export interface PlayerState {
   charMoveEndTick: number;
   /** 左右移動中に保持している入力（1回分） */
   buffered: Action | null;
+  /** v3.2.0 保持の受付tick（左右移動は moveBufferTicks で期限切れ） */
+  bufferedTick: number;
+  /** v3.2.0 自動反復でできた保持か（離したら捨てる） */
+  bufferedRepeat: boolean;
   /** 操作硬直の終了tick（発射・上詰め・B入替・不成立） */
   lockUntil: number;
   lockKind: LockKind | null;
@@ -378,6 +386,8 @@ export class Game {
       selectedCol: 2,
       charMoveEndTick: 0,
       buffered: null,
+      bufferedTick: -1,
+      bufferedRepeat: false,
       lockUntil: 0,
       lockKind: null,
       role: null,
@@ -466,15 +476,45 @@ export class Game {
 
   // ---- 入力 ----
 
+  /** v3.2.0 入力の予約・消費・破棄の記録（開発時の検査用。最新500件。ゲーム結果には影響しない） */
+  readonly inputLog: InputLogEntry[] = [];
+
+  private inputLogger(p: PlayerState) {
+    return (e: Omit<InputLogEntry, 'tick' | 'player'>) => {
+      this.inputLog.push({ tick: this.tick, player: p.id, ...e });
+      if (this.inputLog.length > 500) this.inputLog.splice(0, this.inputLog.length - 500);
+    };
+  }
+
+  /** 予約の破棄（ラウンド終了・画面遷移・フォーカス喪失など。呼出し側が理由を渡す） */
+  clearInputBuffers(): void {
+    for (const p of this.players) {
+      if (p.buffered) this.inputLogger(p)({ event: 'discard', action: p.buffered, reason: 'state' });
+      clearHeld(p);
+    }
+  }
+
   private processInputs(p: PlayerState, cmds: readonly Command[]): void {
     if (this.single?.clearPending) return; // ノルマ達成後は新たな操作を受け付けない
+    const log = this.inputLogger(p);
     if (p.buffered && !this.isMoving(p)) {
-      const a = p.buffered;
-      p.buffered = null;
-      // 保持規則は移動中だけ。移動終了時に別の操作禁止状態なら破棄する
-      if (!this.isLocked(p) && !p.defeated) this.act(p, a);
+      // 次に移動できる最初のtick：有効な予約を1回だけ実行・消費（左右は受付から moveBufferTicks 以内）
+      const a = take(p, this.tick, this.config.moveBufferTicks, log);
+      // 保持規則は移動中だけ。移動終了時に別の操作禁止状態なら破棄する（長い硬直を横断して残さない）
+      if (a) {
+        if (this.isLocked(p) || p.defeated) log({ event: 'discard', action: a, reason: p.defeated ? 'state' : 'locked' });
+        else if (MOVE_ACTIONS.has(a) && this.edgeBlocked(p, a)) log({ event: 'discard', action: a, reason: 'edge' });
+        else {
+          log({ event: 'consume', action: a });
+          this.act(p, a);
+        }
+      }
     }
-    for (const c of cmds) this.apply(p, c);
+    for (const c of neutralizeSimultaneous(cmds, log)) this.apply(p, c);
+  }
+
+  private edgeBlocked(p: PlayerState, a: Action): boolean {
+    return (a === 'left' && p.selectedCol === 0) || (a === 'right' && p.selectedCol === 5);
   }
 
   private apply(p: PlayerState, c: Command): void {
@@ -482,10 +522,11 @@ export class Game {
       if (!this.single) this.receiveAttack(p, c.lines, 'debug');
       return;
     }
+    if (c.type === 'cancelRepeat') return release(p, this.inputLogger(p));
     if (p.defeated || this.isLocked(p)) return; // 発射中・上詰め/B入替中・不成立硬直中・役処理中は操作不可
     if (c.type === 'manualRise') return this.manualRise(p); // 保持対象外：移動中も即時（N5：既存挙動を維持）
     if (this.isMoving(p)) {
-      if (BUFFERABLE.has(c.type)) p.buffered = c.type;
+      if (BUFFERABLE.has(c.type)) offer(p, c.type, !!c.repeat, this.tick, this.inputLogger(p));
       return;
     }
     this.act(p, c.type);
@@ -578,7 +619,7 @@ export class Game {
       streakPercent: pct,
       scoreMul: this.currentScoreMultiplier(p),
     };
-    p.buffered = null;
+    clearHeld(p);
     this.emit({
       type: 'declare',
       tick: this.tick,
@@ -732,6 +773,7 @@ export class Game {
     this.emit({ type: 'stageClear', tick: this.tick, player: p.id, stage: s.stage, bonus: def.stage_clear_bonus, final });
     this.addScore(p, def.stage_clear_bonus, 'stageClear');
     this.result = { winner: 0, tick: this.tick, outcome: final ? 'allStagesClear' : 'stageClear' };
+    this.clearInputBuffers(); // v3.2.0 ラウンド終了で移動の予約を破棄
     this.emit({ type: 'roundEnd', tick: this.tick, winner: 0, outcome: this.result.outcome });
   }
 
@@ -890,11 +932,13 @@ export class Game {
     if (lost.length === 0) return;
     if (this.single) {
       this.result = { winner: null, tick: this.tick, outcome: 'gameOver' };
+      this.clearInputBuffers(); // v3.2.0 ラウンド終了で移動の予約を破棄
       this.emit({ type: 'roundEnd', tick: this.tick, winner: null, outcome: 'gameOver' });
       return;
     }
     const winner = lost.length === 2 ? null : ((1 - lost[0].id) as PlayerId);
     this.result = { winner, tick: this.tick, outcome: winner === null ? 'draw' : 'win' };
+    this.clearInputBuffers(); // v3.2.0 ラウンド終了で移動の予約を破棄
     this.emit({ type: 'roundEnd', tick: this.tick, winner, outcome: this.result.outcome });
   }
 

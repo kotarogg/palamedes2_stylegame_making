@@ -1,4 +1,4 @@
-// v3.1.0 CPU：設定の参照、抽選のタイミングと回数、seed 再現、停止と失念の重ね掛けなし、ピンチ時の6ピース役判断、MODE2
+// v3.1.0 CPU（v3.2.0 の設定値・判断停止へ更新）：設定の参照、抽選のタイミングと回数、seed 再現、停止と失念の重ね掛けなし、ピンチ時の6ピース役判断、MODE2
 import { describe, expect, it } from 'vitest';
 import type { Game } from '../src/core/game';
 import { Mode2Game } from '../src/core/mode2';
@@ -8,31 +8,44 @@ import { EMPTY, kind, makeGame, setStock, toPlay } from './helpers';
 
 const K = (o: Record<string, unknown>) => ['kotaro', 'akane', 'zunko'].map((c) => o[c]);
 const clone = (): CpuConfig => JSON.parse(JSON.stringify(CPU_CONFIG));
+/** 判断停止を0%に（他の判断だけを見る） */
+const noStop = (cfg: CpuConfig, level: 'easy' | 'normal' | 'hard', ch: 'kotaro' | 'akane' | 'zunko' = 'kotaro') => {
+  cfg.decisionStop[level].pct[ch] = 0;
+};
 
-describe('v3.1.0 CPU 設定ファイル（初期採用値）', () => {
+describe('v3.2.0 CPU 設定ファイル（初期採用値）', () => {
   it('確率・停止時間・判断余裕は設定ファイルにあり、指示の表どおり（列順 コタロー／アカネ／ずん子）', () => {
     const c = CPU_CONFIG;
+    expect(c.version).toBe('cpu-v3.2.0-initial');
     const pm = (o: Record<string, { pct: number; ms: number }>) => K(o).map((x) => `${(x as { pct: number }).pct}/${(x as { ms: number }).ms}`);
-    expect(pm(c.idleStop.easy.normal)).toEqual(['25/220', '20/200', '25/240']);
-    expect(pm(c.idleStop.easy.pinch)).toEqual(['15/140', '12/120', '10/140']);
-    expect(pm(c.idleStop.normal.normal)).toEqual(['12/140', '10/120', '12/150']);
-    expect(pm(c.idleStop.normal.pinch)).toEqual(['6/90', '5/80', '4/90']);
-    expect(pm(c.idleStop.hard.normal)).toEqual(['5/80', '4/70', '5/90']);
-    expect(pm(c.idleStop.hard.pinch)).toEqual(['2/50', '2/50', '1/50']);
+    expect(c.decisionStopWeights).toEqual([25, 50, 25]);
+    expect(K(c.decisionStop.easy.pct)).toEqual([45, 50, 55]);
+    expect(K(c.decisionStop.normal.pct)).toEqual([25, 20, 25]);
+    expect(K(c.decisionStop.hard.pct)).toEqual([12, 10, 12]);
+    expect([c.decisionStop.easy.normalMs, c.decisionStop.normal.normalMs, c.decisionStop.hard.normalMs]).toEqual([[700, 1000, 1300], [460, 660, 860], [140, 220, 300]]);
+    expect([c.decisionStop.easy.pinchMs, c.decisionStop.normal.pinchMs, c.decisionStop.hard.pinchMs]).toEqual([[350, 500, 650], [230, 330, 430], [70, 110, 150]]);
     expect([c.bestPick.easy, c.bestPick.normal, c.bestPick.hard].flatMap((x) => [K(x.normal), K(x.pinch)])).toEqual([
-      [80, 78, 84],
-      [86, 84, 90],
-      [93, 91, 95],
-      [96, 95, 98],
-      [98, 97, 99],
+      [50, 48, 54],
+      [56, 54, 60],
+      [75, 73, 77],
+      [80, 78, 82],
+      [80, 85, 90],
       [99, 99, 100],
     ]);
-    expect(pm(c.forget.easy.normal)).toEqual(['8/180', '10/160', '6/200']);
-    expect(pm(c.forget.easy.pinch)).toEqual(['5/120', '6/100', '3/120']);
-    expect(pm(c.forget.normal.normal)).toEqual(['3/120', '4/100', '2/140']);
-    expect(pm(c.forget.normal.pinch)).toEqual(['2/80', '2/70', '1/90']);
-    expect(pm(c.forget.hard.normal)).toEqual(['1/70', '2/60', '1/80']);
-    expect(K(c.forget.hard.pinch).map((x) => (x as { pct: number }).pct)).toEqual([1, 1, 0]);
+    expect(pm(c.forget.easy.normal)).toEqual(['20/180', '24/160', '16/200']);
+    expect(pm(c.forget.easy.pinch)).toEqual(['10/120', '12/100', '8/120']);
+    expect(pm(c.forget.normal.normal)).toEqual(['14/120', '16/100', '12/140']);
+    expect(pm(c.forget.normal.pinch)).toEqual(['8/80', '10/70', '6/90']);
+    expect(pm(c.forget.hard.normal)).toEqual(['10/70', '12/60', '8/80']);
+    expect(K(c.forget.hard.pinch).map((x) => (x as { pct: number }).pct)).toEqual([0, 0, 0]);
+    expect([c.seventhImprove.easy, c.seventhImprove.normal, c.seventhImprove.hard].flatMap((x) => [K(x.normal), K(x.pinch)])).toEqual([
+      [10, 15, 8],
+      [0, 0, 0],
+      [30, 40, 25],
+      [8, 12, 6],
+      [50, 60, 45],
+      [20, 30, 15],
+    ]);
     const six = (d: 'easy' | 'normal' | 'hard', s: 'normal' | 'pinch') => [K(c.sixChallenge[d][s].hand3), K(c.sixChallenge[d][s].hand4Role), K(c.sixChallenge[d][s].hand5Role4)];
     expect(six('easy', 'normal')).toEqual([[30, 40, 25], [25, 35, 20], [65, 75, 60]]);
     expect(six('normal', 'normal')).toEqual([[55, 65, 45], [45, 60, 35], [85, 92, 80]]);
@@ -50,7 +63,7 @@ describe('v3.1.0 CPU 設定ファイル（初期採用値）', () => {
     expect(rise('normal')).toEqual([[100, 100, 100], [90, 95, 85], [50, 65, 40]]);
     expect(rise('hard')).toEqual([[100, 100, 100], [95, 100, 90], [65, 80, 55]]);
     expect(c.pinchMarginMs).toEqual({ easy: 500, normal: 350, hard: 200 });
-    expect([K(c.mode2BestPick.easy), K(c.mode2BestPick.normal), K(c.mode2BestPick.hard)]).toEqual([[80, 78, 84], [93, 91, 95], [98, 97, 99]]);
+    expect([K(c.mode2BestPick.easy), K(c.mode2BestPick.normal), K(c.mode2BestPick.hard)]).toEqual([[50, 48, 54], [75, 73, 77], [98, 97, 99]]);
     expect(c.actionGapMs).toBe(0);
   });
 });
@@ -86,22 +99,22 @@ describe('v3.1.0 CPU 抽選のタイミング・回数・再現', () => {
     const seen = new Set<string>();
     for (const l of cpu.log) {
       const k = `${l.tick}:${l.kind}`;
-      if (l.kind === 'bestPick' || l.kind === 'idleStop' || l.kind === 'forget') {
+      if (l.kind === 'bestPick' || l.kind === 'decisionStop' || l.kind === 'forget') {
         expect(seen.has(k), k).toBe(false);
         seen.add(k);
       }
     }
-    // 目的地探索の機会ごとに停止抽選1回：停止が当たった直後の次の抽選は bestPick（再度の停止抽選ではない）
-    const ix = cpu.log.findIndex((l) => l.kind === 'idleStop' && l.hit);
+    // 判断の機会ごとに停止抽選1回：停止が当たった直後の次の抽選は判断そのもの（再度の停止抽選ではない）
+    const ix = cpu.log.findIndex((l) => l.kind === 'decisionStop' && l.hit);
     expect(ix).toBeGreaterThanOrEqual(0);
-    const next = cpu.log.slice(ix + 1).find((l) => l.kind !== 'sixChallenge' && l.kind !== 'declareFour' && l.kind !== 'manualRise');
-    expect(next?.kind).not.toBe('idleStop');
+    const next = cpu.log.slice(ix + 1).find((l) => l.kind !== 'sixChallenge' && l.kind !== 'declareFour' && l.kind !== 'manualRise' && l.kind !== 'declareSix' && l.kind !== 'seventhImprove');
+    expect(next?.kind).not.toBe('decisionStop');
   });
 
   it('失念：移動計画につき1回だけ抽選し、当たれば停止後に再判断（同じ移動機会で再失念しない・目的地なしの停止を重ねない）', () => {
     const cfg = clone();
     cfg.forget.easy.normal.kotaro = { pct: 100, ms: 200 };
-    cfg.idleStop.easy.normal.kotaro = { pct: 0, ms: 0 };
+    noStop(cfg, 'easy');
     const g = makeGame({ base: '1s', boards: { 0: { 0: ['2s', '3d'], 1: ['3d'], 2: ['3d'], 3: ['3d'], 4: ['3d'], 5: ['3d'] }, 1: EMPTY } });
     toPlay(g);
     g.players[0].selectedCol = 5;
@@ -112,8 +125,10 @@ describe('v3.1.0 CPU 抽選のタイミング・回数・再現', () => {
     // 失念は最初の移動計画で1回。再判断後の同じ移動機会（最初の打ち上げまで）では抽選しない
     const firstLaunch = g.events.find((e) => e.type === 'launch')!.tick;
     expect(forget.filter((l) => l.tick <= firstLaunch)).toHaveLength(1);
-    const idleAfter = cpu.log.filter((l) => l.kind === 'idleStop' && l.tick > forget[0].tick && l.tick < forget[0].tick + 30);
-    expect(idleAfter).toHaveLength(0);
+    const stopAfter = cpu.log.filter((l) => l.kind === 'decisionStop' && l.tick > forget[0].tick && l.tick < forget[0].tick + 30);
+    expect(stopAfter).toHaveLength(0);
+    expect(cpu.stats.forgetRolls).toBeGreaterThanOrEqual(1);
+    expect(cpu.stats.forgetStops).toBeGreaterThanOrEqual(1);
     // 最初の1歩 → 失念停止（約200ms）→ 再判断して移動を続け、打ち上げる
     const moves = cmds.filter((c) => c.endsWith(':left'));
     expect(moves.length).toBeGreaterThanOrEqual(5);
@@ -160,26 +175,51 @@ describe('v3.1.0 CPU 役の判断（6ピース役への挑戦、ピンチの期�
   it('ピンチ・手元4で役成立：期限内の経路があれば挑戦率で抽選（100%で挑戦→移動）。期限外なら抽選せず宣言', () => {
     const cfg = clone();
     cfg.sixChallenge.hard.pinch.hand4Role.kotaro = 100;
-    cfg.idleStop.hard.pinch.kotaro = { pct: 0, ms: 0 };
-    // 最短経路1020ms＋宣言から解除717ms＋判断余裕200ms ＝ 1937ms < 4000ms
+    noStop(cfg, 'hard');
+    // v3.2.0 見積り：最短経路1020ms＋判断停止・失念の期待値（ここでは0）＋宣言受理1tick＋安全余裕200ms ≒ 1236.7ms（導入700msは加えない）
     const a = setup('hard', 240, cfg);
     const outA = a.cpu.poll(a.g);
     expect(outA.map((c) => c.type)).toEqual(['left']);
     expect(a.cpu.log.filter((l) => l.kind === 'sixChallenge')).toMatchObject([{ hit: true, pct: 100 }]);
-    // 残り1500ms：間に合わない → 抽選せず、今の成立役で宣言
-    const b = setup('hard', 90, cfg);
+    // 残り1167ms（70tick）：間に合わない → 抽選せず、今の成立役で宣言
+    const b = setup('hard', 70, cfg);
     expect(b.cpu.poll(b.g).map((c) => c.type)).toEqual(['declare']);
     expect(b.cpu.log.filter((l) => l.kind === 'sixChallenge')).toHaveLength(0);
-    // 判断余裕を含めて判定：最短経路は 6♠（1歩）→5♠（1歩）＝1020ms。＋解除717ms＋余裕200ms＝1937ms。残り1917ms（115tick）なら宣言
-    const c = setup('hard', 115, cfg);
+    // 境界：残り1233ms（74tick）は宣言、1250ms（75tick）は挑戦
+    const c = setup('hard', 74, cfg);
     expect(c.cpu.poll(c.g).map((x) => x.type)).toEqual(['declare']);
+    const d = setup('hard', 75, cfg);
+    expect(d.cpu.poll(d.g).map((x) => x.type)).toEqual(['left']);
+  });
+
+  it('ピンチの見積りに判断停止の期待値を含める（停止確率×時間候補の加重平均）', () => {
+    // 盤面が低いので1tick進めるとピンチが解除される：停止に外れた seed で、最初の判断だけを見る
+    const firstMiss = (pinchTicks: number, cfg: CpuConfig) => {
+      for (let seed = 1; seed < 60; seed++) {
+        const x = setup('hard', pinchTicks, cfg);
+        const cpu = new CpuController(0, 'hard', seed, 'kotaro', cfg);
+        const out = cpu.poll(x.g);
+        if (out.length) return out.map((c) => c.type);
+      }
+      throw new Error('no miss');
+    };
+    const cfg = clone();
+    cfg.sixChallenge.hard.pinch.hand4Role.kotaro = 100;
+    // 停止50%・候補2000ms → 期待値1000ms／取得 × 2取得 ＝ 2000ms：必要 ≒ 1020＋2000＋16.7＋200 ＝ 3236.7ms
+    cfg.decisionStop.hard.pct.kotaro = 50;
+    cfg.decisionStop.hard.pinchMs = [2000, 2000, 2000];
+    expect(firstMiss(195, cfg)).toEqual(['left']); // 3250ms
+    expect(firstMiss(194, cfg)).toEqual(['declare']); // 3233ms
+    // 停止0%なら 1236.7ms で足りる
+    noStop(cfg, 'hard');
+    expect(firstMiss(75, cfg)).toEqual(['left']);
   });
 
   it('挑戦中は同じ計画が有効な間に再抽選しない。取得で経路が残れば継続、6ピース役完成で宣言100%', () => {
     const cfg = clone();
     cfg.sixChallenge.hard.normal.hand4Role.kotaro = 100;
     cfg.sixChallenge.hard.normal.hand5Role4.kotaro = 0; // 取得後に再抽選していれば宣言へ変わる
-    cfg.idleStop.hard.normal.kotaro = { pct: 0, ms: 0 };
+    noStop(cfg, 'hard');
     cfg.forget.hard.normal.kotaro = { pct: 0, ms: 0 };
     cfg.bestPick.hard.normal.kotaro = 100;
     const { g, cpu } = setup('hard', null, cfg);
@@ -195,7 +235,7 @@ describe('v3.1.0 CPU 役の判断（6ピース役への挑戦、ピンチの期�
   it('通常・4ピース役成立で6ピース役への経路なし：宣言率で1回抽選。外れたら役を維持する1取得の後に再評価', () => {
     const cfg = clone();
     cfg.declareFour.hard.normal.kotaro = 0;
-    cfg.idleStop.hard.normal.kotaro = { pct: 0, ms: 0 };
+    noStop(cfg, 'hard');
     const g = makeGame({ base: '4s', boards: { 0: { 0: ['4h', '1h'], 1: ['1h'], 2: ['1h'], 3: ['1h'], 4: ['1h'], 5: ['1h'] }, 1: EMPTY } });
     toPlay(g);
     setStock(g, 0, '1s', '2s', '3s', '4s');
@@ -231,13 +271,13 @@ describe('v3.1.0 CPU MODE2', () => {
     const cmds = play(g, cpu, 2400);
     expect(cmds.length).toBeGreaterThan(10);
     expect(cmds.every((c) => /:(left|right|launch)$/.test(c))).toBe(true);
-    expect(cpu.log.every((l) => ['idleStop', 'bestPick', 'forget'].includes(l.kind))).toBe(true);
+    expect(cpu.log.every((l) => ['decisionStop', 'bestPick', 'forget'].includes(l.kind))).toBe(true);
   });
 
   it('最適：移動と打ち上げが最短の候補（100%で最短の列）。候補が1つならそれを選ぶ', () => {
     const cfg = clone();
     cfg.mode2BestPick.hard.kotaro = 100;
-    cfg.idleStop.hard.normal.kotaro = { pct: 0, ms: 0 };
+    noStop(cfg, 'hard');
     const g = new Mode2Game({ seed: 4 });
     while (!g.playing) g.step();
     const p = g.players[0];

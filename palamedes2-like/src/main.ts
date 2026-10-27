@@ -140,6 +140,7 @@ async function boot(): Promise<void> {
     if (app.onKey(e.code, e.repeat)) e.preventDefault();
     else if (e.code === 'Space' || e.code.startsWith('Arrow') || e.code === 'Tab') e.preventDefault();
   });
+  window.addEventListener('keyup', (e) => app.onKeyUp(e.code));
   window.addEventListener('pointerdown', () => {
     onFirstInput();
     app.onPointer();

@@ -1,5 +1,5 @@
 // オプション設定（音・操作・対戦・表示）の保持。保存先はこのブラウザの localStorage（保存・読込できない環境でも初期値で起動）。
-// 初期値（設計補完）：2本先取・自然上昇中級・NPC中級、1P/2Pキーボード、各音量100（マスター−6dBは別に適用）、表示は収まる最大（実画素の整数倍）。
+// 初期値（設計補完）：2本先取・自然上昇中級・NPC初級（v3.2.0）、1P/2Pキーボード、各音量100（マスター−6dBは別に適用）、表示は収まる最大（実画素の整数倍）。
 import { DEFAULT_VOLUMES, type AudioVolumes } from '../audio/audioBus';
 import type { Difficulty } from '../core/config';
 import type { FirstTo } from '../core/match';
@@ -31,18 +31,22 @@ export interface AppSettings {
   pads: [PadBindings, PadBindings];
   audio: AudioVolumes;
   display: { scale: DisplayScale; fullscreen: boolean };
+  /** v3.2.0 出せるピースの補助表示（人間側。MODE1・MODE2共通。初期ON、旧保存データに無ければON） */
+  assist: boolean;
 }
 
 export function defaultSettings(): AppSettings {
   return {
     firstTo: 2,
     difficulty: 'normal',
-    npcLevel: 'normal',
+    // v3.2.0：CPU の強さの初期値は初級（新規設定のみ。保存済みの設定は上書きしない。自然上昇の難易度とは別）
+    npcLevel: 'easy',
     devices: [{ kind: 'keyboard' }, { kind: 'keyboard' }],
     keys: [cloneKeyBindings(DEFAULT_KEY_BINDINGS[0]), cloneKeyBindings(DEFAULT_KEY_BINDINGS[1])],
     pads: [clonePadBindings(DEFAULT_PAD_BINDINGS), clonePadBindings(DEFAULT_PAD_BINDINGS)],
     audio: { ...DEFAULT_VOLUMES },
     display: { scale: 0, fullscreen: false },
+    assist: true,
   };
 }
 
@@ -89,6 +93,7 @@ export function parseSettings(raw: string | null): AppSettings {
       if (typeof sc === 'number' && Number.isInteger(sc) && sc >= 0 && sc <= 8) d.display.scale = sc;
       d.display.fullscreen = s.display.fullscreen === true;
     }
+    if (typeof s.assist === 'boolean') d.assist = s.assist;
   } catch {
     // 初期値のまま
   }

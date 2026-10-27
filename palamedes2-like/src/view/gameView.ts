@@ -6,9 +6,11 @@ import { DEFAULT_VIEW_CONFIG, type ViewConfig } from '../core/config';
 import type { Game, GameEvent, PlayerState } from '../core/game';
 import type { AnyGame } from '../core/match';
 import type { Mode2Event, Mode2Game } from '../core/mode2';
+import { isLaunchSuccess } from '../core/pieces';
 import { evaluateStock, glowSegments } from '../core/roles';
 import type { Piece, PlayerId } from '../core/types';
 import { drawFrame, drawNineSlice, type Assets } from './assets';
+import { drawBitmapText } from './bitmapFont';
 import type { ManifestFrame } from './data';
 import { arcPoint, barY, CELL, cellX, columnCenterX, descentY, easeInOutSine, easeOutQuad, lerp, progress, Z, type BoardRect } from './geometry';
 import { characterPose, crackerPose, type ResultPlan } from './presentation';
@@ -17,7 +19,10 @@ import { drawNumericScaled, drawText, formatTime, multiplierText, numericNatural
 
 /** v3.1.0 連鎖切り予約のヒビ（採用3種） */
 export const STREAK_CRACKS = ['streak_crack_01', 'streak_crack_02', 'streak_crack_03'] as const;
-/** v3.1.0 連続出しの数字の高さ（初期表示サイズ17px）・役連鎖の連鎖数の高さ（34px基準） */
+/** v3.2.0「連続出し」の新名称（送り仮名なし。役連鎖とは別名称） */
+export const STREAK_NAME = '打上連鎖';
+
+/** v3.1.0 打上連鎖（旧称 連続出し）の数字の高さ（初期表示サイズ17px）・役連鎖の連鎖数の高さ（34px基準） */
 export const STREAK_DIGIT_PX = 17;
 export const ROLE_CHAIN_DIGIT_PX = 34;
 
@@ -194,11 +199,15 @@ export interface HudInfo {
   characters?: readonly Character[];
   /** 役名表示の予定（RoleNameDirector）。表示中のロゴと表示開始tick */
   roleLogo?: (p: PlayerId, tick: number) => { logo: number; since: number } | null;
+  /** v3.2.0 出せるピースの補助表示を出すプレイヤー（人間側。空・未指定なら出さない） */
+  assist?: readonly PlayerId[];
+  /** v3.2.0 MODE2 ノーリセットクリアの達成者（対戦は勝者、シングルは 0）。クリア／勝利演出の中で付記 */
+  noReset?: PlayerId | null;
   /** 遊び方・デモ：READY／GO の見出しを出さない（教材は入力受付の開始から始める） */
   hideStartBanner?: boolean;
   /** 遊び方・デモ：シングルの情報欄（得点・Lv）を描かない（右パネルは説明に使う。info_panel の枠は描く） */
   hideSingleInfo?: boolean;
-  /** 遊び方の教材：連続出しの倍率を攻撃倍率で表示（既定のシングルは得点倍率）。値は本体の現在値 */
+  /** 遊び方の教材：打上連鎖の倍率を攻撃倍率で表示（既定のシングルは得点倍率）。値は本体の現在値 */
   streakRate?: 'score' | 'attack';
 }
 
@@ -590,6 +599,8 @@ export class GameView {
     this.collectCenter(items, t);
     this.collectFlights(items, t);
     this.collectFx(items, t);
+    // v3.2.0 補助表示：ピースの直上（役成立光・キャラ・飛行・見出し・ピンチの数字より下）
+    items.push({ z: Z.piece + 1, draw: (c) => this.drawAssist(c, t) });
     items.sort((a, b) => a.z - b.z);
     for (const it of items) {
       if (it.clip) {
@@ -1094,8 +1105,63 @@ export class GameView {
     });
     if (this.isSingle) {
       if (!this.hud.hideSingleInfo) this.drawSingleInfo(ctx);
+    } else if (this.hud.firstTo) drawText(ctx, `${this.hud.firstTo}本先取 R${this.hud.round ?? 1}`, 320, 124, { align: 'center', size: 10, color: TEXT_COLORS.secondary });
+    this.drawNoReset(ctx, t);
+  }
+
+  /**
+   * v3.2.0 出せるピースの補助表示：自分の各列の最上段で、現在の場へ出せる打ち上げ候補だけ（既存の成功判定）。
+   * 埋まったピース・帰還予約の空白・飛行中は対象外。未来の場は予測しない。入力受付中だけ
+   */
+  assistTargets(p: PlayerId): number[] {
+    const g = this.game;
+    if (!g.playing || !(this.hud.assist ?? []).includes(p)) return [];
+    if (g.mode === 'mode2' && (g as Mode2Game).phase !== 'play') return [];
+    const st = g.players[p];
+    const out: number[] = [];
+    st.board.cols.forEach((col, c) => {
+      const top = col[0];
+      if (top && top.kind === 'piece' && isLaunchSuccess(top.piece, g.base)) out.push(c);
+    });
+    return out;
+  }
+
+  private drawAssist(ctx: CanvasRenderingContext2D, t: number): void {
+    for (const p of this.hud.assist ?? []) {
+      const cols = this.assistTargets(p);
+      if (!cols.length) continue;
+      const st = this.game.players[p];
+      ctx.save();
+      // 役成立光とは別の控えめな輪郭（点滅しない）。数字・柄を隠さないよう枠の外周だけ
+      ctx.strokeStyle = 'rgba(255,241,214,0.85)';
+      ctx.lineWidth = 1;
+      for (const c of cols) {
+        const top = st.board.cols[c][0];
+        if (!top || top.kind !== 'piece') continue;
+        const k = this.localK(top.piece.id, 0, t).k;
+        const x = cellX(this.boards[p], c);
+        const y = this.pieceBar(p, t) + CELL * k;
+        ctx.strokeRect(x + 0.5, y + 0.5, CELL - 1, CELL - 1);
+      }
+      ctx.restore();
     }
-    else if (this.hud.firstTo) drawText(ctx, `${this.hud.firstTo}本先取 R${this.hud.round ?? 1}`, 320, 124, { align: 'center', size: 10, color: TEXT_COLORS.secondary });
+  }
+
+  /**
+   * v3.2.0「ノーリセットクリア」：MODE2で場の更新0回のクリア／勝利のとき、結果演出の中で付記（独立した待機は追加しない）。
+   * 対戦は勝者の盤面上、シングルは盤面上。文字は採用フォント（Noto Sans JP）で描く
+   */
+  noResetLabel(t: number): { text: string; x: number; y: number } | null {
+    const p = this.hud.noReset;
+    const r = this.hud.result;
+    if (p === null || p === undefined || !r || t < r.startTick) return null;
+    const b = this.boards[p];
+    return { text: 'ノーリセットクリア！', x: b.x + b.w / 2, y: b.y + 112 };
+  }
+
+  private drawNoReset(ctx: CanvasRenderingContext2D, t: number): void {
+    const l = this.noResetLabel(t);
+    if (l) drawText(ctx, l.text, l.x, l.y, { align: 'center', size: 16, weight: 800, color: '#f2b950', box: true });
   }
 
   /** 危険表示の残りtick（自然上昇の危険猶予・攻撃ピンチ猶予の早い方。どちらもなければ null） */
@@ -1121,14 +1187,14 @@ export class GameView {
     return { sheet: id, id, x: 0, y: 0, w: d.canvas[0], h: d.canvas[1], reserved: false };
   }
 
-  /** v3.1.0 連続出しの表示位置（既存の倍率領域を基礎に）。テスト・検証用に公開 */
-  streakHudLayout(p: PlayerId): { label: { x: number; y: number; w: number; h: number }; numbers: { x: number; y: number; h: number; maxW: number; align: 'left' | 'right' }; text: { x: number; y: number; align: 'left' | 'right' } } {
+  /** v3.1.0 打上連鎖の表示位置（既存の倍率領域を基礎に）。テスト・検証用に公開 */
+  streakHudLayout(p: PlayerId): { label: { x: number; y: number; w: number; h: number; align: 'left' | 'right' }; numbers: { x: number; y: number; h: number; maxW: number; align: 'left' | 'right' }; text: { x: number; y: number; align: 'left' | 'right' } } {
     const mr = this.assets.layout.pRect(p, 'multiplier');
     const left = p === 0;
     const lx = left ? mr.x : mr.x + mr.w - 80;
     const nx = left ? mr.x + 2 : mr.x + mr.w - 2;
     return {
-      label: { x: lx, y: mr.y - 22, w: 80, h: 20 },
+      label: { x: lx, y: mr.y - 22, w: 80, h: 20, align: left ? ('left' as const) : ('right' as const) },
       numbers: { x: nx, y: mr.y + 1, h: STREAK_DIGIT_PX, maxW: mr.w - 4, align: left ? 'left' : 'right' },
       text: { x: nx, y: mr.y + 20, align: left ? 'left' : 'right' },
     };
@@ -1141,33 +1207,39 @@ export class GameView {
     return { label: { x: strip.x, y: 136, w: 48, h: 12 }, digitsCenterX: cx, digitsY: 152, digitsH: ROLE_CHAIN_DIGIT_PX, maxW: strip.w - 2, plusY: 190 };
   }
 
-  /** 連続出し：見出し＋成功数（ヒビは予約中だけ。倍率には付けない）＋倍率（対戦＝攻撃倍率、シングル＝得点倍率）。小さく補助的に */
+  /** 打上連鎖：見出し＋成功数（ヒビは予約中だけ。倍率には付けない）＋倍率（対戦＝攻撃倍率、シングル＝得点倍率）。小さく補助的に */
   private drawStreak(ctx: CanvasRenderingContext2D, p: PlayerId, st: PlayerState, ms: number): void {
     const g = this.mode1!;
     const lay = this.streakHudLayout(p);
     const phase = numericPhase(ms);
-    const lbl = this.assets.images.get('label_launch_streak');
-    if (lbl) ctx.drawImage(lbl, lay.label.x, lay.label.y);
+    // v3.2.0 名称「打上連鎖」：採用済みの見出し画像（label_launch_streak）は旧称「連続出し」の字のため使わず、
+    // 新しい見出し画像が届くまで遊び方用の共通フォントで描く（素材待ち。報告書参照）
+    drawBitmapText(ctx, this.assets.tutorial?.font, STREAK_NAME, lay.label.align === 'left' ? lay.label.x : lay.label.x + lay.label.w, lay.label.y + 2, {
+      align: lay.label.align,
+      color: '#f2b950',
+      outline: '#0b1f35',
+    });
     const active = g.streakActive(st);
     const count = active ? st.streakCount : 0;
     const crack = active && st.streakCutReserved ? (this.pv[p].crack ?? STREAK_CRACKS[p]) : null;
+    // v3.2.0：攻撃倍率の見出し・数値と回数単位「回」は表示しない（計算は変えない）。シングルの得点倍率は従来どおり表示
     const scoreRate = this.isSingle && this.hud.streakRate !== 'attack';
-    const mul = scoreRate
-      ? (() => {
-          const m = g.currentScoreMultiplier(st);
-          return multiplierText(m.num, m.den);
-        })()
-      : multiplierText(g.currentStreakPercent(st), 100);
     const n = lay.numbers;
-    // 成功数 → 少し空けて倍率（右側のプレイヤーは右寄せで同じ並び）。収まらなければ倍率側を等比で縮める（横だけ潰さない）
     const gap = 8;
     const k = n.h / 34;
     const countW = Math.round(numericNaturalWidth(this.assets, String(count)) * k);
+    if (!scoreRate) {
+      drawNumericScaled(ctx, this.assets, String(count), n.align === 'left' ? n.x : n.x - countW, n.y, n.h, countW, 'left', phase, crack);
+      return;
+    }
+    const m = g.currentScoreMultiplier(st);
+    const mul = multiplierText(m.num, m.den);
+    // 成功数 → 少し空けて倍率（右側のプレイヤーは右寄せで同じ並び）。収まらなければ倍率側を等比で縮める（横だけ潰さない）
     const mulW = Math.round(Math.min(numericNaturalWidth(this.assets, mul) * k, n.maxW - countW - gap));
     const x0 = n.align === 'left' ? n.x : n.x - countW - gap - mulW;
     drawNumericScaled(ctx, this.assets, String(count), x0, n.y, n.h, countW, 'left', phase, crack);
     drawNumericScaled(ctx, this.assets, mul, x0 + countW + gap, n.y, n.h, mulW, 'left', phase);
-    drawText(ctx, scoreRate ? '回　得点倍率' : '回　攻撃倍率', lay.text.x, lay.text.y, { align: lay.text.align, size: 9, color: TEXT_COLORS.secondary });
+    drawText(ctx, '得点倍率', lay.text.x + (n.align === 'left' ? countW + gap : 0), lay.text.y, { align: lay.text.align, size: 9, color: TEXT_COLORS.secondary });
   }
 
   /** 役連鎖：見出し＋連鎖数（34px）＋攻撃加算「＋○」（対戦のみ。シングルへは流用しない） */

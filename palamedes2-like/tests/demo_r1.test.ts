@@ -26,7 +26,7 @@ describe('修正R1：結果の中央見出しの表示条件', () => {
   });
 });
 
-describe('修正R1：対戦デモ（seed 92）の終盤', () => {
+describe('修正R1：対戦デモ（seed 60）の終盤', () => {
   it('決着後も中央見出しなし。左右の勝利／敗北・敗者の落下・勝者のボイス・クラッカー・勝利SEは結果演出どおり。終了は演出後（短縮しない）', () => {
     const bus = new AudioBus('./');
     const st = new VersusDemoStage({ assets: fakeAssets(), bus });

@@ -1,5 +1,5 @@
 // 放置デモ（タイトル無操作20秒・オプション「デモ再生」）と遊び方（目次・説明実演・役一覧・MODE2説明）の画面。
-// 放置デモ：説明（基本操作→役成立〜連続出し・役連鎖→ピンチ）→MODE1 SINGLE ひたすら→MODE1 対戦→暗転してタイトル。
+// 放置デモ：説明（基本操作→役成立〜打上連鎖・役連鎖→ピンチ）→MODE1 SINGLE ひたすら→MODE1 対戦→暗転してタイトル。
 // 終了：新しいキー入力・パッドのボタン／方向・マウスクリック（保持入力・スティックの小さな傾きでは終了しない）。終了操作は消費し、
 // タイトルの決定へ連鎖させない。暗転中も受け付ける。非アクティブになったら進行と音を止め、復帰でタイトルへ。音量・倍率は設定を継承し、何も保存しない。
 import type { App, Scene } from '../app';
@@ -208,10 +208,9 @@ export class DemoScene implements Scene {
 
 type HelpTopic = 'basic' | 'mode1' | 'streak' | 'roles' | 'mode2' | 'text';
 
-const HELP_ITEMS: { topic: HelpTopic; label: string }[] = [
-  ...TUTORIAL_SCRIPT.help_menu.map((label, i) => ({ topic: (['basic', 'mode1', 'streak', 'roles', 'mode2'] as const)[i], label })),
-  { topic: 'text', label: '操作一覧' },
-];
+/** v3.2.0 目次の順：操作一覧→基本操作→連鎖説明→役一覧→MODE1→MODE2（表示名は台本データ、行き先は同じ順の対応） */
+const HELP_TOPICS: readonly HelpTopic[] = ['text', 'basic', 'streak', 'roles', 'mode1', 'mode2'];
+export const HELP_ITEMS: { topic: HelpTopic; label: string }[] = TUTORIAL_SCRIPT.help_menu.map((label, i) => ({ topic: HELP_TOPICS[i], label }));
 
 /** 遊び方の目次。呼出元（メインメニュー／オプション）へ戻る */
 export class HelpMenuScene implements Scene {

@@ -4,11 +4,13 @@ export interface Records {
   endless: { score: number; level: number } | null;
   stage: { score: number; maxStage: number; completed: boolean } | null;
   mode2Single: { bestMs: number } | null;
+  /** v3.2.0 MODE2シングルのノーリセットクリア達成回数（旧データにない場合は0。最短時間とは別） */
+  mode2NoReset: number;
 }
 
 export const RECORDS_KEY = 'palamedes2-like.records.v1';
 
-export const emptyRecords = (): Records => ({ endless: null, stage: null, mode2Single: null });
+export const emptyRecords = (): Records => ({ endless: null, stage: null, mode2Single: null, mode2NoReset: 0 });
 
 export function parseRecords(raw: string | null): Records {
   const r = emptyRecords();
@@ -19,6 +21,7 @@ export function parseRecords(raw: string | null): Records {
     if (s.endless && num(s.endless.score) && num(s.endless.level)) r.endless = { score: s.endless.score, level: s.endless.level };
     if (s.stage && num(s.stage.score) && num(s.stage.maxStage)) r.stage = { score: s.stage.score, maxStage: s.stage.maxStage, completed: s.stage.completed === true };
     if (s.mode2Single && num(s.mode2Single.bestMs)) r.mode2Single = { bestMs: s.mode2Single.bestMs };
+    if (num(s.mode2NoReset)) r.mode2NoReset = Math.floor(s.mode2NoReset!);
   } catch {
     // 壊れていれば空
   }
@@ -63,4 +66,10 @@ export function submitMode2(r: Records, ms: number): boolean {
   if (r.mode2Single && r.mode2Single.bestMs <= ms) return false;
   r.mode2Single = { bestMs: ms };
   return true;
+}
+
+/** v3.2.0 MODE2シングルのノーリセットクリア：1クリアにつき1回だけ加算（呼出し側がクリアごとに1回呼ぶ） */
+export function submitMode2NoReset(r: Records): number {
+  r.mode2NoReset += 1;
+  return r.mode2NoReset;
 }

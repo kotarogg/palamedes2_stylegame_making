@@ -27,7 +27,23 @@ export interface PanelContent {
   icons?: readonly string[];
 }
 
+/**
+ * v3.2.0 説明パネルの不要な内線を消す：info_panel.png は本編SINGLEの情報欄用に横線3本（y＋36/98/160、x＋12〜179）を持つ。
+ * 説明パネルでは同じ面の色で塗り、外枠は残す（本編SINGLEの情報欄は従来どおり線あり）
+ */
+export const INFO_PANEL_RULES = { x: 384 + 12, w: 168, ys: [128 + 36, 128 + 98, 128 + 160], color: 'rgb(20,43,65)' } as const;
+
+export function hidePanelRules(ctx: CanvasRenderingContext2D): void {
+  ctx.fillStyle = INFO_PANEL_RULES.color;
+  for (const y of INFO_PANEL_RULES.ys) ctx.fillRect(INFO_PANEL_RULES.x, y, INFO_PANEL_RULES.w, 1);
+}
+
+/** 説明パネルの面（info_panel［384,128］）。中央の見出し（ALL CLEAR 等）の端がパネルへ掛からないよう、説明の前に描き直す */
+export const INFO_PANEL_AT = { x: 384, y: 128 } as const;
+
 export function drawTutorialPanel(ctx: CanvasRenderingContext2D, assets: Assets, c: PanelContent): void {
+  drawFrame(ctx, assets, assets.atlas.frame('info_panel', 'info_panel'), INFO_PANEL_AT.x, INFO_PANEL_AT.y);
+  hidePanelRules(ctx);
   const font = assets.tutorial?.font;
   if (c.heading) drawBitmapText(ctx, font, c.heading, PANEL.heading.x, PANEL.heading.y + 2, { color: TUTORIAL_COLORS.heading });
   (c.lines ?? []).slice(0, PANEL.body.maxLines).forEach((l, i) => drawBitmapText(ctx, font, l, PANEL.body.x, PANEL.body.y + i * PANEL.body.step));

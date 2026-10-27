@@ -15,6 +15,7 @@ import type { Assets } from '../view/assets';
 import { measureBitmap } from '../view/bitmapFont';
 import { GameView, type HudInfo } from '../view/gameView';
 import { RoleNameDirector, Staging } from '../view/presentation';
+import { Mode2LessonRunner, MODE2_LESSON } from './mode2Lesson';
 import { LessonRunner, pageText, pieceKind, TUTORIAL_SCRIPT, type LessonDef, type PageKey } from './lesson';
 import { drawFocus, drawTutorialPanel, PANEL, type HintLayout, type PanelContent } from './panel';
 import { SingleAutoController } from './singleAuto';
@@ -34,8 +35,8 @@ export const DEMO = {
   resultHoldMs: 1500,
   lessonSeed: 20261026,
   singleSeed: 7301,
-  /** 対戦デモの seed（seed 1〜120 を試し、攻撃・相殺が両者とも見え、60秒以内に決着した 92 を選定） */
-  versusSeed: 92,
+  /** 対戦デモの seed（v3.2.0 の CPU 設定で seed 1〜300 を同じ条件で選び直し：攻撃・相殺が両者とも見え、60秒以内に決着した 60 を選定。旧 92） */
+  versusSeed: 60,
   versusCharacters: ['akane', 'zunko'] as const,
 } as const;
 
@@ -366,46 +367,45 @@ export class VersusDemoStage implements Stage {
 
 // ---------------------------------------------------------------- MODE2 説明（遊び方のみ）
 
-const MODE2_PAGES: PageKey[] = ['mode2_success', 'mode2_goal', 'mode2_refresh', 'mode2_flight', 'mode2_none'];
-
-/** MODE2 の説明（遊び方のみ）：同じ説明パネルと左フィールド。シングルを既存CPU（中級）で進め、頁を順に表示 */
+/**
+ * v3.2.0 MODE2 の説明（遊び方のみ）：指示書 第9節の固定盤面・固定入力を通常の Mode2Game で最後までクリアし、
+ * 実イベント（詰まり・カウントダウン・場の更新・クリア）で説明を切り替える。CPU・固定尺のページ送りは使わない。
+ * 得点・公式記録は表示も保存もしない。READY／GO は出さない
+ */
 export class Mode2Stage implements Stage {
   readonly hint: HintLayout = 'single';
-  readonly session: SingleSession;
-  private readonly cpu: CpuController;
+  readonly runner: Mode2LessonRunner;
   private readonly presenter: Presenter;
   private readonly driver: FixedStepDriver;
-  private ms = 0;
-  static readonly PAGE_MS = 4500;
 
-  constructor(
-    private readonly host: StageHost,
-    seed = 4242,
-  ) {
-    this.session = new SingleSession({ mode: 'mode2', seed });
-    this.cpu = new CpuController(0, 'normal', seed, 'kotaro');
-    this.presenter = new Presenter(host, this.session.game, ['kotaro'], seed, false);
-    this.driver = new FixedStepDriver({ tickMs: this.session.game.tickMs, step: () => this.session.step(this.cpu.poll(this.session.game), false) });
+  constructor(private readonly host: StageHost) {
+    this.runner = new Mode2LessonRunner();
+    this.presenter = new Presenter(host, this.runner.game, ['kotaro'], MODE2_LESSON.seed, true);
+    this.driver = new FixedStepDriver({ tickMs: this.runner.game.tickMs, step: () => void this.runner.tick() });
     host.bus.playBgm('single');
   }
 
   get page(): PageKey {
-    return MODE2_PAGES[Math.min(MODE2_PAGES.length - 1, Math.floor(this.ms / Mode2Stage.PAGE_MS))];
+    return this.runner.page;
+  }
+
+  get game(): Mode2Game {
+    return this.runner.game;
   }
 
   get finished(): boolean {
-    return this.ms >= Mode2Stage.PAGE_MS * MODE2_PAGES.length + 1000 || (!!this.session.game.result && this.ms >= Mode2Stage.PAGE_MS * MODE2_PAGES.length);
+    return this.runner.done;
   }
 
   update(dtMs: number): void {
     this.driver.advance(dtMs);
     this.presenter.sync();
-    this.ms += dtMs;
   }
 
   render(ctx: CanvasRenderingContext2D): void {
-    const g = this.session.game as Mode2Game;
-    this.presenter.render(ctx, g.tick + this.driver.alpha, { hideSingleInfo: true });
+    const g = this.runner.game;
+    const t = this.runner.paused || g.result ? g.tick : g.tick + this.driver.alpha;
+    this.presenter.render(ctx, t, { hideSingleInfo: true, hideStartBanner: true });
     drawTutorialPanel(ctx, this.host.assets, pageContent(this.page));
   }
 }
