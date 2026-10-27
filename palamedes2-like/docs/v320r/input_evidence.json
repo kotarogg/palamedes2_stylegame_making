@@ -1,0 +1,969 @@
+{
+ "about": "移動予約の消費順（当該tickの解除・新規方向・同時押しを旧予約より先に反映）と、低fps時の受付（入力時刻と固定ステップの対応）の記録。E＝次に移動できるtick。模擬入力（実キーボード・実パッドではない）",
+ "mode1": {
+  "PM①：E−1 に右の反復で予約、E で解除 → 動かない": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-1",
+     "commands": [
+      "right(反復)"
+     ]
+    },
+    {
+     "tick": "E",
+     "commands": [
+      "cancelRepeat"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-1"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "released",
+     "rel": "E"
+    }
+   ],
+   "moves": []
+  },
+  "PM②：E−1 に右、E で左 → E に左へ1回だけ": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-1",
+     "commands": [
+      "right"
+     ]
+    },
+    {
+     "tick": "E",
+     "commands": [
+      "left"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-1"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "overwritten",
+     "rel": "E"
+    }
+   ],
+   "moves": [
+    {
+     "tick": 78,
+     "rel": "E",
+     "from": 3,
+     "to": 2
+    }
+   ]
+  },
+  "E−2 に右 → E に右へ1回": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-2",
+     "commands": [
+      "right"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 76,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-2"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "rel": "E"
+    }
+   ],
+   "moves": [
+    {
+     "tick": 78,
+     "rel": "E",
+     "from": 3,
+     "to": 4
+    }
+   ]
+  },
+  "E−3 に右 → 期限切れ": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-3",
+     "commands": [
+      "right"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 75,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-3"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "expired",
+     "rel": "E"
+    }
+   ],
+   "moves": []
+  },
+  "E−1 に右、E で左右同時 → 中立（動かない）": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-1",
+     "commands": [
+      "right"
+     ]
+    },
+    {
+     "tick": "E",
+     "commands": [
+      "left",
+      "right"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-1"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "simultaneous",
+     "rel": "E"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "left+right",
+     "reason": "simultaneous",
+     "rel": "E"
+    }
+   ],
+   "moves": []
+  },
+  "E−1 に右の短押し、E で解除 → E に右へ1回（期限内は維持）": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-1",
+     "commands": [
+      "right"
+     ]
+    },
+    {
+     "tick": "E",
+     "commands": [
+      "cancelRepeat"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-1"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "rel": "E"
+    }
+   ],
+   "moves": [
+    {
+     "tick": 78,
+     "rel": "E",
+     "from": 3,
+     "to": 4
+    }
+   ]
+  },
+  "E−1 に反復→解除（同じtick） → 予約を作らない": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-1",
+     "commands": [
+      "right(反復)",
+      "cancelRepeat"
+     ]
+    }
+   ],
+   "inputLog": [],
+   "moves": []
+  }
+ },
+ "mode2": {
+  "PM①：E−1 に右の反復で予約、E で解除 → 動かない": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-1",
+     "commands": [
+      "right(反復)"
+     ]
+    },
+    {
+     "tick": "E",
+     "commands": [
+      "cancelRepeat"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-1"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "released",
+     "rel": "E"
+    }
+   ],
+   "moves": []
+  },
+  "PM②：E−1 に右、E で左 → E に左へ1回だけ": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-1",
+     "commands": [
+      "right"
+     ]
+    },
+    {
+     "tick": "E",
+     "commands": [
+      "left"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-1"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "overwritten",
+     "rel": "E"
+    }
+   ],
+   "moves": [
+    {
+     "tick": 78,
+     "rel": "E",
+     "from": 3,
+     "to": 2
+    }
+   ]
+  },
+  "E−2 に右 → E に右へ1回": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-2",
+     "commands": [
+      "right"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 76,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-2"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "rel": "E"
+    }
+   ],
+   "moves": [
+    {
+     "tick": 78,
+     "rel": "E",
+     "from": 3,
+     "to": 4
+    }
+   ]
+  },
+  "E−3 に右 → 期限切れ": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-3",
+     "commands": [
+      "right"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 75,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-3"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "expired",
+     "rel": "E"
+    }
+   ],
+   "moves": []
+  },
+  "E−1 に右、E で左右同時 → 中立（動かない）": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-1",
+     "commands": [
+      "right"
+     ]
+    },
+    {
+     "tick": "E",
+     "commands": [
+      "left",
+      "right"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-1"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "simultaneous",
+     "rel": "E"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "left+right",
+     "reason": "simultaneous",
+     "rel": "E"
+    }
+   ],
+   "moves": []
+  },
+  "E−1 に右の短押し、E で解除 → E に右へ1回（期限内は維持）": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-1",
+     "commands": [
+      "right"
+     ]
+    },
+    {
+     "tick": "E",
+     "commands": [
+      "cancelRepeat"
+     ]
+    }
+   ],
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "rel": "E-1"
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "rel": "E"
+    }
+   ],
+   "moves": [
+    {
+     "tick": 78,
+     "rel": "E",
+     "from": 3,
+     "to": 4
+    }
+   ]
+  },
+  "E−1 に反復→解除（同じtick） → 予約を作らない": {
+   "E": 78,
+   "script": [
+    {
+     "tick": "E-1",
+     "commands": [
+      "right(反復)",
+      "cancelRepeat"
+     ]
+    }
+   ],
+   "inputLog": [],
+   "moves": []
+  }
+ },
+ "lowFps": [
+  {
+   "fps": 15,
+   "pressLeadMsBeforeTickE": 20,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1080,
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1083.3
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    },
+    {
+     "tick": 78,
+     "at": 1100
+    }
+   ]
+  },
+  {
+   "fps": 15,
+   "pressLeadMsBeforeTickE": 40,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1060,
+   "inputLog": [
+    {
+     "tick": 76,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1066.7
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    },
+    {
+     "tick": 78,
+     "at": 1100
+    }
+   ]
+  },
+  {
+   "fps": 15,
+   "pressLeadMsBeforeTickE": 60,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1040,
+   "inputLog": [
+    {
+     "tick": 75,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1050
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "expired",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    }
+   ]
+  },
+  {
+   "fps": 30,
+   "pressLeadMsBeforeTickE": 20,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1080,
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1083.3
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    },
+    {
+     "tick": 78,
+     "at": 1100
+    }
+   ]
+  },
+  {
+   "fps": 30,
+   "pressLeadMsBeforeTickE": 40,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1060,
+   "inputLog": [
+    {
+     "tick": 76,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1066.7
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    },
+    {
+     "tick": 78,
+     "at": 1100
+    }
+   ]
+  },
+  {
+   "fps": 30,
+   "pressLeadMsBeforeTickE": 60,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1040,
+   "inputLog": [
+    {
+     "tick": 75,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1050
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "expired",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    }
+   ]
+  },
+  {
+   "fps": 60,
+   "pressLeadMsBeforeTickE": 20,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1080,
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1083.3
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    },
+    {
+     "tick": 78,
+     "at": 1100
+    }
+   ]
+  },
+  {
+   "fps": 60,
+   "pressLeadMsBeforeTickE": 40,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1060,
+   "inputLog": [
+    {
+     "tick": 76,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1066.7
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    },
+    {
+     "tick": 78,
+     "at": 1100
+    }
+   ]
+  },
+  {
+   "fps": 60,
+   "pressLeadMsBeforeTickE": 60,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1040,
+   "inputLog": [
+    {
+     "tick": 75,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1050
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "expired",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    }
+   ]
+  },
+  {
+   "fps": 120,
+   "pressLeadMsBeforeTickE": 20,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1080,
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1083.3
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    },
+    {
+     "tick": 78,
+     "at": 1100
+    }
+   ]
+  },
+  {
+   "fps": 120,
+   "pressLeadMsBeforeTickE": 40,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1060,
+   "inputLog": [
+    {
+     "tick": 76,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1066.7
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    },
+    {
+     "tick": 78,
+     "at": 1100
+    }
+   ]
+  },
+  {
+   "fps": 120,
+   "pressLeadMsBeforeTickE": 60,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1040,
+   "inputLog": [
+    {
+     "tick": 75,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1050
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "expired",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    }
+   ]
+  },
+  {
+   "fps": 144,
+   "pressLeadMsBeforeTickE": 20,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1080,
+   "inputLog": [
+    {
+     "tick": 77,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1083.3
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    },
+    {
+     "tick": 78,
+     "at": 1100
+    }
+   ]
+  },
+  {
+   "fps": 144,
+   "pressLeadMsBeforeTickE": 40,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1060,
+   "inputLog": [
+    {
+     "tick": 76,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1066.7
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "consume",
+     "action": "right",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    },
+    {
+     "tick": 78,
+     "at": 1100
+    }
+   ]
+  },
+  {
+   "fps": 144,
+   "pressLeadMsBeforeTickE": 60,
+   "E": 78,
+   "tickE_at": 1100,
+   "pressAt": 1040,
+   "inputLog": [
+    {
+     "tick": 75,
+     "player": 0,
+     "event": "buffer",
+     "action": "right",
+     "at": 1050
+    },
+    {
+     "tick": 78,
+     "player": 0,
+     "event": "discard",
+     "action": "right",
+     "reason": "expired",
+     "at": 1100
+    }
+   ],
+   "moves": [
+    {
+     "tick": 73,
+     "at": 1016.7
+    }
+   ]
+  }
+ ]
+}

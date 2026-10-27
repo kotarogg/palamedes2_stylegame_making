@@ -2,3 +2,5 @@ Noto Sans JP — Version 2.004
 © 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
 License: SIL Open Font License 1.1 (OFL.txt)
 Bitmap derivative: tutorial_font_16, 2026-10-26. Native16px rasterization + pixel edits. Original TTF is not included.
+
+2026-10-28 extension:14glyphs (requested13 plus ノ required by verification text). Source TTF and existing313bitmap glyphs unchanged.

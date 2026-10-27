@@ -118,8 +118,8 @@
   },
   {
    "path": "gfx/assets/legacy/announcements_sheet.png",
-   "size": 117431,
-   "sha256": "acd728bac72d496734a8a98e67707562e16c665a6f51312b1b79c60f5a26fb45"
+   "size": 117692,
+   "sha256": "af28895d4c9902869ef2d66c3ab6f9c6eb0ce1df27978615855237df74d40da6"
   },
   {
    "path": "gfx/assets/legacy/display_numeric_sheet.png",
@@ -148,8 +148,8 @@
   },
   {
    "path": "gfx/assets/legacy/role_name_sheet.png",
-   "size": 88716,
-   "sha256": "d43012d7440fc95f1605b44560ef19f5190641c3539f7c8ad82b0f3d20cb394a"
+   "size": 88673,
+   "sha256": "4624e5da4bd92c9c54f568ebebb9d2aaa5b5fabc97b57448f7f2c6aca08c83ca"
   },
   {
    "path": "gfx/assets/legacy/ui_common_sheet.png",
@@ -249,7 +249,7 @@
   {
    "path": "gfx/data/graphics_manifest_v3.json",
    "size": 184700,
-   "sha256": "e768d0f256750317649fa8f61cc009b0346eca42ee1b171bd0ffc130f79ce449"
+   "sha256": "67ab1ba15808443cc322c25e3d2844d34774fb82eae9e1af98d0d226608fa4f7"
   },
   {
    "path": "gfx/data/game_loading_list.json",
@@ -872,8 +872,8 @@
   },
   {
    "path": "gfx/data/additional_assets_v310.json",
-   "size": 17316,
-   "sha256": "968a3ff46391a0b061e5c9a2efd0d77317d726e78b6a6417c0244c14b4a26aba"
+   "size": 17182,
+   "sha256": "8d453cc6488bca2f09fd6f84c00987055f5b8fb51030fda501cce281f094855f"
   },
   {
    "path": "gfx/assets/streak_crack_01.png",
@@ -892,8 +892,8 @@
   },
   {
    "path": "gfx/assets/label_launch_streak.png",
-   "size": 1324,
-   "sha256": "9e511e7129a803b43ea5092a325c2e3a33ba2c55b942938383da154c13cf9119"
+   "size": 823,
+   "sha256": "8fc4d94c4434327bd9d196fbffba25f619a9bc9fc7a5d8e22915818de492434d"
   },
   {
    "path": "gfx/assets/label_role_chain.png",
@@ -922,8 +922,8 @@
   },
   {
    "path": "gfx/assets/tutorial_font_16.png",
-   "size": 12009,
-   "sha256": "4defdcb09b8f462b8953908f088814dca0b8cba6e6de4878e665530ee80fd9bc"
+   "size": 12797,
+   "sha256": "cf1e34465edee757215837a73c9a651689a327ba1e948becff06fe2bbe118546"
   },
   {
    "path": "gfx/assets/tutorial_action_icons.png",
@@ -938,17 +938,17 @@
   {
    "path": "gfx/data/tutorial_assets.json",
    "size": 4834,
-   "sha256": "bc60b58c1449d8d25cd3bc796f53a45d2235f9f2b9bd8d07fa5261e9a7404323"
+   "sha256": "24e842fd9a8d1c69814a4e868193d790c69f9cbca44789656740b7e8bffe77ee"
   },
   {
    "path": "gfx/data/tutorial_font_16.json",
-   "size": 84531,
-   "sha256": "c6186c8e653d897fce80d6951dc4439e16980dc0bd81202acda76deee32d796e"
+   "size": 89283,
+   "sha256": "314a31e58c22b64e1f006f36d44fca0f40cb26cbd59739d0a0170ed1d10bda79"
   },
   {
    "path": "gfx/fonts/tutorial_font_attribution.txt",
-   "size": 273,
-   "sha256": "97b1f495e6afa41b7592c6e6046b2b664f400c6135e1e8191913e6e0c46325f7"
+   "size": 409,
+   "sha256": "e4e8d757ac6cdcc7388f22347f76b909d656bd4ca79bdb819e74c5036ddb297d"
   }
  ]
 }

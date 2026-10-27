@@ -1,0 +1,17 @@
+{
+  "status": "PM評価後にプログラマが適用。未適用。r1からr2へS7のSHA256のみ更新。",
+  "target": "gfx/data/graphics_manifest_v3.json",
+  "operations": [
+    {
+      "op": "test",
+      "path": "/sheets/6/sha256",
+      "value": "8c3e4cf4c62714e87670994a5eb9d91c57f485dbaafc262cf573f640fc7b9e9c"
+    },
+    {
+      "op": "replace",
+      "path": "/sheets/6/sha256",
+      "value": "4624e5da4bd92c9c54f568ebebb9d2aaa5b5fabc97b57448f7f2c6aca08c83ca"
+    }
+  ],
+  "frames": "切出し・順序・原点は変更なし"
+}

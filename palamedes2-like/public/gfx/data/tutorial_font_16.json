@@ -7,10 +7,10 @@
     16
   ],
   "columns": 32,
-  "glyph_count": 313,
+  "glyph_count": 327,
   "size": [
     512,
-    160
+    176
   ],
   "line_height": 22,
   "glyphs": {
@@ -6268,6 +6268,286 @@
         12,
         14
       ]
+    },
+    "、": {
+      "codepoint": "U+3001",
+      "rect": [
+        400,
+        144,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        1,
+        11,
+        5,
+        15
+      ]
+    },
+    "ん": {
+      "codepoint": "U+3093",
+      "rect": [
+        416,
+        144,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        1,
+        1,
+        15,
+        14
+      ]
+    },
+    "ウ": {
+      "codepoint": "U+30A6",
+      "rect": [
+        432,
+        144,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        2,
+        1,
+        14,
+        15
+      ]
+    },
+    "ダ": {
+      "codepoint": "U+30C0",
+      "rect": [
+        448,
+        144,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    "リ": {
+      "codepoint": "U+30EA",
+      "rect": [
+        464,
+        144,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        4,
+        2,
+        13,
+        15
+      ]
+    },
+    "切": {
+      "codepoint": "U+5207",
+      "rect": [
+        480,
+        144,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        0,
+        1,
+        15,
+        15
+      ]
+    },
+    "後": {
+      "codepoint": "U+5F8C",
+      "rect": [
+        496,
+        144,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    "新": {
+      "codepoint": "U+65B0",
+      "rect": [
+        0,
+        160,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    "明": {
+      "codepoint": "U+660E",
+      "rect": [
+        16,
+        160,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        1,
+        1,
+        16,
+        15
+      ]
+    },
+    "更": {
+      "codepoint": "U+66F4",
+      "rect": [
+        32,
+        160,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        1,
+        1,
+        16,
+        15
+      ]
+    },
+    "残": {
+      "codepoint": "U+6B8B",
+      "rect": [
+        48,
+        160,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    "説": {
+      "codepoint": "U+8AAC",
+      "rect": [
+        64,
+        160,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        1,
+        1,
+        16,
+        15
+      ]
+    },
+    "離": {
+      "codepoint": "U+96E2",
+      "rect": [
+        80,
+        160,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    "ノ": {
+      "codepoint": "U+30CE",
+      "rect": [
+        96,
+        160,
+        16,
+        16
+      ],
+      "advance": 16,
+      "offset": [
+        0,
+        0
+      ],
+      "ink_box": [
+        3,
+        2,
+        13,
+        14
+      ]
     }
   },
   "source": {
@@ -6408,5 +6688,56 @@
       ],
       "reason": "元字形18pxの縦棒を16セル内の14px線へ手作業で整理"
     }
-  ]
+  ],
+  "extension_v320": {
+    "source_commit": "9f1ba45e5fd116c028ab10abc30b145a0c27b82a",
+    "previous_glyph_count": 313,
+    "previous_size": [
+      512,
+      160
+    ],
+    "added_characters": [
+      "、",
+      "ん",
+      "ウ",
+      "ダ",
+      "リ",
+      "切",
+      "後",
+      "新",
+      "明",
+      "更",
+      "残",
+      "説",
+      "離",
+      "ノ"
+    ],
+    "placement": "append in requested order; first7 occupy unused row10 cells, next7 new row11",
+    "original_glyphs": "unchanged pixels and definitions",
+    "pixel_edits": [
+      {
+        "character": "離",
+        "clear": [
+          [
+            10,
+            4
+          ],
+          [
+            11,
+            4
+          ],
+          [
+            13,
+            4
+          ],
+          [
+            14,
+            4
+          ]
+        ],
+        "reason": "隹の連続横画の間を開き、潰れを解消"
+      }
+    ],
+    "new_glyph_method": "Same Noto Sans JP2.004 /16px weight400 /threshold100 /baseline14; no scaling. Native glyph review."
+  }
 }

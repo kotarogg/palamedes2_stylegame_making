@@ -39,8 +39,13 @@ describe('第3版 採用グラフィック（graphics_manifest_v3：14シート�
     expect(onDisk.sort()).toEqual([...pngs, ...extra, ...tutorial].sort());
   });
 
-  it('再利用の9シート（S4〜S12）は第2.3版の採用PNGとバイト同一', () => {
-    for (const [id, sha] of Object.entries(CARGO_CHECK.legacySha256)) expect(raw.sheets.find((s) => s.id === id)?.sha256, id).toBe(sha);
+  it('再利用の9シート（S4〜S12）は第2.3版の採用PNGとバイト同一。v3.2.0 で修正を採用した S7・S9 は採用版のハッシュ', () => {
+    for (const [id, sha] of Object.entries(CARGO_CHECK.legacySha256)) expect(raw.sheets.find((s) => s.id === id)?.sha256, id).toBe(CARGO_CHECK.v320Sha256[id] ?? sha);
+    // 実ファイルもマニフェストの値と一致（S7・S9 は旧版が残っていない）
+    for (const id of Object.keys(CARGO_CHECK.v320Sha256)) {
+      const sheet = raw.sheets.find((s) => s.id === id)!;
+      expect(createHash('sha256').update(readFileSync(gfx(sheet.file))).digest('hex'), id).toBe(CARGO_CHECK.v320Sha256[id]);
+    }
   });
 
   it('明示読込一覧：一覧外の画像は読み込まない（エラー）。フォントは一覧に含まれる', () => {

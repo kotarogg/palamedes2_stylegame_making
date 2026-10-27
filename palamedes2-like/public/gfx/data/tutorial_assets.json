@@ -9,7 +9,7 @@
       "file": "assets/tutorial_font_16.png",
       "dimensions": [
         512,
-        160
+        176
       ],
       "origin": [
         0,
@@ -24,13 +24,13 @@
         255
       ],
       "color_space": "sRGB",
-      "sha256": "4defdcb09b8f462b8953908f088814dca0b8cba6e6de4878e665530ee80fd9bc",
+      "sha256": "cf1e34465edee757215837a73c9a651689a327ba1e948becff06fe2bbe118546",
       "cell": [
         16,
         16
       ],
       "columns": 32,
-      "glyph_count": 313,
+      "glyph_count": 327,
       "frames": "data/tutorial_font_16.json",
       "purpose": "16px共通本文・見出し・案内用の白マスク",
       "line_height": 22,

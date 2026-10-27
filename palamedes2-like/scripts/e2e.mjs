@@ -894,13 +894,6 @@ try {
     };
     const sl0 = v.streakHudLayout(0);
     const sl1 = v.streakHudLayout(1);
-    // v3.2.0 見出し「打上連鎖」（共通ビットマップフォント・金色）の画素数
-    const gold = (r) => {
-      const d = c.getContext('2d', { willReadFrequently: true }).getImageData(r.x, r.y, r.w, r.h).data;
-      let n = 0;
-      for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - 0xf2) < 24 && Math.abs(d[i + 1] - 0xb9) < 24 && Math.abs(d[i + 2] - 0x50) < 32) n++;
-      return n;
-    };
     // v3.2.0 対戦では攻撃倍率（数値・見出し）と「回」を描かない：成功数の右側の領域が、連鎖なし（成功数0）の描画と同じ
     const rateRect = { x: sl0.numbers.x + 30, y: sl0.numbers.y, w: sl0.numbers.maxW - 30, h: 34 };
     const grab = () => c.getContext('2d', { willReadFrequently: true }).getImageData(rateRect.x, rateRect.y, rateRect.w, rateRect.h).data;
@@ -918,10 +911,12 @@ try {
     const plans = [0, 1].map((p) => v.stockDrawPlan(p, g.tick));
     return {
       png: big.toDataURL('image/png'),
-      label0: gold(sl0.label),
-      label1: gold(sl1.label),
+      // v3.2.0 r：採用画像 label_launch_streak（80×20）を左右とも既存の見出し領域の左上へ原寸で描く（画素一致）
+      label0: cmpImg(img('label_launch_streak'), 0, 0, 80, 20, sl0.label.x, sl0.label.y),
+      label1: cmpImg(img('label_launch_streak'), 0, 0, 80, 20, sl1.label.x, sl1.label.y),
+      labelRects: [sl0.label, sl1.label],
+      labelSize: [img('label_launch_streak').width, img('label_launch_streak').height],
       rateDiff,
-      missing: [...window.__p2like.demo.missingGlyphs].filter((ch) => '打上連鎖'.includes(ch)),
       pinch: pc,
       pinchPx: f3 ? cmpImg(A.images.get('S9'), f3.x, f3.y, f3.w, f3.h, pc.x, pc.y) : null,
       stock: plans.map((pl) => ({ n: pl.entries.length, minX: Math.min(...pl.entries.map((e) => e.x)), maxX: Math.max(...pl.entries.map((e) => e.x + e.w)), maxY: Math.max(...pl.entries.map((e) => e.y + e.h)), label: pl.label })),
@@ -932,9 +927,9 @@ try {
   writeFileSync(new URL('screens/V310_hud_stock_pinch.png', OUT), Buffer.from(v310.png.split(',')[1], 'base64'));
   shots.push('screens/V310_hud_stock_pinch.png');
   check(
-    'v3.2.0 打上連鎖（見出しは共通フォントで「打上連鎖」・成功数17px、1P予約中のヒビ）：対戦では攻撃倍率の見出し・数値・「回」を描かない（成功数の右側が連鎖なしと同じ）。倍率の計算は維持（12＝×1.25、19＝×1.75）',
-    v310.label0 > 20 && v310.label1 > 20 && v310.missing.length === 0 && v310.rateDiff === 0 && v310.mult.join() === '125,175',
-    JSON.stringify({ label0: v310.label0, label1: v310.label1, rateDiff: v310.rateDiff, missing: v310.missing, mult: v310.mult }),
+    'v3.2.0 r 打上連鎖：採用画像（80×20）を左右の既存見出し領域へ原寸・画素一致で描画（透明余白を切り詰めない）。対戦では攻撃倍率の見出し・数値・「回」を描かない。倍率の計算は維持（12＝×1.25、19＝×1.75）',
+    v310.labelSize.join() === '80,20' && v310.label0.bad === 0 && v310.label0.opaque > 0 && v310.label1.bad === 0 && v310.rateDiff === 0 && v310.mult.join() === '125,175',
+    JSON.stringify({ label0: v310.label0, label1: v310.label1, rects: v310.labelRects, rateDiff: v310.rateDiff, mult: v310.mult }),
   );
   check(
     'v3.1.0 受攻撃ストックの中央配置：1P（予約29＋待機22＋相殺12）・2P（予約10＋待機11＋相殺3）とも中央エリア x264〜376・下端360以内。数字は列の中央側',
@@ -1094,6 +1089,46 @@ try {
   await steps(60 * 600, 'sc.game.result');
   await wait(2600);
   await shot('S17_game_over');
+  {
+    // v3.2.0 r：GAME OVER（S9 show_game_over_A/B/C、Mを修正した採用版）を結果パネルの見出し位置［240,42］へ原寸で描画（いずれかの位相と画素一致）
+    const gov = await ev(() => {
+      const A = window.__p2like.app.assets;
+      const cv = document.getElementById('screen');
+      const n = Number(cv.dataset.scale) || 1;
+      const s9 = A.images.get('S9');
+      const res = {};
+      for (const ph of ['A', 'B', 'C']) {
+        const f = A.atlas.frame('S9', `show_game_over_${ph}`);
+        const t = document.createElement('canvas');
+        t.width = f.w;
+        t.height = f.h;
+        const tg = t.getContext('2d', { willReadFrequently: true });
+        tg.drawImage(s9, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+        const a = tg.getImageData(0, 0, f.w, f.h).data;
+        const s2 = document.createElement('canvas');
+        s2.width = f.w;
+        s2.height = f.h;
+        const sg = s2.getContext('2d', { willReadFrequently: true });
+        sg.imageSmoothingEnabled = false;
+        sg.drawImage(cv, 240 * n, 42 * n, f.w * n, f.h * n, 0, 0, f.w, f.h);
+        const b = sg.getImageData(0, 0, f.w, f.h).data;
+        let opaque = 0;
+        let bad = 0;
+        for (let i = 0; i < a.length; i += 4) {
+          if (a[i + 3] < 255) continue;
+          opaque++;
+          if (Math.abs(a[i] - b[i]) > 2 || Math.abs(a[i + 1] - b[i + 1]) > 2 || Math.abs(a[i + 2] - b[i + 2]) > 2) bad++;
+        }
+        res[ph] = { rect: [f.x, f.y, f.w, f.h], opaque, bad };
+      }
+      return res;
+    });
+    check(
+      'v3.2.0 r GAME OVER：採用版 S9 の show_game_over A/B/C（切出し［0／160／320,192,160,64］）を結果パネルへ原寸描画（表示中の位相と画素一致）',
+      ['A', 'B', 'C'].every((p) => gov[p].rect.join() === `${{ A: 0, B: 160, C: 320 }[p]},192,160,64`) && ['A', 'B', 'C'].some((p) => gov[p].bad === 0 && gov[p].opaque > 0),
+      JSON.stringify(gov),
+    );
+  }
   const go = await ev(() => ({ outcome: window.__p2like.game().result?.outcome, cracker: window.__p2like.gameScene().staging.plan?.crackerTick, choices: window.__p2like.gameScene().finalChoices().map((c) => c.label) }));
   check('ゲームオーバー：結果パネル（再挑戦／メニューへ）、クラッカーなし', go.outcome === 'gameOver' && go.cracker === null && go.choices.join() === '再挑戦,メニューへ', JSON.stringify(go));
   await toMenu();
@@ -1516,8 +1551,7 @@ try {
     await ff(1500);
     const missing = await ev(() => [...window.__p2like.demo.missingGlyphs]);
     // v3.2.0：新しい台本（目次「連鎖説明」・MODE2説明）の13字は共通フォントに未収録（素材待ち。PMへ追加を依頼）。それ以外の代替描画がないこと
-    const PENDING_GLYPHS = [...'、んウダリ切後新明更残説離'].map((ch) => `U+${ch.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}`);
-    check('説明・案内の文字は共通ビットマップフォントに収録。未収録は素材待ちの13字だけ（代替描画で表示）', missing.every((ch) => PENDING_GLYPHS.includes(ch)), `未収録：${missing.map((u) => String.fromCodePoint(parseInt(u.slice(2), 16))).join('')}`);
+    check('説明・案内の文字はすべて共通ビットマップフォント（採用版327字）に収録（代替描画なし）', missing.length === 0, `未収録：${missing.map((u) => String.fromCodePoint(parseInt(u.slice(2), 16))).join('')}`);
 
     // 遊び方：目次（5項目＋操作一覧）→役一覧（16役）→戻る→目次→戻る→呼出元
     await toMenu();
@@ -1591,6 +1625,46 @@ try {
       JSON.stringify(dest),
     );
 
+    // v3.2.0 r：連鎖説明の「打上連鎖で／攻撃力アップ」。本文領域［396,170,168,88］・外枠・戻る案内と重ならない（原寸）
+    await ev(() => (window.__p2like.scene().cursor = 2));
+    await key('Enter', 200);
+    const sr = await ev(() => {
+      const sc = window.__p2like.scene();
+      for (let i = 0; i < 60 * 90 && sc.stage.runner?.page !== 'streak_rate'; i++) sc.update(1000 / 60);
+      return { page: sc.stage.runner?.page };
+    });
+    await raf();
+    await shot('V320R_streak_rate_page');
+    const bodyLit = (y0, y1) =>
+      ev(([y0, y1]) => {
+        const cv = document.getElementById('screen');
+        const n = Number(cv.dataset.scale) || 1;
+        const t = document.createElement('canvas');
+        t.width = 640;
+        t.height = 360;
+        const tg = t.getContext('2d', { willReadFrequently: true });
+        tg.imageSmoothingEnabled = false;
+        tg.drawImage(cv, 0, 0, 640 * n, 360 * n, 0, 0, 640, 360);
+        // 本文の白（#fff1d6 系）の画素：本文領域の外側（右端 x564 より右、または y の範囲外）に出ていないか
+        const d = tg.getImageData(384, 128, 192, 224).data;
+        let outside = 0;
+        let inside = 0;
+        for (let y = 0; y < 224; y++)
+          for (let x = 0; x < 192; x++) {
+            const i = (y * 192 + x) * 4;
+            const white = d[i] > 230 && d[i + 1] > 220 && d[i + 2] > 190;
+            if (!white) continue;
+            const gx = 384 + x;
+            const gy = 128 + y;
+            if (gy >= y0 && gy < y1 && gx >= 396 && gx < 564) inside++;
+            else if (gy >= y0 && gy < y1) outside++;
+          }
+        return { inside, outside };
+      }, [y0, y1]);
+    const srBody = await bodyLit(170, 258);
+    check('v3.2.0 r 連鎖説明：「打上連鎖で／攻撃力アップ」を本文領域内に原寸表示（右端・外枠へはみ出さない）', sr.page === 'streak_rate' && srBody.inside > 50 && srBody.outside === 0, JSON.stringify({ sr, srBody }));
+    await key('Escape', 200);
+
     // MODE2 説明：通常の Mode2Game で最後までクリア。頁は実イベントに同期
     await ev(() => (window.__p2like.scene().cursor = 5));
     await key('Enter', 200);
@@ -1610,6 +1684,9 @@ try {
       }, want);
     await raf();
     await shot('V320_mode2_lesson_intro');
+    const m2Body = await bodyLit(170, 258);
+    const m2Lines = await ev(() => window.__p2like.scene().stage.runner.page);
+    check('v3.2.0 r MODE2冒頭：4行「６列から選んで／場へ出そう／となりの数字なら／成功！」を本文領域内に原寸表示（4行目 y236〜252、例／戻る案内 y266・y310 と重ならない）', m2Lines === 'm2_intro' && m2Body.inside > 50 && m2Body.outside === 0, JSON.stringify({ m2Lines, m2Body }));
     const a = await advance('m2_refresh');
     await raf();
     await shot('V320_mode2_lesson_countdown');
@@ -1648,7 +1725,7 @@ try {
     );
     check('v3.2.0 説明パネルの不要な内線を描かない（外枠は維持）：横線 y164 が面の色', rule === 0, `違う画素 ${rule}/168`);
     const missing2 = await ev(() => [...window.__p2like.demo.missingGlyphs]);
-    check('v3.2.0 MODE2説明・目次の文字：未収録は素材待ちの13字だけ（代替描画で表示。素材待ち）', missing2.every((ch) => [...'、んウダリ切後新明更残説離'].some((p) => `U+${p.codePointAt(0).toString(16).toUpperCase()}` === ch)), `未収録：${missing2.map((u) => String.fromCodePoint(parseInt(u.slice(2), 16))).join('')}`);
+    check('v3.2.0 r MODE2説明・目次の文字：すべて採用フォントに収録（代替描画なし）', missing2.length === 0, `未収録：${missing2.map((u) => String.fromCodePoint(parseInt(u.slice(2), 16))).join('')}`);
     await key('Escape', 200);
     await key('Escape', 200);
 
@@ -1673,6 +1750,70 @@ try {
       return { on: window.__p2like.app.settings.assist, hud: sc.view.hud.assist, targets: sc.view.assistTargets(0).length, singleRule: off };
     });
     check('v3.2.0 補助表示：既定ON、人間（1P）の出せる最上段を囲む。本編SINGLEの情報枠の線は維持', as.on === true && as.hud.join() === '0' && as.targets > 0 && as.singleRule > 100, JSON.stringify(as));
+
+    // v3.2.0 r：役名ロゴ role_15（スーパーストレートフラッシュ、r2 で「ス」「パ」を修正）。実際の宣言で表示し、A/B/C の切出しと画素一致
+    await ev(() => {
+      const g = window.__p2like.game();
+      const p = g.players[0];
+      p.roleStock = [1, 2, 3, 4, 5, 6].map((n) => g.factory.make(n, 'spade'));
+    });
+    await key('KeyH', 60);
+    const role = { frames: {}, seen: {} };
+    for (let i = 0; i < 24; i++) {
+      const r = await ev(() => {
+        const sc = window.__p2like.gameScene();
+        const A = window.__p2like.app.assets;
+        const g = sc.game;
+        const logo = sc.roleNames.logoAt(0, g.tick);
+        if (!logo || logo.logo !== 15) return null;
+        const cv = document.getElementById('screen');
+        const n = Number(cv.dataset.scale) || 1;
+        const rr = A.layout.pRect(0, 'role_logo');
+        const out = {};
+        for (const ph of ['A', 'B', 'C']) {
+          const f = A.atlas.role(15, ph);
+          const img = A.images.get(f.sheet);
+          const t = document.createElement('canvas');
+          t.width = f.w;
+          t.height = f.h;
+          const tg = t.getContext('2d', { willReadFrequently: true });
+          tg.drawImage(img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+          const a = tg.getImageData(0, 0, f.w, f.h).data;
+          const s2 = document.createElement('canvas');
+          s2.width = f.w;
+          s2.height = f.h;
+          const sg = s2.getContext('2d', { willReadFrequently: true });
+          sg.imageSmoothingEnabled = false;
+          sg.drawImage(cv, rr.x * n, rr.y * n, f.w * n, f.h * n, 0, 0, f.w, f.h);
+          const b = sg.getImageData(0, 0, f.w, f.h).data;
+          let opaque = 0;
+          let bad = 0;
+          for (let k = 0; k < a.length; k += 4) {
+            if (a[k + 3] < 255) continue;
+            opaque++;
+            if (Math.abs(a[k] - b[k]) > 2 || Math.abs(a[k + 1] - b[k + 1]) > 2 || Math.abs(a[k + 2] - b[k + 2]) > 2) bad++;
+          }
+          out[ph] = { rect: [f.x, f.y, f.w, f.h], opaque, bad };
+        }
+        return out;
+      });
+      if (r) {
+        for (const ph of ['A', 'B', 'C']) {
+          role.frames[ph] = r[ph].rect;
+          if (r[ph].bad === 0 && r[ph].opaque > 0 && !role.seen[ph]) {
+            role.seen[ph] = true;
+            await shot(`V320R_role15_${ph}`);
+          }
+        }
+      }
+      if (Object.keys(role.seen).length === 3) break;
+      await wait(70);
+    }
+    check(
+      'v3.2.0 r 役名 role_15（r2）：切出し［480,576／640／704,160,64］のまま、宣言時の表示が A・B・C の各位相と画素一致',
+      ['A', 'B', 'C'].every((p, i) => role.frames[p]?.join() === `480,${576 + i * 64},160,64`) && Object.keys(role.seen).length === 3,
+      JSON.stringify(role),
+    );
     await toMenu();
   }
 

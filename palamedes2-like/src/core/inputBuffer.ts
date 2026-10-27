@@ -36,6 +36,36 @@ export function neutralizeSimultaneous<C extends Cmd>(cmds: readonly C[], log: (
   return cmds.filter((c) => !MOVE_ACTIONS.has(c.type));
 }
 
+/**
+ * v3.2.0 r：当該tickの入力を、旧移動予約の実行（take）より前に反映する（MODE1・MODE2 共通）。
+ * - 離した（cancelRepeat）：反復でできた予約を捨てる。明示的な短押しの予約は期限内なら残す
+ * - 左右の新規押下が同時（優先できない）：中立。旧方向の予約も実行しない
+ * - 移動できる tick（free）に左右の新規押下がある：旧方向の予約を捨て、新しい押下を通常入力として扱う（古い方向へ一度動かない）
+ * - 発射・宣言・入替の予約には触れない（保持規則は従来どおり）
+ * 戻り値：このあと適用するコマンド（cancelRepeat と、同時押しの左右と、解除より前の反復を除く）
+ */
+export function resolveTick<C extends Cmd>(h: HeldInput<string>, cmds: readonly C[], free: boolean, log: (e: Omit<InputLogEntry, 'tick' | 'player'>) => void): C[] {
+  let lastCancel = -1;
+  cmds.forEach((c, i) => {
+    if (c.type === 'cancelRepeat') lastCancel = i;
+  });
+  if (lastCancel >= 0) release(h, log);
+  const fresh = (t: string) => cmds.some((c) => c.type === t && !c.repeat);
+  const simultaneous = fresh('left') && fresh('right');
+  if (h.buffered !== null && MOVE_ACTIONS.has(h.buffered)) {
+    if (simultaneous) {
+      log({ event: 'discard', action: h.buffered, reason: 'simultaneous' });
+      clear(h);
+    } else if (free && (fresh('left') || fresh('right'))) {
+      log({ event: 'discard', action: h.buffered, reason: 'overwritten' });
+      clear(h);
+    }
+  }
+  // 解除より前に届いた反復は、離した後に予約を作らないよう捨てる
+  const rest = cmds.filter((c, i) => c.type !== 'cancelRepeat' && !(i < lastCancel && c.repeat && MOVE_ACTIONS.has(c.type)));
+  return neutralizeSimultaneous(rest, log);
+}
+
 /** 移動中に届いた入力を予約へ。戻り値：予約を変えたか */
 export function offer<A extends string>(h: HeldInput<A>, action: A, repeat: boolean, tick: number, log: (e: Omit<InputLogEntry, 'tick' | 'player'>) => void): void {
   if (repeat) {

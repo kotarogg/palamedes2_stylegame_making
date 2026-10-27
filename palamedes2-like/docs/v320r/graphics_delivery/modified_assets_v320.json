@@ -1,0 +1,240 @@
+{
+  "source_commit": "9f1ba45e5fd116c028ab10abc30b145a0c27b82a",
+  "assets": [
+    {
+      "file": "assets/label_launch_streak.png",
+      "before": {
+        "dimensions": [
+          80,
+          20
+        ],
+        "visible_xywh": [
+          1,
+          0,
+          79,
+          19
+        ],
+        "transparent_margins_ltrb": [
+          1,
+          0,
+          0,
+          1
+        ],
+        "colors": 16,
+        "sha256": "9e511e7129a803b43ea5092a325c2e3a33ba2c55b942938383da154c13cf9119"
+      },
+      "after": {
+        "dimensions": [
+          80,
+          20
+        ],
+        "visible_xywh": [
+          2,
+          0,
+          74,
+          19
+        ],
+        "transparent_margins_ltrb": [
+          2,
+          0,
+          4,
+          1
+        ],
+        "colors": 9,
+        "sha256": "8fc4d94c4434327bd9d196fbffba25f619a9bc9fc7a5d8e22915818de492434d"
+      },
+      "anchors": {
+        "logical_origin": [
+          0,
+          0
+        ],
+        "meaning": "PNG／シート左上。シートは各切出しフレーム左上を個別の描画原点にする。",
+        "changed": false
+      }
+    },
+    {
+      "file": "assets/tutorial_font_16.png",
+      "before": {
+        "dimensions": [
+          512,
+          160
+        ],
+        "visible_xywh": [
+          1,
+          0,
+          511,
+          159
+        ],
+        "transparent_margins_ltrb": [
+          1,
+          0,
+          0,
+          1
+        ],
+        "colors": 1,
+        "sha256": "4defdcb09b8f462b8953908f088814dca0b8cba6e6de4878e665530ee80fd9bc"
+      },
+      "after": {
+        "dimensions": [
+          512,
+          176
+        ],
+        "visible_xywh": [
+          1,
+          0,
+          511,
+          175
+        ],
+        "transparent_margins_ltrb": [
+          1,
+          0,
+          0,
+          1
+        ],
+        "colors": 1,
+        "sha256": "cf1e34465edee757215837a73c9a651689a327ba1e948becff06fe2bbe118546"
+      },
+      "anchors": {
+        "logical_origin": [
+          0,
+          0
+        ],
+        "meaning": "PNG／シート左上。シートは各切出しフレーム左上を個別の描画原点にする。",
+        "changed": false
+      }
+    },
+    {
+      "file": "assets/legacy/announcements_sheet.png",
+      "before": {
+        "dimensions": [
+          1024,
+          1024
+        ],
+        "visible_xywh": [
+          4,
+          11,
+          951,
+          757
+        ],
+        "transparent_margins_ltrb": [
+          4,
+          11,
+          69,
+          256
+        ],
+        "colors": 307,
+        "sha256": "acd728bac72d496734a8a98e67707562e16c665a6f51312b1b79c60f5a26fb45"
+      },
+      "after": {
+        "dimensions": [
+          1024,
+          1024
+        ],
+        "visible_xywh": [
+          4,
+          11,
+          951,
+          757
+        ],
+        "transparent_margins_ltrb": [
+          4,
+          11,
+          69,
+          256
+        ],
+        "colors": 307,
+        "sha256": "af28895d4c9902869ef2d66c3ab6f9c6eb0ce1df27978615855237df74d40da6"
+      },
+      "anchors": {
+        "logical_origin": [
+          0,
+          0
+        ],
+        "meaning": "PNG／シート左上。シートは各切出しフレーム左上を個別の描画原点にする。",
+        "changed": false
+      }
+    },
+    {
+      "file": "assets/legacy/role_name_sheet.png",
+      "before": {
+        "dimensions": [
+          1024,
+          1024
+        ],
+        "visible_xywh": [
+          26,
+          0,
+          609,
+          768
+        ],
+        "transparent_margins_ltrb": [
+          26,
+          0,
+          389,
+          256
+        ],
+        "colors": 46,
+        "sha256": "d43012d7440fc95f1605b44560ef19f5190641c3539f7c8ad82b0f3d20cb394a"
+      },
+      "after": {
+        "dimensions": [
+          1024,
+          1024
+        ],
+        "visible_xywh": [
+          26,
+          0,
+          609,
+          768
+        ],
+        "transparent_margins_ltrb": [
+          26,
+          0,
+          389,
+          256
+        ],
+        "colors": 46,
+        "sha256": "4624e5da4bd92c9c54f568ebebb9d2aaa5b5fabc97b57448f7f2c6aca08c83ca"
+      },
+      "anchors": {
+        "logical_origin": [
+          0,
+          0
+        ],
+        "meaning": "PNG／シート左上。シートは各切出しフレーム左上を個別の描画原点にする。",
+        "changed": false
+      },
+      "previous_r1": {
+        "dimensions": [
+          1024,
+          1024
+        ],
+        "visible_xywh": [
+          26,
+          0,
+          609,
+          768
+        ],
+        "transparent_margins_ltrb": [
+          26,
+          0,
+          389,
+          256
+        ],
+        "colors": 46,
+        "sha256": "8c3e4cf4c62714e87670994a5eb9d91c57f485dbaafc262cf573f640fc7b9e9c"
+      }
+    }
+  ],
+  "font_baseline": {
+    "baseline_y": 14,
+    "offset": [
+      0,
+      0
+    ],
+    "fullwidth_advance": 16,
+    "ASCII_advance": 8
+  },
+  "game_coordinates": "not specified",
+  "revision": "r2: S7のみ更新。他3PNGとフォント定義はr1合格版を再利用。"
+}

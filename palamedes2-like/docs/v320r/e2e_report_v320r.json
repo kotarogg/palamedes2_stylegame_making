@@ -1,0 +1,648 @@
+{
+  "date": "2026-10-27T23:58:12.969Z",
+  "mode": "fallback",
+  "root": "dist",
+  "bgmPresent": [],
+  "fontPresent": false,
+  "fontStandin": true,
+  "simulatedInputOnly": true,
+  "results": [
+    {
+      "name": "起動（画像49・JSON5・フォント・音声読込）→タイトル",
+      "pass": true,
+      "detail": "514ms"
+    },
+    {
+      "name": "明示読込一覧の49PNG＋v3.1.0追加9PNG＋遊び方UI3PNG（tutorial_assets.json）だけを取得（旧版・見本・previews を読まない）、JSON8件",
+      "pass": true,
+      "detail": "png=61 json=additional_assets_v310.json,credits_text.json,font_styles.json,game_loading_list.json,graphics_manifest_v3.json,screen_layout_v2.json,tutorial_assets.json,tutorial_font_16.json"
+    },
+    {
+      "name": "音声：SE39＋ボイス75（ピンチ3本を含む。計114）を HTTP200 で取得",
+      "pass": true,
+      "detail": "wav200=114"
+    },
+    {
+      "name": "［フォールバック］BGM 3曲（配信物に存在0曲）",
+      "pass": true,
+      "detail": "未配置3曲は404を許容（無音で継続）"
+    },
+    {
+      "name": "旧音（sfx_piece_success／role_success／chain／旧 sfx_field_rise）を取得しない",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "［フォールバック・フォント代用］同じ書体の代用で読込完了（納品物の採用フォントではない）",
+      "pass": true,
+      "detail": "{\"loaded\":true,\"check\":true}"
+    },
+    {
+      "name": "マニフェスト graphics-v3",
+      "pass": true,
+      "detail": "graphics-v3-delivery-r1-20261021"
+    },
+    {
+      "name": "DPR1・1280×720：収まる最大＝実画素2倍（描画バッファ1280、CSS 1280px）",
+      "pass": true,
+      "detail": "{\"css\":\"1280px\",\"buf\":1280,\"mode\":\"fit\"}"
+    },
+    {
+      "name": "拡大時にドットを滲ませない(image-rendering)",
+      "pass": true,
+      "detail": "pixelated"
+    },
+    {
+      "name": "タイトル：title_logo を原寸で描画（画素一致）",
+      "pass": true,
+      "detail": "{\"opaque\":39100,\"bad\":0}"
+    },
+    {
+      "name": "R1・S01：パッドAだけで音声有効化を試み running、タイトル→メインメニュー。その入力はメニューへ渡らない（MODE1を開かない）",
+      "pass": true,
+      "detail": "before={\"ctx\":false,\"attempted\":false} after={\"ctx\":\"running\",\"attempted\":true,\"scene\":\"MenuScene\",\"depth\":1,\"cursor\":0}"
+    },
+    {
+      "name": "修正R6・タイトルはメニュー曲（自動再生を強制せず、有効化後にデコード完了を待って開始）。タイトル→メニューで再始動しない",
+      "pass": true,
+      "detail": "{\"wait\":{\"ok\":true,\"waitedMs\":5,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":0.482,\"nodes\":[]}},\"bgmNodes0\":[]}"
+    },
+    {
+      "name": "メインメニュー（MODE1／MODE2／オプション／遊び方）：両脇の menu_kotaro・menu_akane を原寸・原点どおりに描画（画素一致）",
+      "pass": true,
+      "detail": "[{\"opaque\":6879,\"bad\":0},{\"opaque\":9800,\"bad\":0}]"
+    },
+    {
+      "name": "v3.1.0 CPU対戦：メニューからキャラクター選択へ（初期カーソル＝コタロー、2Pカーソルなし）",
+      "pass": true,
+      "detail": "{\"scene\":\"CpuCharacterSelectScene\",\"ch\":\"kotaro\"}"
+    },
+    {
+      "name": "パッドだけで MODE1 CPU対戦を開始：1Pコタロー対アカネ、READY／GO の担当はアカネ（同じ話者）・実ノードで再生開始",
+      "pass": true,
+      "detail": "{\"padStart\":{\"chars\":[\"kotaro\",\"akane\"],\"ann\":\"akane\"},\"readyNode\":{\"id\":\"akane_ready\",\"kind\":\"voice\",\"start\":2.641269841269841,\"duration\":0.5098185941043084,\"loop\":false,\"stoppedAt\":null},\"goNode\":{\"id\":\"akane_go\",\"kind\":\"voice\",\"start\":3.84,\"duration\":0.402312925170068,\"loop\":false,\"stoppedAt\":null}}"
+    },
+    {
+      "name": "対戦BGM（versus）を要求",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "受攻撃ストック：処理中ブロック（上）と nextPending（下）を混ぜず表示。予約高さ維持",
+      "pass": true,
+      "detail": "{\"v\":{\"blockLines\":6,\"pendingLines\":12,\"blockY\":148,\"pendingY\":186,\"reservedPx\":32},\"evs\":[[\"blockStart\",211,7],[\"waveStart\",211,3],[\"attackRow\",211,6]]}"
+    },
+    {
+      "name": "役宣言：代表役（先頭ロゴ）と代表ボイス（役名、または20%で代替の攻撃ボイス。両方は鳴らさない）を同時開始。役宣言SEは連鎖段階 se_role_declare_0N（代表ボイスと同時なので −2dB）、旧成立音・連鎖音を鳴らさない",
+      "pass": true,
+      "detail": "{\"decl\":{\"tick\":235,\"logos\":[15],\"chain\":1},\"roleShow\":{\"logo\":15,\"since\":235},\"altKind\":\"role\",\"repVoices\":[{\"t\":5797.20000000007,\"kind\":\"voice\",\"id\":\"kotaro_role_16\",\"channel\":\"main\"}],\"declSfxE\":{\"t\":5796.900000000023,\"kind\":\"sfx\",\"id\":\"role_declare_1\",\"gainDb\":-2},\"declSfx\":[\"role_declare_1\"]}"
+    },
+    {
+      "name": "Esc：終了確認ダイアログ（dialog_panel）、確認中もゲームは進行（一時停止なし）",
+      "pass": true,
+      "detail": "dialog=1 tick 261→292"
+    },
+    {
+      "name": "「続ける」でダイアログを閉じる",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "v3.1.0 勝敗演出：敗者ボイス→（640ms）落下開始で se_character_fall→（700ms＋200ms）勝者演出の開始で勝利SE・勝者ボイス・クラッカーSEが同時（人が勝ったCPU対戦は敗北SEなし、勝利SEは1回）",
+      "pass": true,
+      "detail": "{\"order\":[0,617,1517,1517,1517],\"plan1\":{\"kind\":\"versus\",\"winner\":0,\"loser\":1,\"startTick\":307,\"fallStartTick\":345,\"fallEndTick\":387,\"winnerTick\":399,\"crackerTick\":399,\"crackerToward\":0,\"acceptTick\":417}}"
+    },
+    {
+      "name": "接着音 sfx_attack_row：実適用1ラインにつき1回（実ノード）",
+      "pass": true,
+      "detail": "rows=1 log=1 nodes=1"
+    },
+    {
+      "name": "修正R2：上昇音 se_field_rise は攻撃の実適用1段につき1回（自然・手動上昇を含めた要求数が一致、二重要求なし）",
+      "pass": true,
+      "detail": "rows=1 expected=1 requested=1"
+    },
+    {
+      "name": "クラッカーは1回だけ（勝者＝1P・左側へ向けて左右反転）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "勝者演出の開始後に決定入力を受付",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "B1：CPU対戦の第2ラウンドでも CPU が開始直後から操作（1.5秒以内）",
+      "pass": true,
+      "detail": "{\"round\":2,\"wins\":[1,0],\"firstCpuCmd\":1}"
+    },
+    {
+      "name": "CPU対戦で勝利：次の相手へ／同じ相手と再戦／キャラ選択へ／メニューへ",
+      "pass": true,
+      "detail": "{\"state\":\"matchResult\",\"choices\":[\"次の相手へ\",\"同じ相手と再戦\",\"キャラ選択へ\",\"メニューへ\"]}"
+    },
+    {
+      "name": "「次の相手へ」：相手が東北ずん子に進み、勝利数0から。READY担当は相手（ずん子）",
+      "pass": true,
+      "detail": "{\"chars\":[\"kotaro\",\"zunko\"],\"wins\":[0,0],\"opp\":\"zunko\",\"ann\":\"zunko\"}"
+    },
+    {
+      "name": "キャラ別モーションシート：コタローS1・ずん子S13",
+      "pass": true,
+      "detail": "S1,S13"
+    },
+    {
+      "name": "CPU対戦で敗北：同じ相手に再挑戦／キャラ選択へ／メニューへ",
+      "pass": true,
+      "detail": "同じ相手に再挑戦,キャラ選択へ,メニューへ"
+    },
+    {
+      "name": "再挑戦：同じ相手（ずん子）のまま、勝利数0から。前の結果の声・SEを持ち越さない",
+      "pass": true,
+      "detail": "{\"re\":{\"chars\":[\"kotaro\",\"zunko\"],\"wins\":[0,0],\"opp\":\"zunko\"},\"leftovers\":[]}"
+    },
+    {
+      "name": "メインメニューへ戻ると CPU の相手順はアカネへ戻る（保存しない）",
+      "pass": true,
+      "detail": "akane"
+    },
+    {
+      "name": "MODE1 › 2P対戦 → キャラクター選択",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "同じフレームの入力は 1P→2P の順：1Pはアカネを飛ばしてずん子、2Pはずん子を飛ばしてコタロー（カーソル重複なし）",
+      "pass": true,
+      "detail": "2,0"
+    },
+    {
+      "name": "決定済みカーソルは固定、戻るは自分の決定だけ取消。決定ボイス（select）は決定時に1回",
+      "pass": true,
+      "detail": "{\"cs2\":{\"c\":[2,0],\"l\":[true,false]},\"cs3\":[false,false],\"voices\":[\"zunko_select\",\"zunko_select\",\"kotaro_select\"]}"
+    },
+    {
+      "name": "修正R3：両者決定でただちに 2P対戦開始（固定待機なし。1P ずん子・2P コタロー）。READY担当は両者のどちらか",
+      "pass": true,
+      "detail": "{\"scene\":\"GameScene\",\"chars\":[\"zunko\",\"kotaro\"],\"ann\":\"zunko\"}"
+    },
+    {
+      "name": "R2：1P終了確認中も 2P（←・,）の移動と発射は 2P へ届き、1P の確認カーソルは動かない",
+      "pass": true,
+      "detail": "{\"q0\":{\"dlg\":[[0,0]],\"sel2\":2,\"n\":0},\"q1\":{\"dlg\":[[0,0]],\"sel2\":1,\"launch2\":true}}"
+    },
+    {
+      "name": "2P対戦の終了：同じキャラで再戦／キャラ選択へ／メニューへ",
+      "pass": true,
+      "detail": "同じキャラで再戦,キャラ選択へ,メニューへ"
+    },
+    {
+      "name": "「キャラ選択へ」→ 両者未決定の戻るで前のメニュー（MODE1）へ",
+      "pass": true,
+      "detail": "{\"back\":\"CharacterSelectScene\",\"back2\":{\"scene\":\"MenuScene\",\"title\":\"MODE1\"}}"
+    },
+    {
+      "name": "修正R3・R6：ほぼ同時の確定でもコタロー・アカネの確定ボイスが各1回、途中停止せず終端まで再生（AudioContext時刻で判定。READYと重なっても止まらない、試合開始は待たない）",
+      "pass": true,
+      "detail": "{\"selScene\":{\"scene\":\"GameScene\",\"chars\":[\"kotaro\",\"akane\"]},\"wait\":{\"ok\":true,\"waitedMs\":1861,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":41.561,\"nodes\":[{\"id\":\"kotaro_select\",\"start\":1.602,\"end\":3.542,\"duration\":1.94,\"stoppedAt\":null,\"loop\":false},{\"id\":\"kotaro_select\",\"start\":27.101,\"end\":29.041,\"duration\":1.94,\"stoppedAt\":null,\"loop\":false},{\"id\":\"kotaro_select\",\"start\":39.59,\"end\":41.53,\"duration\":1.94,\"stoppedAt\":null,\"loop\":false},{\"id\":\"akane_select\",\"start\":39.59,\"end\":41.019,\"duration\":1.429,\"stoppedAt\":null,\"loop\":false}]}},\"selDone\":[{\"id\":\"kotaro_select\",\"intact\":true},{\"id\":\"akane_select\",\"intact\":true}],\"readyHeard\":true}"
+    },
+    {
+      "name": "修正R3：メニュー復帰で声を持ち越さない",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "修正R5：予約29・現残1・待機28→12相殺→6受信。数字は待機22（消失対象を含めない）、爆発は相殺時の位置のまま画面内、小爆発が前面に描かれている（画素照合）",
+      "pass": true,
+      "detail": "{\"pending\":22,\"label\":\"22\",\"y0\":314,\"y1\":314,\"inScreen\":true,\"maxBottom\":356,\"burstFront\":{\"opaque\":16,\"bad\":0},\"after\":{\"vanish\":0,\"label\":\"22\"}}"
+    },
+    {
+      "name": "修正R5：2Pの爆発中にブロック開始 → 相殺した3の表示を即時打切り、有効な7だけで現ブロック（囲いあり）。数量は減らし直さず、演出は復活しない",
+      "pass": true,
+      "detail": "{\"vanishBefore\":6,\"vanishAfter\":0,\"blockStart\":7,\"icons\":2,\"frames\":1,\"xd\":0,\"inScreen\":true,\"blockIcon\":{\"opaque\":200,\"bad\":0},\"canceled\":3,\"revived\":0}"
+    },
+    {
+      "name": "v3.1.0 修正R1：開始前待機中は READY・GO とも描かない（最初・新ラウンド・再戦。画素照合、全位相）。待機後に既存の READY→GO へ進む",
+      "pass": true,
+      "detail": "{\"s0\":{\"frames\":60,\"drawn\":[],\"readyAfter\":true,\"tickMax\":0},\"s1\":{\"frames\":61,\"drawn\":[],\"readyAfter\":true,\"tickMax\":0},\"s2\":{\"frames\":60,\"drawn\":[],\"readyAfter\":true,\"tickMax\":0},\"round\":1}"
+    },
+    {
+      "name": "v3.1.0 開始前待機：表示後1000msはゲームを進めない（tick 0・READY前）。待機中の発射を解除後へ持ち越さない",
+      "pass": true,
+      "detail": "{\"h0\":{\"holding\":true,\"tick\":0},\"h1\":{\"holding\":true,\"tick\":0},\"voiceDuringHold\":0,\"released\":1016,\"after\":{\"launches\":0,\"tick\":107},\"readyAfter\":true}"
+    },
+    {
+      "name": "v3.1.0 ヒビ：数字セルの(2,0)へ重ね、数字の不透明部でマスク（全数字×3種×A/B/C で数字外0px・数字内に残る）。17px 縮小・複数桁でも外へ出ない",
+      "pass": true,
+      "detail": "{\"cases\":90,\"outside\":0,\"invisible\":[],\"outside17\":0,\"inside17\":56}"
+    },
+    {
+      "name": "v3.2.0 r 打上連鎖：採用画像（80×20）を左右の既存見出し領域へ原寸・画素一致で描画（透明余白を切り詰めない）。対戦では攻撃倍率の見出し・数値・「回」を描かない。倍率の計算は維持（12＝×1.25、19＝×1.75）",
+      "pass": true,
+      "detail": "{\"label0\":{\"opaque\":1244,\"bad\":0},\"label1\":{\"opaque\":1244,\"bad\":0},\"rects\":[{\"x\":24,\"y\":72,\"w\":80,\"h\":20,\"align\":\"left\"},{\"x\":536,\"y\":72,\"w\":80,\"h\":20,\"align\":\"right\"}],\"rateDiff\":0,\"mult\":[125,175]}"
+    },
+    {
+      "name": "v3.1.0 受攻撃ストックの中央配置：1P（予約29＋待機22＋相殺12）・2P（予約10＋待機11＋相殺3）とも中央エリア x264〜376・下端360以内。数字は列の中央側",
+      "pass": true,
+      "detail": "[{\"n\":8,\"minX\":269,\"maxX\":291,\"maxY\":322,\"label\":{\"text\":\"22\",\"x\":292,\"y\":250,\"align\":\"left\"}},{\"n\":8,\"minX\":349,\"maxX\":371,\"maxY\":226,\"label\":{\"text\":\"11\",\"x\":348,\"y\":186,\"align\":\"right\"}}]"
+    },
+    {
+      "name": "v3.1.0 ピンチの数字：残り猶予に同期して 3（枠なしS9、2Pの盤面上）を描画（画素一致）",
+      "pass": true,
+      "detail": "{\"pinch\":{\"value\":3,\"x\":400,\"y\":148,\"alpha\":1},\"px\":{\"opaque\":2383,\"bad\":0}}"
+    },
+    {
+      "name": "v3.2.0 対戦の最終結果：勝敗演出中は中央「対戦結果」を出さない（HUD見出しなし）。演出後の結果パネルに「対戦結果」（原寸・画素一致）と再戦・戻る",
+      "pass": true,
+      "detail": "{\"bannerDuring\":[\"null\",\"null\",\"null\",\"null\",\"null\",\"null\",\"null\",\"accept\"],\"heads\":{\"state\":\"matchResult\",\"match\":{\"opaque\":5947,\"bad\":0},\"choices\":[\"同じキャラで再戦\",\"キャラ選択へ\",\"メニューへ\"]}}"
+    },
+    {
+      "name": "v3.1.0 CPU対戦キャラ選択：キャンセルで「メニューに戻りますか？」（初期「戻らない」、背後は動かない）→ 戻らないで位置維持 → アカネで開始、相手はコタロー・READY担当も相手、CPU設定のキャラも一致",
+      "pass": true,
+      "detail": "{\"d0\":{\"dialog\":0,\"ch\":\"akane\"},\"d1\":{\"scene\":\"CpuCharacterSelectScene\",\"dialog\":null,\"ch\":\"akane\"},\"st\":{\"chars\":[\"akane\",\"kotaro\"],\"ann\":\"kotaro\",\"opp\":\"kotaro\",\"cpuChar\":\"kotaro\"}}"
+    },
+    {
+      "name": "パッド2台だけでキャラ選択→2P対戦（1P ずん子・2P コタロー）",
+      "pass": true,
+      "detail": "zunko,kotaro"
+    },
+    {
+      "name": "R2：パッド2台：1P確認中も 2P のパッドで移動・発射、1P の確認は動かない",
+      "pass": true,
+      "detail": "{\"pq0\":{\"dlg\":[[0,0]],\"sel\":2,\"n\":0},\"pq1\":{\"dlg\":[[0,0]],\"sel\":1,\"launch\":true}}"
+    },
+    {
+      "name": "パッドだけで終了確認「終了する」→メニュー",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "シングル：READY担当はコタロー、BGM single",
+      "pass": true,
+      "detail": "single,single,ready,kotaro_ready,go,kotaro_go"
+    },
+    {
+      "name": "打ち上げ成功SE：連続取得1→2で se_launch_success_01→02。旧成功音なし",
+      "pass": true,
+      "detail": "piece_launch,launch_success_1,piece_launch,launch_success_2"
+    },
+    {
+      "name": "v3.2.0 r GAME OVER：採用版 S9 の show_game_over A/B/C（切出し［0／160／320,192,160,64］）を結果パネルへ原寸描画（表示中の位相と画素一致）",
+      "pass": true,
+      "detail": "{\"A\":{\"rect\":[0,192,160,64],\"opaque\":7136,\"bad\":3982},\"B\":{\"rect\":[160,192,160,64],\"opaque\":7136,\"bad\":3982},\"C\":{\"rect\":[320,192,160,64],\"opaque\":7136,\"bad\":0}}"
+    },
+    {
+      "name": "ゲームオーバー：結果パネル（再挑戦／メニューへ）、クラッカーなし",
+      "pass": true,
+      "detail": "{\"outcome\":\"gameOver\",\"cracker\":null,\"choices\":[\"再挑戦\",\"メニューへ\"]}"
+    },
+    {
+      "name": "R3：ステージクリアで sfx_stage_clear が途中停止せず終端まで再生。シングル成功はクラッカーあり",
+      "pass": true,
+      "detail": "{\"outcome\":\"stageClear\",\"plan\":{\"kind\":\"stageClear\",\"winner\":0,\"loser\":null,\"startTick\":132,\"fallStartTick\":132,\"fallEndTick\":132,\"winnerTick\":132,\"crackerTick\":132,\"crackerToward\":0,\"acceptTick\":192},\"wait\":{\"ok\":true,\"waitedMs\":1310,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":85.882,\"nodes\":[{\"id\":\"stage_clear\",\"start\":84.762,\"end\":85.882,\"duration\":1.12,\"stoppedAt\":null,\"loop\":false}]}}}"
+    },
+    {
+      "name": "R3：最終面クリア＋全消し同時で sfx_all_stages_clear・sfx_all_clear とも終端まで再生",
+      "pass": true,
+      "detail": "{\"outcome\":\"allStagesClear\",\"wait\":{\"ok\":true,\"waitedMs\":2377,\"diag\":{\"decoded\":114,\"pendingDecode\":0,\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"ctxState\":\"running\",\"ctxTime\":91.002,\"nodes\":[{\"id\":\"all_clear\",\"start\":88.811,\"end\":89.53,\"duration\":0.72,\"stoppedAt\":null,\"loop\":false},{\"id\":\"all_stages_clear\",\"start\":88.811,\"end\":90.97,\"duration\":2.16,\"stoppedAt\":null,\"loop\":false}]}}}"
+    },
+    {
+      "name": "MODE2 シングル：42個から開始",
+      "pass": true,
+      "detail": "{\"mode\":\"mode2\",\"remaining\":42,\"n\":1}"
+    },
+    {
+      "name": "v3.2.0 MODE2 シングル：場の更新0回のクリアで「ノーリセットクリア」をクリア演出の中に付記し、達成回数を記録",
+      "pass": true,
+      "detail": "{\"outcome\":\"clear\",\"refresh\":0,\"label\":{\"text\":\"ノーリセットクリア！\",\"x\":160,\"y\":240},\"count\":1}"
+    },
+    {
+      "name": "MODE2 シングル：盤面を空にしてクリア",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "MODE2 CPU対戦：CPUが打ち上げて残数が減る",
+      "pass": true,
+      "detail": "{\"mode\":\"mode2\",\"r\":[42,25]}"
+    },
+    {
+      "name": "MODE2：両者（シングルは本人）が出せないと 3・2・1 のカウントダウン",
+      "pass": true,
+      "detail": "[3]"
+    },
+    {
+      "name": "MODE2 に MODE1 専用の処理・音（役・攻撃・相殺・危険・段階2以上の成功音）が混入しない",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "オプション：音／操作／対戦／表示／クレジット／遊び方／デモ再生／設定初期化／戻る",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "音量変更（BGM 100→90）が設定に保存される",
+      "pass": true,
+      "detail": "90"
+    },
+    {
+      "name": "声の再生中は BGM を −4dB 減衰し、終了後に戻す（ゲイン値の検査）",
+      "pass": true,
+      "detail": "{\"during\":0.6309573650360107,\"after\":1}"
+    },
+    {
+      "name": "表示設定：「収まる最大」と固定倍率。収まらない倍率は無効（選択不可）と表示",
+      "pass": true,
+      "detail": "画面表示倍率:収まる最大:false | ×3・×4（現在無効）:選択不可:true | 全画面:オフ:false | 出せるピースの表示:オン:false | 戻る:undefined:false"
+    },
+    {
+      "name": "クレジット画面へ",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "クレジット：左右でページ切替、URLを選んで決定で外部ブラウザ（window.open）、ページ位置を維持",
+      "pass": true,
+      "detail": "{\"urls\":[\"https://x.com/Vno_kotaro\"],\"page\":1,\"scene\":\"CreditsScene\"}"
+    },
+    {
+      "name": "遊び方：メインメニューの既存入口から目次へ",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "設定初期化の確認ダイアログ",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "タイトルの無操作20秒で暗転（600ms＋黒300ms）して放置デモ（マウス移動ではリセットしない）。最初は説明（基本操作）",
+      "pass": true,
+      "detail": "{\"leaving\":{\"scene\":\"TitleScene\",\"leaving\":450},\"idle\":{\"scene\":\"DemoScene\",\"by\":\"idle\",\"ch\":\"basic\"}}"
+    },
+    {
+      "name": "デモ中：保持入力（リピート）では終了せず、新しい決定入力で暗転→タイトル。その入力でメニューへ進まない",
+      "pass": true,
+      "detail": "{\"afterRepeat\":false,\"ending\":{\"ending\":true,\"phase\":\"fadeOut\"},\"scene\":\"TitleScene\"}"
+    },
+    {
+      "name": "タイトル：有効なキー入力で無操作時間をリセット",
+      "pass": true,
+      "detail": "50"
+    },
+    {
+      "name": "オプション「デモ再生」：最初の説明から。開始の決定・押したままのボタン・小さな傾きでは終了しない",
+      "pass": true,
+      "detail": "{\"opt\":{\"scene\":\"DemoScene\",\"by\":\"option\",\"ch\":\"basic\",\"ending\":false},\"drift\":false}"
+    },
+    {
+      "name": "パッドの新しいボタン押下で終了（暗転へ）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "マウスクリックで終了してタイトルへ",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "非アクティブ中は進行・音を止め、復帰でタイトルへ（本編は変更なし）",
+      "pass": true,
+      "detail": "{\"tick\":163,\"after\":163,\"logs\":0,\"bgm\":null}"
+    },
+    {
+      "name": "放置デモの章順：基本操作→4/4/6→ピンチ→SINGLE→対戦→タイトル（完走後はタイトルで20秒を再計測）",
+      "pass": true,
+      "detail": "basic,roles,pinch,single,versus → TitleScene"
+    },
+    {
+      "name": "4/4/6 教材（ブラウザ）：連続取得14回・役連鎖3回が実処理で成立",
+      "pass": true,
+      "detail": "{\"ch\":\"roles\",\"phase\":\"fadeOut\",\"maxStreak\":14,\"chains\":[1,2,3],\"gen\":2}"
+    },
+    {
+      "name": "修正R1：対戦デモの決着後、中央の「対戦結果」を描かない。左右の敗北（1P）／勝利（2P）は描き、敗者の落下・勝者ボイス・クラッカーは鳴る",
+      "pass": true,
+      "detail": "{\"winner\":1,\"banner\":null,\"match\":{\"opaque\":5947,\"bad\":5947},\"lose0\":{\"opaque\":7084,\"bad\":0},\"win1\":{\"opaque\":6419,\"bad\":0},\"log\":[\"character_fall\",\"zunko_win\",\"result_cracker\",\"character_fall\",\"zunko_win\",\"result_cracker\",\"character_fall\",\"result_cracker\",\"character_fall\",\"result_cracker\",\"character_fall\",\"result_cracker\",\"character_fall\",\"result_cracker\",\"result_cracker\",\"result_cracker\",\"character_fall\",\"akane_lose\",\"character_fall\",\"zunko_win\",\"result_cracker\",\"character_fall\",\"akane_lose\",\"character_fall\",\"zunko_win\",\"result_cracker\"]}"
+    },
+    {
+      "name": "暗転中も戻る案内を残し、形式の位置を保つ（シングル右下2行／対戦中央1行）。案内以外は黒",
+      "pass": true,
+      "detail": "{\"singleBlack\":{\"hint\":6148,\"outside\":0},\"versusHint\":15624,\"versusBlack\":{\"hint\":6148,\"outside\":0}}"
+    },
+    {
+      "name": "説明・案内の文字はすべて共通ビットマップフォント（採用版327字）に収録（代替描画なし）",
+      "pass": true,
+      "detail": "未収録："
+    },
+    {
+      "name": "役一覧：1役ずつ16役、役名ロゴは本体の表示名対応どおり（R01〜R16）",
+      "pass": true,
+      "detail": "[[[0],1,0],[[1],1,0],[[2],1,0],[[3],2,1],[[4],3,2],[[5],3,2],[[6],3,2],[[7],1,0],[[8],1,0],[[9],1,0],[[10],1,0],[[11],2,1],[[12],3,2],[[13],4,3],[[14],5,4],[[15],6,5]]"
+    },
+    {
+      "name": "役一覧の値は本体の役データ：フォーカード消去1/基本攻撃0、フラッシュ3/2、スーパーストレート3/2",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "遊び方：戻るで目次→呼出元（メインメニュー／オプション）へ。放置デモのタイトル復帰と混同しない",
+      "pass": true,
+      "detail": "HelpMenuScene,MenuScene,HelpMenuScene,OptionsScene"
+    },
+    {
+      "name": "v3.2.0 メインメニュー最上位の戻る（Esc）でタイトルへ。無操作デモ待機は0から。戻る入力でメニューへ再進入しない",
+      "pass": true,
+      "detail": "{\"t1\":{\"scene\":\"TitleScene\",\"idle\":283.1999999999971},\"t2\":\"TitleScene\"}"
+    },
+    {
+      "name": "v3.2.0 遊び方目次の順「操作一覧→基本操作→連鎖説明→役一覧→MODE1→MODE2」と各行き先",
+      "pass": true,
+      "detail": "[\"HelpScene:\",\"HelpLessonScene:LessonStage\",\"HelpLessonScene:LessonStage\",\"RoleListScene:\",\"HelpLessonScene:LessonStage\",\"HelpLessonScene:Mode2Stage\"]"
+    },
+    {
+      "name": "v3.2.0 r 連鎖説明：「打上連鎖で／攻撃力アップ」を本文領域内に原寸表示（右端・外枠へはみ出さない）",
+      "pass": true,
+      "detail": "{\"sr\":{\"page\":\"streak_rate\"},\"srBody\":{\"inside\":1204,\"outside\":0}}"
+    },
+    {
+      "name": "v3.2.0 r MODE2冒頭：4行「６列から選んで／場へ出そう／となりの数字なら／成功！」を本文領域内に原寸表示（4行目 y236〜252、例／戻る案内 y266・y310 と重ならない）",
+      "pass": true,
+      "detail": "{\"m2Lines\":\"m2_intro\",\"m2Body\":{\"inside\":1326,\"outside\":0}}"
+    },
+    {
+      "name": "v3.2.0 MODE2説明：固定盤面・固定入力を通常の Mode2Game へ渡し、場の更新1回（カウントダウン中）→同じ記号→同じ数字→1と6→クリア条件→クリア→対戦の補足→「もう一度／戻る」。頁は実イベント順",
+      "pass": true,
+      "detail": "{\"a\":{\"page\":\"m2_refresh\",\"pages\":[\"m2_intro\",\"m2_refresh\"],\"tick\":103,\"elapsed\":516.6666666666667,\"refresh\":0,\"remaining\":41,\"result\":null,\"problems\":[],\"choice\":null},\"b\":{\"page\":\"m2_suit\",\"pages\":[\"m2_intro\",\"m2_refresh\",\"m2_suit\"],\"tick\":283,\"elapsed\":3516.666666666667,\"refresh\":1,\"remaining\":41,\"result\":null,\"problems\":[],\"choice\":null},\"c\":{\"page\":\"m2_rule\",\"pages\":[\"m2_intro\",\"m2_refresh\",\"m2_suit\",\"m2_number\",\"m2_adjacent\",\"m2_rule\"],\"tick\":380,\"elapsed\":5133.333333333334,\"refresh\":1,\"remaining\":38,\"result\":null,\"problems\":[],\"choice\":null},\"d\":{\"page\":\"m2_clear\",\"pages\":[\"m2_intro\",\"m2_refresh\",\"m2_suit\",\"m2_number\",\"m2_adjacent\",\"m2_rule\",\"m2_clear\"],\"tick\":1748,\"elapsed\":27933.333333333336,\"refresh\":1,\"remaining\":0,\"result\":\"clear\",\"problems\":[],\"choice\":null},\"e\":{\"page\":\"m2_versus\",\"pages\":[\"m2_intro\",\"m2_refresh\",\"m2_suit\",\"m2_number\",\"m2_adjacent\",\"m2_rule\",\"m2_clear\",\"m2_versus\"],\"tick\":1748,\"elapsed\":27933.333333333336,\"refresh\":1,\"remaining\":0,\"result\":\"clear\",\"problems\":[],\"choice\":0}}"
+    },
+    {
+      "name": "v3.2.0 説明パネルの不要な内線を描かない（外枠は維持）：横線 y164 が面の色",
+      "pass": true,
+      "detail": "違う画素 0/168"
+    },
+    {
+      "name": "v3.2.0 r MODE2説明・目次の文字：すべて採用フォントに収録（代替描画なし）",
+      "pass": true,
+      "detail": "未収録："
+    },
+    {
+      "name": "v3.2.0 補助表示：既定ON、人間（1P）の出せる最上段を囲む。本編SINGLEの情報枠の線は維持",
+      "pass": true,
+      "detail": "{\"on\":true,\"hud\":[0],\"targets\":2,\"singleRule\":168}"
+    },
+    {
+      "name": "v3.2.0 r 役名 role_15（r2）：切出し［480,576／640／704,160,64］のまま、宣言時の表示が A・B・C の各位相と画素一致",
+      "pass": true,
+      "detail": "{\"frames\":{\"A\":[480,576,160,64],\"B\":[480,640,160,64],\"C\":[480,704,160,64]},\"seen\":{\"A\":true,\"C\":true,\"B\":true}}"
+    },
+    {
+      "name": "音声の有効化前でもデモは進行し、未解除の無音（locked）と素材欠落（missing）を区別して記録",
+      "pass": true,
+      "detail": "{\"unlocked\":false,\"ch\":\"basic\",\"tick\":630,\"locked\":8,\"missing\":0,\"total\":8}"
+    },
+    {
+      "name": "B6 DPR 1：収まる最大＝実画素2倍（バッファ1280・CSS 1280px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替",
+      "pass": true,
+      "detail": "{\"fit\":{\"n\":2,\"mode\":\"fit\",\"bufW\":1280,\"cssW\":1280,\"dpr\":1,\"setting\":0},\"fixed\":[[1,\"fixed\",1,1],[2,\"fixed\",2,2],[3,\"fit\",2,0],[4,\"fit\",2,0]]}"
+    },
+    {
+      "name": "B6 DPR 1.25：収まる最大＝実画素2倍（バッファ1280・CSS 1024px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替",
+      "pass": true,
+      "detail": "{\"fit\":{\"n\":2,\"mode\":\"fit\",\"bufW\":1280,\"cssW\":1024,\"dpr\":1.25,\"setting\":0},\"fixed\":[[1,\"fixed\",1,1],[2,\"fixed\",2,2],[3,\"fit\",2,0],[4,\"fit\",2,0]]}"
+    },
+    {
+      "name": "B6 DPR 1.5：収まる最大＝実画素3倍（バッファ1920・CSS 1280px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替",
+      "pass": true,
+      "detail": "{\"fit\":{\"n\":3,\"mode\":\"fit\",\"bufW\":1920,\"cssW\":1280,\"dpr\":1.5,\"setting\":0},\"fixed\":[[1,\"fixed\",1,1],[2,\"fixed\",2,2],[3,\"fixed\",3,3],[4,\"fit\",3,0]]}"
+    },
+    {
+      "name": "B6 DPR 2：収まる最大＝実画素4倍（バッファ2560・CSS 1280px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替",
+      "pass": true,
+      "detail": "{\"fit\":{\"n\":4,\"mode\":\"fit\",\"bufW\":2560,\"cssW\":1280,\"dpr\":2,\"setting\":0},\"fixed\":[[1,\"fixed\",1,1],[2,\"fixed\",2,2],[3,\"fixed\",3,3],[4,\"fixed\",4,4]]}"
+    },
+    {
+      "name": "ウィンドウ縮小で固定3倍が収まらなくなると「収まる最大」（2倍）へ切替え、設定も0へ（スクロールなし）",
+      "pass": true,
+      "detail": "{\"big\":{\"n\":3,\"mode\":\"fixed\",\"bufW\":1920,\"cssW\":1920,\"dpr\":1,\"setting\":3},\"shrunk\":{\"n\":2,\"mode\":\"fit\",\"bufW\":1280,\"cssW\":1280,\"dpr\":1,\"setting\":0}}"
+    },
+    {
+      "name": "DPR変更（1→2）を検知して実画素倍率を選び直す（収まる最大＝4倍・CSS 1280px）",
+      "pass": true,
+      "detail": "{\"n\":4,\"mode\":\"fit\",\"bufW\":2560,\"cssW\":1280,\"dpr\":2,\"setting\":0}"
+    },
+    {
+      "name": "1倍も収まらない時だけ緊急縮小（通知あり）",
+      "pass": true,
+      "detail": "{\"n\":1,\"mode\":\"emergency\",\"bufW\":640,\"cssW\":500,\"dpr\":1,\"setting\":0}"
+    },
+    {
+      "name": "全画面の切替（ヘッドレスでの要求・解除と倍率再計算。実機の全画面表示は未検証）",
+      "pass": true,
+      "detail": "{\"on\":true,\"off\":true,\"mode\":\"fit\"}"
+    },
+    {
+      "name": "描画ループ稼働",
+      "pass": true,
+      "detail": "fps≒61"
+    },
+    {
+      "name": "［フォールバック］音声：未配置はBGMのみ、SE・ボイス114本はデコード成功",
+      "pass": true,
+      "detail": "{\"missing\":[\"bgm/bgm_menu.wav\",\"bgm/bgm_puzzle_single.wav\",\"bgm/bgm_puzzle_versus.wav\"],\"decoded\":114,\"state\":\"running\"}"
+    },
+    {
+      "name": "v3.1.0 ピンチボイス3本：実デコード・再生ノード作成・実尺どおり。READY 中は鳴らさない（状態確認。聴感は未確認）",
+      "pass": true,
+      "detail": "{\"out\":[{\"c\":\"kotaro\",\"played\":true,\"dur\":1.53,\"durMs\":1530},{\"c\":\"akane\",\"played\":true,\"dur\":1.306893,\"durMs\":1306.8934240362812},{\"c\":\"zunko\",\"played\":true,\"dur\":1.170204,\"durMs\":1170.204081632653}],\"busy\":false,\"missing\":[]}"
+    },
+    {
+      "name": "旧成功音・旧成立音・連鎖音は一度も要求されない（新旧SEの二重発音なし）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "コンソールエラー/警告なし（フォールバック：BGM・フォント未配置の404を除く）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ネットワーク失敗・4xx/5xxなし（フォールバック：BGM・フォント未配置の404を除く）",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "screenshots": [
+    "screens/S01_title.png",
+    "screens/S02_menu.png",
+    "screens/S03_menu_mode1.png",
+    "screens/S08_versus_stock_block_and_pending.png",
+    "screens/S08_role_chain.png",
+    "screens/S26_confirm_quit.png",
+    "screens/S13_round_result_motion.png",
+    "screens/S13_round_result_fall.png",
+    "screens/S13_round_result_winner_cracker.png",
+    "screens/S14_cpu_win.png",
+    "screens/S08_versus_kotaro_zunko.png",
+    "screens/S14_cpu_lose.png",
+    "screens/S05_character_select.png",
+    "screens/S05_character_select_locked.png",
+    "screens/S11_ready.png",
+    "screens/S11_go.png",
+    "screens/S15_2p_result.png",
+    "screens/S04_menu_mode1_from_select.png",
+    "screens/R5_a0_cancel12.png",
+    "screens/R5_a1_receive6_during_burst.png",
+    "screens/R5_a2_after_160ms.png",
+    "screens/R5_b0_p2_cancel3.png",
+    "screens/R5_b1_p2_block_start_cut.png",
+    "screens/V310_hud_stock_pinch.png",
+    "screens/V310_versus_live.png",
+    "screens/V310_round_result_ja.png",
+    "screens/V310_match_result_ja.png",
+    "screens/V310_cpu_select_cancel_dialog.png",
+    "screens/V310_cpu_select_akane.png",
+    "screens/S06_endless.png",
+    "screens/S17_game_over.png",
+    "screens/S07_stage_start.png",
+    "screens/S07_stage.png",
+    "screens/S16_stage_clear.png",
+    "screens/S16_all_stages.png",
+    "screens/S09_mode2_single.png",
+    "screens/S18_mode2_clear.png",
+    "screens/S10_mode2_versus.png",
+    "screens/S12_countdown.png",
+    "screens/S19_options.png",
+    "screens/S20_sound.png",
+    "screens/S21_controls.png",
+    "screens/S22_match_settings.png",
+    "screens/S23_display_settings.png",
+    "screens/S24_credits.png",
+    "screens/S24_credits_links.png",
+    "screens/S25_help.png",
+    "screens/S26_confirm_reset.png",
+    "screens/DEMO_blackout_single.png",
+    "screens/DEMO_versus.png",
+    "screens/DEMO_versus_result.png",
+    "screens/DEMO_blackout_versus.png",
+    "screens/DEMO_roles_lesson.png",
+    "screens/DEMO_single_auto.png",
+    "screens/HELP_roles_16.png",
+    "screens/V320_help_menu.png",
+    "screens/V320R_streak_rate_page.png",
+    "screens/V320_mode2_lesson_intro.png",
+    "screens/V320_mode2_lesson_countdown.png",
+    "screens/V320_mode2_lesson_suit.png",
+    "screens/V320_mode2_lesson_rule.png",
+    "screens/V320_mode2_lesson_clear.png",
+    "screens/V320_mode2_lesson_choice.png",
+    "screens/V320_assist_single.png",
+    "screens/V320R_role15_A.png",
+    "screens/V320R_role15_C.png",
+    "screens/V320R_role15_B.png",
+    "screens/B6_dpr1.25_fixed2.png",
+    "screens/B6_switched_to_fit_notice.png",
+    "screens/B6_emergency.png"
+  ]
+}

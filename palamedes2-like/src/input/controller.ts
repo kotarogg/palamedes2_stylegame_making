@@ -1,12 +1,16 @@
 // 1P/2P・CPUが共通で使う入力窓口。キーボード・ゲームパッドとも割当変更可能（確定）。
 import type { Action, Command } from '../core/game';
+import type { StepInfo } from '../core/driver';
 import type { AnyGame } from '../core/match';
 import type { PlayerId } from '../core/types';
 
 export interface Controller {
   readonly player: PlayerId;
-  /** 次のtickで適用するコマンドを返す（呼ばれるたびに消費） */
-  poll(game: AnyGame): Command[];
+  /**
+   * 次のtickで適用するコマンドを返す（呼ばれるたびに消費）。
+   * info（v3.2.0 r）：このtickが表す実時刻とフレーム内の最後のtickか。無ければ溜まった入力をすべて返す
+   */
+  poll(game: AnyGame, info?: StepInfo): Command[];
   /** 新ラウンド・再戦・次の相手の開始時：前のゲームの入力・計画・時刻を持ち越さない（B1） */
   reset?(): void;
 }
@@ -137,7 +141,8 @@ export function assignKey(all: KeyBindings[], player: PlayerId, action: Action, 
 
 /** キーボード1系統分。keydown を次tickまでキューに積む */
 export class KeyboardController implements Controller {
-  private queue: Command[] = [];
+  /** 受けたコマンドとキーイベントの時刻（event.timeStamp、performance.now と同じ基準。無ければ null） */
+  private queue: { cmd: Command; at: number | null }[] = [];
   private lookup = new Map<string, Action>();
 
   constructor(
@@ -158,21 +163,21 @@ export class KeyboardController implements Controller {
   }
 
   /** 処理したキーなら true */
-  handleKey(code: string, repeat: boolean): boolean {
+  handleKey(code: string, repeat: boolean, at: number | null = null): boolean {
     const action = this.lookup.get(code);
     if (!action) return false;
     // キーリピートは左右移動のみ（他の操作は押すたびに1回）
     if (repeat && action !== 'left' && action !== 'right') return true;
     // v3.2.0：リピートは新しい押下と区別して渡す（予約の上書き・期限延長をしない）
-    this.queue.push(repeat ? { player: this.player, type: action, repeat: true } : { player: this.player, type: action });
+    this.queue.push({ cmd: repeat ? { player: this.player, type: action, repeat: true } : { player: this.player, type: action }, at });
     return true;
   }
 
   /** v3.2.0 キーを離した：左右なら自動反復でできた移動予約を捨てる指示を渡す。処理したキーなら true */
-  handleKeyUp(code: string): boolean {
+  handleKeyUp(code: string, at: number | null = null): boolean {
     const action = this.lookup.get(code);
     if (!action) return false;
-    if (action === 'left' || action === 'right') this.queue.push({ player: this.player, type: 'cancelRepeat' });
+    if (action === 'left' || action === 'right') this.queue.push({ cmd: { player: this.player, type: 'cancelRepeat' }, at });
     return true;
   }
 
@@ -184,10 +189,21 @@ export class KeyboardController implements Controller {
     this.queue = [];
   }
 
-  poll(): Command[] {
-    const out = this.queue;
-    this.queue = [];
-    return out;
+  /**
+   * v3.2.0 r（低fps時の入力受付）：フレーム間に受けたキーを追いつき処理の最初のtickへ一律に入れず、
+   * イベント時刻がそのtickの実時刻以前のものだけを渡す。フレーム最後のtickでは残りをすべて渡す（遅延を足さない）。
+   * 時刻の無い入力（テスト・自動検証）と、tickの時刻が無い呼出しは従来どおり即時。順序は保つ
+   */
+  poll(_game?: AnyGame, info?: StepInfo): Command[] {
+    if (!info || info.at === null || info.last) {
+      const out = this.queue.map((q) => q.cmd);
+      this.queue = [];
+      return out;
+    }
+    const at = info.at;
+    let n = 0;
+    while (n < this.queue.length && (this.queue[n].at === null || this.queue[n].at! <= at)) n++;
+    return this.queue.splice(0, n).map((q) => q.cmd);
   }
 }
 
@@ -249,7 +265,12 @@ export class GamepadController implements Controller {
     this.confirmPressed = false;
   }
 
-  poll(): Command[] {
+  /**
+   * v3.2.0 r：パッドは押下時刻が分からないため、状態を観測したフレームの最後のtickで読む（観測より前の時刻を推測しない）。
+   * 1フレーム1tick（60fps）では従来と同じ。info が無い呼出しは従来どおり毎回読む
+   */
+  poll(_game?: AnyGame, info?: StepInfo): Command[] {
+    if (info && !info.last) return [];
     const s = this.source(this.padIndex);
     const out: Command[] = [];
     if (!s) return out;

@@ -129,7 +129,7 @@
     {
       "id": "label_launch_streak",
       "file": "assets/label_launch_streak.png",
-      "purpose": "連続出し",
+      "purpose": "打上連鎖",
       "classification": "new_candidate",
       "canvas": [
         80,
@@ -150,25 +150,18 @@
         10
       ],
       "ink_box": [
-        1,
+        2,
         0,
-        80,
+        76,
         19
       ],
-      "colors_excluding_transparent": 16,
+      "colors_excluding_transparent": 9,
       "palette": [
         "#08172b",
-        "#1376c2",
-        "#1453a0",
         "#16b6dc",
         "#25cbd5",
         "#53cdbc",
-        "#58d4e2",
         "#84cba2",
-        "#90e3df",
-        "#b5cf8d",
-        "#d0efdc",
-        "#f5af24",
         "#ffc940",
         "#ffdf70",
         "#fff0ac",
@@ -179,7 +172,7 @@
         255
       ],
       "color_space": "sRGB PNG chunk rendering_intent=0",
-      "sha256": "9e511e7129a803b43ea5092a325c2e3a33ba2c55b942938383da154c13cf9119"
+      "sha256": "8fc4d94c4434327bd9d196fbffba25f619a9bc9fc7a5d8e22915818de492434d"
     },
     {
       "id": "label_role_chain",

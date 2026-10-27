@@ -172,3 +172,230 @@ describe('v3.2.0 先行入力：フレームレート別（30/60/120fps・低fps
     }
   });
 });
+
+describe.each(games())('%s：v3.2.0 r 移動予約の消費順（当該tickの解除・新規方向を旧予約より先に反映）', (_name, make) => {
+  const C = (): Command => ({ player: 0, type: 'cancelRepeat' });
+  type MoveEv = { type: string; tick: number; from: number; to: number };
+  const moves = (g: Any) => (g as unknown as { events: MoveEv[] }).events.filter((e) => e.type === 'move');
+  /** 3列目へ1歩移動中（E＝次に移動できるtick）。以後の移動イベントだけを見る */
+  const setup = () => {
+    const g = make();
+    const e = startMove(g); // 2→3
+    const before = moves(g).length;
+    return { g, e, after: () => moves(g).slice(before) };
+  };
+
+  it('① E−1 に右の反復で予約し、E で解除：右へ動かない（解除が先）', () => {
+    const { g, e, after } = setup();
+    stepTo(g, e - 1, [R(true)]);
+    stepTo(g, e, [C()]);
+    finish(g);
+    expect(after()).toEqual([]);
+    expect(g.players[0].selectedCol).toBe(3);
+    expect(g.inputLog.some((x) => x.event === 'discard' && x.reason === 'released' && x.tick === e)).toBe(true);
+  });
+
+  it('② E−1 に右を予約し、E で左を押す：古い右へ動かず、E に左へ1回だけ（切り返しの往復なし）', () => {
+    for (const dt of [-1, -2]) {
+      const { g, e, after } = setup();
+      stepTo(g, e + dt, [R()]);
+      stepTo(g, e, [L()]);
+      finish(g);
+      expect(after().map((m) => [m.tick, m.from, m.to]), `dt=${dt}`).toEqual([[e, 3, 2]]);
+      expect(g.inputLog.some((x) => x.event === 'discard' && x.action === 'right' && x.reason === 'overwritten' && x.tick === e)).toBe(true);
+      expect(g.inputLog.some((x) => x.event === 'consume' && x.action === 'right')).toBe(false);
+    }
+  });
+
+  it('期限境界：E−2 の予約は E に1回、E−3 は期限切れ（E で別入力がなければ）', () => {
+    const a = setup();
+    stepTo(a.g, a.e - 2, [R()]);
+    finish(a.g);
+    expect(a.after().map((m) => [m.tick, m.to])).toEqual([[a.e, 4]]);
+    const b = setup();
+    stepTo(b.g, b.e - 3, [R()]);
+    finish(b.g);
+    expect(b.after()).toEqual([]);
+    expect(b.g.inputLog.some((x) => x.reason === 'expired')).toBe(true);
+  });
+
+  it('E で左右を同時に新規押下：中立。古い方向の予約も実行しない', () => {
+    const { g, e, after } = setup();
+    stepTo(g, e - 1, [R()]);
+    stepTo(g, e, [L(), R()]);
+    finish(g);
+    expect(after()).toEqual([]);
+    expect(g.inputLog.filter((x) => x.reason === 'simultaneous').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('移動中に左右を同時に新規押下：中立。それまでの方向予約も捨てる', () => {
+    const { g, e, after } = setup();
+    stepTo(g, e - 2, [R()]);
+    stepTo(g, e - 1, [L(), R()]);
+    finish(g);
+    expect(after()).toEqual([]);
+  });
+
+  it('明示的な短押しは、離しても2tickの期限内は有効（E−1 に押し、E に解除しても E に1回動く）', () => {
+    const { g, e, after } = setup();
+    stepTo(g, e - 1, [R()]);
+    stepTo(g, e, [C()]);
+    finish(g);
+    expect(after().map((m) => [m.tick, m.to])).toEqual([[e, 4]]);
+  });
+
+  it('反復との競合：同じtickに反復→解除の順で届いたら予約を作らない。反復は短押しの予約を上書きしない', () => {
+    const a = setup();
+    stepTo(a.g, a.e - 1, [R(true), C()]);
+    finish(a.g);
+    expect(a.after()).toEqual([]);
+    const b = setup();
+    stepTo(b.g, b.e - 2, [L()]);
+    stepTo(b.g, b.e - 1, [R(true)]);
+    finish(b.g);
+    expect(b.after().map((m) => [m.tick, m.to])).toEqual([[b.e, 2]]);
+  });
+
+  it('1入力は1回だけ実行。移動の周期は変えない（E に開始し、次の移動可能tickは E＋移動時間）', () => {
+    const { g, e, after } = setup();
+    stepTo(g, e - 1, [R()]);
+    finish(g);
+    const m = after();
+    expect(m).toHaveLength(1);
+    expect(g.players[0].charMoveEndTick - e).toBe(e - (e - 5));
+  });
+});
+
+describe('v3.2.0 r 低fps時の入力受付（案A：入力時刻と固定ステップの対応）', () => {
+  /**
+   * 実際の経路：キーは押下時刻（event.timeStamp）付きで積み、フレームごとの追いつき処理（FixedStepDriver に nowMs）で
+   * 各tickの実時刻以前の入力だけをそのtickへ渡す。フレーム最後のtickでは残りを渡す（遅延を足さない）。
+   * 期待：受付tick＝「実時刻が押下時刻以上の最初のtick（無ければフレーム最後のtick）」。E−2 以上なら E に1回、それより前は期限切れ
+   */
+  /** 同じ fps・位相で、最初の右（時刻 t0）→ 2回目の右（時刻 press。null なら押さない）をフレーム処理で流す */
+  async function sim(make: () => Any, fps: number, phase: number, press: number | null) {
+    const { KeyboardController } = await import('../src/input/controller');
+    const { FixedStepDriver } = await import('../src/core/driver');
+    const g = make();
+    const kb = new KeyboardController(0);
+    const tickAt = new Map<number, number>();
+    const lastOfFrame = new Set<number>();
+    const driver = new FixedStepDriver({
+      tickMs: 1000 / 60,
+      step: (info) => {
+        const t = g.tick + 1;
+        tickAt.set(t, info!.at!);
+        if (info!.last) lastOfFrame.add(t);
+        g.step(kb.poll(undefined, info));
+      },
+    });
+    const frame = 1000 / fps;
+    let now = 1000 + phase * frame;
+    driver.advance(0, now);
+    const keys: [number, string][] = [[now + 5, 'KeyD'], ...(press === null ? [] : ([[press, 'KeyD']] as [number, string][]))];
+    let queuedAfter = -1;
+    while (now < 1700) {
+      const next = now + frame;
+      for (const [at, code] of keys)
+        if (at > now && at <= next) {
+          kb.handleKey(code, false, at);
+          if (at === press) queuedAfter = g.tick;
+        }
+      now = next;
+      driver.advance(frame, now);
+    }
+    return { g, tickAt, lastOfFrame, queuedAfter };
+  }
+
+  it.each([15, 30, 60, 120, 144])('%sfps・位相4通り：押下時刻に対応するtickで受け付け、E−2 以上なら E に1回（2列移動なし）。実時間の窓は約33ms', async (fps) => {
+    for (const [name, make] of games()) {
+      let executedUpTo = -1;
+      let expiredFrom = Infinity;
+      for (const phase of [0, 0.25, 0.5, 0.75]) {
+        // 1回目：最初の移動の開始tick と E の実時刻
+        const base = await sim(make, fps, phase, null);
+        const mv = (base.g as unknown as { events: { type: string; tick: number; endTick: number }[] }).events.find((e) => e.type === 'move')!;
+        const E = mv.endTick;
+        const tE = base.tickAt.get(E)!;
+        const tStart = base.tickAt.get(mv.tick)!;
+        for (let lead = 0; lead <= 70; lead += 1) {
+          const press = tE - lead;
+          if (press <= tStart) continue; // 最初の移動より前の押下は対象外
+          const r = await sim(make, fps, phase, press);
+          const moved = r.g.players[0].selectedCol - base.g.players[0].selectedCol;
+          // 期待の受付tick：押下を積んだ後のtickのうち、実時刻が押下時刻以上の最初のtick。
+          // それより先にフレーム最後のtickが来れば、そこで渡す（次フレームへ遅らせない＝遅延を足さない）
+          const ticks = [...r.tickAt.keys()].sort((x, y) => x - y).filter((t) => t > r.queuedAfter);
+          const acc = ticks.find((t) => r.tickAt.get(t)! >= press || r.lastOfFrame.has(t))!;
+          const expectMove = acc >= E - 2 ? 1 : 0;
+          expect(moved, `${name} ${fps}fps phase${phase} lead${lead} accept${acc} E${E}`).toBe(expectMove);
+          // 受付の記録（buffer／expired／consume）が期待tickと一致
+          const first = r.g.inputLog.find((x) => x.action === 'right' && x.tick > r.queuedAfter);
+          if (acc < E) expect(first?.tick, `${name} ${fps}fps lead${lead}`).toBe(acc);
+          if (moved) executedUpTo = Math.max(executedUpTo, lead);
+          else expiredFrom = Math.min(expiredFrom, lead);
+        }
+      }
+      expect(executedUpTo, `${name} ${fps}fps`).toBeGreaterThanOrEqual(33);
+      expect(expiredFrom, `${name} ${fps}fps`).toBeGreaterThan(33);
+      expect(expiredFrom, `${name} ${fps}fps`).toBeLessThanOrEqual(51);
+    }
+  });
+
+  it.each([15, 30, 60, 120, 144])('%sfps：各tickの実時刻はフレームをまたいで単調に tickMs ずつ進み、フレーム時刻を超えない', async (fps) => {
+    const { FixedStepDriver } = await import('../src/core/driver');
+    const at: number[] = [];
+    const lastFlags: boolean[] = [];
+    let frameNow = 0;
+    const d = new FixedStepDriver({
+      tickMs: 1000 / 60,
+      step: (info) => {
+        expect(info!.at!).toBeLessThanOrEqual(frameNow + 1e-6);
+        at.push(info!.at!);
+        lastFlags.push(info!.last);
+      },
+    });
+    for (let i = 1; i <= 120; i++) {
+      frameNow = 500 + (i * 1000) / fps + (i % 3) * 0.7; // 揺らぎのあるフレーム間隔
+      d.advance(i === 1 ? (1000 / fps) : frameNow - (500 + ((i - 1) * 1000) / fps + ((i - 1) % 3) * 0.7), frameNow);
+    }
+    for (let i = 1; i < at.length; i++) expect(at[i] - at[i - 1]).toBeCloseTo(1000 / 60, 6);
+    expect(lastFlags.filter(Boolean).length).toBeGreaterThan(0);
+  });
+
+  it('同じフレーム内の押下→解除・切り返しは、時刻順にそれぞれのtickへ渡す（15fps・1フレーム4tick）', async () => {
+    const { KeyboardController } = await import('../src/input/controller');
+    const kb = new KeyboardController(0);
+    kb.handleKey('KeyD', false, 100);
+    kb.handleKeyUp('KeyD', 120);
+    kb.handleKey('KeyA', false, 140);
+    // フレームの4tick（実時刻 110, 126.7, 143.3, 160）
+    expect(kb.poll(undefined, { at: 110, last: false }).map((c) => c.type)).toEqual(['right']);
+    expect(kb.poll(undefined, { at: 126.7, last: false }).map((c) => c.type)).toEqual(['cancelRepeat']);
+    expect(kb.poll(undefined, { at: 143.3, last: false }).map((c) => c.type)).toEqual(['left']);
+    expect(kb.poll(undefined, { at: 160, last: true })).toEqual([]);
+    // フレーム最後のtickより後の時刻の入力も、最後のtickで渡す（次フレームへ遅らせない）
+    kb.handleKey('KeyD', false, 170);
+    expect(kb.poll(undefined, { at: 160, last: false })).toEqual([]);
+    expect(kb.poll(undefined, { at: 160, last: true }).map((c) => c.type)).toEqual(['right']);
+    // 時刻の無い呼出し（開始前待機の読み捨てなど）は全部渡す
+    kb.handleKey('KeyA', false, 999);
+    expect(kb.poll().map((c) => c.type)).toEqual(['left']);
+  });
+
+  it('パッド：押下時刻は分からないため推測しない。観測したフレームの最後のtickで渡す（60fps＝1フレーム1tickは従来と同じ）', async () => {
+    const { GamepadController } = await import('../src/input/controller');
+    let pressed = false;
+    const pad = new GamepadController(0, 0, undefined, () => ({ buttons: Array.from({ length: 16 }, (_, i) => ({ pressed: pressed && i === 15 })), axes: [0, 0] }), () => 0);
+    pressed = true;
+    // 15fps：1フレーム4tick。最初の3tickでは読まず、最後のtickで新規押下として1回
+    expect(pad.poll(undefined, { at: 1, last: false })).toEqual([]);
+    expect(pad.poll(undefined, { at: 2, last: false })).toEqual([]);
+    expect(pad.poll(undefined, { at: 3, last: false })).toEqual([]);
+    expect(pad.poll(undefined, { at: 4, last: true }).map((c) => c.type)).toEqual(['right']);
+    // 次のフレームも押したまま：新規押下にしない
+    expect(pad.poll(undefined, { at: 5, last: true })).toEqual([]);
+    pressed = false;
+    expect(pad.poll(undefined, { at: 6, last: true }).map((c) => c.type)).toEqual(['cancelRepeat']);
+  });
+});

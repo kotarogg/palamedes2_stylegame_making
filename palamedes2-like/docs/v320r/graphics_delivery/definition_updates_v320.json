@@ -1,0 +1,116 @@
+{
+  "status": "PM評価後にプログラマが適用する差分。今回未適用。",
+  "source_commit": "9f1ba45e5fd116c028ab10abc30b145a0c27b82a",
+  "updates": [
+    {
+      "target": "gfx/data/tutorial_assets.json",
+      "source_sha256": "bc60b58c1449d8d25cd3bc796f53a45d2235f9f2b9bd8d07fa5261e9a7404323",
+      "operations": [
+        {
+          "op": "test",
+          "path": "/assets/0/dimensions",
+          "value": [
+            512,
+            160
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/assets/0/dimensions",
+          "value": [
+            512,
+            176
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/assets/0/sha256",
+          "value": "cf1e34465edee757215837a73c9a651689a327ba1e948becff06fe2bbe118546"
+        },
+        {
+          "op": "replace",
+          "path": "/assets/0/glyph_count",
+          "value": 327
+        }
+      ]
+    },
+    {
+      "target": "gfx/data/additional_assets_v310.json",
+      "source_sha256": "968a3ff46391a0b061e5c9a2efd0d77317d726e78b6a6417c0244c14b4a26aba",
+      "operations": [
+        {
+          "op": "test",
+          "path": "/assets/3/sha256",
+          "value": "9e511e7129a803b43ea5092a325c2e3a33ba2c55b942938383da154c13cf9119"
+        },
+        {
+          "op": "replace",
+          "path": "/assets/3/sha256",
+          "value": "8fc4d94c4434327bd9d196fbffba25f619a9bc9fc7a5d8e22915818de492434d"
+        },
+        {
+          "op": "replace",
+          "path": "/assets/3/ink_box",
+          "value": [
+            2,
+            0,
+            76,
+            19
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/assets/3/purpose",
+          "value": "打上連鎖"
+        },
+        {
+          "op": "replace",
+          "path": "/assets/3/colors_excluding_transparent",
+          "value": 9
+        },
+        {
+          "op": "replace",
+          "path": "/assets/3/palette",
+          "value": [
+            "#08172b",
+            "#16b6dc",
+            "#25cbd5",
+            "#53cdbc",
+            "#84cba2",
+            "#ffc940",
+            "#ffdf70",
+            "#fff0ac",
+            "#fff8d9"
+          ]
+        }
+      ]
+    },
+    {
+      "target": "gfx/data/graphics_manifest_v3.json",
+      "source_sha256": "e768d0f256750317649fa8f61cc009b0346eca42ee1b171bd0ffc130f79ce449",
+      "operations": [
+        {
+          "op": "test",
+          "path": "/sheets/6/sha256",
+          "value": "d43012d7440fc95f1605b44560ef19f5190641c3539f7c8ad82b0f3d20cb394a"
+        },
+        {
+          "op": "replace",
+          "path": "/sheets/6/sha256",
+          "value": "4624e5da4bd92c9c54f568ebebb9d2aaa5b5fabc97b57448f7f2c6aca08c83ca"
+        },
+        {
+          "op": "test",
+          "path": "/sheets/8/sha256",
+          "value": "acd728bac72d496734a8a98e67707562e16c665a6f51312b1b79c60f5a26fb45"
+        },
+        {
+          "op": "replace",
+          "path": "/sheets/8/sha256",
+          "value": "af28895d4c9902869ef2d66c3ab6f9c6eb0ce1df27978615855237df74d40da6"
+        }
+      ]
+    }
+  ],
+  "revision": "r2。元コミットから適用する全差分。r1適用済みなら別紙definition_updates_r1_to_r2.jsonのみ使用。"
+}

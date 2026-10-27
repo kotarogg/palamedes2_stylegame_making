@@ -1,0 +1,45 @@
+{
+ "about": "先行入力の実時間窓（案A適用後）。移動終了tick E の実時刻（tick区間の終わり）から何ms前までの押下が E に実行されるか。フレーム位相8通り・0.5ms刻み。alwaysExecutedBelowMs 未満は全位相で実行、neverExecutedAboveMs 超は全位相で期限切れ。模擬入力",
+ "result": {
+  "MODE1 15fps": {
+   "alwaysExecutedBelowMs": 50.5,
+   "neverExecutedAboveMs": 50
+  },
+  "MODE2 15fps": {
+   "alwaysExecutedBelowMs": 50.5,
+   "neverExecutedAboveMs": 50
+  },
+  "MODE1 30fps": {
+   "alwaysExecutedBelowMs": 50,
+   "neverExecutedAboveMs": 49.5
+  },
+  "MODE2 30fps": {
+   "alwaysExecutedBelowMs": 50,
+   "neverExecutedAboveMs": 49.5
+  },
+  "MODE1 60fps": {
+   "alwaysExecutedBelowMs": 50.5,
+   "neverExecutedAboveMs": 50
+  },
+  "MODE2 60fps": {
+   "alwaysExecutedBelowMs": 50.5,
+   "neverExecutedAboveMs": 50
+  },
+  "MODE1 120fps": {
+   "alwaysExecutedBelowMs": 50,
+   "neverExecutedAboveMs": 49.5
+  },
+  "MODE2 120fps": {
+   "alwaysExecutedBelowMs": 50,
+   "neverExecutedAboveMs": 49.5
+  },
+  "MODE1 144fps": {
+   "alwaysExecutedBelowMs": 44.5,
+   "neverExecutedAboveMs": 44
+  },
+  "MODE2 144fps": {
+   "alwaysExecutedBelowMs": 44.5,
+   "neverExecutedAboveMs": 44
+  }
+ }
+}

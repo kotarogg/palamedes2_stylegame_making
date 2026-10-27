@@ -9,7 +9,7 @@ import { Board } from './board';
 import { DEFAULT_CONFIG, DEFAULT_MODE2_CONFIG, msToTicks, type GameConfig, type Mode2Config } from './config';
 import type { Command, Flight, LockKind, RoundResult } from './game';
 import { isLaunchSuccess, kindFromIndex, PieceFactory } from './pieces';
-import { clear as clearHeld, MOVE_ACTIONS, neutralizeSimultaneous, offer, release, take, type InputLogEntry } from './inputBuffer';
+import { clear as clearHeld, MOVE_ACTIONS, offer, resolveTick, take, type InputLogEntry } from './inputBuffer';
 import { createSeededRng, randomInt, type Rng } from './rng';
 import type { Piece, PlayerId } from './types';
 
@@ -295,6 +295,8 @@ export class Mode2Game {
   private processInputs(p: Mode2Player, cmds: readonly Command[]): void {
     if (p.finishedTick !== null) return;
     const log = this.inputLogger(p);
+    // v3.2.0 r：当該tickの解除・新規方向・同時押しを、旧予約の実行より先に反映する
+    const now = resolveTick(p, cmds, !this.isMoving(p), log);
     if (p.buffered && !this.isMoving(p)) {
       const a = take(p, this.tick, this.config.moveBufferTicks, log);
       if (a) {
@@ -306,11 +308,7 @@ export class Mode2Game {
         }
       }
     }
-    for (const c of neutralizeSimultaneous(cmds, log)) {
-      if (c.type === 'cancelRepeat') {
-        release(p, log);
-        continue;
-      }
+    for (const c of now) {
       if (!MODE2_ACTIONS.has(c.type)) continue; // MODE2にB・宣言・手動上昇はない
       const a = c.type as Mode2Action;
       if (this.isLocked(p)) continue;

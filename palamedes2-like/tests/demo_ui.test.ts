@@ -20,7 +20,7 @@ import { fakeAssets, readJson } from './helpers';
 
 const font = readJson<BitmapFontDef>('public/gfx/data/tutorial_font_16.json');
 
-describe('台本と収録文字（tutorial_font_16：313字）', () => {
+describe('台本と収録文字（tutorial_font_16：v3.2.0 採用版 327字）', () => {
   const S = TUTORIAL_SCRIPT;
   const all: string[] = [
     ...Object.values(S.pages).flatMap((p) => [p.heading, ...p.lines]),
@@ -37,18 +37,27 @@ describe('台本と収録文字（tutorial_font_16：313字）', () => {
     '消去０１２３４５６７８９ライン',
   ];
 
-  it('表示する文字は収録済み。v3.2.0 の新台本で不足する13字だけは素材待ち（採用フォントで代替表示し、欠字として記録）', () => {
-    // 不足字は PM 経由でフォント画像への追加を依頼中（報告書の素材待ち）。それ以外の欠字が増えたら失敗にする
-    const PENDING = '、んウダリ切後新明更残説離';
-    expect([...new Set(all.flatMap((s) => uncovered(font, s)))].sort().join('')).toBe([...PENDING].sort().join(''));
+  it('表示する文字はすべて収録済み（台本・目次・打上連鎖・ノーリセットクリアに欠字なし）', () => {
+    expect([...new Set([...all, '打上連鎖', 'ノーリセットクリア！'].flatMap((s) => uncovered(font, s)))].join('')).toBe('');
+  });
+
+  it('v3.2.0 採用フォント：327字・512×176。既存313字の定義（矩形・送り・offset）は第1版のまま、追加14字は末尾', () => {
+    expect(Object.keys(font.glyphs)).toHaveLength(327);
+    const f = font as unknown as { glyph_count: number; size: number[]; glyphs: Record<string, { rect: number[]; advance: number }> };
+    expect(f.glyph_count).toBe(327);
+    expect(f.size).toEqual([512, 176]);
+    const added = Object.keys(font.glyphs).slice(313).join('');
+    expect(added).toBe('、んウダリ切後新明更残説離ノ');
+    // 既存の代表字（ASCII 8px・全角16px）の字送りは不変
+    expect(f.glyphs[' '].advance).toBe(8);
+    expect(f.glyphs['の'].advance).toBe(16);
+    for (const ch of added) expect(f.glyphs[ch].advance, ch).toBe(16);
   });
 
   it('本文は最大4行・各行168px以内（10全角相当。縮小しない）、見出し168px以内、戻る案内は1行192px（領域196px）', () => {
-    // v3.2.0 指示書の台本「となりの数字なら成功！」（11字＝176px）だけは指定文のまま（パネル枠内に収まる。報告書で確認依頼）
-    const OVER = new Set(['となりの数字なら成功！']);
     for (const [k, p] of Object.entries(S.pages)) {
       expect(p.lines.length, k).toBeLessThanOrEqual(PANEL.body.maxLines);
-      for (const l of [p.heading, ...p.lines]) expect(measureBitmap(font, l), `${k}:${l}`).toBeLessThanOrEqual(OVER.has(l) ? 176 : PANEL.body.w);
+      for (const l of [p.heading, ...p.lines]) expect(measureBitmap(font, l), `${k}:${l}`).toBeLessThanOrEqual(PANEL.body.w);
     }
     // 宣言中は本文3行＋「消去Ｎライン」
     for (const k of ['declare', 'flush', 'chain', 'chain3', 'line_clear'] as const) expect(S.pages[k].lines.length, k).toBeLessThanOrEqual(3);
@@ -62,6 +71,9 @@ describe('台本と収録文字（tutorial_font_16：313字）', () => {
     expect(S.pages.chain3.lines).toEqual(['３回続けて宣言', '役連鎖が３連鎖に！']);
     expect(S.pages.miss.lines).toEqual(['猶予がなくなると', 'ミス！', '打ち上げ失敗とは', '別のミス条件だよ']);
     expect(S.pages.pinch.lines).toEqual(['７段のまま次の', '自然上昇を迎えると', 'ピンチ！']);
+    // v3.2.0 PM 追加指示
+    expect(S.pages.m2_intro.lines).toEqual(['６列から選んで', '場へ出そう', 'となりの数字なら', '成功！']);
+    expect(S.pages.streak_rate.lines).toEqual(['打上連鎖で', '攻撃力アップ', '対戦で力を発揮！']);
   });
 });
 

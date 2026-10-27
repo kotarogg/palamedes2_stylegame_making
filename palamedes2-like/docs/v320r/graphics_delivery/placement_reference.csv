@@ -1,0 +1,58 @@
+kind,id,file,canvas_wh,cutout_xywh,visible_xywh,before_visible_xywh,anchor,anchor_meaning,anchor_changed,margin_changed,offset,advance
+PNG,label_launch_streak.png,assets/label_launch_streak.png,"[80, 20]","[0, 0, 80, 20]","[2, 0, 74, 19]","[1, 0, 79, 19]","[0, 0]",PNG左上／フォントはセルグリッド原点,no,True,,
+PNG,tutorial_font_16.png,assets/tutorial_font_16.png,"[512, 176]","[0, 0, 512, 176]","[1, 0, 511, 175]","[1, 0, 511, 159]","[0, 0]",PNG左上／フォントはセルグリッド原点,no,False,,
+PNG,legacy/announcements_sheet.png,assets/legacy/announcements_sheet.png,"[1024, 1024]","[0, 0, 1024, 1024]","[4, 11, 951, 757]","[4, 11, 951, 757]","[0, 0]",PNG左上／フォントはセルグリッド原点,no,False,,
+PNG,legacy/role_name_sheet.png,assets/legacy/role_name_sheet.png,"[1024, 1024]","[0, 0, 1024, 1024]","[26, 0, 609, 768]","[26, 0, 609, 768]","[0, 0]",PNG左上／フォントはセルグリッド原点,no,False,,
+glyph_added,、,assets/tutorial_font_16.png,"[16,16]","[400, 144, 16, 16]","[1, 11, 4, 4]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,ん,assets/tutorial_font_16.png,"[16,16]","[416, 144, 16, 16]","[1, 1, 14, 13]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,ウ,assets/tutorial_font_16.png,"[16,16]","[432, 144, 16, 16]","[2, 1, 12, 14]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,ダ,assets/tutorial_font_16.png,"[16,16]","[448, 144, 16, 16]","[1, 1, 14, 14]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,リ,assets/tutorial_font_16.png,"[16,16]","[464, 144, 16, 16]","[4, 2, 9, 13]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,切,assets/tutorial_font_16.png,"[16,16]","[480, 144, 16, 16]","[0, 1, 15, 14]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,後,assets/tutorial_font_16.png,"[16,16]","[496, 144, 16, 16]","[1, 1, 14, 14]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,新,assets/tutorial_font_16.png,"[16,16]","[0, 160, 16, 16]","[1, 1, 14, 14]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,明,assets/tutorial_font_16.png,"[16,16]","[16, 160, 16, 16]","[1, 1, 15, 14]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,更,assets/tutorial_font_16.png,"[16,16]","[32, 160, 16, 16]","[1, 1, 15, 14]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,残,assets/tutorial_font_16.png,"[16,16]","[48, 160, 16, 16]","[1, 1, 14, 14]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,説,assets/tutorial_font_16.png,"[16,16]","[64, 160, 16, 16]","[1, 1, 15, 14]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,離,assets/tutorial_font_16.png,"[16,16]","[80, 160, 16, 16]","[1, 1, 14, 14]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+glyph_added,ノ,assets/tutorial_font_16.png,"[16,16]","[96, 160, 16, 16]","[3, 2, 10, 12]",not present,"[0,14]","16pxセル内の日本語基準線／実描画offsetは[0,0]",new,new,"[0, 0]",16
+frame,S9/show_game_over_A,assets/legacy/announcements_sheet.png,"[160,64]","[0, 192, 160, 64]","[11, 2, 138, 62]","[11, 2, 138, 62]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S9/show_game_over_B,assets/legacy/announcements_sheet.png,"[160,64]","[160, 192, 160, 64]","[11, 2, 138, 62]","[11, 2, 138, 62]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S9/show_game_over_C,assets/legacy/announcements_sheet.png,"[160,64]","[320, 192, 160, 64]","[11, 2, 138, 62]","[11, 2, 138, 62]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S9/show_max_A,assets/legacy/announcements_sheet.png,"[160,64]","[0, 320, 160, 64]","[6, 11, 148, 42]","[5, 11, 149, 42]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,True,"[0,0]",
+frame,S9/show_max_B,assets/legacy/announcements_sheet.png,"[160,64]","[160, 320, 160, 64]","[6, 11, 148, 42]","[5, 11, 149, 42]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,True,"[0,0]",
+frame,S9/show_max_C,assets/legacy/announcements_sheet.png,"[160,64]","[320, 320, 160, 64]","[6, 11, 148, 42]","[5, 11, 149, 42]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,True,"[0,0]",
+frame,S9/show_all_stages_complete_A,assets/legacy/announcements_sheet.png,"[160,64]","[480, 512, 160, 64]","[6, 2, 148, 62]","[6, 2, 148, 62]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S9/show_all_stages_complete_B,assets/legacy/announcements_sheet.png,"[160,64]","[640, 512, 160, 64]","[6, 2, 148, 62]","[6, 2, 148, 62]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S9/show_all_stages_complete_C,assets/legacy/announcements_sheet.png,"[160,64]","[800, 512, 160, 64]","[6, 2, 148, 62]","[6, 2, 148, 62]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S9/show_mode1_A,assets/legacy/announcements_sheet.png,"[160,64]","[480, 640, 160, 64]","[7, 14, 147, 36]","[6, 14, 148, 36]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,True,"[0,0]",
+frame,S9/show_mode1_B,assets/legacy/announcements_sheet.png,"[160,64]","[640, 640, 160, 64]","[7, 14, 147, 36]","[6, 14, 148, 36]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,True,"[0,0]",
+frame,S9/show_mode1_C,assets/legacy/announcements_sheet.png,"[160,64]","[800, 640, 160, 64]","[7, 14, 147, 36]","[6, 14, 148, 36]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,True,"[0,0]",
+frame,S9/show_mode2_A,assets/legacy/announcements_sheet.png,"[160,64]","[0, 704, 160, 64]","[6, 14, 148, 36]","[5, 14, 149, 36]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,True,"[0,0]",
+frame,S9/show_mode2_B,assets/legacy/announcements_sheet.png,"[160,64]","[160, 704, 160, 64]","[6, 14, 148, 36]","[5, 14, 149, 36]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,True,"[0,0]",
+frame,S9/show_mode2_C,assets/legacy/announcements_sheet.png,"[160,64]","[320, 704, 160, 64]","[6, 14, 148, 36]","[5, 14, 149, 36]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,True,"[0,0]",
+frame,S7/role_02_A,assets/legacy/role_name_sheet.png,"[160,64]","[320, 0, 160, 64]","[28, 0, 103, 64]","[28, 0, 103, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_02_B,assets/legacy/role_name_sheet.png,"[160,64]","[320, 64, 160, 64]","[28, 0, 103, 64]","[28, 0, 103, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_02_C,assets/legacy/role_name_sheet.png,"[160,64]","[320, 128, 160, 64]","[28, 0, 103, 64]","[28, 0, 103, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_03_A,assets/legacy/role_name_sheet.png,"[160,64]","[480, 0, 160, 64]","[19, 0, 122, 64]","[19, 0, 122, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_03_B,assets/legacy/role_name_sheet.png,"[160,64]","[480, 64, 160, 64]","[19, 0, 122, 64]","[19, 0, 122, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_03_C,assets/legacy/role_name_sheet.png,"[160,64]","[480, 128, 160, 64]","[19, 0, 122, 64]","[19, 0, 122, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_06_A,assets/legacy/role_name_sheet.png,"[160,64]","[320, 192, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_06_B,assets/legacy/role_name_sheet.png,"[160,64]","[320, 256, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_06_C,assets/legacy/role_name_sheet.png,"[160,64]","[320, 320, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_08_A,assets/legacy/role_name_sheet.png,"[160,64]","[0, 384, 160, 64]","[28, 0, 103, 64]","[28, 0, 103, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_08_B,assets/legacy/role_name_sheet.png,"[160,64]","[0, 448, 160, 64]","[28, 0, 103, 64]","[28, 0, 103, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_08_C,assets/legacy/role_name_sheet.png,"[160,64]","[0, 512, 160, 64]","[28, 0, 103, 64]","[28, 0, 103, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_10_A,assets/legacy/role_name_sheet.png,"[160,64]","[320, 384, 160, 64]","[28, 0, 103, 64]","[28, 0, 103, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_10_B,assets/legacy/role_name_sheet.png,"[160,64]","[320, 448, 160, 64]","[28, 0, 103, 64]","[28, 0, 103, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_10_C,assets/legacy/role_name_sheet.png,"[160,64]","[320, 512, 160, 64]","[28, 0, 103, 64]","[28, 0, 103, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_13_A,assets/legacy/role_name_sheet.png,"[160,64]","[160, 576, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_13_B,assets/legacy/role_name_sheet.png,"[160,64]","[160, 640, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_13_C,assets/legacy/role_name_sheet.png,"[160,64]","[160, 704, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_14_A,assets/legacy/role_name_sheet.png,"[160,64]","[320, 576, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_14_B,assets/legacy/role_name_sheet.png,"[160,64]","[320, 640, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_14_C,assets/legacy/role_name_sheet.png,"[160,64]","[320, 704, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_15_A,assets/legacy/role_name_sheet.png,"[160,64]","[480, 576, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_15_B,assets/legacy/role_name_sheet.png,"[160,64]","[480, 640, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",
+frame,S7/role_15_C,assets/legacy/role_name_sheet.png,"[160,64]","[480, 704, 160, 64]","[5, 0, 150, 64]","[5, 0, 150, 64]","[0,0] / center[80,32]",固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。,no,False,"[0,0]",

@@ -1149,7 +1149,7 @@ export class GameView {
 
   /**
    * v3.2.0「ノーリセットクリア」：MODE2で場の更新0回のクリア／勝利のとき、結果演出の中で付記（独立した待機は追加しない）。
-   * 対戦は勝者の盤面上、シングルは盤面上。文字は採用フォント（Noto Sans JP）で描く
+   * 対戦は勝者の盤面上、シングルは盤面上。文字は共通ビットマップフォント（v3.2.0 採用版で「ノ」「リ」を収録）で描く
    */
   noResetLabel(t: number): { text: string; x: number; y: number } | null {
     const p = this.hud.noReset;
@@ -1161,7 +1161,7 @@ export class GameView {
 
   private drawNoReset(ctx: CanvasRenderingContext2D, t: number): void {
     const l = this.noResetLabel(t);
-    if (l) drawText(ctx, l.text, l.x, l.y, { align: 'center', size: 16, weight: 800, color: '#f2b950', box: true });
+    if (l) drawBitmapText(ctx, this.assets.tutorial?.font, l.text, l.x, l.y, { align: 'center', color: '#f2b950', outline: '#0b1f35' });
   }
 
   /** 危険表示の残りtick（自然上昇の危険猶予・攻撃ピンチ猶予の早い方。どちらもなければ null） */
@@ -1212,13 +1212,10 @@ export class GameView {
     const g = this.mode1!;
     const lay = this.streakHudLayout(p);
     const phase = numericPhase(ms);
-    // v3.2.0 名称「打上連鎖」：採用済みの見出し画像（label_launch_streak）は旧称「連続出し」の字のため使わず、
-    // 新しい見出し画像が届くまで遊び方用の共通フォントで描く（素材待ち。報告書参照）
-    drawBitmapText(ctx, this.assets.tutorial?.font, STREAK_NAME, lay.label.align === 'left' ? lay.label.x : lay.label.x + lay.label.w, lay.label.y + 2, {
-      align: lay.label.align,
-      color: '#f2b950',
-      outline: '#0b1f35',
-    });
+    // v3.2.0 見出し「打上連鎖」：採用画像 label_launch_streak（80×20、グラフィック修正 r1）を原寸・原点(0,0)のまま既存の見出し領域へ描く。
+    // 透明余白は切り詰めず、可視範囲の中心へ再配置しない（左右とも同じ矩形の左上に置く）
+    const lbl = this.assets.images.get('label_launch_streak');
+    if (lbl) ctx.drawImage(lbl, lay.label.x, lay.label.y);
     const active = g.streakActive(st);
     const count = active ? st.streakCount : 0;
     const crack = active && st.streakCutReserved ? (this.pv[p].crack ?? STREAK_CRACKS[p]) : null;

@@ -1,0 +1,1570 @@
+{
+  "source_commit": "9f1ba45e5fd116c028ab10abc30b145a0c27b82a",
+  "note": "全切出し矩形・順番・原点を維持。以下は修正フレームの画像内参照情報のみ。ゲーム座標ではない。",
+  "frames": [
+    {
+      "sheet": "S9",
+      "frame": "show_game_over_A",
+      "cutout_xywh": [
+        0,
+        192,
+        160,
+        64
+      ],
+      "order_in_source": 18,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        11,
+        2,
+        138,
+        62
+      ],
+      "visible_xywh": [
+        11,
+        2,
+        138,
+        62
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 28,
+      "colors_after": 28
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_game_over_B",
+      "cutout_xywh": [
+        160,
+        192,
+        160,
+        64
+      ],
+      "order_in_source": 19,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        11,
+        2,
+        138,
+        62
+      ],
+      "visible_xywh": [
+        11,
+        2,
+        138,
+        62
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 28,
+      "colors_after": 28
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_game_over_C",
+      "cutout_xywh": [
+        320,
+        192,
+        160,
+        64
+      ],
+      "order_in_source": 20,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        11,
+        2,
+        138,
+        62
+      ],
+      "visible_xywh": [
+        11,
+        2,
+        138,
+        62
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 28,
+      "colors_after": 29
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_max_A",
+      "cutout_xywh": [
+        0,
+        320,
+        160,
+        64
+      ],
+      "order_in_source": 30,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        11,
+        149,
+        42
+      ],
+      "visible_xywh": [
+        6,
+        11,
+        148,
+        42
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 38,
+      "colors_after": 38
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_max_B",
+      "cutout_xywh": [
+        160,
+        320,
+        160,
+        64
+      ],
+      "order_in_source": 31,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        11,
+        149,
+        42
+      ],
+      "visible_xywh": [
+        6,
+        11,
+        148,
+        42
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 38,
+      "colors_after": 38
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_max_C",
+      "cutout_xywh": [
+        320,
+        320,
+        160,
+        64
+      ],
+      "order_in_source": 32,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        11,
+        149,
+        42
+      ],
+      "visible_xywh": [
+        6,
+        11,
+        148,
+        42
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 38,
+      "colors_after": 38
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_all_stages_complete_A",
+      "cutout_xywh": [
+        480,
+        512,
+        160,
+        64
+      ],
+      "order_in_source": 51,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        6,
+        2,
+        148,
+        62
+      ],
+      "visible_xywh": [
+        6,
+        2,
+        148,
+        62
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 28,
+      "colors_after": 28
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_all_stages_complete_B",
+      "cutout_xywh": [
+        640,
+        512,
+        160,
+        64
+      ],
+      "order_in_source": 52,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        6,
+        2,
+        148,
+        62
+      ],
+      "visible_xywh": [
+        6,
+        2,
+        148,
+        62
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 28,
+      "colors_after": 28
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_all_stages_complete_C",
+      "cutout_xywh": [
+        800,
+        512,
+        160,
+        64
+      ],
+      "order_in_source": 53,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        6,
+        2,
+        148,
+        62
+      ],
+      "visible_xywh": [
+        6,
+        2,
+        148,
+        62
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 28,
+      "colors_after": 29
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_mode1_A",
+      "cutout_xywh": [
+        480,
+        640,
+        160,
+        64
+      ],
+      "order_in_source": 63,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        6,
+        14,
+        148,
+        36
+      ],
+      "visible_xywh": [
+        7,
+        14,
+        147,
+        36
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 32,
+      "colors_after": 32
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_mode1_B",
+      "cutout_xywh": [
+        640,
+        640,
+        160,
+        64
+      ],
+      "order_in_source": 64,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        6,
+        14,
+        148,
+        36
+      ],
+      "visible_xywh": [
+        7,
+        14,
+        147,
+        36
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 32,
+      "colors_after": 32
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_mode1_C",
+      "cutout_xywh": [
+        800,
+        640,
+        160,
+        64
+      ],
+      "order_in_source": 65,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        6,
+        14,
+        148,
+        36
+      ],
+      "visible_xywh": [
+        7,
+        14,
+        147,
+        36
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 32,
+      "colors_after": 32
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_mode2_A",
+      "cutout_xywh": [
+        0,
+        704,
+        160,
+        64
+      ],
+      "order_in_source": 66,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        14,
+        149,
+        36
+      ],
+      "visible_xywh": [
+        6,
+        14,
+        148,
+        36
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 32,
+      "colors_after": 32
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_mode2_B",
+      "cutout_xywh": [
+        160,
+        704,
+        160,
+        64
+      ],
+      "order_in_source": 67,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        14,
+        149,
+        36
+      ],
+      "visible_xywh": [
+        6,
+        14,
+        148,
+        36
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 32,
+      "colors_after": 32
+    },
+    {
+      "sheet": "S9",
+      "frame": "show_mode2_C",
+      "cutout_xywh": [
+        320,
+        704,
+        160,
+        64
+      ],
+      "order_in_source": 68,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        14,
+        149,
+        36
+      ],
+      "visible_xywh": [
+        6,
+        14,
+        148,
+        36
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 32,
+      "colors_after": 32
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_02_A",
+      "cutout_xywh": [
+        320,
+        0,
+        160,
+        64
+      ],
+      "order_in_source": 6,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_02_B",
+      "cutout_xywh": [
+        320,
+        64,
+        160,
+        64
+      ],
+      "order_in_source": 7,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_02_C",
+      "cutout_xywh": [
+        320,
+        128,
+        160,
+        64
+      ],
+      "order_in_source": 8,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_03_A",
+      "cutout_xywh": [
+        480,
+        0,
+        160,
+        64
+      ],
+      "order_in_source": 9,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        19,
+        0,
+        122,
+        64
+      ],
+      "visible_xywh": [
+        19,
+        0,
+        122,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_03_B",
+      "cutout_xywh": [
+        480,
+        64,
+        160,
+        64
+      ],
+      "order_in_source": 10,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        19,
+        0,
+        122,
+        64
+      ],
+      "visible_xywh": [
+        19,
+        0,
+        122,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_03_C",
+      "cutout_xywh": [
+        480,
+        128,
+        160,
+        64
+      ],
+      "order_in_source": 11,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        19,
+        0,
+        122,
+        64
+      ],
+      "visible_xywh": [
+        19,
+        0,
+        122,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_06_A",
+      "cutout_xywh": [
+        320,
+        192,
+        160,
+        64
+      ],
+      "order_in_source": 18,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_06_B",
+      "cutout_xywh": [
+        320,
+        256,
+        160,
+        64
+      ],
+      "order_in_source": 19,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_06_C",
+      "cutout_xywh": [
+        320,
+        320,
+        160,
+        64
+      ],
+      "order_in_source": 20,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_08_A",
+      "cutout_xywh": [
+        0,
+        384,
+        160,
+        64
+      ],
+      "order_in_source": 24,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_08_B",
+      "cutout_xywh": [
+        0,
+        448,
+        160,
+        64
+      ],
+      "order_in_source": 25,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_08_C",
+      "cutout_xywh": [
+        0,
+        512,
+        160,
+        64
+      ],
+      "order_in_source": 26,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_10_A",
+      "cutout_xywh": [
+        320,
+        384,
+        160,
+        64
+      ],
+      "order_in_source": 30,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_10_B",
+      "cutout_xywh": [
+        320,
+        448,
+        160,
+        64
+      ],
+      "order_in_source": 31,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_10_C",
+      "cutout_xywh": [
+        320,
+        512,
+        160,
+        64
+      ],
+      "order_in_source": 32,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "visible_xywh": [
+        28,
+        0,
+        103,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_13_A",
+      "cutout_xywh": [
+        160,
+        576,
+        160,
+        64
+      ],
+      "order_in_source": 39,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_13_B",
+      "cutout_xywh": [
+        160,
+        640,
+        160,
+        64
+      ],
+      "order_in_source": 40,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_13_C",
+      "cutout_xywh": [
+        160,
+        704,
+        160,
+        64
+      ],
+      "order_in_source": 41,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_14_A",
+      "cutout_xywh": [
+        320,
+        576,
+        160,
+        64
+      ],
+      "order_in_source": 42,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_14_B",
+      "cutout_xywh": [
+        320,
+        640,
+        160,
+        64
+      ],
+      "order_in_source": 43,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_14_C",
+      "cutout_xywh": [
+        320,
+        704,
+        160,
+        64
+      ],
+      "order_in_source": 44,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "固定160×64フレームの左上／幾何中心。可視範囲の中心へ自動再配置しない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_15_A",
+      "cutout_xywh": [
+        480,
+        576,
+        160,
+        64
+      ],
+      "order_in_source": 45,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        4,
+        0,
+        151,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "切出し矩形の左上／固定160×64キャンバスの幾何中心。ゲーム内座標ではない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30,
+      "changed_pixels": 964,
+      "changed_local_xywh": [
+        4,
+        0,
+        90,
+        31
+      ],
+      "frame_rgba_sha256": "eed001a8faa0da04e5c64e55df1710af60122a521bd4ebca4ca76d5c405b9823",
+      "previous_r1_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ]
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_15_B",
+      "cutout_xywh": [
+        480,
+        640,
+        160,
+        64
+      ],
+      "order_in_source": 46,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        4,
+        0,
+        151,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "切出し矩形の左上／固定160×64キャンバスの幾何中心。ゲーム内座標ではない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30,
+      "changed_pixels": 964,
+      "changed_local_xywh": [
+        4,
+        0,
+        90,
+        31
+      ],
+      "frame_rgba_sha256": "f37f23bea7e30cc4e0646ac60acc5db25f01b273bc264f9749d0540728e4f2cb",
+      "previous_r1_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ]
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_15_C",
+      "cutout_xywh": [
+        480,
+        704,
+        160,
+        64
+      ],
+      "order_in_source": 47,
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        4,
+        0,
+        151,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "切出し矩形の左上／固定160×64キャンバスの幾何中心。ゲーム内座標ではない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30,
+      "changed_pixels": 964,
+      "changed_local_xywh": [
+        4,
+        0,
+        90,
+        31
+      ],
+      "frame_rgba_sha256": "15686cddf65fab89d0a3ba7795592d3e78df0285480b25335860a870ec455ae1",
+      "previous_r1_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ]
+    }
+  ],
+  "revision": "r2 / Q1修正"
+}

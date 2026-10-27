@@ -15,7 +15,7 @@ import { DEFAULT_CONFIG, msToTicks, streakPercent, type GameConfig } from './con
 import { cancelPending, createIncoming, receive, totalIncoming, tryEndBlock, tryStartBlock, tryStartWave, type IncomingState } from './incoming';
 import { isLaunchSuccess, PieceFactory } from './pieces';
 import { evaluateStock, roleLogoIndices, type RoleResult } from './roles';
-import { clear as clearHeld, MOVE_ACTIONS, neutralizeSimultaneous, offer, release, take, type InputLogEntry } from './inputBuffer';
+import { clear as clearHeld, MOVE_ACTIONS, offer, release, resolveTick, take, type InputLogEntry } from './inputBuffer';
 import { createSeededRng, type Rng } from './rng';
 import { pushRoleStock } from './stock';
 import type { Piece, PlayerId } from './types';
@@ -497,6 +497,8 @@ export class Game {
   private processInputs(p: PlayerState, cmds: readonly Command[]): void {
     if (this.single?.clearPending) return; // ノルマ達成後は新たな操作を受け付けない
     const log = this.inputLogger(p);
+    // v3.2.0 r：当該tickの解除・新規方向・同時押しを、旧予約の実行より先に反映する
+    const now = resolveTick(p, cmds, !this.isMoving(p), log);
     if (p.buffered && !this.isMoving(p)) {
       // 次に移動できる最初のtick：有効な予約を1回だけ実行・消費（左右は受付から moveBufferTicks 以内）
       const a = take(p, this.tick, this.config.moveBufferTicks, log);
@@ -510,7 +512,7 @@ export class Game {
         }
       }
     }
-    for (const c of neutralizeSimultaneous(cmds, log)) this.apply(p, c);
+    for (const c of now) this.apply(p, c);
   }
 
   private edgeBlocked(p: PlayerState, a: Action): boolean {

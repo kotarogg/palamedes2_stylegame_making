@@ -5,7 +5,7 @@ import type { AudioBus } from './audio/audioBus';
 import { VOICE_PRIORITY, type BgmId, type Character } from './audio/audioMap';
 import { DEFAULT_DIRECTOR_OPTIONS, SoundDirector } from './audio/director';
 import { DIFFICULTY_LABEL, type Difficulty } from './core/config';
-import { FixedStepDriver } from './core/driver';
+import { FixedStepDriver, type StepInfo } from './core/driver';
 import type { Command, Game } from './core/game';
 import { Match, SingleSession, type AnyGame, type FirstTo, type GameMode, type SingleMode } from './core/match';
 import type { Mode2Game } from './core/mode2';
@@ -131,7 +131,8 @@ export class App {
   /** 開発版だけ：人間のプレイの計測記録（第21章。製品画面には出さない） */
   readonly devMetrics: (RoundMetrics & { kind: string; characters: readonly Character[]; at: string })[] = [];
   private notice: { text: string; until: number } | null = null;
-  private nowMs = 0;
+  /** 現在のフレームの時刻（requestAnimationFrame の時刻。performance.now と同じ基準） */
+  nowMs = 0;
 
   constructor(readonly deps: AppDeps) {
     this.settings = deps.settings;
@@ -198,9 +199,13 @@ export class App {
     this.scene.onPointer?.();
   }
 
-  onKeyUp(code: string): void {
+  onKeyUp(code: string, at: number | null = null): void {
+    this.keyEventAt = at;
     this.scene.onKeyUp?.(code);
   }
+
+  /** v3.2.0 r：処理中のキーイベントの時刻（event.timeStamp。無ければ null）。試合中のキー入力をtickの実時刻と対応させる */
+  keyEventAt: number | null = null;
 
   onVisibility(hidden: boolean): void {
     this.scene.onVisibility?.(hidden);
@@ -211,7 +216,8 @@ export class App {
     this.bus.setVolumes(this.settings.audio);
   }
 
-  onKey(code: string, repeat: boolean): boolean {
+  onKey(code: string, repeat: boolean, at: number | null = null): boolean {
+    this.keyEventAt = at;
     void this.bus.unlock();
     if (this.scene.rawKeys && this.scene.onKey) return this.scene.onKey(code, repeat);
     if (this.scene.onKey && this.scene.onKey(code, repeat)) return true;
@@ -1352,7 +1358,7 @@ export class GameScene implements Scene {
       seed: (Math.random() * 4294967295) >>> 0,
     });
     this.staging = new Staging(this.game, app.bus, this.stagingOpts());
-    this.driver = new FixedStepDriver({ tickMs: 1000 / 60, step: () => this.step() });
+    this.driver = new FixedStepDriver({ tickMs: 1000 / 60, step: (info) => this.step(info) });
   }
 
   get game(): AnyGame {
@@ -1405,13 +1411,13 @@ export class GameScene implements Scene {
   }
 
   /** 1tick：入力収集→ロジック→ラウンド切替の隔離 */
-  private step(): void {
+  private step(info?: StepInfo): void {
     if (this.holdMs !== null) return; // 新ラウンドの開始前待機に入った後は、同じフレームの残りのtickを進めない
     const s = this.session;
     const before = s.game;
     let cmds: Command[] = [];
     this.controllers.forEach((c) => {
-      const out = c.poll(before);
+      const out = c.poll(before, info);
       if (!this.dialogOf(c.player)) cmds.push(...out); // 確認中のプレイヤーの操作はダイアログへ
     });
     cmds.push(...this.debugQueue.splice(0));
@@ -1515,7 +1521,7 @@ export class GameScene implements Scene {
           return true;
         }
       }
-      for (const k of this.keyboards) if (k && k.player !== dlg.player && k.handleKey(code, repeat)) return true;
+      for (const k of this.keyboards) if (k && k.player !== dlg.player && k.handleKey(code, repeat, this.app.keyEventAt)) return true;
       return true;
     }
     if (code === 'Escape') {
@@ -1537,12 +1543,12 @@ export class GameScene implements Scene {
       if (code === 'Enter' || code === 'NumpadEnter' || code === 'Space' || launchKey) this.queueConfirm();
       return true;
     }
-    for (const k of this.keyboards) if (k?.handleKey(code, repeat)) return true;
+    for (const k of this.keyboards) if (k?.handleKey(code, repeat, this.app.keyEventAt)) return true;
     return false;
   }
 
   onKeyUp(code: string): void {
-    for (const k of this.keyboards) if (k?.handleKeyUp(code)) return;
+    for (const k of this.keyboards) if (k?.handleKeyUp(code, this.app.keyEventAt)) return;
   }
 
   /** v3.2.0 フォーカス喪失：移動予約・入力キューを破棄（ゲームの進行は従来どおり） */
@@ -1696,7 +1702,8 @@ export class GameScene implements Scene {
   update(dtMs: number): void {
     if (this.updateHold(dtMs)) return;
     // ゲームパッドの入力は毎フレーム取得（ロジックは固定ステップ）
-    this.driver.advance(dtMs);
+    // v3.2.0 r：フレームの時刻を渡し、追いつき処理の各tickに実時刻を対応させる（低fps時の入力受付）
+    this.driver.advance(dtMs, this.app.nowMs);
     this.director.sync();
     this.roleNames.update();
     this.staging.update();

@@ -65,7 +65,7 @@
       "file": "assets/legacy/role_name_sheet.png",
       "w": 1024,
       "h": 1024,
-      "sha256": "d43012d7440fc95f1605b44560ef19f5190641c3539f7c8ad82b0f3d20cb394a",
+      "sha256": "4624e5da4bd92c9c54f568ebebb9d2aaa5b5fabc97b57448f7f2c6aca08c83ca",
       "classification": "existing_reuse",
       "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/role_name_sheet.png"
     },
@@ -83,7 +83,7 @@
       "file": "assets/legacy/announcements_sheet.png",
       "w": 1024,
       "h": 1024,
-      "sha256": "acd728bac72d496734a8a98e67707562e16c665a6f51312b1b79c60f5a26fb45",
+      "sha256": "af28895d4c9902869ef2d66c3ab6f9c6eb0ce1df27978615855237df74d40da6",
       "classification": "existing_reuse",
       "baseline_release": "palamedes2-like_play_v1.0.0-rc1_20261020/assets/sprites/announcements_sheet.png"
     },

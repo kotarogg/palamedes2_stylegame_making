@@ -1,0 +1,151 @@
+{
+  "from_r1_sha256": "8c3e4cf4c62714e87670994a5eb9d91c57f485dbaafc262cf573f640fc7b9e9c",
+  "to_r2_sha256": "4624e5da4bd92c9c54f568ebebb9d2aaa5b5fabc97b57448f7f2c6aca08c83ca",
+  "formal": "スーパーストレートフラッシュ",
+  "frame_order": [
+    "role_15_A",
+    "role_15_B",
+    "role_15_C"
+  ],
+  "changes": "上段のス2字・パのみ骨格再作図、既存パレットで輪郭と影を再配置",
+  "frames": [
+    {
+      "sheet": "S7",
+      "frame": "role_15_A",
+      "cutout_xywh": [
+        480,
+        576,
+        160,
+        64
+      ],
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        4,
+        0,
+        151,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "切出し矩形の左上／固定160×64キャンバスの幾何中心。ゲーム内座標ではない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30,
+      "changed_pixels": 964,
+      "changed_local_xywh": [
+        4,
+        0,
+        90,
+        31
+      ],
+      "frame_rgba_sha256": "eed001a8faa0da04e5c64e55df1710af60122a521bd4ebca4ca76d5c405b9823"
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_15_B",
+      "cutout_xywh": [
+        480,
+        640,
+        160,
+        64
+      ],
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        4,
+        0,
+        151,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "切出し矩形の左上／固定160×64キャンバスの幾何中心。ゲーム内座標ではない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30,
+      "changed_pixels": 964,
+      "changed_local_xywh": [
+        4,
+        0,
+        90,
+        31
+      ],
+      "frame_rgba_sha256": "f37f23bea7e30cc4e0646ac60acc5db25f01b273bc264f9749d0540728e4f2cb"
+    },
+    {
+      "sheet": "S7",
+      "frame": "role_15_C",
+      "cutout_xywh": [
+        480,
+        704,
+        160,
+        64
+      ],
+      "canvas": [
+        160,
+        64
+      ],
+      "before_visible_xywh": [
+        5,
+        0,
+        150,
+        64
+      ],
+      "visible_xywh": [
+        4,
+        0,
+        151,
+        64
+      ],
+      "logical_origin": [
+        0,
+        0
+      ],
+      "center_anchor": [
+        80,
+        32
+      ],
+      "anchor_meaning": "切出し矩形の左上／固定160×64キャンバスの幾何中心。ゲーム内座標ではない。",
+      "anchor_changed": false,
+      "colors_before": 30,
+      "colors_after": 30,
+      "changed_pixels": 964,
+      "changed_local_xywh": [
+        4,
+        0,
+        90,
+        31
+      ],
+      "frame_rgba_sha256": "15686cddf65fab89d0a3ba7795592d3e78df0285480b25335860a870ec455ae1"
+    }
+  ]
+}
