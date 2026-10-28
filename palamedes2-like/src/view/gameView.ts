@@ -11,20 +11,16 @@ import { evaluateStock, glowSegments } from '../core/roles';
 import type { Piece, PlayerId } from '../core/types';
 import { drawFrame, drawNineSlice, type Assets } from './assets';
 import { drawBitmapText } from './bitmapFont';
+import { CHAIN_HUD, chainHudLayout, type ChainHudLayout, type TextRow } from './chainHud';
 import type { ManifestFrame } from './data';
 import { arcPoint, barY, CELL, cellX, columnCenterX, descentY, easeInOutSine, easeOutQuad, lerp, progress, Z, type BoardRect } from './geometry';
 import { characterPose, crackerPose, type ResultPlan } from './presentation';
 import { afterimageDurationMs, counterAnchorOffset, DEFAULT_STOCK_VIEW, discardAnchorOffset, FRAME_PAD, pendingGroupY, stockColumnLayout, stockGroupHeight, type StockDrawEntry, type StockViewConfig } from './stockLayout';
-import { drawNumericScaled, drawText, formatTime, multiplierText, numericNaturalWidth, numericPhase, TEXT_COLORS } from './text';
+import { drawNumericScaled, drawText, formatTime, multiplierText, numericPhase, TEXT_COLORS } from './text';
 
 /** v3.1.0 連鎖切り予約のヒビ（採用3種） */
 export const STREAK_CRACKS = ['streak_crack_01', 'streak_crack_02', 'streak_crack_03'] as const;
-/** v3.2.0「連続出し」の新名称（送り仮名なし。役連鎖とは別名称） */
-export const STREAK_NAME = '打上連鎖';
-
-/** v3.1.0 打上連鎖（旧称 連続出し）の数字の高さ（初期表示サイズ17px）・役連鎖の連鎖数の高さ（34px基準） */
-export const STREAK_DIGIT_PX = 17;
-export const ROLE_CHAIN_DIGIT_PX = 34;
+/** 連鎖HUD（役連鎖・打上連鎖）の座標・寸法・倍率は chainHud.ts（V320-FIX-03）で一元管理する */
 
 /** キャラクター → モーションシート（第3版：コタローS1・アカネS2・ずん子S13。プレイヤー番号では選ばない） */
 export const CHARACTER_SHEET: Record<Character, string> = { kotaro: 'S1', akane: 'S2', zunko: 'S13' };
@@ -254,6 +250,11 @@ export class GameView {
 
   private get mode1(): Game | null {
     return this.game.mode === 'mode1' ? this.game : null;
+  }
+
+  /** シングル表示か（攻撃加算を描かない。教材の注目枠が参照） */
+  get isSingleView(): boolean {
+    return this.isSingle;
   }
 
   private get isSingle(): boolean {
@@ -1088,8 +1089,7 @@ export class GameView {
       const board = this.boards[p];
       if (g.mode === 'mode1') {
         const st = (g as Game).players[p];
-        this.drawStreak(ctx, p, st, ms);
-        this.drawRoleChain(ctx, p, st, ms);
+        this.drawChainHud(ctx, p, st, ms);
         this.drawChainGauge(ctx, p, st);
         // 危険の残り時間：自然上昇の危険猶予と攻撃ピンチ猶予のうち早い期限（どちらも自分の役処理中は止まる）
         const rest = g.result ? null : this.dangerRemainingTicks(st);
@@ -1187,74 +1187,44 @@ export class GameView {
     return { sheet: id, id, x: 0, y: 0, w: d.canvas[0], h: d.canvas[1], reserved: false };
   }
 
-  /** v3.1.0 打上連鎖の表示位置（既存の倍率領域を基礎に）。テスト・検証用に公開 */
-  streakHudLayout(p: PlayerId): { label: { x: number; y: number; w: number; h: number; align: 'left' | 'right' }; numbers: { x: number; y: number; h: number; maxW: number; align: 'left' | 'right' }; text: { x: number; y: number; align: 'left' | 'right' } } {
-    const mr = this.assets.layout.pRect(p, 'multiplier');
-    const left = p === 0;
-    const lx = left ? mr.x : mr.x + mr.w - 80;
-    const nx = left ? mr.x + 2 : mr.x + mr.w - 2;
-    return {
-      label: { x: lx, y: mr.y - 22, w: 80, h: 20, align: left ? ('left' as const) : ('right' as const) },
-      numbers: { x: nx, y: mr.y + 1, h: STREAK_DIGIT_PX, maxW: mr.w - 4, align: left ? 'left' : 'right' },
-      text: { x: nx, y: mr.y + 20, align: left ? 'left' : 'right' },
-    };
+  /** V320-FIX-03 連鎖HUD（役連鎖・打上連鎖の縦帯）の配置。定義は chainHud.ts の1か所。テスト・検証・教材の注目枠が参照する */
+  chainHud(p: PlayerId): ChainHudLayout {
+    return chainHudLayout(p);
   }
 
-  /** v3.1.0 役連鎖の表示位置（連鎖ゲージの外側の縦帯）。テスト・検証用に公開 */
-  roleChainHudLayout(p: PlayerId): { label: { x: number; y: number; w: number; h: number }; digitsCenterX: number; digitsY: number; digitsH: number; maxW: number; plusY: number } {
-    const strip = p === 0 ? { x: 0, w: 48 } : { x: 592, w: 48 };
-    const cx = strip.x + strip.w / 2;
-    return { label: { x: strip.x, y: 136, w: 48, h: 12 }, digitsCenterX: cx, digitsY: 152, digitsH: ROLE_CHAIN_DIGIT_PX, maxW: strip.w - 2, plusY: 190 };
-  }
-
-  /** 打上連鎖：見出し＋成功数（ヒビは予約中だけ。倍率には付けない）＋倍率（対戦＝攻撃倍率、シングル＝得点倍率）。小さく補助的に */
-  private drawStreak(ctx: CanvasRenderingContext2D, p: PlayerId, st: PlayerState, ms: number): void {
+  /**
+   * V320-FIX-03 連鎖HUD：盤面外側の縦帯に、上から「役」（2倍）「連鎖」・役連鎖数・攻撃加算（対戦のみ）、「打上」「連鎖」・打上連鎖数。
+   * 見出しは共通16pxビットマップ文字（原寸、「役」だけ整数2倍）と暗色の縁取り。数字は既存S12（多色・等比収め、打上連鎖のヒビ）。
+   * 旧位置（上部の打上連鎖見出し画像・外側の役連鎖見出しの1/2縮小）には描かない
+   */
+  private drawChainHud(ctx: CanvasRenderingContext2D, p: PlayerId, st: PlayerState, ms: number): void {
     const g = this.mode1!;
-    const lay = this.streakHudLayout(p);
+    const l = chainHudLayout(p);
+    const font = this.assets.tutorial?.font;
     const phase = numericPhase(ms);
-    // v3.2.0 見出し「打上連鎖」：採用画像 label_launch_streak（80×20、グラフィック修正 r1）を原寸・原点(0,0)のまま既存の見出し領域へ描く。
-    // 透明余白は切り詰めず、可視範囲の中心へ再配置しない（左右とも同じ矩形の左上に置く）
-    const lbl = this.assets.images.get('label_launch_streak');
-    if (lbl) ctx.drawImage(lbl, lay.label.x, lay.label.y);
+    const title = (r: TextRow) => drawBitmapText(ctx, font, r.text, l.cx, r.y, { align: 'center', color: CHAIN_HUD.color, outline: CHAIN_HUD.outline, scale: r.scale });
+    // 役連鎖
+    title(l.roleTitle);
+    title(l.roleSub);
+    const chain = st.chainRemaining > 0 ? st.chainCount : 0;
+    drawNumericScaled(ctx, this.assets, String(chain), l.roleDigits.cx, l.roleDigits.y, l.roleDigits.h, l.roleDigits.maxW, 'center', phase);
+    if (!this.isSingle) {
+      const bonus = chain > 0 ? Math.min(chain - 1, g.config.chainBonusMax) : 0;
+      drawText(ctx, `＋${bonus}`, l.plus.cx, l.plus.y, { align: 'center', size: l.plus.size, weight: 800, color: '#f2b950' });
+    }
+    // 打上連鎖（ヒビは予約中だけ。数字にだけ付ける）
+    title(l.streakTitle);
+    title(l.streakSub);
     const active = g.streakActive(st);
     const count = active ? st.streakCount : 0;
     const crack = active && st.streakCutReserved ? (this.pv[p].crack ?? STREAK_CRACKS[p]) : null;
-    // v3.2.0：攻撃倍率の見出し・数値と回数単位「回」は表示しない（計算は変えない）。シングルの得点倍率は従来どおり表示
-    const scoreRate = this.isSingle && this.hud.streakRate !== 'attack';
-    const n = lay.numbers;
-    const gap = 8;
-    const k = n.h / 34;
-    const countW = Math.round(numericNaturalWidth(this.assets, String(count)) * k);
-    if (!scoreRate) {
-      drawNumericScaled(ctx, this.assets, String(count), n.align === 'left' ? n.x : n.x - countW, n.y, n.h, countW, 'left', phase, crack);
-      return;
-    }
-    const m = g.currentScoreMultiplier(st);
-    const mul = multiplierText(m.num, m.den);
-    // 成功数 → 少し空けて倍率（右側のプレイヤーは右寄せで同じ並び）。収まらなければ倍率側を等比で縮める（横だけ潰さない）
-    const mulW = Math.round(Math.min(numericNaturalWidth(this.assets, mul) * k, n.maxW - countW - gap));
-    const x0 = n.align === 'left' ? n.x : n.x - countW - gap - mulW;
-    drawNumericScaled(ctx, this.assets, String(count), x0, n.y, n.h, countW, 'left', phase, crack);
-    drawNumericScaled(ctx, this.assets, mul, x0 + countW + gap, n.y, n.h, mulW, 'left', phase);
-    drawText(ctx, '得点倍率', lay.text.x + (n.align === 'left' ? countW + gap : 0), lay.text.y, { align: lay.text.align, size: 9, color: TEXT_COLORS.secondary });
-  }
-
-  /** 役連鎖：見出し＋連鎖数（34px）＋攻撃加算「＋○」（対戦のみ。シングルへは流用しない） */
-  private drawRoleChain(ctx: CanvasRenderingContext2D, p: PlayerId, st: PlayerState, ms: number): void {
-    const g = this.mode1!;
-    const lay = this.roleChainHudLayout(p);
-    const lbl = this.assets.images.get('label_role_chain');
-    if (lbl) {
-      ctx.save();
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(lbl, lay.label.x, lay.label.y, lay.label.w, lay.label.h); // 96×24 を縦横等比 1/2・最近傍
-      ctx.restore();
-    }
-    const count = st.chainRemaining > 0 ? st.chainCount : 0;
-    drawNumericScaled(ctx, this.assets, String(count), lay.digitsCenterX, lay.digitsY, lay.digitsH, lay.maxW, 'center', numericPhase(ms));
-    if (!this.isSingle) {
-      const bonus = count > 0 ? Math.min(count - 1, g.config.chainBonusMax) : 0;
-      drawText(ctx, `＋${bonus}`, lay.digitsCenterX, lay.plusY, { align: 'center', size: 16, weight: 800, color: '#f2b950' });
+    drawNumericScaled(ctx, this.assets, String(count), l.streakDigits.cx, l.streakDigits.y, l.streakDigits.h, l.streakDigits.maxW, 'center', phase, crack);
+    // SINGLE の得点倍率：上部の既存倍率領域へ独立表示（打上連鎖数は重複表示しない）。教材は攻撃倍率の扱いのため描かない
+    if (this.isSingle && this.hud.streakRate !== 'attack') {
+      const r = CHAIN_HUD.singleRate;
+      const m = g.currentScoreMultiplier(st);
+      drawText(ctx, r.heading.text, r.heading.x, r.heading.y, { size: r.heading.size, color: TEXT_COLORS.secondary });
+      drawNumericScaled(ctx, this.assets, multiplierText(m.num, m.den), r.value.x, r.value.y, r.value.h, r.value.maxW, 'left', phase);
     }
   }
 

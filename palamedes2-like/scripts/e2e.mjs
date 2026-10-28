@@ -892,31 +892,69 @@ try {
       }
       return { opaque, bad };
     };
-    const sl0 = v.streakHudLayout(0);
-    const sl1 = v.streakHudLayout(1);
-    // v3.2.0 対戦では攻撃倍率（数値・見出し）と「回」を描かない：成功数の右側の領域が、連鎖なし（成功数0）の描画と同じ
-    const rateRect = { x: sl0.numbers.x + 30, y: sl0.numbers.y, w: sl0.numbers.maxW - 30, h: 34 };
-    const grab = () => c.getContext('2d', { willReadFrequently: true }).getImageData(rateRect.x, rateRect.y, rateRect.w, rateRect.h).data;
-    const withStreak = grab();
-    const saved = p0.streakRemaining;
-    p0.streakRemaining = 0;
-    v.render(c.getContext('2d', { willReadFrequently: true }), g.tick);
-    const noStreak = grab();
-    p0.streakRemaining = saved;
-    v.render(c.getContext('2d', { willReadFrequently: true }), g.tick);
-    let rateDiff = 0;
-    for (let i = 0; i < withStreak.length; i += 4) if (Math.abs(withStreak[i] - noStreak[i]) + Math.abs(withStreak[i + 1] - noStreak[i + 1]) + Math.abs(withStreak[i + 2] - noStreak[i + 2]) > 6) rateDiff++;
+    // ---- V320-FIX-03 連鎖HUD（縦帯）の検査：1倍（640×360）の描画で行う ----
+    const cx2 = c.getContext('2d', { willReadFrequently: true });
+    const hl = [0, 1].map((p) => v.chainHud(p));
+    const grabAll = () => cx2.getImageData(0, 0, 640, 360).data;
+    const inStrip = (x) => x < 48 || x >= 592;
+    const base1x = c.toDataURL('image/png');
+    const baseAll = grabAll();
+    // 見出し（共通16pxビットマップ・見出し色 #f2b950）：各行の箱の中の見出し色の画素数と、その横方向の重心（中心線 x24／x616 との差）
+    const goldIn = (r) => {
+      const d = cx2.getImageData(r.x - 2, r.y - 2, r.w + 4, r.h + 4).data;
+      let n = 0;
+      let sx = 0;
+      for (let i = 0; i < d.length; i += 4) if (Math.abs(d[i] - 0xf2) < 10 && Math.abs(d[i + 1] - 0xb9) < 10 && Math.abs(d[i + 2] - 0x50) < 10) {
+        n++;
+        sx += ((i / 4) % (r.w + 4)) + r.x - 2;
+      }
+      return { n, center: n ? Math.round((sx / n) * 10) / 10 : null };
+    };
+    const titles = hl.map((l) => ({ role: goldIn(l.roleTitle), ren: goldIn(l.roleSub), up: goldIn(l.streakTitle), ren2: goldIn(l.streakSub), cx: l.cx }));
+    // 数字 0／3／12／19／99／999 × ヒビあり／なし：帯の外の画素が基準描画と同じ（盤面・ゲージ・画面端へ出ない）
+    const sweep = {};
+    const shots1x = {};
+    for (const n of [0, 3, 12, 19, 99, 999]) {
+      for (const crack of [false, true]) {
+        for (const pl of [p0, p1]) Object.assign(pl, { streakCount: n, streakRemaining: FAR, streakCutReserved: crack, chainCount: n, chainRemaining: FAR }); // 連鎖ゲージは表示のまま（帯の外の比較のため）
+        v.pv[0].crack = crack ? 'streak_crack_02' : null;
+        v.pv[1].crack = crack ? 'streak_crack_01' : null;
+        v.render(cx2, g.tick);
+        const d = grabAll();
+        let outside = 0;
+        let inside = 0;
+        for (let i = 0; i < d.length; i += 4) {
+          const x = (i / 4) % 640;
+          const y = Math.floor(i / 4 / 640);
+          const diff = Math.abs(d[i] - baseAll[i]) + Math.abs(d[i + 1] - baseAll[i + 1]) + Math.abs(d[i + 2] - baseAll[i + 2]) > 6;
+          if (!diff) continue;
+          // 帯の外で差が出てよいのは、受攻撃ストックの相殺表示など時間で変わらない要素は無いので 0 を期待（攻撃加算は帯の中）
+          if (inStrip(x) && y >= 128 && y < 320) inside++;
+          else outside++;
+        }
+        sweep[`${n}${crack ? '+ヒビ' : ''}`] = { outside, inside };
+        if ((n === 999 && crack) || (n === 3 && !crack)) shots1x[`${n}${crack ? 'c' : ''}`] = c.toDataURL('image/png');
+      }
+    }
+    // 基準の状態（1P：打上連鎖12＋ヒビ・役連鎖3、2P：19・6）へ戻す
+    Object.assign(p0, { streakCount: 12, streakRemaining: FAR, streakCutReserved: true, chainCount: 3, chainRemaining: FAR });
+    Object.assign(p1, { streakCount: 19, streakRemaining: FAR, streakCutReserved: false, chainCount: 6, chainRemaining: FAR });
+    v.pv[0].crack = 'streak_crack_02';
+    v.pv[1].crack = null;
+    v.render(cx2, g.tick);
     const pc = v.pinchCountView(1, g.tick);
     const f3 = pc ? A.atlas.frame('S9', `show_countdown_${pc.value}_${v.s9Phase(g.tick)}`) : null;
     const plans = [0, 1].map((p) => v.stockDrawPlan(p, g.tick));
     return {
       png: big.toDataURL('image/png'),
-      // v3.2.0 r：採用画像 label_launch_streak（80×20）を左右とも既存の見出し領域の左上へ原寸で描く（画素一致）
-      label0: cmpImg(img('label_launch_streak'), 0, 0, 80, 20, sl0.label.x, sl0.label.y),
-      label1: cmpImg(img('label_launch_streak'), 0, 0, 80, 20, sl1.label.x, sl1.label.y),
-      labelRects: [sl0.label, sl1.label],
-      labelSize: [img('label_launch_streak').width, img('label_launch_streak').height],
-      rateDiff,
+      // V320-FIX-03：旧位置（上部の打上連鎖見出し画像［24,72］［536,72］）へは描かない
+      oldLabel0: cmpImg(img('label_launch_streak'), 0, 0, 80, 20, 24, 72),
+      oldLabel1: cmpImg(img('label_launch_streak'), 0, 0, 80, 20, 536, 72),
+      titles,
+      sweep,
+      base1x,
+      shots1x,
+      layout: hl,
       pinch: pc,
       pinchPx: f3 ? cmpImg(A.images.get('S9'), f3.x, f3.y, f3.w, f3.h, pc.x, pc.y) : null,
       stock: plans.map((pl) => ({ n: pl.entries.length, minX: Math.min(...pl.entries.map((e) => e.x)), maxX: Math.max(...pl.entries.map((e) => e.x + e.w)), maxY: Math.max(...pl.entries.map((e) => e.y + e.h)), label: pl.label })),
@@ -926,10 +964,22 @@ try {
   });
   writeFileSync(new URL('screens/V310_hud_stock_pinch.png', OUT), Buffer.from(v310.png.split(',')[1], 'base64'));
   shots.push('screens/V310_hud_stock_pinch.png');
+  writeFileSync(new URL('screens/V320F03_versus_1x.png', OUT), Buffer.from(v310.base1x.split(',')[1], 'base64'));
+  shots.push('screens/V320F03_versus_1x.png');
+  for (const [k, u] of Object.entries(v310.shots1x)) {
+    writeFileSync(new URL(`screens/V320F03_versus_${k}_1x.png`, OUT), Buffer.from(u.split(',')[1], 'base64'));
+    shots.push(`screens/V320F03_versus_${k}_1x.png`);
+  }
+  const notOld = (r) => r.opaque > 0 && r.bad / r.opaque > 0.5;
   check(
-    'v3.2.0 r 打上連鎖：採用画像（80×20）を左右の既存見出し領域へ原寸・画素一致で描画（透明余白を切り詰めない）。対戦では攻撃倍率の見出し・数値・「回」を描かない。倍率の計算は維持（12＝×1.25、19＝×1.75）',
-    v310.labelSize.join() === '80,20' && v310.label0.bad === 0 && v310.label0.opaque > 0 && v310.label1.bad === 0 && v310.rateDiff === 0 && v310.mult.join() === '125,175',
-    JSON.stringify({ label0: v310.label0, label1: v310.label1, rects: v310.labelRects, rateDiff: v310.rateDiff, mult: v310.mult }),
+    'V320-FIX-03 連鎖HUD：旧位置（上部の打上連鎖見出し画像）へ描かない。見出し「役」「連鎖」「打上」「連鎖」を左右の縦帯に描き、横方向の中心が中心線（x24／x616）から1px以内',
+    notOld(v310.oldLabel0) && notOld(v310.oldLabel1) && v310.titles.every((t) => ['role', 'ren', 'up', 'ren2'].every((k) => t[k].n > 20 && Math.abs(t[k].center - t.cx) <= 1)),
+    JSON.stringify({ old: [v310.oldLabel0, v310.oldLabel1], titles: v310.titles }),
+  );
+  check(
+    'V320-FIX-03 連鎖HUD：数字 0／3／12／19／99／999 とヒビあり／なしで、変化は縦帯の中だけ（盤面・ゲージ・受攻撃ストック・画面上部へ出ない）。攻撃倍率の表示なし。倍率の計算は維持（12＝×1.25、19＝×1.75）',
+    Object.values(v310.sweep).every((x) => x.outside === 0) && Object.entries(v310.sweep).filter(([k]) => k !== '0').every(([, x]) => x.inside > 0) && v310.mult.join() === '125,175',
+    JSON.stringify({ sweep: v310.sweep, mult: v310.mult }),
   );
   check(
     'v3.1.0 受攻撃ストックの中央配置：1P（予約29＋待機22＋相殺12）・2P（予約10＋待機11＋相殺3）とも中央エリア x264〜376・下端360以内。数字は列の中央側',
@@ -1663,6 +1713,50 @@ try {
       }, [y0, y1]);
     const srBody = await bodyLit(170, 258);
     check('v3.2.0 r 連鎖説明：「打上連鎖で／攻撃力アップ」を本文領域内に原寸表示（右端・外枠へはみ出さない）', sr.page === 'streak_rate' && srBody.inside > 50 && srBody.outside === 0, JSON.stringify({ sr, srBody }));
+    // V320-FIX-03：教材の注目枠（打上連鎖・役連鎖）が新しい縦帯へ追従。注目枠あり／なしの差の外接が chainFocusBox＋1px の内側
+    const focusCheck = {};
+    for (const want of ['streak', 'chain']) {
+      const r = await ev((want) => {
+        const sc = window.__p2like.scene();
+        for (let i = 0; i < 60 * 120 && sc.stage.focus?.kind !== want && !sc.stage.finished; i++) sc.update(1000 / 60);
+        const st = sc.stage;
+        if (st.focus?.kind !== want) return { found: false };
+        const c = document.createElement('canvas');
+        c.width = 640;
+        c.height = 360;
+        const g2 = c.getContext('2d', { willReadFrequently: true });
+        st.render(g2);
+        const a = g2.getImageData(0, 0, 640, 360).data;
+        const png = c.toDataURL('image/png');
+        const f = st.focus;
+        st.focus = null;
+        st.render(g2);
+        const b = g2.getImageData(0, 0, 640, 360).data;
+        st.focus = f;
+        let x0 = 640, y0 = 360, x1 = -1, y1 = -1;
+        for (let i = 0; i < a.length; i += 4) {
+          if (Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]) <= 6) continue;
+          const x = (i / 4) % 640;
+          const y = Math.floor(i / 4 / 640);
+          x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+        }
+        const l = st.presenter.view.chainHud(0);
+        return { found: true, bbox: [x0, y0, x1 - x0 + 1, y1 - y0 + 1], strip: l.strip, png };
+      }, want);
+      if (r.png) {
+        writeFileSync(new URL(`screens/V320F03_lesson_focus_${want}_1x.png`, OUT), Buffer.from(r.png.split(',')[1], 'base64'));
+        shots.push(`screens/V320F03_lesson_focus_${want}_1x.png`);
+        delete r.png;
+      }
+      focusCheck[want] = r;
+    }
+    const exp = { streak: [0, 257, 48, 61], chain: [0, 129, 48, 96] };
+    const inside = (bb, e) => bb[0] >= e[0] && bb[1] >= e[1] && bb[0] + bb[2] <= e[0] + e[2] && bb[1] + bb[3] <= e[1] + e[3];
+    check(
+      'V320-FIX-03 教材の注目枠：打上連鎖は［0,257,48,61］、役連鎖は［0,129,48,96］（縦帯の注目行＋1px）の内側に描き、本文・戻る案内（x≧384）へ掛からない',
+      ['streak', 'chain'].every((k) => focusCheck[k].found && inside(focusCheck[k].bbox, exp[k])),
+      JSON.stringify(focusCheck),
+    );
     await key('Escape', 200);
 
     // MODE2 説明：通常の Mode2Game で最後までクリア。頁は実イベントに同期
@@ -1750,6 +1844,41 @@ try {
       return { on: window.__p2like.app.settings.assist, hud: sc.view.hud.assist, targets: sc.view.assistTargets(0).length, singleRule: off };
     });
     check('v3.2.0 補助表示：既定ON、人間（1P）の出せる最上段を囲む。本編SINGLEの情報枠の線は維持', as.on === true && as.hud.join() === '0' && as.targets > 0 && as.singleRule > 100, JSON.stringify(as));
+    // V320-FIX-03：SINGLE の得点倍率は上部［24,94,120,34］へ独立表示。打上連鎖数は縦帯（上部へ重複表示しない）
+    const sr1 = await ev(() => {
+      const sc = window.__p2like.gameScene();
+      const g = sc.game;
+      const v = sc.view;
+      const p = g.players[0];
+      Object.assign(p, { streakCount: 12, streakRemaining: 1e9, streakCutReserved: false, chainCount: 3, chainRemaining: 1e9 });
+      const c = document.createElement('canvas');
+      c.width = 640;
+      c.height = 360;
+      const g2 = c.getContext('2d', { willReadFrequently: true });
+      v.render(g2, g.tick);
+      const a = g2.getImageData(0, 0, 640, 360).data;
+      const png = c.toDataURL('image/png');
+      const hud = v.hud;
+      v.hud = { ...hud, streakRate: 'attack' }; // 得点倍率を描かない描画と比べる
+      v.render(g2, g.tick);
+      const b = g2.getImageData(0, 0, 640, 360).data;
+      v.hud = hud;
+      let inArea = 0;
+      let outArea = 0;
+      for (let i = 0; i < a.length; i += 4) {
+        if (Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]) <= 6) continue;
+        const x = (i / 4) % 640;
+        const y = Math.floor(i / 4 / 640);
+        if (x >= 24 && x < 144 && y >= 94 && y < 128) inArea++;
+        else outArea++;
+      }
+      const mul = g.currentScoreMultiplier(p);
+      return { inArea, outArea, png, mul: `${mul.num}/${mul.den}` };
+    });
+    writeFileSync(new URL('screens/V320F03_single_1x.png', OUT), Buffer.from(sr1.png.split(',')[1], 'base64'));
+    shots.push('screens/V320F03_single_1x.png');
+    delete sr1.png;
+    check('V320-FIX-03 SINGLE：得点倍率（見出し・値）は上部の倍率領域［24,94,120,34］の中だけに描く（削除しない・他へ出ない）', sr1.inArea > 30 && sr1.outArea === 0, JSON.stringify(sr1));
 
     // v3.2.0 r：役名ロゴ role_15（スーパーストレートフラッシュ、r2 で「ス」「パ」を修正）。実際の宣言で表示し、A/B/C の切出しと画素一致
     await ev(() => {

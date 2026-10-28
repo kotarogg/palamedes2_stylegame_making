@@ -77,34 +77,7 @@ describe('v3.1.0 連鎖切り予約のヒビ（表示状態）', () => {
   });
 });
 
-describe('v3.1.0 連続出し・役連鎖の配置（既存の倍率・連鎖領域を基礎に、画面内・盤面と重ならない）', () => {
-  it('連続出し：見出し80×20、数字17px（初期表示）。1P は左上の倍率領域、2P は右上。盤面（y128〜）より上', () => {
-    const g = makeGame({ boards: { 0: EMPTY, 1: EMPTY } });
-    const v = new GameView(g, fakeAssets());
-    for (const p of [0, 1] as const) {
-      const s = v.streakHudLayout(p);
-      expect(s.label.w).toBe(80);
-      expect(s.label.h).toBe(20);
-      expect(s.numbers.h).toBe(17);
-      expect(s.label.x).toBeGreaterThanOrEqual(0);
-      expect(s.label.x + s.label.w).toBeLessThanOrEqual(640);
-      expect(s.numbers.y + s.numbers.h).toBeLessThanOrEqual(128);
-    }
-  });
-
-  it('役連鎖：連鎖数34px（連続出しより大きい）、見出しは縦横等比1/2。盤面枠の外側の縦帯（1P x0〜48、2P x592〜640）', () => {
-    const g = makeGame({ boards: { 0: EMPTY, 1: EMPTY } });
-    const v = new GameView(g, fakeAssets());
-    const l0 = v.roleChainHudLayout(0);
-    const l1 = v.roleChainHudLayout(1);
-    expect(l0.digitsH).toBe(34);
-    expect(l0.digitsH).toBeGreaterThan(v.streakHudLayout(0).numbers.h);
-    expect(l0.label.w / l0.label.h).toBe(96 / 24);
-    expect(l0.label.x + l0.label.w).toBeLessThanOrEqual(48);
-    expect(l1.label.x).toBeGreaterThanOrEqual(592);
-    expect(l0.plusY + 16).toBeLessThan(168 + 96 + 100); // 連鎖ゲージの帯の中
-  });
-});
+// v3.1.0 の打上連鎖（上部の倍率領域）・役連鎖（見出し1/2縮小）の配置は V320-FIX-03 で縦帯へ変更（tests/v320_fix03_hud.test.ts）
 
 describe('v3.1.0 受攻撃ストックの中央配置', () => {
   it('1P／2P の最大表示（予約29＋待機28＋相殺）が中央エリア（x264〜376）に収まり、左右の列・数字が重ならない', () => {

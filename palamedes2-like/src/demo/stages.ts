@@ -13,6 +13,7 @@ import type { Controller } from '../input/controller';
 import { CpuController } from '../input/cpu';
 import type { Assets } from '../view/assets';
 import { measureBitmap } from '../view/bitmapFont';
+import { chainFocusBox } from '../view/chainHud';
 import { GameView, type HudInfo } from '../view/gameView';
 import { RoleNameDirector, Staging } from '../view/presentation';
 import { Mode2LessonRunner, MODE2_LESSON } from './mode2Lesson';
@@ -228,13 +229,8 @@ export class LessonStage implements Stage {
     const pad = (r: { x: number; y: number; w: number; h: number }, n = 4) => ({ x: r.x - n, y: r.y - n, w: r.w + 2 * n, h: r.h + 2 * n });
     if (f.kind === 'col' && f.col !== undefined) drawFocus(ctx, this.host.assets, pad(v.topPieceRect(0, f.col, t)));
     else if (f.kind === 'stock') drawFocus(ctx, this.host.assets, pad(this.host.assets.layout.pRect(0, 'stock_background'), 2));
-    else if (f.kind === 'streak') {
-      const s = v.streakHudLayout(0);
-      drawFocus(ctx, this.host.assets, pad({ x: s.label.x, y: s.label.y, w: Math.max(s.label.w, 96), h: s.numbers.y + s.numbers.h - s.label.y }));
-    } else if (f.kind === 'chain') {
-      const c = v.roleChainHudLayout(0);
-      drawFocus(ctx, this.host.assets, pad({ x: c.label.x, y: c.label.y, w: c.label.w, h: c.digitsY + c.digitsH - c.label.y }, 2));
-    }
+    // V320-FIX-03：注目枠は連鎖HUDの縦帯（chainHud.ts の同じ定義）へ追従。教材はシングル表示のため攻撃加算は含めない
+    else if (f.kind === 'streak' || f.kind === 'chain') drawFocus(ctx, this.host.assets, pad(chainFocusBox(0, f.kind, !v.isSingleView), 1));
   }
 }
 

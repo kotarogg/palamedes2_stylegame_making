@@ -1,6 +1,6 @@
-// 遊び方・放置デモの共通ビットマップフォント（tutorial_font_16.png／tutorial_font_16.json：16px白マスク、313字）。
-// 表示側で着色（本文 #fff1d6・見出し #f2b950・補助 #a5c5c5）し、戻る案内だけ 1px の暗色縁取り（#0b1f35）を付ける。
-// 字形の拡大縮小はしない。収録外の文字は採用済み Noto Sans JP で描き、欠字として記録する（黙って差し替えない）。
+// 遊び方・放置デモの共通ビットマップフォント（tutorial_font_16.png／tutorial_font_16.json：16px白マスク、v3.2.0 採用版 327字）。
+// 表示側で着色（本文 #fff1d6・見出し #f2b950・補助 #a5c5c5）し、戻る案内などに 1px の暗色縁取り（#0b1f35）を付ける。
+// 字形の縮小はしない。拡大は整数倍だけ（V320-FIX-03 連鎖HUDの「役」2倍・最近傍）。収録外の文字は採用済み Noto Sans JP で描き、欠字として記録する（黙って差し替えない）。
 import { drawText, UI_FONT } from './text';
 
 export interface BitmapGlyph {
@@ -65,28 +65,30 @@ function tint(font: BitmapFont, color: string): HTMLCanvasElement {
 export interface BitmapTextOpts {
   color?: string;
   align?: 'left' | 'center' | 'right';
-  /** 1px の縁取り色（戻る案内のみ） */
+  /** 縁取り色（倍率と同じ px 幅。戻る案内・連鎖HUD） */
   outline?: string;
+  /** 整数倍の拡大（最近傍）。既定1 */
+  scale?: 1 | 2;
 }
 
-function drawRun(ctx: CanvasRenderingContext2D, font: BitmapFont, s: string, x: number, y: number, color: string): void {
+function drawRun(ctx: CanvasRenderingContext2D, font: BitmapFont, s: string, x: number, y: number, color: string, k = 1): void {
   const sheet = tint(font, color);
   let dx = x;
   for (const ch of chars(s)) {
     const gl = font.def.glyphs[ch];
     if (gl) {
       const [sx, sy, w, h] = gl.rect;
-      ctx.drawImage(sheet, sx, sy, w, h, Math.round(dx + gl.offset[0]), Math.round(y + gl.offset[1]), w, h);
-      dx += gl.advance;
+      ctx.drawImage(sheet, sx, sy, w, h, Math.round(dx + gl.offset[0] * k), Math.round(y + gl.offset[1] * k), w * k, h * k);
+      dx += gl.advance * k;
     } else {
       missingGlyphs.add(cp(ch));
       ctx.save();
-      ctx.font = `400 16px ${UI_FONT}`;
+      ctx.font = `400 ${16 * k}px ${UI_FONT}`;
       ctx.textBaseline = 'top';
       ctx.fillStyle = color;
       ctx.fillText(ch, Math.round(dx), Math.round(y));
       ctx.restore();
-      dx += font.def.cell[0];
+      dx += font.def.cell[0] * k;
     }
   }
 }
@@ -94,15 +96,16 @@ function drawRun(ctx: CanvasRenderingContext2D, font: BitmapFont, s: string, x: 
 /** ビットマップ文字を原寸で描く。font が無い（読込前・検証環境）ときは採用フォントで同じ位置へ描く */
 export function drawBitmapText(ctx: CanvasRenderingContext2D, font: BitmapFont | null | undefined, s: string, x: number, y: number, o: BitmapTextOpts = {}): void {
   const color = o.color ?? TUTORIAL_COLORS.body;
+  const k = o.scale ?? 1;
   if (!font) {
-    drawText(ctx, s, x, y, { size: 16, weight: 400, color, align: o.align ?? 'left' });
+    drawText(ctx, s, x, y, { size: 16 * k, weight: 400, color, align: o.align ?? 'left' });
     return;
   }
-  const w = measureBitmap(font.def, s);
+  const w = measureBitmap(font.def, s) * k;
   const x0 = Math.round(o.align === 'center' ? x - w / 2 : o.align === 'right' ? x - w : x);
   ctx.save();
   ctx.imageSmoothingEnabled = false;
-  if (o.outline) for (const [ox, oy] of [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]) drawRun(ctx, font, s, x0 + ox, y + oy, o.outline);
-  drawRun(ctx, font, s, x0, y, color);
+  if (o.outline) for (const [ox, oy] of [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]) drawRun(ctx, font, s, x0 + ox * k, y + oy * k, o.outline, k);
+  drawRun(ctx, font, s, x0, y, color, k);
   ctx.restore();
 }
