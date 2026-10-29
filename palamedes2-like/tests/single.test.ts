@@ -39,7 +39,7 @@ describe('数値正本 mode1_balance_v1.json（28_MODE1_NUMERIC_DESIGN）', () =
     expect(MODE1_BALANCE.stages.map((s) => s.natural_rise_ms)).toEqual([7000, 7000, 6000, 6000, 5000, 5000, 4000, 4000, 3000, 3000, 7000, 7000, 6000, 6000, 5000, 5000, 4000, 4000, 3000, 3000]);
     expect(MODE1_BALANCE.stages.map((s) => s.stage_clear_bonus)).toEqual(Array.from({ length: 20 }, (_, i) => (i + 1) * 1000));
     expect(MODE1_BALANCE.stages.every((s) => s.initial_pieces === 18)).toBe(true);
-    expect(MODE1_BALANCE.stage_transition).toMatchObject({ restore_streak_remaining_ms: 3000, restore_chain_remaining_ms: 12000, danger_grace_max_ms: 4000 });
+    expect(MODE1_BALANCE.stage_transition).toMatchObject({ restore_streak_remaining_ms: null, restore_chain_remaining_ms: 10000, danger_grace_max_ms: 4000 }); // V320-FIX-05
     expect(levelDef(20).cumulative_clears_to_enter).toBe(2370);
     expect(levelDef(20).required_clears_to_next).toBeNull();
     expect([1, 2, 3, 4, 5, 6, 7, 9].map((n) => scoreMultiplier(n)).map((m) => m.num / m.den)).toEqual([1, 1, 1.5, 1.5, 2, 2, 2.5, 2.5]);
@@ -146,7 +146,7 @@ describe('MODE1シングル：ステージクリア', () => {
     expect(evs(g, 'stageClear')).toHaveLength(1);
   });
 
-  it('ステージ間：得点・連続取得数・役連鎖数を引継ぎ、受付残時間を3秒／12秒（V320-FIX-04）へ戻す。盤面18・進捗0・危険非発動・その面の自然上昇周期', () => {
+  it('ステージ間：得点・打上連鎖数・役連鎖数を引継ぎ、打上は時間制限なし・役連鎖は10秒（V320-FIX-05）へ戻す。盤面18・進捗0・危険非発動・その面の自然上昇周期', () => {
     const s = new SingleSession({ mode: 'stage', seed: 4, config: { naturalRiseIntervalMs: 5000 } });
     const g = s.game as Game;
     toPlay(g);
@@ -171,14 +171,14 @@ describe('MODE1シングル：ステージクリア', () => {
     expect(n.single!.progress).toBe(0);
     expect(n.players[0].board.allIds()).toHaveLength(18);
     expect(n.players[0].streakCount).toBe(1);
-    expect(n.players[0].streakRemaining).toBe(n.ticks(3000)); // V320-FIX-04：打上3000ms
+    expect(n.players[0].streakRemaining).toBeNull(); // V320-FIX-05：打上連鎖は時間制限なし（旧：3000ms へ復帰）
     expect(n.players[0].chainCount).toBe(2);
-    expect(n.players[0].chainRemaining).toBe(n.ticks(12000));
+    expect(n.players[0].chainRemaining).toBe(n.ticks(10000)); // V320-FIX-05：10秒（旧12秒）
     expect(n.players[0].graceRemaining).toBeNull();
     expect(n.players[0].riseIntervalTicks).toBe(n.ticks(stageDef(2).natural_rise_ms));
     // READY中は受付時間を減らさない
     stepN(n, 30);
-    expect(n.players[0].streakRemaining).toBe(n.ticks(3000));
+    expect([n.players[0].streakRemaining, n.players[0].streakCount]).toEqual([null, 1]);
   });
 
   it('V320-FIX-04：ステージ10クリアは通常クリアで11面へ（ボーナス10000・11面の自然上昇7000ms・18個）', () => {

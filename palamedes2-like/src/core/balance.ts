@@ -41,7 +41,8 @@ export interface Mode1Balance {
     carry_score: boolean;
     carry_streak_count: boolean;
     carry_role_chain_count: boolean;
-    restore_streak_remaining_ms: number;
+    /** V320-FIX-05：null＝打上連鎖は時間制限なし（復帰する受付時間を持たない） */
+    restore_streak_remaining_ms: number | null;
     restore_chain_remaining_ms: number;
     clear_danger_active: boolean;
     danger_grace_max_ms: number;

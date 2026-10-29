@@ -203,8 +203,11 @@ export interface PlayerState {
   /** 危険猶予の残りtick（null＝猶予中でない） */
   graceRemaining: number | null;
   streakCount: number;
-  /** 連続取得の受付残りtick（成功取得で2秒に更新。自分の成立役の処理中は停止） */
-  streakRemaining: number;
+  /**
+   * 打上連鎖の受付残りtick。null＝時間制限なし（V320-FIX-05 の既定）。連鎖の有効条件には使わない（有効＝streakCount>0）。
+   * 受付時間を設定した場合だけ、成功で更新・自分の成立役の処理中は停止・0で時間切れ
+   */
+  streakRemaining: number | null;
   /** v3.1.0 連鎖切り予約（有効な連鎖中の最初のミスで true。成功・役の宣言では解除しない） */
   streakCutReserved: boolean;
   /** v3.1.0 ピンチ警告の状態（表示・音へ伝えた最後の値） */
@@ -317,10 +320,12 @@ export class Game {
       const tr = this.balance.stage_transition;
       this.single.score = carry.score;
       p.streakCount = carry.streakCount;
-      p.streakRemaining = carry.streakCount > 0 ? this.ticks(tr.restore_streak_remaining_ms) : 0;
+      // V320-FIX-05：打上連鎖は時間制限なし。成功数・切り予約をそのまま引き継ぐ（時間による復帰・別理由のヒビ解除はしない）
+      p.streakRemaining = carry.streakCount > 0 ? this.streakWindowTicks() : 0;
       p.streakCutReserved = carry.streakCount > 0 && !!carry.streakCutReserved;
       p.chainCount = carry.chainCount;
-      // 第3版 PM指定：役連鎖の受付は12000ms。ステージクリア時の最大復帰も同じ値（数値正本JSONの8000msより本指示を優先）
+      // 役連鎖の最大復帰は chainWindowMs（V320-FIX-05：10000ms。数値正本JSONの restore_chain_remaining_ms も同値）
+      void tr;
       p.chainRemaining = carry.chainCount > 0 ? this.ticks(this.config.chainWindowMs) : 0;
     }
     opts.setup?.(this);
@@ -422,9 +427,14 @@ export class Game {
     return this.tick < p.charMoveEndTick;
   }
 
-  /** 連続取得が受付時間内か */
+  /** 打上連鎖が有効か（V320-FIX-05：成功数で判定。受付残り時間は使わない） */
   streakActive(p: PlayerState): boolean {
-    return p.streakRemaining > 0;
+    return p.streakCount > 0;
+  }
+
+  /** 成功時に設定する受付残り（tick）。null＝時間制限なし */
+  private streakWindowTicks(): number | null {
+    return this.config.streakWindowMs === null ? null : this.ticks(this.config.streakWindowMs);
   }
 
   /** 現在の連続取得の攻撃倍率×100（受付時間切れなら×1.0） */
@@ -456,7 +466,8 @@ export class Game {
       for (const p of this.players) {
         if (p.role) continue;
         if (p.chainRemaining > 0) p.chainRemaining--;
-        if (p.streakRemaining > 0 && --p.streakRemaining === 0) this.endStreak(p, 'timeout');
+        // 受付時間を設定した場合だけ時間切れがある（既定 null＝時間では切らない）
+        if (p.streakRemaining !== null && p.streakRemaining > 0 && --p.streakRemaining === 0) this.endStreak(p, 'timeout');
       }
     }
     if (!this.single) {
@@ -1006,10 +1017,10 @@ export class Game {
         const r = pushRoleStock(p.roleStock, f.piece);
         p.roleStock = r.stock;
         discarded = r.discarded;
-        // 連続取得：成功取得から次の成功取得まで2秒以内なら継続（失敗では更新・リセットしない）
-        // v3.1.0：予約中の成功も成功数・受付時間を更新する（予約は解除しない）
+        // 打上連鎖：成功で+1（V320-FIX-05：時間では切れない。失敗では更新・リセットしない）
+        // 予約中の成功も成功数を増やす（予約・ヒビは解除しない）
         p.streakCount = this.streakActive(p) ? p.streakCount + 1 : 1;
-        p.streakRemaining = this.ticks(this.config.streakWindowMs);
+        p.streakRemaining = this.streakWindowTicks();
         p.board.releaseReservation(f.col, f.piece.id);
         packedIds = p.board.cols[f.col].map((s) => (s.kind === 'piece' ? s.piece.id : s.pieceId));
         packEndTick = this.tick + this.t.packMs;

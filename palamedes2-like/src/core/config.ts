@@ -80,11 +80,14 @@ export interface GameConfig {
   dangerHeight: number;
   /** 危険猶予（自然上昇の危険猶予。v3.1.0 修正R2：攻撃ピンチ猶予と同じ4000msに統一。1000/2000/3000ms で 3/2/1） */
   dangerGraceMs: number;
-  /** 連続取得の受付時間（確定：成功取得から次の成功取得まで2秒。自分の成立役の処理中は停止＝共有ノート17） */
-  streakWindowMs: number;
+  /**
+   * 打上連鎖の受付時間（ms）。null＝時間制限なし（V320-FIX-05：時間経過では切らない。切れるのは連鎖切り予約中の2回目の失敗だけ）。
+   * 数値を入れた場合だけ、成功から次の成功までの受付時間として働く（自分の成立役の処理中は停止）
+   */
+  streakWindowMs: number | null;
   streakAttackTable: readonly StreakStep[];
   streakScoreTable: readonly StreakStep[];
-  /** 役連鎖の受付時間（第3版 PM指定：8000ms→12000ms。ステージクリア時の最大復帰もこの値） */
+  /** 役連鎖の受付時間（V320-FIX-05：12000ms→10000ms。成立宣言ごとに更新、自分の成立役の処理中は停止。ステージクリア時の最大復帰もこの値） */
   chainWindowMs: number;
   /**
    * v3.2.0 移動の先行入力：移動終了前の左右入力を保持する期限（受付tickから、期限tickを含む）。初期値2tick（60Hzで約33.3ms）。
@@ -136,10 +139,10 @@ export const DEFAULT_CONFIG: GameConfig = {
   manualRiseMaxHeight: 7,
   dangerHeight: 7,
   dangerGraceMs: 4000,
-  streakWindowMs: 3000,
+  streakWindowMs: null,
   streakAttackTable: STREAK_ATTACK_TABLE,
   streakScoreTable: STREAK_SCORE_TABLE,
-  chainWindowMs: 12000,
+  chainWindowMs: 10000,
   moveBufferTicks: 2,
   chainBonusMax: 4,
   counterPerLine: 2,

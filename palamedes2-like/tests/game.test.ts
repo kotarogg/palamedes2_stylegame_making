@@ -428,13 +428,14 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     expect(evs(g.events, 'attackCancel').map((e) => e.tick)).toEqual([a.tick]);
   });
 
-  it('連続取得：成功取得から2秒以内の成功で継続し、宣言時の倍率に反映（v3.1.0：8回継続中から5個で13回＝×1.5）。受付時間切れは×1.0', () => {
+  // V320-FIX-05 で更新：旧「受付時間切れは×1.0」は時間制限の撤廃で無効。待っても×1.5のまま
+  it('打上連鎖：成功で継続し、宣言時の倍率に反映（8回継続中から5個で13回＝×1.5）。V320-FIX-05：待っても切れず×1.5のまま', () => {
     const run = (waitTicks: number) => {
       const g = makeGame({ base: '1s', boards: { 0: { 2: ['2s', '3s', '4s', '5s', '6s', '1d'] }, 1: EMPTY } });
       toPlay(g);
       const T = g.config.timing;
       g.players[0].streakCount = 8;
-      g.players[0].streakRemaining = g.ticks(2000);
+      g.players[0].streakRemaining = null;
       for (let i = 0; i < 5; i++) {
         g.step([cmd(0, 'launch')]);
         stepN(g, g.ticks(T.launchMs) + g.ticks(T.packMs));
@@ -450,9 +451,9 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     expect(fast.d.streakPercent).toBe(150);
     // V320-FIX-04：ハイストレート（数字役4ピース）+1 → (4+1)×1.5=7.5→7。受付は3000ms
     expect(fast.a.breakdown).toMatchObject({ base: 4, numberBonus: 1, multiplied: 7, power: 7 });
-    const slow = run(200);
-    expect(slow.d.streakPercent).toBe(100);
-    expect(slow.a.breakdown.power).toBe(5);
+    const slow = run(600);
+    expect(slow.d.streakPercent).toBe(150);
+    expect(slow.a.breakdown.power).toBe(7);
   });
 
   it('連続取得の受付時間は自分の成立役の処理中は停止し、宣言で連続取得状態をリセットしない（共有ノート17）', () => {
@@ -492,13 +493,14 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     ]);
   });
 
-  it('役連鎖：成立ごとに12秒（第3版）の受付を更新、処理中は停止。2連鎖目+1。不成立は更新・加算しない', () => {
+  // V320-FIX-05 で更新：受付 12秒→10秒
+  it('役連鎖：成立ごとに10秒（V320-FIX-05）の受付を更新、処理中は停止。2連鎖目+1。不成立は更新・加算しない', () => {
     const g = makeGame({ boards: { 0: rows(7), 1: EMPTY } });
     setStock(g, 0, '1s', '2s', '3s', '4s');
     toPlay(g);
     const p = g.players[0];
     g.step([cmd(0, 'declare')]);
-    const window = g.ticks(12000);
+    const window = g.ticks(10000);
     expect(p.chainRemaining).toBe(window);
     stepN(g, 50);
     expect(p.chainRemaining).toBe(window); // 自分の成立役の処理中は停止

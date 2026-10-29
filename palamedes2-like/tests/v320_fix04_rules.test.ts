@@ -13,10 +13,11 @@ const cmd = (player: PlayerId, type: Command['type']): Command => ({ player, typ
 const evs = <T extends GameEvent['type']>(events: GameEvent[], type: T) => events.filter((e): e is Extract<GameEvent, { type: T }> => e.type === type);
 
 describe('V320-FIX-04 第6章 演出時間', () => {
-  it('roleIntro 1200・roleOutro 500・descend 1600・streakWindow 3000。lineClear 200・lineShift 120・bounce 120・arc 260・chain 12000 は維持', () => {
+  // V320-FIX-05 で更新：streakWindow 3000→null（時間制限なし）、chain 12000→10000。他の値は FIX-04 のまま
+  it('roleIntro 1200・roleOutro 500・descend 1600・streakWindow null（FIX-05）。lineClear 200・lineShift 120・bounce 120・arc 260・chain 10000（FIX-05）', () => {
     const T = DEFAULT_CONFIG.timing;
-    expect([T.roleIntroMs, T.roleOutroMs, T.descendMs, DEFAULT_CONFIG.streakWindowMs]).toEqual([1200, 500, 1600, 3000]);
-    expect([T.lineClearMs, T.lineShiftMs, T.bounceMs, T.arcMs, DEFAULT_CONFIG.chainWindowMs, T.charMoveMs]).toEqual([200, 120, 120, 260, 12000, 90]);
+    expect([T.roleIntroMs, T.roleOutroMs, T.descendMs, DEFAULT_CONFIG.streakWindowMs]).toEqual([1200, 500, 1600, null]);
+    expect([T.lineClearMs, T.lineShiftMs, T.bounceMs, T.arcMs, DEFAULT_CONFIG.chainWindowMs, T.charMoveMs]).toEqual([200, 120, 120, 260, 10000, 90]);
     expect([DEFAULT_CONFIG.dangerGraceMs, DEFAULT_CONFIG.chainBonusMax, DEFAULT_CONFIG.counterPerLine, DEFAULT_CONFIG.moveBufferTicks]).toEqual([4000, 4, 2, 2]);
   });
 
@@ -35,24 +36,23 @@ describe('V320-FIX-04 第6章 演出時間', () => {
     expect(end.tick - atk.tick).toBe(30);
   });
 
-  it('打上連鎖の受付3000ms：到達から180tick（3000ms）で切れる', () => {
-    const run = (wait: number) => {
-      const g = makeGame({ base: '1s', boards: { 0: { 2: ['2s', '3s'] }, 1: rows(0) } });
-      toPlay(g);
-      g.step([cmd(0, 'launch')]);
-      while (!evs(g.events, 'arrive').length) g.step();
-      const p = g.players[0];
-      expect(p.streakRemaining).toBe(179); // 到達tickで180を設定し、同じtickの経過で1減る
-      stepN(g, wait);
-      return g.streakActive(p);
-    };
-    expect(run(178)).toBe(true);
-    expect(run(179)).toBe(false);
+  // V320-FIX-05 で更新：旧「到達から180tick（3000ms）で切れる」は時間制限の撤廃で無効
+  it('V320-FIX-05 打上連鎖は時間制限なし：成功後に長く待っても切れない（受付残りは null）', () => {
+    const g = makeGame({ base: '1s', boards: { 0: { 2: ['2s', '3s'] }, 1: rows(0) } });
+    toPlay(g);
+    g.step([cmd(0, 'launch')]);
+    while (!evs(g.events, 'arrive').length) g.step();
+    const p = g.players[0];
+    expect(p.streakRemaining).toBeNull();
+    stepN(g, 60 * 60);
+    expect([g.streakActive(p), p.streakCount]).toEqual([true, 1]);
+    expect(evs(g.events, 'streakCut')).toEqual([]);
   });
 
-  it('旧JSONの復帰値（2000／8000／3000）は使わない：ステージ移行の復帰は打上3000・役連鎖12000・ピンチ4000', () => {
-    const b = readJson<{ stage_transition: Record<string, number> }>('src/data/mode1_balance_v1.json').stage_transition;
-    expect([b.restore_streak_remaining_ms, b.restore_chain_remaining_ms, b.danger_grace_max_ms]).toEqual([3000, 12000, 4000]);
+  // V320-FIX-05 で更新：打上の復帰は null（時間制限なし）、役連鎖は10000
+  it('旧JSONの復帰値（2000／8000／3000）は使わない：ステージ移行の復帰は打上 null（時間制限なし）・役連鎖10000・ピンチ4000', () => {
+    const b = readJson<{ stage_transition: Record<string, number | null> }>('src/data/mode1_balance_v1.json').stage_transition;
+    expect([b.restore_streak_remaining_ms, b.restore_chain_remaining_ms, b.danger_grace_max_ms]).toEqual([null, 10000, 4000]);
   });
 });
 

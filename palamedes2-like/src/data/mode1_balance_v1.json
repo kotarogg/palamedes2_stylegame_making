@@ -323,8 +323,8 @@
     "carry_score": true,
     "carry_streak_count": true,
     "carry_role_chain_count": true,
-    "restore_streak_remaining_ms": 3000,
-    "restore_chain_remaining_ms": 12000,
+    "restore_streak_remaining_ms": null,
+    "restore_chain_remaining_ms": 10000,
     "clear_danger_active": true,
     "danger_grace_max_ms": 4000,
     "carry_excess_clear_units": false,
@@ -333,5 +333,6 @@
     "intermission_freezes_game_timers": true
   },
   "mode2_initial_pieces": 42,
-  "revision_V320_FIX_04": "2026-10-29 V320-FIX-04 実装依頼書 第6章・第10章：ステージを全20面へ拡張（11〜20面を追加、1〜10面は不変）。ステージ移行時の復帰を打上3000ms・役連鎖12000ms、ピンチ猶予4000msへ整合（旧値 2000／8000／3000 は不使用）。"
+  "revision_V320_FIX_04": "2026-10-29 V320-FIX-04 実装依頼書 第6章・第10章：ステージを全20面へ拡張（11〜20面を追加、1〜10面は不変）。ステージ移行時の復帰を打上3000ms・役連鎖12000ms、ピンチ猶予4000msへ整合（旧値 2000／8000／3000 は不使用）。",
+  "revision_V320_FIX_05": "2026-10-29 V320-FIX-05 実装依頼書 第2・3章：打上連鎖は時間制限なし（restore_streak_remaining_ms＝null。成功数・切り予約をそのまま引き継ぐ）。役連鎖の受付とステージ移行の最大復帰は10000ms。"
 }

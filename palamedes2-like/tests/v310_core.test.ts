@@ -160,21 +160,23 @@ describe('v3.1.0 打ち上げ成功連鎖：攻撃倍率表と連鎖切り予約
     toPlay(g);
     const p = g.players[0];
     p.streakCount = 7;
-    p.streakRemaining = 100;
+    p.streakRemaining = null;
     launchFrom(g, 0); // ミス
     expect(evs(g, 'streakCut', 0)).toMatchObject([{ state: 'reserved', reason: 'miss', count: 7 }]);
     expect([p.streakCount, p.streakCutReserved, g.currentStreakPercent(p)]).toEqual([7, true, 125]);
-    expect(p.streakRemaining).toBeLessThan(100); // ミスでは受付時間を更新しない
+    // V320-FIX-05 で更新：旧「ミス・成功で受付時間を更新」は時間制限の撤廃で無効（受付残りは null のまま）
+    expect(p.streakRemaining).toBeNull();
     launchFrom(g, 1); // 成功（1♠→2♠）
     expect([p.streakCount, p.streakCutReserved]).toEqual([8, true]);
-    expect(p.streakRemaining).toBeGreaterThan(100); // 成功で受付時間を2000msへ更新
+    expect(p.streakRemaining).toBeNull();
     launchFrom(g, 2); // 再ミス（2♠ と 4♥）
     expect(evs(g, 'streakCut', 0).at(-1)).toMatchObject({ state: 'ended', reason: 'miss', count: 8 });
     expect([p.streakCount, p.streakRemaining, p.streakCutReserved, g.currentStreakPercent(p)]).toEqual([0, 0, false, 100]);
   });
 
-  it('ミス→時間切れで終了し予約解除。次の新しい成功連鎖へ予約を持ち越さない', () => {
-    const g = makeGame({ base: '1s', boards: { 0: board, 1: EMPTY } });
+  // V320-FIX-05：既定では時間切れはない。受付時間を明示した設定（streakWindowMs≠null）の場合の動作として残す
+  it('受付時間を設定した場合だけ：ミス→時間切れで終了し予約解除。次の新しい成功連鎖へ予約を持ち越さない', () => {
+    const g = makeGame({ base: '1s', boards: { 0: board, 1: EMPTY } }, testConfig({ streakWindowMs: 3000 }));
     toPlay(g);
     const p = g.players[0];
     p.streakCount = 3;

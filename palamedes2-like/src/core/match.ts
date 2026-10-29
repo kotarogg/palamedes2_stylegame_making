@@ -177,8 +177,8 @@ export class SingleSession {
       // クリア確定時点で有効な状態を引き継ぐ（受付時間が切れていた状態は復活させない）
       const carry: SingleCarry = {
         score: this.game.single.score,
-        streakCount: p.streakRemaining > 0 ? p.streakCount : 0,
-        streakCutReserved: p.streakRemaining > 0 && p.streakCutReserved,
+        streakCount: this.game.streakActive(p) ? p.streakCount : 0,
+        streakCutReserved: this.game.streakActive(p) && p.streakCutReserved,
         chainCount: p.chainRemaining > 0 ? p.chainCount : 0,
       };
       this.stage++;
