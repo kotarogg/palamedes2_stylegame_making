@@ -33,7 +33,7 @@ import {
 import { CpuController } from './input/cpu';
 import { defaultSettings, DEVICE_CHOICES, deviceLabel, sameDevice, saveSettings, type AppSettings, type DeviceChoice, type DisplayScale } from './input/settings';
 import { MenuInput, type NavEvent, type NavKey } from './ui/menuInput';
-import { loadRecords, saveRecords, submitEndless, submitMode2, submitMode2NoReset, submitStage, type Records } from './ui/records';
+import { loadRecords, saveRecords, submitEndless, submitMode2, submitStage, type Mode2Submit, type Records } from './ui/records';
 import {
   ACCENT,
   CHARACTER_NAME,
@@ -461,8 +461,13 @@ export class MenuScene implements Scene {
       const best: string[] = [];
       if (t.title.startsWith('MODE1')) {
         if (r.endless) best.push(`ひたすら ベスト ${r.endless.score.toLocaleString('ja-JP')}点（Lv${r.endless.level}）`);
-        if (r.stage) best.push(`ステージ ベスト ${r.stage.score.toLocaleString('ja-JP')}点（最高${r.stage.maxStage}面${r.stage.completed ? '・完走' : ''}）`);
-      } else if (r.mode2Single) best.push(`最短クリア ${formatTime(r.mode2Single.bestMs)}`);
+        if (r.stage) best.push(`ステージ ベスト ${r.stage.score.toLocaleString('ja-JP')}点（最高${r.stage.maxStage}面${r.stage.completed ? '・全20面クリア' : ''}）`);
+        // 旧ルール（全10面）の記録は消さずに区別して表示（20面クリアとは扱わない）
+        else if (r.stageLegacy10) best.push(`旧ルール（全10面）ベスト ${r.stageLegacy10.score.toLocaleString('ja-JP')}点（最高${r.stageLegacy10.maxStage}面）`);
+      } else {
+        if (r.mode2Single) best.push(`最短クリア ${formatTime(r.mode2Single.bestMs)}`);
+        if (r.mode2NoResetBest) best.push(`ノーリセット最短 ${formatTime(r.mode2NoResetBest.bestMs)}`);
+      }
       best.forEach((b, i) => drawText(ctx, b, 320, MENU_DESC_Y(t.items.length) + 22 + i * 18, { align: 'center', size: 11, color: ACCENT, maxWidth: 300 }));
     }
     drawFooter(ctx, A);
@@ -1308,6 +1313,8 @@ export class GameScene implements Scene {
   finalCursor = 0;
   private confirmQueued = false;
   private recorded = false;
+  /** V320-FIX-04 MODE2シングルの記録更新（総合・ノーリセット専用）。結果画面の「新記録！」表示用 */
+  private mode2Submit: Mode2Submit | null = null;
   private nextAnnouncer: Character = 'kotaro';
   /** 2P対戦のREADY／GO担当の抽選専用の乱数（ゲームの乱数列へ影響させない） */
   private readonly announcerRng: Rng;
@@ -1461,6 +1468,7 @@ export class GameScene implements Scene {
     this.staging.reset(this.game, this.stagingOpts());
     this.finalCursor = 0;
     this.recorded = false;
+    this.mode2Submit = null;
     this.holdMs = PRESTART_MS;
     this.holdRendered = false;
   }
@@ -1472,9 +1480,9 @@ export class GameScene implements Scene {
     const out = g.result!.outcome;
     if (g.mode === 'mode2') {
       if (out === 'clear') {
-        // 最短クリアは従来どおり全クリアが対象（専用最速・補正タイムは作らない）。ノーリセットは達成回数だけ1回加算
-        submitMode2(r, (g as Mode2Game).elapsedMs());
-        if ((g as Mode2Game).noResetAchiever() === 0) submitMode2NoReset(r);
+        // V320-FIX-04：総合ベスト（全正常クリア）とノーリセット専用ベスト（場の更新0回）を独立に判定。達成回数は加算しない
+        const m2 = g as Mode2Game;
+        this.mode2Submit = submitMode2(r, m2.elapsedTicks(), m2.elapsedMs(), m2.noResetAchiever() === 0);
       }
     } else {
       const s = (g as Game).single!;
@@ -1771,9 +1779,11 @@ export class GameScene implements Scene {
     } else if (g.mode === 'mode2') {
       const m2 = g as Mode2Game;
       head = 'show_all_clear';
+      const up = this.mode2Submit;
       lines.push(`クリアタイム ${formatTime(m2.elapsedMs())}`);
-      if (r.mode2Single) lines.push(`ベスト ${formatTime(r.mode2Single.bestMs)}`);
-      if (m2.noResetAchiever() === 0) lines.push(`ノーリセットクリア！（達成 ${r.mode2NoReset}回）`);
+      if (r.mode2Single) lines.push(`ベスト ${formatTime(r.mode2Single.bestMs)}${up?.total ? '　新記録！' : ''}`);
+      // ノーリセット達成時だけ専用ベストと更新を出す（更新ありのクリアでは専用欄を出さない）
+      if (m2.noResetAchiever() === 0 && r.mode2NoResetBest) lines.push(`ノーリセットクリア！　専用ベスト ${formatTime(r.mode2NoResetBest.bestMs)}${up?.noReset ? '　新記録！' : ''}`);
     } else {
       const sg = (g as Game).single!;
       const out = g.result!.outcome;

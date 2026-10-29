@@ -133,7 +133,8 @@ describe('受攻撃ストックの配置（第10章）', () => {
   });
 
   it('相殺：XD顔＋小爆発を4コマ×40msの残像として表示（数量は即時に減る）。ピンチ破棄は別の表現（120msフェード）', () => {
-    const g = makeGame({ boards: { 0: rows(4), 1: EMPTY } });
+    // V320-FIX-04：役導入1200msで処理が長くなるため、受攻撃ブロック開始前に攻撃処理が来るよう消去1ラインの盤面にする
+    const g = makeGame({ boards: { 0: rows(1), 1: EMPTY } });
     const v = new GameView(g, fakeAssets());
     toPlay(g);
     g.step([atk(0, 3)]);

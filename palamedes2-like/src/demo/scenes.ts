@@ -377,7 +377,7 @@ export class RoleListScene implements Scene {
   info(i = this.index): { logos: number[]; han: number; clear: number; attack: number } {
     const ex = this.roles[i].example.map((c, k) => ({ id: k + 1, ...pieceKind(c) }));
     const r = evaluateSubset(ex);
-    return { logos: roleLogoIndices(r), han: r.han, clear: r.han, attack: computeAttack(r.han, 100, 1, DEFAULT_CONFIG.chainBonusMax).power };
+    return { logos: roleLogoIndices(r), han: r.han, clear: r.han, attack: computeAttack(r.han, 100, 1, DEFAULT_CONFIG.chainBonusMax, r.numberRole).power };
   }
 
   onNav(ev: NavEvent): void {

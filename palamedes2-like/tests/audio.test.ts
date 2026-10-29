@@ -143,9 +143,9 @@ describe('記録・設定・表示倍率', () => {
     expect(submitEndless(r, 900, 6)).toBe(false);
     expect(submitStage(r, 5000, 3, false)).toBe(true);
     expect(submitStage(r, 4000, 5, true)).toBe(false);
-    expect(r.stage).toEqual({ score: 5000, maxStage: 5, completed: true });
-    expect(submitMode2(r, 65000)).toBe(true);
-    expect(submitMode2(r, 70000)).toBe(false);
+    expect(r.stage).toEqual({ score: 5000, maxStage: 5, completed: true, rule: 'stage20_V320-FIX-04' });
+    expect(submitMode2(r, 3900, 65000, false).total).toBe(true);
+    expect(submitMode2(r, 4200, 70000, false).total).toBe(false);
     expect(parseRecords(JSON.stringify(r))).toEqual(r);
     expect(parseRecords('{broken')).toEqual(emptyRecords());
   });

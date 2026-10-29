@@ -116,15 +116,15 @@ export const DEFAULT_CONFIG: GameConfig = {
     rotateMs: 220,
     bounceMs: 120,
     arcMs: 260,
-    // v3.1.0：ミス帰還の「列の縦軸へ戻った後、空いている戻り位置へ到達する区間」を現行700msの1.6倍（所要時間）。
+    // ミス帰還の「列の縦軸へ戻った後、空いている戻り位置へ到達する区間」（v3.1.0 1120ms → V320-FIX-04 1600ms）。
     // 打ち上げ・反発・山なり帰還は変えない。帰還完了・描画・戻り位置の確保・操作制限はこの値で一致する
-    descendMs: 1120,
+    descendMs: 1600,
     riseMs: 250,
     bPoseMs: 150,
-    roleIntroMs: 700,
+    roleIntroMs: 1200,
     lineClearMs: 200,
     lineShiftMs: 120,
-    roleOutroMs: 300,
+    roleOutroMs: 500,
     declareFailLockMs: 500,
     readyMs: 1200,
     goMs: 700,
@@ -136,7 +136,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   manualRiseMaxHeight: 7,
   dangerHeight: 7,
   dangerGraceMs: 4000,
-  streakWindowMs: 2000,
+  streakWindowMs: 3000,
   streakAttackTable: STREAK_ATTACK_TABLE,
   streakScoreTable: STREAK_SCORE_TABLE,
   chainWindowMs: 12000,

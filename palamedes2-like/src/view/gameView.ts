@@ -1,7 +1,7 @@
 // ゲーム画面の描画（MODE1対戦／MODE1シングル／MODE2対戦／MODE2シングル）。第3版採用グラフィック（graphics_manifest_v3）。
 // ロジックのイベント列を読み、時間補間だけを行う（ロジックへ書き戻さない）。盤面の固定グリッド・論理座標は変更しない。
 import type { Character } from '../audio/audioMap';
-import { levelDef } from '../core/balance';
+import { levelDef, STAGE_COUNT } from '../core/balance';
 import { DEFAULT_VIEW_CONFIG, type ViewConfig } from '../core/config';
 import type { Game, GameEvent, PlayerState } from '../core/game';
 import type { AnyGame } from '../core/match';
@@ -11,7 +11,7 @@ import { evaluateStock, glowSegments } from '../core/roles';
 import type { Piece, PlayerId } from '../core/types';
 import { drawFrame, drawNineSlice, type Assets } from './assets';
 import { drawBitmapText } from './bitmapFont';
-import { CHAIN_HUD, chainHudLayout, crackShakeOffset, labelAt, rateRun, type ChainHudLayout, type HudLabelId, type LabelRow } from './chainHud';
+import { ATTACK_RESULT, attackResultRows, CHAIN_HUD, chainHudLayout, crackShakeOffset, labelAt, rateRun, type AttackResultRow, type ChainHudLayout, type HudLabelId, type LabelRow } from './chainHud';
 import type { ManifestFrame } from './data';
 import { arcPoint, barY, CELL, cellX, columnCenterX, descentY, easeInOutSine, easeOutQuad, lerp, progress, Z, type BoardRect } from './geometry';
 import { characterPose, crackerPose, type ResultPlan } from './presentation';
@@ -175,6 +175,8 @@ interface PlayerVis {
   crack: string | null;
   /** V320-FIX-04 揺れの起点（予約に入ったtick。数字の更新では動かさない）。null＝予約なし */
   crackStart: number | null;
+  /** V320-FIX-04 相殺・送信の表示（最新の攻撃結果だけ。キューに積まない） */
+  attackShow: { canceled: number; sent: number; start: number } | null;
 }
 
 interface DrawItem {
@@ -278,6 +280,7 @@ export class GameView {
       pinchCount: null,
       crack: null,
       crackStart: null,
+      attackShow: null,
     }));
   }
 
@@ -522,6 +525,8 @@ export class GameView {
       case 'attack': {
         if (v.role) v.role.attackTick = e.tick;
         if (this.isSingle) break;
+        // V320-FIX-04 第9章：確定した攻撃イベントの相殺数・送信数をそのまま表示（計算を再実行しない）。新しい結果で置き換える
+        v.attackShow = e.counter.canceled > 0 || e.counter.sent > 0 ? { canceled: e.counter.canceled, sent: e.counter.sent, start: e.tick } : null;
         // 送信の演出は受け手の列の上端（相殺の演出はストックの XD 顔＋小爆発）
         if (e.counter.sent > 0) {
           const [tx, ty] = this.pvc.stock.origin[(1 - e.player) as PlayerId];
@@ -1111,6 +1116,48 @@ export class GameView {
       if (!this.hud.hideSingleInfo) this.drawSingleInfo(ctx);
     } else if (this.hud.firstTo) drawText(ctx, `${this.hud.firstTo}本先取 R${this.hud.round ?? 1}`, 320, 124, { align: 'center', size: 10, color: TEXT_COLORS.secondary });
     this.drawNoReset(ctx, t);
+    if (g.mode === 'mode1' && !this.isSingle) for (const p of [0, 1] as PlayerId[]) this.drawAttackResult(ctx, p, t, ms);
+  }
+
+  /**
+   * V320-FIX-04 相殺・送信の表示（900ms）。結果確定後は出さない。テスト・検証用に公開
+   */
+  attackResult(p: PlayerId, t: number): { rows: AttackResultRow[]; dot: { x: number; y: number } | null } | null {
+    const a = this.pv[p]?.attackShow;
+    const g = this.game;
+    if (!a || g.result || t < a.start) return null;
+    const ms = (t - a.start) * g.tickMs;
+    if (ms >= ATTACK_RESULT.durationMs) return null;
+    const rows = attackResultRows(p, a.canceled, a.sent);
+    let dot: { x: number; y: number } | null = null;
+    if (a.sent > 0 && ms < ATTACK_RESULT.dotMs) {
+      const from = rows.find((r) => r.kind === 'attack')!.digits;
+      const opp = (1 - p) as PlayerId;
+      const [ox] = this.pvc.stock.origin[opp];
+      const to = { x: ox + 8, y: this.stockView(opp, t).blockY };
+      const k = ms / ATTACK_RESULT.dotMs;
+      dot = { x: Math.round(from.cx + (to.x - from.cx) * k), y: Math.round(from.y + (to.y - from.y) * k) };
+    }
+    return { rows, dot };
+  }
+
+  private drawAttackResult(ctx: CanvasRenderingContext2D, p: PlayerId, t: number, ms: number): void {
+    const r = this.attackResult(p, t);
+    if (!r) return;
+    const phase = numericPhase(ms);
+    for (const row of r.rows) {
+      this.drawLabel(ctx, row.label);
+      drawNumericScaled(ctx, this.assets, String(row.value), row.digits.cx, row.digits.y, row.digits.h, row.digits.maxW, 'center', phase);
+    }
+    if (r.dot) {
+      // 小さな光点（既存プリミティブ）：芯3px＋淡い外周
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,246,220,0.45)';
+      ctx.fillRect(r.dot.x - 2, r.dot.y - 2, 5, 5);
+      ctx.fillStyle = '#fff6dc';
+      ctx.fillRect(r.dot.x - 1, r.dot.y - 1, 3, 3);
+      ctx.restore();
+    }
   }
 
   /**
@@ -1320,7 +1367,7 @@ export class GameView {
       line('レベル', req === null ? `Lv ${s.level} MAX` : `Lv ${s.level}`);
       line('次Lvまで', req === null ? 'MAX' : `あと ${Math.max(0, req - s.levelProgress)}個`);
     } else {
-      line('ステージ', `${s.stage} / 10`);
+      line('ステージ', `${s.stage} / ${STAGE_COUNT}`);
       line('ノルマ', `${Math.min(s.progress, s.quota)} / ${s.quota}`);
     }
   }

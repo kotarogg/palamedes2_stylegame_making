@@ -77,6 +77,76 @@
       "natural_rise_ms": 3000,
       "initial_pieces": 18,
       "stage_clear_bonus": 10000
+    },
+    {
+      "stage": 11,
+      "quota": 100,
+      "natural_rise_ms": 7000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 11000
+    },
+    {
+      "stage": 12,
+      "quota": 120,
+      "natural_rise_ms": 7000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 12000
+    },
+    {
+      "stage": 13,
+      "quota": 140,
+      "natural_rise_ms": 6000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 13000
+    },
+    {
+      "stage": 14,
+      "quota": 160,
+      "natural_rise_ms": 6000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 14000
+    },
+    {
+      "stage": 15,
+      "quota": 180,
+      "natural_rise_ms": 5000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 15000
+    },
+    {
+      "stage": 16,
+      "quota": 200,
+      "natural_rise_ms": 5000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 16000
+    },
+    {
+      "stage": 17,
+      "quota": 220,
+      "natural_rise_ms": 4000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 17000
+    },
+    {
+      "stage": 18,
+      "quota": 240,
+      "natural_rise_ms": 4000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 18000
+    },
+    {
+      "stage": 19,
+      "quota": 260,
+      "natural_rise_ms": 3000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 19000
+    },
+    {
+      "stage": 20,
+      "quota": 300,
+      "natural_rise_ms": 3000,
+      "initial_pieces": 18,
+      "stage_clear_bonus": 20000
     }
   ],
   "endless": {
@@ -253,14 +323,15 @@
     "carry_score": true,
     "carry_streak_count": true,
     "carry_role_chain_count": true,
-    "restore_streak_remaining_ms": 2000,
-    "restore_chain_remaining_ms": 8000,
+    "restore_streak_remaining_ms": 3000,
+    "restore_chain_remaining_ms": 12000,
     "clear_danger_active": true,
-    "danger_grace_max_ms": 3000,
+    "danger_grace_max_ms": 4000,
     "carry_excess_clear_units": false,
     "reset_stock_and_return_reservations": true,
     "initial_pieces_next_stage": 18,
     "intermission_freezes_game_timers": true
   },
-  "mode2_initial_pieces": 42
+  "mode2_initial_pieces": 42,
+  "revision_V320_FIX_04": "2026-10-29 V320-FIX-04 実装依頼書 第6章・第10章：ステージを全20面へ拡張（11〜20面を追加、1〜10面は不変）。ステージ移行時の復帰を打上3000ms・役連鎖12000ms、ピンチ猶予4000msへ整合（旧値 2000／8000／3000 は不使用）。"
 }

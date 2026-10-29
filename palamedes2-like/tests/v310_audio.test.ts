@@ -193,7 +193,8 @@ describe('v3.1.0 ゲイン（イベント側）と相殺音', () => {
   });
 
   it('相殺音：論理相殺（attackCancel）と同数で、同じバッチを二重に鳴らさない', () => {
-    const g = makeGame({ boards: { 0: rows(4), 1: EMPTY } });
+    // V320-FIX-04：役導入1200msで処理が長くなるため、受攻撃ブロック開始前に攻撃処理が来るよう消去1ラインの盤面にする
+    const g = makeGame({ boards: { 0: rows(1), 1: EMPTY } });
     toPlay(g);
     const r = recBus();
     const d = new SoundDirector(r.bus, g, ['kotaro', 'akane']);

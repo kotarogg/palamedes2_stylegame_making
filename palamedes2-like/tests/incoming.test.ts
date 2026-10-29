@@ -120,7 +120,7 @@ describe('受攻撃ブロック・攻撃波（ゲーム内）', () => {
     g.step([{ player: 0, type: 'declare' }]);
     stepN(g, 400);
     const a = evs(g, 'attack', 0)[0];
-    expect(a.counter).toEqual({ usedPower: 2, canceled: 4, sent: 1, discarded: 0 });
+    expect(a.counter).toEqual({ usedPower: 2, canceled: 4, sent: 2, discarded: 0 }); // V320-FIX-04：ストレート+1で攻撃力4
     expect(evs(g, 'attackCancel', 0).map((e) => e.canceled)).toEqual([4]);
     // 現ブロック・波は相殺されずに、役処理後に実適用される
     expect(s.stats.canceled).toBe(4);

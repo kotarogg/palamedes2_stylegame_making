@@ -684,8 +684,9 @@ export class Game {
       }
       return;
     }
-    // 攻撃計算 → 相殺 → 送信（盤面が空で予定ライン数を消せなくても基本攻撃量は減らさない）
-    const breakdown = computeAttack(r.result.han, r.streakPercent, r.chainCount, this.config.chainBonusMax);
+    // 攻撃計算 → 相殺 → 送信（盤面が空で予定ライン数を消せなくても基本攻撃量は減らさない）。
+    // 採択役・倍率・役連鎖数は宣言時点のスナップショット（数字役ボーナスは採択された数字役から1回）
+    const breakdown = computeAttack(r.result.han, r.streakPercent, r.chainCount, this.config.chainBonusMax, r.result.numberRole);
     if (this.single) {
       // シングルは送り先がない（攻撃ストック・送信なし）
       this.emit({ type: 'attack', tick: this.tick, player: p.id, breakdown, counter: { usedPower: 0, canceled: 0, sent: 0, discarded: 0 }, linesCleared: r.linesCleared });

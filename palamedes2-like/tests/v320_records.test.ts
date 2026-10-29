@@ -5,7 +5,7 @@ import { AudioBus } from '../src/audio/audioBus';
 import { Mode2Game } from '../src/core/mode2';
 import { Mode2Stage } from '../src/demo/stages';
 import { defaultSettings, parseSettings } from '../src/input/settings';
-import { emptyRecords, parseRecords, submitMode2, submitMode2NoReset } from '../src/ui/records';
+import { emptyRecords, MODE2_RULE_ID, parseRecords, STAGE_RULE_ID, submitMode2, submitStage } from '../src/ui/records';
 import { fakeAssets, kind } from './helpers';
 
 function makeApp() {
@@ -28,6 +28,7 @@ describe('v3.2.0 旧データの読込', () => {
     const r = parseRecords(old);
     expect(r.mode2NoReset).toBe(0);
     expect(r.mode2Single).toEqual({ bestMs: 61234 });
+    expect(r.mode2NoResetBest).toBeNull(); // 旧達成回数から専用時間を捏造しない
     expect(r.endless).toEqual({ score: 1200, level: 4 });
     expect(parseRecords(JSON.stringify({ mode2NoReset: 3 })).mode2NoReset).toBe(3);
     expect(parseRecords('{broken').mode2NoReset).toBe(0);
@@ -43,12 +44,35 @@ describe('v3.2.0 旧データの読込', () => {
     expect(defaultSettings()).toMatchObject({ assist: true, npcLevel: 'easy' });
   });
 
-  it('最短クリアは全クリアが対象（ノーリセットの有無に関係なく比較）。達成回数は呼出し1回につき1加算', () => {
+  it('V320-FIX-04 MODE2：総合ベストとノーリセット専用ベストを独立判定。同タイム（tick）は新記録でない。ルール識別を付ける', () => {
     const r = emptyRecords();
-    expect(submitMode2(r, 50000)).toBe(true);
-    expect(submitMode2(r, 60000)).toBe(false);
-    expect(submitMode2NoReset(r)).toBe(1);
-    expect(r.mode2Single).toEqual({ bestMs: 50000 });
+    r.mode2NoReset = 5; // 旧達成回数は加算しない
+    expect(submitMode2(r, 3000, 50000, false)).toEqual({ total: true, noReset: false });
+    expect(r.mode2NoResetBest).toBeNull();
+    // ノーリセットで遅い → 総合は更新なし、専用は初回作成
+    expect(submitMode2(r, 3300, 55000, true)).toEqual({ total: false, noReset: true });
+    expect(r.mode2NoResetBest).toEqual({ bestMs: 55000, bestTicks: 3300, rule: MODE2_RULE_ID });
+    // 同tick は新記録でない（総合・専用とも）
+    expect(submitMode2(r, 3000, 50000, true)).toEqual({ total: false, noReset: true });
+    expect(submitMode2(r, 3000, 50000, true)).toEqual({ total: false, noReset: false });
+    // 更新ありのクリアは専用を更新しない
+    expect(submitMode2(r, 2900, 48333, false)).toEqual({ total: true, noReset: false });
+    expect(r.mode2Single).toEqual({ bestMs: 48333, bestTicks: 2900, rule: MODE2_RULE_ID });
+    expect(r.mode2NoReset).toBe(5);
+    // 旧保存（ms のみ）は ms で比較。同値は更新しない
+    const old = parseRecords(JSON.stringify({ mode2Single: { bestMs: 50000 } }));
+    expect(submitMode2(old, 3000, 50000, false).total).toBe(false);
+    expect(parseRecords(JSON.stringify(r))).toEqual(r);
+  });
+
+  it('V320-FIX-04 ステージ：旧（全10面・ルール識別なし）の記録は消さずに旧ルール欄へ。20面の記録とは比較しない', () => {
+    const r = parseRecords(JSON.stringify({ stage: { score: 90000, maxStage: 10, completed: true } }));
+    expect(r.stage).toBeNull();
+    expect(r.stageLegacy10).toEqual({ score: 90000, maxStage: 10, completed: true });
+    expect(submitStage(r, 1000, 2, false)).toBe(true);
+    expect(r.stage).toEqual({ score: 1000, maxStage: 2, completed: false, rule: STAGE_RULE_ID });
+    const back = parseRecords(JSON.stringify(r));
+    expect(back).toEqual(r);
   });
 });
 
@@ -116,22 +140,23 @@ describe('v3.2.0 記録の登録（本編シーン）', () => {
     return { app, sc, g };
   }
 
-  it('SINGLE：ノーリセットクリアは1クリアにつき1回だけ加算（結果表示中に何度更新しても二重登録しない）。最短クリアも登録', () => {
+  it('SINGLE：ノーリセットクリアで総合・専用ベストを登録（結果表示中に何度更新しても二重登録しない）。達成回数は加算しない', () => {
     const { app, sc, g } = scene('single');
     app.onKey('KeyF', false);
     for (let i = 0; i < 900; i++) sc.update(1000 / 60);
     expect(g.result?.outcome).toBe('clear');
-    expect(app.records.mode2NoReset).toBe(1);
-    expect(app.records.mode2Single?.bestMs).toBe(g.elapsedMs());
+    expect(app.records.mode2NoReset).toBe(0);
+    expect(app.records.mode2Single).toEqual({ bestMs: g.elapsedMs(), bestTicks: g.elapsedTicks(), rule: MODE2_RULE_ID });
+    expect(app.records.mode2NoResetBest).toEqual(app.records.mode2Single);
     for (let i = 0; i < 300; i++) sc.update(1000 / 60);
-    expect(app.records.mode2NoReset).toBe(1);
+    expect(app.records.mode2NoResetBest?.bestTicks).toBe(g.elapsedTicks());
   });
 
   it('CPU対戦：CPU・人間どちらの勝利も SINGLE の記録へ登録しない', () => {
     const { app, sc, g } = scene('cpu');
     for (let i = 0; i < 900 && !g.result; i++) sc.update(1000 / 60);
     expect(g.result).not.toBeNull();
-    expect(app.records.mode2NoReset).toBe(0);
+    expect(app.records.mode2NoResetBest).toBeNull();
     expect(app.records.mode2Single).toBeNull();
   });
 

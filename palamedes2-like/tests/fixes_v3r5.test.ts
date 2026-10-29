@@ -311,7 +311,8 @@ describe('修正R5：相殺音', () => {
   }
 
   it('1相殺バッチ（攻撃1回）につき1回。表示の打切りで音を追加・遅延発火しない', () => {
-    const g = makeGame({ boards: { 0: rows(4), 1: EMPTY } });
+    // V320-FIX-04：役導入1200msで処理が長くなるため、受攻撃ブロック開始前に攻撃処理が来るよう消去1ラインの盤面にする
+    const g = makeGame({ boards: { 0: rows(1), 1: EMPTY } });
     toPlay(g);
     const r = recordingBus();
     const d = new SoundDirector(r.bus, g, ['kotaro', 'akane']);

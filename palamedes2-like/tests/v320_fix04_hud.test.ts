@@ -195,3 +195,63 @@ describe('V320-FIX-04 候補補助表示（第5章）', () => {
     expect(GameView.assistAlpha(0)).toBeCloseTo(GameView.assistAlpha(1000), 6);
   });
 });
+
+describe('V320-FIX-04 相殺・送信の表示（第9章）', () => {
+  /** 1P：待機3の状態で攻撃力4（ストレートフラッシュ）を宣言 → 相殺3・送信2 */
+  function setup(pending: number) {
+    const g = makeGame({ boards: { 0: { 0: ['5c'], 1: ['5c'], 2: ['5c'], 3: ['5c'], 4: ['5c'], 5: ['5c'] }, 1: EMPTY } });
+    const v = new GameView(g, fakeAssets());
+    while (!g.playing) g.step();
+    if (pending) g.step([{ player: 0, type: 'debugAttack', lines: pending } as never]);
+    g.players[0].roleStock = [1, 2, 3, 4].map((n) => g.factory.make(n, 'spade'));
+    g.step([{ player: 0, type: 'declare' }]);
+    let a: { tick: number; counter: { canceled: number; sent: number } } | undefined;
+    for (let i = 0; i < 300 && !a; i++) {
+      g.step();
+      a = g.events.find((e) => e.type === 'attack') as typeof a;
+    }
+    v.syncEvents();
+    return { g, v, a: a! };
+  }
+
+  it('相殺・攻撃の両方：上段「相殺 N」（y166/188）、下段「攻撃 N」（y214/236）。1Pは左レーン x264〜318 の中央', () => {
+    const { v, a } = setup(3);
+    expect(a.counter).toMatchObject({ canceled: 3, sent: 2 });
+    const r = v.attackResult(0, a.tick)!;
+    expect(r.rows.map((x) => [x.kind, x.value, x.label.y, x.digits.y, x.digits.cx])).toEqual([
+      ['cancel', 3, 166, 188, 291],
+      ['attack', 2, 214, 236, 291],
+    ]);
+    for (const x of r.rows) {
+      expect(x.label.visible.x).toBeGreaterThanOrEqual(264);
+      expect(x.label.visible.x + x.label.visible.w).toBeLessThanOrEqual(318);
+      expect(x.digits).toMatchObject({ h: 17, maxW: 50 });
+    }
+    expect(r.dot).not.toBeNull();
+    expect(v.attackResult(1, a.tick)).toBeNull();
+  });
+
+  it('相殺0：攻撃だけ（上段は空ける）。送信0：相殺だけで光点なし。900msで終了', () => {
+    const s = setup(0);
+    const r = s.v.attackResult(0, s.a.tick)!;
+    expect(r.rows.map((x) => [x.kind, x.label.y])).toEqual([['attack', 214]]);
+    expect(s.v.attackResult(0, s.a.tick + 53)).not.toBeNull();
+    expect(s.v.attackResult(0, s.a.tick + 54)).toBeNull(); // 900ms
+    expect(s.v.attackResult(0, s.a.tick + 15)!.dot).toBeNull(); // 光点は250msまで
+    const c = setup(9);
+    const rc = c.v.attackResult(0, c.a.tick)!;
+    expect(c.a.counter).toMatchObject({ canceled: 8, sent: 0 });
+    expect(rc.rows.map((x) => x.kind)).toEqual(['cancel']);
+    expect(rc.dot).toBeNull();
+  });
+
+  it('結果確定・新ラウンドで表示を終える（後から再出現しない）', () => {
+    const { g, v, a } = setup(3);
+    expect(v.attackResult(0, a.tick)).not.toBeNull();
+    g.result = { winner: 1, tick: g.tick, outcome: 'win' };
+    expect(v.attackResult(0, a.tick)).toBeNull();
+    g.result = null;
+    v.reset(makeGame({ boards: { 0: EMPTY, 1: EMPTY } }));
+    expect(v.attackResult(0, a.tick)).toBeNull();
+  });
+});

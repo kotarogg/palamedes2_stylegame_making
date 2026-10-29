@@ -365,8 +365,9 @@ describe('役宣言の処理フェーズ（確定）', () => {
     expect(evs(g.events, 'lineClear')).toHaveLength(1);
     const a = evs(g.events, 'attack')[0];
     expect(a.linesCleared).toBe(1);
-    expect(a.breakdown).toMatchObject({ base: 3, power: 3 });
-    expect(evs(g.events, 'attackReceive').filter((e) => e.player === 1 && e.cause === 'receive').map((e) => e.accepted)).toEqual([3]);
+    // V320-FIX-04：ストレート（数字役4ピース）+1
+    expect(a.breakdown).toMatchObject({ base: 3, numberBonus: 1, power: 4 });
+    expect(evs(g.events, 'attackReceive').filter((e) => e.player === 1 && e.cause === 'receive').map((e) => e.accepted)).toEqual([4]);
   });
 
   it('宣言者だけ操作不能・自然上昇停止。相手は継続し、終了後に残り時間から自然上昇を再開', () => {
@@ -409,7 +410,8 @@ describe('攻撃計算・相殺・送信（確定）', () => {
   });
 
   it('相殺は攻撃処理フェーズで行い、役処理の途中へ割り込ませない。処理中の受信も即加算され、相殺対象（nextPending）になる', () => {
-    const g = makeGame({ boards: { 0: rows(4) } });
+    // V320-FIX-04：役導入1200msで処理が長くなるため、ブロック開始より前に攻撃処理が来るよう消去1ラインの盤面にする
+    const g = makeGame({ boards: { 0: rows(1) } });
     setStock(g, 0, '1s', '2s', '3s', '4s');
     toPlay(g);
     g.step([atk(0, 1)]);
@@ -420,9 +422,9 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     expect(evs(g.events, 'attack')).toHaveLength(0);
     stepN(g, 200);
     const a = evs(g.events, 'attack')[0];
-    expect(a.counter).toEqual({ usedPower: 1, canceled: 2, sent: 2, discarded: 0 });
+    expect(a.counter).toEqual({ usedPower: 1, canceled: 2, sent: 3, discarded: 0 });
     expect(g.players[0].incoming.nextPending).toBe(0);
-    expect(evs(g.events, 'attackReceive').filter((e) => e.player === 1).map((e) => [e.tick, e.accepted])).toEqual([[a.tick, 2]]);
+    expect(evs(g.events, 'attackReceive').filter((e) => e.player === 1).map((e) => [e.tick, e.accepted])).toEqual([[a.tick, 3]]);
     expect(evs(g.events, 'attackCancel').map((e) => e.tick)).toEqual([a.tick]);
   });
 
@@ -446,10 +448,11 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     const fast = run(0);
     expect(fast.d.result.han).toBe(5); // 2345♠ ハイストレートフラッシュ
     expect(fast.d.streakPercent).toBe(150);
-    expect(fast.a.breakdown).toMatchObject({ base: 4, multiplied: 6, power: 6 });
-    const slow = run(130);
+    // V320-FIX-04：ハイストレート（数字役4ピース）+1 → (4+1)×1.5=7.5→7。受付は3000ms
+    expect(fast.a.breakdown).toMatchObject({ base: 4, numberBonus: 1, multiplied: 7, power: 7 });
+    const slow = run(200);
     expect(slow.d.streakPercent).toBe(100);
-    expect(slow.a.breakdown.power).toBe(4);
+    expect(slow.a.breakdown.power).toBe(5);
   });
 
   it('連続取得の受付時間は自分の成立役の処理中は停止し、宣言で連続取得状態をリセットしない（共有ノート17）', () => {
@@ -511,7 +514,7 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     stepN(g, 400);
     const atks = evs(g.events, 'attack');
     expect(atks.map((a) => a.breakdown.chainBonus)).toEqual([0, 1]);
-    expect(atks[1].breakdown.power).toBe(4);
+    expect(atks[1].breakdown.power).toBe(5); // (3+1)×1 + 連鎖1
     // 受付時間切れ後は1連鎖目に戻る（相手の受攻撃は本テストの対象外：ピンチ敗北で終わらないよう受信分を空にする）
     g.players[1].incoming = createIncoming();
     stepN(g, window + 5);
@@ -522,7 +525,8 @@ describe('攻撃計算・相殺・送信（確定）', () => {
   });
 
   it('同一tickの双方送信：双方とも送信反映前の待機ストックで相殺し、その後に双方の送信を反映（処理順の有利不利なし）', () => {
-    const g = makeGame({ boards: { 0: rows(4), 1: rows(4) } });
+    // V320-FIX-04：役処理が長くなったため、ブロック開始より前に攻撃処理が来るよう消去1ラインの盤面にする
+    const g = makeGame({ boards: { 0: rows(1), 1: rows(1) } });
     setStock(g, 0, '1s', '2s', '3s', '4s');
     setStock(g, 1, '1s', '2s', '3s', '4s');
     toPlay(g);
@@ -532,13 +536,13 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     const a = evs(g.events, 'attack');
     expect(a[0].tick).toBe(a[1].tick);
     expect(a.map((x) => x.counter)).toEqual([
-      { usedPower: 1, canceled: 1, sent: 2, discarded: 1 },
-      { usedPower: 1, canceled: 1, sent: 2, discarded: 1 },
+      { usedPower: 1, canceled: 1, sent: 3, discarded: 1 },
+      { usedPower: 1, canceled: 1, sent: 3, discarded: 1 },
     ]);
     const recv = evs(g.events, 'attackReceive').filter((e) => e.cause === 'receive');
     expect(recv.map((e) => [e.player, e.accepted, e.total, e.tick === a[0].tick])).toEqual([
-      [1, 2, 2, true],
-      [0, 2, 2, true],
+      [1, 3, 3, true],
+      [0, 3, 3, true],
     ]);
   });
 });
@@ -636,7 +640,7 @@ describe('危険状態・敗北（確定）', () => {
     const left = p.graceRemaining;
     stepN(g, 20);
     expect(p.graceRemaining).toBe(left); // 処理中は停止
-    stepN(g, 30);
+    stepN(g, 60);
     const rel = evs(g.events, 'danger').find((e) => e.state === 'release')!;
     expect(rel.tick).toBe(evs(g.events, 'lineClear')[0].tick);
     stepN(g, 300);

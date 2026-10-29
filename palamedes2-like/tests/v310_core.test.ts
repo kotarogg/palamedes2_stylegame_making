@@ -109,7 +109,7 @@ describe('v3.1.0 ピンチ：猶予4000ms、1000/2000/3000ms で 3/2/1、4000ms 
 });
 
 describe('v3.1.0 ミス帰還：縦軸へ戻った後の降下区間だけ1.6倍', () => {
-  it('反発120ms・山なり260msは不変、降下は700ms→1120ms。returned は returnEndTick、描画も同じ時刻に戻り位置へ到達', () => {
+  it('反発120ms・山なり260msは不変、降下は1600ms（V320-FIX-04）。returned は returnEndTick、描画も同じ時刻に戻り位置へ到達', () => {
     const g = makeGame({ base: '1s', boards: { 0: { 2: ['4d', '5c'] }, 1: EMPTY } });
     const v = new GameView(g, fakeAssets());
     toPlay(g);
@@ -120,8 +120,8 @@ describe('v3.1.0 ミス帰還：縦軸へ戻った後の降下区間だけ1.6倍
     expect(a.success).toBe(false);
     expect(a.arcStartTick - a.tick).toBe(g.ticks(120));
     expect(a.arcEndTick - a.arcStartTick).toBe(g.ticks(260));
-    expect(a.returnEndTick - a.arcEndTick).toBe(g.ticks(1120));
-    expect(g.ticks(1120)).toBe(67); // 700ms＝42tick の1.6倍（67.2）を tick へ丸め
+    expect(a.returnEndTick - a.arcEndTick).toBe(g.ticks(1600)); // V320-FIX-04：1120→1600ms
+    expect(g.ticks(1600)).toBe(96);
     const r = evs(g, 'returned', 0)[0];
     expect(r.tick).toBe(a.returnEndTick);
     expect(r.instant).toBe(false);

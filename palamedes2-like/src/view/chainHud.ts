@@ -157,3 +157,47 @@ export function rateRun(glyphs: readonly RateGlyphDef[], text: string): { width:
   }
   return { width, cells };
 }
+
+/**
+ * 相殺・送信の表示（V320-FIX-04 第9章）：攻撃が確定した既存イベントの canceled／sent を、中央領域の左右レーンへ。
+ * 1P＝左レーン x264〜318、2P＝右レーン x322〜376。見出しPNGはレーン中央へ原寸（描画画素の中心で合わせる）、
+ * 相殺：見出し y166・数字 y188、攻撃：見出し y214・数字 y236。数字はS12・高さ上限17・幅上限50。0の行は空ける
+ */
+export const ATTACK_RESULT = {
+  durationMs: 900,
+  lanes: { 0: { x: 264, w: 54 }, 1: { x: 322, w: 54 } },
+  cancel: { id: 'label_cancel', headingY: 166, digitsY: 188 },
+  attack: { id: 'label_attack', headingY: 214, digitsY: 236 },
+  digits: { h: 17, maxW: 50 },
+  /** 送信>0 の光点：送信側の攻撃数字付近から相手の受ストック上端へ */
+  dotMs: 250,
+} as const;
+
+export interface AttackResultRow {
+  kind: 'cancel' | 'attack';
+  value: number;
+  label: LabelRow;
+  digits: DigitRow;
+}
+
+/** 表示する行（0の項目は出さない。行の位置は固定で、相殺0なら上段を空ける） */
+export function attackResultRows(p: PlayerId, canceled: number, sent: number): AttackResultRow[] {
+  const lane = ATTACK_RESULT.lanes[p];
+  const cx = lane.x + lane.w / 2;
+  const row = (kind: 'cancel' | 'attack', value: number): AttackResultRow => {
+    const d = ATTACK_RESULT[kind];
+    const base = labelAt(d.id, 0, 0);
+    const vis = HUD_LABELS[d.id].visible_xywh;
+    const x = Math.round(cx - (vis[0] + vis[2] / 2));
+    return {
+      kind,
+      value,
+      label: { ...base, x, y: d.headingY, visible: { x: x + vis[0], y: d.headingY + vis[1], w: vis[2], h: vis[3] } },
+      digits: { cx, y: d.digitsY, h: ATTACK_RESULT.digits.h, maxW: ATTACK_RESULT.digits.maxW },
+    };
+  };
+  const out: AttackResultRow[] = [];
+  if (canceled > 0) out.push(row('cancel', canceled));
+  if (sent > 0) out.push(row('attack', sent));
+  return out;
+}

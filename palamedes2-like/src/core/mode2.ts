@@ -151,8 +151,13 @@ export class Mode2Game {
 
   /** 経過時間（ms）：GOから。シングル完了後は完了時点で止める */
   elapsedMs(p: Mode2Player = this.players[0]): number {
+    return this.elapsedTicks(p) * this.tickMs;
+  }
+
+  /** 経過tick（記録の比較用。丸めた表示文字列では比較しない） */
+  elapsedTicks(p: Mode2Player = this.players[0]): number {
     const end = p.finishedTick ?? this.tick;
-    return Math.max(0, end - this.playStartTick) * this.tickMs;
+    return Math.max(0, end - this.playStartTick);
   }
 
   /**
