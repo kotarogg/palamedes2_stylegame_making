@@ -66,11 +66,21 @@ export interface PathResult {
  * 目標までの最短経路（所要時間）を、最初に取る候補ごとに求める。maxDepth を超える経路は探さない。
  * 返り値は最初の候補の列 → 最短の経路。達成不能な候補は含めない。
  */
-export function shortestPaths(cols: SimCols, base: Piece, stock: readonly Piece[], fromCol: number, goal: Goal, maxDepth: number, t: PlanTiming): Map<number, PathResult> {
+export function shortestPaths(
+  cols: SimCols,
+  base: Piece,
+  stock: readonly Piece[],
+  fromCol: number,
+  goal: Goal,
+  maxDepth: number,
+  t: PlanTiming,
+  /** V320-FIX-05：最初の取得の候補（CPU の認識結果）。省略時は実際の成功候補 */
+  firstCands?: readonly Candidate[],
+): Map<number, PathResult> {
   const best = new Map<number, PathResult>();
   if (maxDepth <= 0) return best;
   const dfs = (cs: SimCols, b: Piece, st: readonly Piece[], at: number, depth: number, ms: number, first: Candidate | null) => {
-    for (const c of candidatesOf(cs, b)) {
+    for (const c of depth === 0 && firstCands ? firstCands : candidatesOf(cs, b)) {
       const f = first ?? c;
       const nms = ms + acquireMs(at, c.col, t);
       const prev = best.get(f.col);

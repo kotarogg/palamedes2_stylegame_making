@@ -4,7 +4,13 @@ import type { Game } from '../src/core/game';
 import { CPU_CONFIG, CpuController, type CpuConfig } from '../src/input/cpu';
 import { EMPTY, makeGame, setStock, toPlay } from './helpers';
 
-const clone = (): CpuConfig => JSON.parse(JSON.stringify(CPU_CONFIG));
+// V320-FIX-05 で更新：この試験は FIX-04 までの判断ロジック（停止・7個目・6ピース挑戦・見積り）を単独で検証するため、
+// MODE1 の認識誤り・探索深さ・中上級の必須待ち（mode1Adjust）を外した設定を使う。FIX-05 の調整は v320_fix05_cpu.test.ts
+const clone = (): CpuConfig => {
+  const c = JSON.parse(JSON.stringify(CPU_CONFIG)) as CpuConfig;
+  delete c.mode1Adjust;
+  return c;
+};
 
 function play(g: Game, cpu: CpuController, ticks: number, untilLaunch = false) {
   const cmds: { tick: number; type: string }[] = [];

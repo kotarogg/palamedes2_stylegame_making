@@ -16,6 +16,7 @@ import type { Character } from '../audio/audioMap';
 import type { Piece, PlayerId } from '../core/types';
 import { pushRoleStock } from '../core/stock';
 import rawConfig from '../data/cpu_config_v320.json';
+import mode1Fix05 from '../data/cpu_config_fix05_mode1.json';
 import type { Controller } from './controller';
 import { acquireMs, candidatesOf, depthFor, remainingAfter, shortestPaths, simCols, type Candidate, type Goal, type PlanTiming } from './cpuPlan';
 
@@ -55,14 +56,25 @@ export interface CpuConfig {
   pinchMarginMs: Record<Difficulty, number>;
   mode2BestPick: Record<Difficulty, PerChar<number>>;
   actionGapMs: number;
+  /** V320-FIX-05：MODE1 だけの認識誤り・探索深さ・中上級の必須判断待ち（cpu_config_fix05_mode1.json）。無ければ FIX-04 の動作 */
+  mode1Adjust?: Mode1Adjust;
 }
 
-export const CPU_CONFIG = rawConfig as unknown as CpuConfig;
+/** V320-FIX-05 MODE1 の調整（cpu_config_fix05_mode1.json と同じ形） */
+export interface Mode1Adjust {
+  adjustment: string;
+  misread: Record<Difficulty, Record<Situation, PerChar<number>>>;
+  overlook: Record<Difficulty, Record<Situation, PerChar<number>>>;
+  mandatoryWait: Partial<Record<Difficulty, { normalMs: [number, number, number]; pinchMs: [number, number, number] }>>;
+  searchDepth: Record<Difficulty, Record<Situation, number | null>>;
+}
+
+export const CPU_CONFIG = { ...(rawConfig as unknown as CpuConfig), mode1Adjust: mode1Fix05 as unknown as Mode1Adjust };
 
 /** 1回の判断で行う抽選の記録（自動検証用） */
 export interface CpuDecisionLog {
   tick: number;
-  kind: 'mandatoryWait' | 'decisionStop' | 'bestPick' | 'forget' | 'sixChallenge' | 'declareFour' | 'declareSix' | 'seventhImprove' | 'manualRise';
+  kind: 'mandatoryWait' | 'perception' | 'misreadLaunch' | 'decisionStop' | 'bestPick' | 'forget' | 'sixChallenge' | 'declareFour' | 'declareSix' | 'seventhImprove' | 'manualRise';
   pct: number;
   hit: boolean;
   detail?: string;
@@ -78,6 +90,20 @@ interface Plan {
   moved: boolean;
   /** 計画を立てたときの基準・盤面（場の変化で取得不能になったら再判断） */
   baseId: number;
+  /** V320-FIX-05：計画の対象ピース（列の最上段のID） */
+  pieceId?: number;
+  /** V320-FIX-05：誤認した候補（実際には場に合わない）を選んだ計画。発射前の成否再判定で取り消さない */
+  misread?: boolean;
+}
+
+/** V320-FIX-05 MODE1 の取得候補の認識（1判断につき1回の抽選結果） */
+interface Perception {
+  /** 場のID＋各列の最上段（帰還予約を含む）。同じ間は同じ判断として再抽選しない */
+  key: string;
+  cands: Candidate[];
+  /** 誤認で加えた列・見落とした列（無ければ null） */
+  misreadCol: number | null;
+  overlookCol: number | null;
 }
 
 /** 役の判断（同じ状態では再抽選しない） */
@@ -99,6 +125,14 @@ interface Seventh {
 
 /** 計測用の件数（v3.2.0 第10章）。停止・失念は抽選対象・当選・実停止を分けて数える */
 export interface CpuStats {
+  /** V320-FIX-05 認識：抽選回数・当選（誤認／見落とし）・実際に候補が変わった回数・誤認候補を選んだ計画・誤認候補の発射 */
+  perceptionRolls: number;
+  misreadHits: number;
+  misreadApplied: number;
+  overlookHits: number;
+  overlookApplied: number;
+  misreadChosen: number;
+  misreadLaunched: number;
   /** V320-FIX-04 必須判断待ち：回数・合計（tick、半減後）・設定上の合計（ms、半減前）・ピンチ移行の半減回数 */
   mandatoryCount: number;
   mandatoryTicks: number;
@@ -127,6 +161,13 @@ export interface CpuStats {
 }
 
 const emptyStats = (): CpuStats => ({
+  perceptionRolls: 0,
+  misreadHits: 0,
+  misreadApplied: 0,
+  overlookHits: 0,
+  overlookApplied: 0,
+  misreadChosen: 0,
+  misreadLaunched: 0,
   mandatoryCount: 0,
   mandatoryTicks: 0,
   mandatoryMs: 0,
@@ -158,6 +199,10 @@ export class CpuController implements Controller {
   private stopUntil = 0;
   /** V320-FIX-04 必須判断待ちの終了tick（必須待ち→判断時停止の順。stopUntil はその後の判断時停止の終了） */
   private mandatoryUntil = 0;
+  /** V320-FIX-05 MODE1 の取得候補の認識（同じ場・最上段の間は同じ結果） */
+  private perception: Perception | null = null;
+  /** V320-FIX-05 誤認候補として発射したピースID（自動検証用：実際の成否をゲームのイベントと突き合わせる） */
+  readonly misreadLaunchIds: number[] = [];
   /** 実行中の停止の種類と、判断停止を始めた時の状況（通常停止中のピンチ移行で残りを半分にする） */
   private stopKind: 'decision' | 'forget' | null = null;
   private stopSit: Situation = 'normal';
@@ -193,6 +238,7 @@ export class CpuController implements Controller {
     this.plan = null;
     this.stopUntil = 0;
     this.mandatoryUntil = 0;
+    this.perception = null;
     this.stopKind = null;
     this.stopRolled = false;
     this.noForgetNext = false;
@@ -275,7 +321,7 @@ export class CpuController implements Controller {
    */
   private decisionStop(game: AnyGame, sit: Situation, tick: number): boolean {
     this.stopRolled = true;
-    const mw = this.cfg.mandatoryWait?.[this.level];
+    const mw = this.mandatoryTable(game);
     let at = tick;
     if (mw) {
       const w = this.cfg.mandatoryWaitWeights ?? [25, 50, 25];
@@ -310,9 +356,15 @@ export class CpuController implements Controller {
     return true;
   }
 
-  /** 必須判断待ちの期待値（ms）。無い難易度は0 */
+  /** 必須判断待ちの表：MODE1 の中級・上級は V320-FIX-05 の表、それ以外（初級・MODE2）は FIX-04 の表。無ければ待ちなし */
+  private mandatoryTable(game: AnyGame | null): { normalMs: [number, number, number]; pinchMs: [number, number, number] } | undefined {
+    const m1 = game === null || game.mode === 'mode1' ? this.cfg.mode1Adjust?.mandatoryWait[this.level] : undefined;
+    return m1 ?? this.cfg.mandatoryWait?.[this.level];
+  }
+
+  /** 必須判断待ちの期待値（ms。MODE1 のピンチ見積り用）。無い難易度は0 */
   private expectedMandatoryMs(sit: Situation): number {
-    const mw = this.cfg.mandatoryWait?.[this.level];
+    const mw = this.mandatoryTable(null);
     if (!mw) return 0;
     const w = this.cfg.mandatoryWaitWeights ?? [25, 50, 25];
     const ms = sit === 'pinch' ? mw.pinchMs : mw.normalMs;
@@ -387,11 +439,64 @@ export class CpuController implements Controller {
     return p.board.cols.map((c) => c.map((s) => (s.kind === 'piece' ? s.piece.id : `r${s.pieceId}`)).join('.')).join('/');
   }
 
+  /**
+   * V320-FIX-05 取得候補の認識（MODE1）：実在して打ち上げ操作できる各列の最上段と場を読み、誤認／見落とし／正しく認識を1回だけ抽選する。
+   * 場のID＋各列の最上段が同じ間は同じ判断として結果を使い回す（毎フレーム・1列移動ごとに引き直さない）。両方0%なら乱数を使わない。
+   * 結果は最適手の評価・ランダム選択・経路探索の入口・7個目の比較で共通に使い、真の成否で誤認候補を除かない
+   */
+  private perceive(game: Game, p: PlayerState, sit: Situation, tick: number): Candidate[] {
+    const cols = simCols(p.board);
+    const key = `${game.base.id}|${p.board.cols.map((c) => (c[0] ? (c[0].kind === 'piece' ? c[0].piece.id : `r${c[0].pieceId}`) : '-')).join(',')}`;
+    if (this.perception && this.perception.key === key) return this.perception.cands;
+    const real = candidatesOf(cols, game.base);
+    const adj = this.cfg.mode1Adjust;
+    const mis = adj ? adj.misread[this.level][sit][this.character] : 0;
+    const over = adj ? adj.overlook[this.level][sit][this.character] : 0;
+    let cands = real;
+    let misreadCol: number | null = null;
+    let overlookCol: number | null = null;
+    if (mis > 0 || over > 0) {
+      this.stats.perceptionRolls++;
+      const r = this.rng.next() * 100;
+      const kind = r < mis ? 'misread' : r < mis + over ? 'overlook' : 'correct';
+      if (kind === 'misread') {
+        this.stats.misreadHits++;
+        // 実際には場に合わない、操作可能な最上段（帰還予約・空列は対象外）
+        const wrong = cols.map((c, col) => ({ col, piece: c[0] })).filter((x): x is Candidate => !!x.piece && !isLaunchSuccess(x.piece, game.base));
+        if (wrong.length) {
+          const w = wrong.length === 1 ? wrong[0] : wrong[randomInt(this.rng, wrong.length)];
+          misreadCol = w.col;
+          cands = [...real, w].sort((a, b) => a.col - b.col);
+          this.stats.misreadApplied++;
+        }
+      } else if (kind === 'overlook') {
+        this.stats.overlookHits++;
+        if (real.length) {
+          const o = real.length === 1 ? real[0] : real[randomInt(this.rng, real.length)];
+          overlookCol = o.col;
+          cands = real.filter((c) => c.col !== o.col);
+          this.stats.overlookApplied++;
+        }
+      }
+      this.log.push({ tick, kind: 'perception', pct: mis + over, hit: kind !== 'correct', detail: `${sit} ${kind}${misreadCol !== null ? ` +col${misreadCol + 1}` : ''}${overlookCol !== null ? ` -col${overlookCol + 1}` : ''}` });
+    }
+    this.perception = { key, cands, misreadCol, overlookCol };
+    return cands;
+  }
+
+  /** V320-FIX-05 役作りの探索深さ（上限を設定した難易度・状況だけ制限。null＝現行どおり） */
+  private depthCap(goal: Goal, hand: number, sit: Situation): number {
+    const d = depthFor(goal, hand);
+    const cap = this.cfg.mode1Adjust?.searchDepth[this.level][sit] ?? null;
+    return cap === null ? d : Math.min(d, cap);
+  }
+
   /** 6ピース役への経路（ピンチでは期限内の経路だけ）。最短の所要時間（ms）、無ければ null */
   private sixPathMs(game: Game, p: PlayerState, sit: Situation): number | null {
     const hand = p.roleStock.length;
     if (hand < 3 || hand > 5) return null;
-    const paths = shortestPaths(simCols(p.board), game.base, p.roleStock, p.selectedCol, 6, depthFor(6, hand), this.timing(game));
+    const first = this.perceive(game, p, sit, game.tick + 1);
+    const paths = shortestPaths(simCols(p.board), game.base, p.roleStock, p.selectedCol, 6, this.depthCap(6, hand, sit), this.timing(game), first);
     let best: number | null = null;
     for (const r of paths.values()) if (best === null || r.ms < best) best = r.ms;
     if (best === null) return null;
@@ -475,7 +580,7 @@ export class CpuController implements Controller {
   private seventhCandidates(game: Game, p: PlayerState, sit: Situation, lines: number): { col: number; gain: number; ms: number }[] | 'noMargin' {
     const t = this.timing(game);
     const out: { col: number; gain: number; ms: number }[] = [];
-    for (const c of candidatesOf(simCols(p.board), game.base)) {
+    for (const c of this.perceive(game, p, sit, game.tick + 1)) {
       const ev = evaluateStock(pushRoleStock(p.roleStock, c.piece).stock);
       if (ev.kind !== 'ok' || ev.result.han <= lines) continue;
       out.push({ col: c.col, gain: ev.result.han - lines, ms: acquireMs(p.selectedCol, c.col, t) });
@@ -533,7 +638,7 @@ export class CpuController implements Controller {
     if (!this.plan) {
       // 判断停止は thinkMode1 で判断の機会につき1回済ませている（停止後は最新の状態で判断する）
       // 7個目による改善：取得先は改善候補の順位で決まっている（最適候補率の抽選はしない）
-      if (target !== undefined) this.plan = { col: target, action: 'launch', forgetRolled: this.noForgetNext, forget: null, moved: false, baseId: game.base.id };
+      if (target !== undefined) this.plan = this.launchPlan(game, p, target, this.noForgetNext);
       else {
         // 手動上昇（成立役の宣言と、既に選んだ取得目標＝6ピース役への挑戦を優先。見送ったら次の取得・盤面変化まで再抽選しない）
         const rise = goal !== 6 && this.riseDecision(game, p, tick);
@@ -553,6 +658,12 @@ export class CpuController implements Controller {
     const plan = this.plan!;
     if (plan.col === p.selectedCol) {
       this.plan = null;
+      if (plan.misread && plan.action === 'launch') {
+        // 発射は人間と同じコマンド。成否・飛行・帰還・連鎖切断はゲーム本体が判定する
+        this.stats.misreadLaunched++;
+        if (plan.pieceId !== undefined) this.misreadLaunchIds.push(plan.pieceId);
+        this.log.push({ tick, kind: 'misreadLaunch', pct: 100, hit: true, detail: `col${plan.col + 1} id${plan.pieceId}` });
+      }
       return [plan.action];
     }
     if (!plan.forgetRolled) {
@@ -581,7 +692,18 @@ export class CpuController implements Controller {
     const top = p.board.top(plan.col);
     if (!top || top.kind !== 'piece') return false;
     if (plan.action === 'rotate') return p.board.cols[plan.col].length >= 2;
+    // V320-FIX-05：誤認で選んだ計画は、発射前の成否再判定で取り消さない（場・対象ピースが変わったら新しい判断へ）
+    if (plan.misread) return game.base.id === plan.baseId && top.piece.id === plan.pieceId;
     return isLaunchSuccess(top.piece, game.base);
+  }
+
+  /** 打ち上げ計画（対象ピースIDと、誤認した候補かを記録） */
+  private launchPlan(game: AnyGame, p: AnyPlayer, col: number, forgetRolled: boolean): Plan {
+    const top = p.board.top(col);
+    const pieceId = top && top.kind === 'piece' ? top.piece.id : undefined;
+    const misread = game.mode === 'mode1' && this.perception?.misreadCol === col;
+    if (misread) this.stats.misreadChosen++;
+    return { col, action: 'launch', forgetRolled, forget: null, moved: false, baseId: game.base.id, pieceId, misread };
   }
 
   private riseDecision(game: Game, p: PlayerState, tick: number): boolean {
@@ -598,8 +720,9 @@ export class CpuController implements Controller {
 
   /** 目的地の選択：現在の目標に対して最適な候補を bestPick% で、外れは取得可能な候補からランダム */
   private choose(game: Game, p: PlayerState, sit: Situation, goal: Goal, tick: number): Plan | null {
-    const cols = simCols(p.board);
-    let cands = candidatesOf(cols, game.base);
+    // V320-FIX-05：候補は認識結果（誤認・見落としを含む）。真の成否で誤認候補を除かない
+    const perceived = this.perceive(game, p, sit, tick);
+    let cands = perceived;
     const t = this.timing(game);
     if (sit === 'pinch') {
       // ピンチでは明らかに期限を超える候補（取得だけで残り猶予を超える）を除外
@@ -608,16 +731,16 @@ export class CpuController implements Controller {
       if (inTime.length) cands = inTime;
     }
     if (cands.length === 0) return null;
-    const pick = (c: Candidate): Plan => ({ col: c.col, action: 'launch', forgetRolled: false, forget: null, moved: false, baseId: game.base.id });
+    const pick = (c: Candidate): Plan => this.launchPlan(game, p, c.col, false);
     if (cands.length === 1) return pick(cands[0]);
-    const best = this.bestCandidates(game, p, cands, goal, sit);
+    const best = this.bestCandidates(game, p, cands, goal, sit, perceived);
     const pct = this.cfg.bestPick[this.level][sit][this.character];
     if (this.roll('bestPick', pct, tick, `${best.length}/${cands.length}`)) return pick(best[best.length === 1 ? 0 : randomInt(this.rng, best.length)]);
     return pick(cands[randomInt(this.rng, cands.length)]);
   }
 
   /** 目標に対して最適な候補（同評価が複数なら全部。呼出し側で seed 付き抽選） */
-  private bestCandidates(game: Game, p: PlayerState, cands: Candidate[], goal: Goal, sit: Situation): Candidate[] {
+  private bestCandidates(game: Game, p: PlayerState, cands: Candidate[], goal: Goal, sit: Situation, perceived: Candidate[]): Candidate[] {
     const hand = p.roleStock.length;
     const t = this.timing(game);
     let score: (c: Candidate) => number;
@@ -628,7 +751,7 @@ export class CpuController implements Controller {
         return ev.kind === 'ok' ? ev.result.han * 1e6 - acquireMs(p.selectedCol, c.col, t) : -1e9;
       };
     } else {
-      const paths = shortestPaths(simCols(p.board), game.base, p.roleStock, p.selectedCol, goal, depthFor(goal, hand), t);
+      const paths = shortestPaths(simCols(p.board), game.base, p.roleStock, p.selectedCol, goal, this.depthCap(goal, hand, sit), t, perceived);
       const rest = sit === 'pinch' ? this.pinchMs(game, p)! : Infinity;
       score = (c) => {
         const r = paths.get(c.col);

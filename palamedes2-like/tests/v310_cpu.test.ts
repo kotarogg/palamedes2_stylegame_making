@@ -7,7 +7,13 @@ import { shortestPaths, simCols } from '../src/input/cpuPlan';
 import { EMPTY, kind, makeGame, setStock, toPlay } from './helpers';
 
 const K = (o: Record<string, unknown>) => ['kotaro', 'akane', 'zunko'].map((c) => o[c]);
-const clone = (): CpuConfig => JSON.parse(JSON.stringify(CPU_CONFIG));
+// V320-FIX-05 で更新：この試験は FIX-04 までの判断ロジック（停止・7個目・6ピース挑戦・見積り）を単独で検証するため、
+// MODE1 の認識誤り・探索深さ・中上級の必須待ち（mode1Adjust）を外した設定を使う。FIX-05 の調整は v320_fix05_cpu.test.ts
+const clone = (): CpuConfig => {
+  const c = JSON.parse(JSON.stringify(CPU_CONFIG)) as CpuConfig;
+  delete c.mode1Adjust;
+  return c;
+};
 /** 判断停止を0%に（他の判断だけを見る） */
 const noStop = (cfg: CpuConfig, level: 'easy' | 'normal' | 'hard', ch: 'kotaro' | 'akane' | 'zunko' = 'kotaro') => {
   cfg.decisionStop[level].pct[ch] = 0;

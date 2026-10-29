@@ -100,7 +100,8 @@ describe('V320-FIX-04 初級の必須判断待ち', () => {
     expect(cpu.log.filter((l) => l.kind === 'mandatoryWait')).toHaveLength(1);
   });
 
-  it('中級・上級は必須待ちなし（操作列は必須待ちの設定の有無で変わらない）', () => {
+  // V320-FIX-05 で更新：MODE1 の中級・上級には FIX-05 の必須待ち（mode1Adjust）が入るため、FIX-04 の表（初級だけ）の検証は mode1Adjust を外して行う
+  it('FIX-04 の必須待ち表は初級だけ（中級・上級の操作列は FIX-04 の表の有無で変わらない。FIX-05 の MODE1 調整は除外して比較）', () => {
     for (const level of ['normal', 'hard'] as const) {
       const run = (cfg: CpuConfig) => {
         const g = makeGame({}, undefined, 21);
@@ -108,9 +109,12 @@ describe('V320-FIX-04 初級の必須判断待ち', () => {
         const cpu = new CpuController(0, level, 4, 'zunko', cfg);
         return { cmds: play(g, cpu, 2400), cpu };
       };
+      const base = clone();
+      delete base.mode1Adjust;
       const without = clone();
+      delete without.mode1Adjust;
       delete without.mandatoryWait;
-      const a = run(CPU_CONFIG);
+      const a = run(base);
       expect(a.cpu.stats.mandatoryCount).toBe(0);
       expect(a.cmds).toEqual(run(without).cmds);
     }

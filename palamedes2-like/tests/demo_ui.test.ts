@@ -152,7 +152,7 @@ describe('SINGLE 専用の自動操作（設計書 第7節）', () => {
 });
 
 describe('対戦デモ（アカネ中級 対 ずん子中級、seed 選定）', () => {
-  it('seed 60（v3.2.0 で再選定）：両者の攻撃送信・攻撃段の適用・相殺が見え、60秒以内に決着（勝敗補正なし、既存CPU設定）', () => {
+  it('対戦デモの seed（V320-FIX-05 で 60→5 に再選定）：両者の攻撃送信・攻撃段の適用・相殺が見え、60秒以内に決着（勝敗補正なし、既存CPU設定）', () => {
     const seed = DEMO.versusSeed;
     const m = new Match({ firstTo: 1, difficulty: 'normal', seed, mode: 'mode1' });
     const c = [new CpuController(0, 'normal', seed * 7 + 1, 'akane'), new CpuController(1, 'normal', seed * 7 + 2, 'zunko')];

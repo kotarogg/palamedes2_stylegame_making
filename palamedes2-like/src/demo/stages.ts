@@ -36,8 +36,12 @@ export const DEMO = {
   resultHoldMs: 1500,
   lessonSeed: 20261026,
   singleSeed: 7301,
-  /** 対戦デモの seed（v3.2.0 の CPU 設定で seed 1〜300 を同じ条件で選び直し：攻撃・相殺が両者とも見え、60秒以内に決着した 60 を選定。旧 92） */
-  versusSeed: 60,
+  /**
+   * 対戦デモの seed。V320-FIX-05 の新ルール（打上連鎖の時間制限なし・役連鎖10秒・MODE1 中級CPUの認識誤り）で旧 60 は相殺3回となり、
+   * 選定基準（両者が攻撃送信・攻撃段10超・相殺4回以上・60秒以内に決着）を満たさないため、seed 1〜300 を同じ基準で選び直し、満たす最小の 5 を採用。
+   * 旧：v3.2.0 で選定した 60（さらに前は 92）
+   */
+  versusSeed: 5,
   versusCharacters: ['akane', 'zunko'] as const,
 } as const;
 

@@ -26,7 +26,7 @@ describe('修正R1：結果の中央見出しの表示条件', () => {
   });
 });
 
-describe('修正R1：対戦デモ（seed 60）の終盤', () => {
+describe('修正R1：対戦デモ（DEMO.versusSeed＝V320-FIX-05 で 5）の終盤', () => {
   it('決着後も中央見出しなし。左右の勝利／敗北・敗者の落下・勝者のボイス・クラッカー・勝利SEは結果演出どおり。終了は演出後（短縮しない）', () => {
     const bus = new AudioBus('./');
     const st = new VersusDemoStage({ assets: fakeAssets(), bus });
@@ -35,9 +35,11 @@ describe('修正R1：対戦デモ（seed 60）の終盤', () => {
     while (!st.finished && guard++ < 60 * 120) st.update(1000 / 60);
     const g = st.game;
     const plan = st.resultPlan!;
-    expect(g.result?.winner).toBe(1);
+    // V320-FIX-05：seed 変更で勝者は seed に依存（勝敗補正なし）。勝者・敗者を結果から読む
+    const w = g.result!.winner!;
+    expect([0, 1]).toContain(w);
     expect(plan.kind).toBe('versus');
-    expect([plan.loser, plan.winner]).toEqual([0, 1]);
+    expect([plan.loser, plan.winner]).toEqual([1 - w, w]);
     expect(plan.fallEndTick).toBeGreaterThan(plan.fallStartTick);
     expect(plan.crackerTick).toBe(plan.winnerTick);
     // 終了判定の時点で勝者演出・受付・結果演出の保持（1500ms）を過ぎている
@@ -47,7 +49,10 @@ describe('修正R1：対戦デモ（seed 60）の終盤', () => {
     for (let t = plan.startTick; t <= g.tick; t += 10) expect(st.view.resultBanner(t), `t=${t}`).toBeNull();
     // 結果演出の音（未解除のため locked 記録）：敗者ボイス→落下→勝者ボイス＋勝利SE→クラッカー
     const ids = bus.log.filter((e) => !e.skipped && e.t >= 0).map((e) => e.id);
-    for (const id of ['akane_lose', 'character_fall', 'zunko_win', 'win', 'result_cracker']) expect(ids, id).toContain(id);
-    expect(ids.indexOf('akane_lose')).toBeLessThan(ids.indexOf('zunko_win'));
+    const name = ['akane', 'zunko'];
+    const lose = `${name[1 - w]}_lose`;
+    const win = `${name[w]}_win`;
+    for (const id of [lose, 'character_fall', win, 'win', 'result_cracker']) expect(ids, id).toContain(id);
+    expect(ids.indexOf(lose)).toBeLessThan(ids.indexOf(win));
   });
 });

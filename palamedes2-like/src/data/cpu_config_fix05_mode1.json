@@ -1,0 +1,30 @@
+{
+ "adjustment": "V320-FIX-05_mode1_perception",
+ "note": "V320-FIX-05 実装依頼書 第4章の初期実装値（PM指定。実測で最適と証明された値ではない）。MODE1 だけに適用し、MODE2 の CPU 思考設定は cpu_config_v320.json のまま。キャラ順は kotaro／akane／zunko、% は新規取得判断1回あたりの確率",
+ "notes": {
+  "misread": "出せない1候補を出せると誤認する確率（%）。実際には場に合わない操作可能な最上段から1つを、認識上の成功候補へ加える。該当列が無ければ変化なし",
+  "overlook": "出せる1候補を見落とす確率（%）。実際に場に合う候補から1つを、認識上の候補から外す。該当が無ければ変化なし",
+  "roll": "誤認／見落とし／正しく認識の3択を、新しい取得目標を決める判断（場のID＋各列最上段のIDが同じ間は同じ判断）につき1回だけ抽選。両方0%なら乱数を消費しない",
+  "mandatoryWait": "MODE1 の中級・上級の必須判断待ち（判断機会ごと）。初級は cpu_config_v320.json の mandatoryWait（MODE1・MODE2 共通）のまま。重み25/50/25、ピンチは同じ候補index",
+  "searchDepth": "役作りの探索深さの上限（取得回数）。null＝現行維持（目標までの残り取得数）。通常の役作りと6ピース挑戦判定に適用。7個目の改善は対象外"
+ },
+ "misread": {
+  "easy": { "normal": { "kotaro": 0, "akane": 0, "zunko": 0 }, "pinch": { "kotaro": 0, "akane": 0, "zunko": 0 } },
+  "normal": { "normal": { "kotaro": 12, "akane": 16, "zunko": 12 }, "pinch": { "kotaro": 6, "akane": 8, "zunko": 6 } },
+  "hard": { "normal": { "kotaro": 8, "akane": 12, "zunko": 8 }, "pinch": { "kotaro": 0, "akane": 0, "zunko": 0 } }
+ },
+ "overlook": {
+  "easy": { "normal": { "kotaro": 0, "akane": 0, "zunko": 0 }, "pinch": { "kotaro": 0, "akane": 0, "zunko": 0 } },
+  "normal": { "normal": { "kotaro": 16, "akane": 12, "zunko": 12 }, "pinch": { "kotaro": 6, "akane": 6, "zunko": 8 } },
+  "hard": { "normal": { "kotaro": 8, "akane": 8, "zunko": 12 }, "pinch": { "kotaro": 0, "akane": 0, "zunko": 0 } }
+ },
+ "mandatoryWait": {
+  "normal": { "normalMs": [120, 180, 240], "pinchMs": [60, 90, 120] },
+  "hard": { "normalMs": [60, 100, 140], "pinchMs": [30, 50, 70] }
+ },
+ "searchDepth": {
+  "easy": { "normal": null, "pinch": null },
+  "normal": { "normal": 2, "pinch": 2 },
+  "hard": { "normal": 3, "pinch": 4 }
+ }
+}
