@@ -23,7 +23,7 @@ import { drawNumericScaled, drawText, formatTime, multiplierText, numericPhase, 
 export const PINCH_WARN = {
   areas: { 0: { x: 88, y: 16, w: 144, h: 14 }, 1: { x: 408, y: 16, w: 144, h: 14 } },
   /** 文字の上端（textBaseline top）の領域上端からのずれ。可視範囲が y16〜30 に収まるよう実描画で確認 */
-  textDy: 0,
+  textDy: 1,
   size: 12,
   color: '#ffb454',
   outline: '#081827',

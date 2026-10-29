@@ -71,7 +71,7 @@
   {
    "name": "第12章 CPU観戦：Esc で終了確認（ゲームは進行）→「終了する」で観戦設定へ",
    "pass": true,
-   "detail": "{\"q\":{\"quit\":1,\"tick\":312},\"q2\":330,\"back\":\"WatchSettingsScene\"}",
+   "detail": "{\"q\":{\"quit\":1,\"tick\":311},\"q2\":329,\"back\":\"WatchSettingsScene\"}",
    "kind": "natural-ui"
   },
   {
@@ -83,7 +83,7 @@
   {
    "name": "第11章 MODE2 結果（場の更新あり）：総合ベストを記録、専用は作らない",
    "pass": true,
-   "detail": "{\"refresh\":1,\"rec\":{\"total\":{\"bestMs\":1300,\"bestTicks\":78,\"rule\":\"mode2_V320-FIX-04\"},\"noReset\":null}}",
+   "detail": "{\"refresh\":1,\"rec\":{\"total\":{\"bestMs\":1316.6666666666667,\"bestTicks\":79,\"rule\":\"mode2_V320-FIX-04\"},\"noReset\":null}}",
    "kind": "direct-state"
   },
   {
@@ -101,7 +101,7 @@
   {
    "name": "R1 MODE2 SINGLE：場の更新0回のクリアで「ノーリセットクリア！」を画面に描画（画素一致）し、総合・ノーリセット専用ベストを記録",
    "pass": true,
-   "detail": "{\"kind\":\"single\",\"outcome\":\"clear\",\"winner\":0,\"refresh\":0,\"shown\":0,\"lbl\":{\"text\":\"ノーリセットクリア！\",\"x\":160,\"y\":240},\"diffForced\":0,\"diffNone\":928,\"forcedVsNone\":928,\"noResetBest\":{\"bestMs\":1300,\"bestTicks\":78,\"rule\":\"mode2_V320-FIX-04\"},\"total\":{\"bestMs\":1300,\"bestTicks\":78,\"rule\":\"mode2_V320-FIX-04\"}}",
+   "detail": "{\"kind\":\"single\",\"outcome\":\"clear\",\"winner\":0,\"refresh\":0,\"shown\":0,\"lbl\":{\"text\":\"ノーリセットクリア！\",\"x\":160,\"y\":240},\"diffForced\":0,\"diffNone\":928,\"forcedVsNone\":928,\"noResetBest\":{\"bestMs\":1283.3333333333335,\"bestTicks\":77,\"rule\":\"mode2_V320-FIX-04\"},\"total\":{\"bestMs\":1283.3333333333335,\"bestTicks\":77,\"rule\":\"mode2_V320-FIX-04\"}}",
    "kind": "direct-state"
   },
   {

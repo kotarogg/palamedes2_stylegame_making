@@ -1,0 +1,29 @@
+{
+ "id": "V320-FIX-05",
+ "fontStandin": true,
+ "results": [
+  {
+   "name": "第5章 ピンチ警告：左右同時に「ピンチ X.X秒」を盤面上部の指定領域（88,16,144,14）／（408,16,144,14）の中だけに描画（可視範囲 y16〜30）。大型3/2/1・危険秒の描画経路なし",
+   "pass": true,
+   "detail": "{\"views\":[\"ピンチ 2.5秒\",\"ピンチ 2.5秒\"],\"box\":[{\"x0\":126,\"y0\":16,\"x1\":195,\"y1\":29},{\"x0\":446,\"y0\":16,\"x1\":515,\"y1\":29}],\"stray\":0}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第6章 役名：0/120/630/750/1110/1230ms（実素材・1倍）。1Pは左→右・2Pは右→左に16px、静止時は原寸・定位置で素材と画素一致、2役は630〜750msだけ2枚（後続が前面）、後続は750〜1110ms静止・1230msで終了、単役は750msで終了",
+   "pass": true,
+   "detail": "[{\"ms\":0,\"tick\":152,\"p1\":[[1,-16,0]],\"p2\":[[16,16,0]],\"match\":null},{\"ms\":60,\"tick\":156,\"p1\":[[1,-3,0.57]],\"p2\":[[16,3,0.57]],\"match\":null},{\"ms\":120,\"tick\":159,\"p1\":[[1,0,1]],\"p2\":[[16,0,1]],\"match\":{\"opaque\":4487,\"bad\":0}},{\"ms\":630,\"tick\":190,\"p1\":[[1,0,1],[8,-16,0]],\"p2\":[[16,0,1]],\"match\":null},{\"ms\":690,\"tick\":193,\"p1\":[[1,3,0.57],[8,-5,0.43]],\"p2\":[[16,-3,0.57]],\"match\":null},{\"ms\":750,\"tick\":197,\"p1\":[[8,0,1]],\"p2\":[],\"match\":{\"opaque\":5510,\"bad\":0}},{\"ms\":1110,\"tick\":219,\"p1\":[[8,0,1]],\"p2\":[],\"match\":{\"opaque\":5510,\"bad\":0}},{\"ms\":1170,\"tick\":222,\"p1\":[[8,3,0.57]],\"p2\":[],\"match\":null},{\"ms\":1230,\"tick\":226,\"p1\":[],\"p2\":[],\"match\":null}]",
+   "kind": "direct-state"
+  }
+ ],
+ "shots": [
+  "docs/v320f05/screens/V320F05_pinch_warn_both_maxstock_role_1x.png",
+  "docs/v320f05/screens/V320F05_role_slide_0000ms_band_1x.png",
+  "docs/v320f05/screens/V320F05_role_slide_0060ms_band_1x.png",
+  "docs/v320f05/screens/V320F05_role_slide_0120ms_band_1x.png",
+  "docs/v320f05/screens/V320F05_role_slide_0690ms_band_1x.png",
+  "docs/v320f05/screens/V320F05_role_slide_0750ms_band_1x.png",
+  "docs/v320f05/screens/V320F05_role_slide_1170ms_band_1x.png",
+  "docs/v320f05/screens/V320F05_role_slide_1230ms_band_1x.png"
+ ],
+ "errors": []
+}

@@ -136,7 +136,7 @@ export type GameEvent =
   | { type: 'pinchWarn'; tick: number; player: PlayerId; state: 'start' | 'count' | 'end'; value: 3 | 2 | 1 | null; remainingMs: number | null }
   /**
    * v3.1.0 打ち上げ成功連鎖（連続取得）の連鎖切り。reserved＝有効な連鎖中の最初のミスで予約（成功数・倍率は維持）、
-   * ended＝予約中の再ミス（reason miss）または受付時間切れ（reason timeout）で終了（成功数0・予約解除）
+   * ended＝予約中の再ミス（reason miss）で終了（成功数0・予約解除）。reason timeout は受付時間を設定した場合だけ（V320-FIX-05 の既定は時間制限なし）
    */
   | { type: 'streakCut'; tick: number; player: PlayerId; state: 'reserved' | 'ended'; reason: 'miss' | 'timeout'; count: number }
   | { type: 'score'; tick: number; player: PlayerId; delta: number; total: number; cause: ScoreCause }
@@ -437,12 +437,12 @@ export class Game {
     return this.config.streakWindowMs === null ? null : this.ticks(this.config.streakWindowMs);
   }
 
-  /** 現在の連続取得の攻撃倍率×100（受付時間切れなら×1.0） */
+  /** 現在の打上連鎖の攻撃倍率×100（連鎖が無ければ×1.0） */
   currentStreakPercent(p: PlayerState): number {
     return this.streakActive(p) ? streakPercent(this.config.streakAttackTable, p.streakCount) : 100;
   }
 
-  /** 現在の得点倍率（シングル表示用。受付時間切れなら×1） */
+  /** 現在の得点倍率（シングル表示用。連鎖が無ければ×1） */
   currentScoreMultiplier(p: PlayerState): { num: number; den: number } {
     return scoreMultiplier(this.streakActive(p) ? p.streakCount : 0, this.balance);
   }

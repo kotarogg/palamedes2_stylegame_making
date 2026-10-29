@@ -1,0 +1,146 @@
+{
+ "id": "V320-FIX-04",
+ "fontStandin": true,
+ "results": [
+  {
+   "name": "R1 第9章：双方の受ストック最大（予約29＋待機28）と双方の相殺・攻撃表示が同時でも、受ストック（アイコン・枠・待機数）の画素は表示の有無で不変。表示は外側の縦帯 x0〜48／592〜640・y48〜124 の中だけ",
+   "pass": true,
+   "detail": "{\"diff\":{\"n\":3938,\"x\":5,\"y\":49,\"w\":630,\"h\":75},\"inStock\":0,\"out\":0,\"regions\":[{\"x0\":268,\"x1\":313,\"y0\":144,\"y1\":347},{\"x0\":327,\"x1\":372,\"y0\":144,\"y1\":347}],\"rows\":[[[\"cancel\",12],[\"attack\",29]],[[\"cancel\",14],[\"attack\",29]]]}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第4.1節 見出しPNG左上：役(2,129)/(594,129)・連鎖(2,166)・打上(2,256)・連鎖(2,276)",
+   "pass": true,
+   "detail": "",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第4.2節 揺れ：600ms周期の最初の200ms、(0,0)→(-1,0)→(1,-1)→(0,1)",
+   "pass": true,
+   "detail": "[{\"dt\":0,\"off\":[0,0]},{\"dt\":3,\"off\":[-1,0]},{\"dt\":6,\"off\":[1,-1]},{\"dt\":9,\"off\":[0,1]},{\"dt\":12,\"off\":[0,0]},{\"dt\":20,\"off\":[0,0]}]",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第4.2節 揺れの描画差は打上連鎖数の行（縦帯 x0〜48・y299〜318）の中だけ",
+   "pass": true,
+   "detail": "{\"n\":207,\"x\":9,\"y\":300,\"w\":30,\"h\":17}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第9章（R1配置）相殺・攻撃：1Pは相殺→攻撃の2段（左の縦帯）、2Pは攻撃のみ（右の縦帯・上段は空ける）。900msで消える",
+   "pass": true,
+   "detail": "[[[\"cancel\",3,48,24,68],[\"attack\",4,87,24,107]],[[\"attack\",596,87,616,107]]]",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第9章 送信>0 で光点（250ms以内）",
+   "pass": true,
+   "detail": "[{\"x\":158,\"y\":123},{\"x\":482,\"y\":123}]",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第4.3節 倍率4種（×1/×1.5/×2/×2.5）の描画は合成領域(24,64,48,56)の中",
+   "pass": true,
+   "detail": "[{\"n\":0,\"mult\":{\"num\":2,\"den\":2},\"box\":{\"n\":1316,\"x\":28,\"y\":65,\"w\":38,\"h\":54}},{\"n\":3,\"mult\":{\"num\":3,\"den\":2},\"box\":{\"n\":1534,\"x\":25,\"y\":65,\"w\":46,\"h\":54}},{\"n\":5,\"mult\":{\"num\":4,\"den\":2},\"box\":{\"n\":1348,\"x\":28,\"y\":65,\"w\":38,\"h\":54}},{\"n\":7,\"mult\":{\"num\":5,\"den\":2},\"box\":{\"n\":1566,\"x\":24,\"y\":65,\"w\":48,\"h\":54}}]",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第4.3節 得点・倍率見出しと数字の描画は合成領域の中だけ（旧領域[24,94,120,34]の外へ出ない。旧Noto描画なし）",
+   "pass": true,
+   "detail": "{\"n\":1566,\"x\":24,\"y\":65,\"w\":48,\"h\":54}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第5章 候補補助：出せる最上段だけ（差は盤面の中の1段分＝高さ32以内）。シアン輪郭の不透明度は 0.50〜0.95 を1000ms周期",
+   "pass": true,
+   "detail": "{\"cols\":[0,1,2,3,4],\"box\":{\"n\":580,\"x\":65,\"y\":257,\"w\":158,\"h\":30},\"alphas\":[0.5,0.73,0.95,0.73,0.5]}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第12章 CPU観戦：メインメニューの MODE2 とオプションの間。設定の初期値（MODE1・アカネ初級・ずん子初級・2本先取・7秒）",
+   "pass": true,
+   "detail": "[\"モード=MODE1\",\"左キャラ=アカネ\",\"左の強さ=初級\",\"右キャラ=東北ずん子\",\"右の強さ=初級\",\"先取本数=2本先取\",\"自然上昇=7秒\",\"観戦開始\",\"戻る\"]",
+   "kind": "natural-ui"
+  },
+  {
+   "name": "第12章 CPU観戦：決定で開始（左右CPU・補助表示なし）、「CPU観戦中」の小見出し",
+   "pass": true,
+   "detail": "{\"kind\":\"watch\",\"devices\":[{\"kind\":\"cpu\",\"level\":\"easy\"},{\"kind\":\"cpu\",\"level\":\"easy\"}]}",
+   "kind": "natural-ui"
+  },
+  {
+   "name": "第12章 CPU観戦：Esc で終了確認（ゲームは進行）→「終了する」で観戦設定へ",
+   "pass": true,
+   "detail": "{\"q\":{\"quit\":1,\"tick\":311},\"q2\":329,\"back\":\"WatchSettingsScene\"}",
+   "kind": "natural-ui"
+  },
+  {
+   "name": "第13章 遊び方 MODE1：説明を5000ms読ませてから「決定で次へ」。早い決定は無視",
+   "pass": true,
+   "detail": "{\"early\":{\"prompt\":null,\"page\":\"m1_single\"},\"prompt\":\"決定で次へ\",\"next\":{\"page\":\"m1_endless\",\"panel\":0}}",
+   "kind": "natural-ui"
+  },
+  {
+   "name": "第11章 MODE2 結果（場の更新あり）：総合ベストを記録、専用は作らない",
+   "pass": true,
+   "detail": "{\"refresh\":1,\"rec\":{\"total\":{\"bestMs\":1316.6666666666667,\"bestTicks\":79,\"rule\":\"mode2_V320-FIX-04\"},\"noReset\":null}}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第11章 MODE2 結果（ノーリセット）：総合ベストを記録、ノーリセット専用ベストを記録",
+   "pass": true,
+   "detail": "{\"refresh\":0,\"rec\":{\"total\":{\"bestMs\":1300,\"bestTicks\":78,\"rule\":\"mode2_V320-FIX-04\"},\"noReset\":{\"bestMs\":1300,\"bestTicks\":78,\"rule\":\"mode2_V320-FIX-04\"}}}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第10章 20面クリアで全ステージクリア（ボーナス20000・倍率なし）。記録に20面ルール識別",
+   "pass": true,
+   "detail": "{\"outcome\":\"allStagesClear\",\"bonus\":20000,\"rec\":{\"score\":20010,\"maxStage\":20,\"completed\":true,\"rule\":\"stage20_V320-FIX-04\"}}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "R1 MODE2 SINGLE：場の更新0回のクリアで「ノーリセットクリア！」を画面に描画（画素一致）し、総合・ノーリセット専用ベストを記録",
+   "pass": true,
+   "detail": "{\"kind\":\"single\",\"outcome\":\"clear\",\"winner\":0,\"refresh\":0,\"shown\":0,\"lbl\":{\"text\":\"ノーリセットクリア！\",\"x\":160,\"y\":240},\"diffForced\":0,\"diffNone\":928,\"forcedVsNone\":928,\"noResetBest\":{\"bestMs\":1283.3333333333335,\"bestTicks\":77,\"rule\":\"mode2_V320-FIX-04\"},\"total\":{\"bestMs\":1283.3333333333335,\"bestTicks\":77,\"rule\":\"mode2_V320-FIX-04\"}}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "R1 MODE2 2p：場の更新0回で1Pが勝っても「ノーリセットクリア！」を描画しない（画面の該当範囲が非表示の描画と一致）。記録なし",
+   "pass": true,
+   "detail": "{\"kind\":\"2p\",\"outcome\":\"win\",\"winner\":0,\"refresh\":0,\"shown\":null,\"lbl\":{\"text\":\"ノーリセットクリア！\",\"x\":160,\"y\":240},\"diffForced\":928,\"diffNone\":0,\"forcedVsNone\":928,\"noResetBest\":null,\"total\":null}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "R1 MODE2 cpu：場の更新0回で1Pが勝っても「ノーリセットクリア！」を描画しない（画面の該当範囲が非表示の描画と一致）。記録なし",
+   "pass": true,
+   "detail": "{\"kind\":\"cpu\",\"outcome\":\"win\",\"winner\":0,\"refresh\":0,\"shown\":null,\"lbl\":{\"text\":\"ノーリセットクリア！\",\"x\":160,\"y\":240},\"diffForced\":928,\"diffNone\":0,\"forcedVsNone\":928,\"noResetBest\":null,\"total\":null}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "R1 MODE2 watch：場の更新0回で1Pが勝っても「ノーリセットクリア！」を描画しない（画面の該当範囲が非表示の描画と一致）。記録なし",
+   "pass": true,
+   "detail": "{\"kind\":\"watch\",\"outcome\":\"win\",\"winner\":0,\"refresh\":0,\"shown\":null,\"lbl\":{\"text\":\"ノーリセットクリア！\",\"x\":160,\"y\":240},\"diffForced\":928,\"diffNone\":0,\"forcedVsNone\":928,\"noResetBest\":null,\"total\":null}",
+   "kind": "direct-state"
+  }
+ ],
+ "shots": [
+  "docs/v320f04/screens/V320F04_versus_1x.png",
+  "docs/v320f04/screens/V320F04_attack_cancel_1x.png",
+  "docs/v320f04/screens/V320F04_attack_cancel_stock_1x.png",
+  "docs/v320f04/screens/V320F04R1_attack_cancel_stock_max29_1x.png",
+  "docs/v320f04/screens/V320F04_single_rate_max_1x.png",
+  "docs/v320f04/screens/V320F04_assist_1x.png",
+  "docs/v320f04/screens/V320F04_assist_board_top_3x.png",
+  "docs/v320f04/screens/V320F04_watch_settings_1x.png",
+  "docs/v320f04/screens/V320F04_watch_playing_1x.png",
+  "docs/v320f04/screens/V320F04_help_mode1_single_1x.png",
+  "docs/v320f04/screens/V320F04_mode2_result_refresh_1x.png",
+  "docs/v320f04/screens/V320F04_mode2_result_noReset_1x.png",
+  "docs/v320f04/screens/V320F04_stage20_clear_1x.png",
+  "docs/v320f04/screens/V320F04R1_mode2_noreset_single_1x.png",
+  "docs/v320f04/screens/V320F04R1_mode2_noreset_2p_1x.png",
+  "docs/v320f04/screens/V320F04R1_mode2_noreset_cpu_1x.png",
+  "docs/v320f04/screens/V320F04R1_mode2_noreset_watch_1x.png"
+ ],
+ "errors": []
+}

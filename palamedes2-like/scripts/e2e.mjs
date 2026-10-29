@@ -945,8 +945,21 @@ try {
     v.pv[0].crack = 'streak_crack_02';
     v.pv[1].crack = null;
     v.render(cx2, g.tick);
-    const pc = v.pinchCountView(1, g.tick);
-    const f3 = pc ? A.atlas.frame('S9', `show_countdown_${pc.value}_${v.s9Phase(g.tick)}`) : null;
+    // V320-FIX-05：大型 3/2/1 は廃止。2P の盤面上部の警告「ピンチ X.X秒」を描く。警告色の画素が警告領域（408,16,144,14）の中だけ
+    const pc = v.pinchWarnView(1);
+    const warnPx = (() => {
+      const d = c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, 640, 360).data;
+      let inside = 0;
+      let outside = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        if (Math.abs(d[i] - 0xff) > 4 || Math.abs(d[i + 1] - 0xb4) > 4 || Math.abs(d[i + 2] - 0x54) > 4) continue;
+        const x = (i / 4) % 640;
+        const y = Math.floor(i / 4 / 640);
+        if (x >= 408 && x < 552 && y >= 16 && y < 30) inside++;
+        else outside++;
+      }
+      return { inside, outside };
+    })();
     const plans = [0, 1].map((p) => v.stockDrawPlan(p, g.tick));
     return {
       png: big.toDataURL('image/png'),
@@ -959,7 +972,7 @@ try {
       shots1x,
       layout: hl,
       pinch: pc,
-      pinchPx: f3 ? cmpImg(A.images.get('S9'), f3.x, f3.y, f3.w, f3.h, pc.x, pc.y) : null,
+      pinchPx: warnPx,
       stock: plans.map((pl) => ({ n: pl.entries.length, minX: Math.min(...pl.entries.map((e) => e.x)), maxX: Math.max(...pl.entries.map((e) => e.x + e.w)), maxY: Math.max(...pl.entries.map((e) => e.y + e.h)), label: pl.label })),
       pending: [p0.incoming.nextPending, p1.incoming.nextPending],
       mult: [g.currentStreakPercent(p0), g.currentStreakPercent(p1)],
@@ -990,8 +1003,8 @@ try {
     JSON.stringify(v310.stock),
   );
   check(
-    'v3.1.0 ピンチの数字：残り猶予に同期して 3（枠なしS9、2Pの盤面上）を描画（画素一致）',
-    v310.pinch?.value === 3 && v310.pinchPx && v310.pinchPx.bad === 0 && v310.pinchPx.opaque > 0,
+    'V320-FIX-05 ピンチ警告：残り猶予に同期した「ピンチ X.X秒」を2Pの盤面上部（408,16,144,14）にだけ描画（大型3/2/1なし）',
+    /^ピンチ \d\.\d秒$/.test(v310.pinch?.text ?? '') && v310.pinchPx.inside > 20 && v310.pinchPx.outside === 0,
     JSON.stringify({ pinch: v310.pinch, px: v310.pinchPx }),
   );
   await shot('V310_versus_live');
@@ -1574,16 +1587,16 @@ try {
         winner: st.game.result?.winner,
         banner: st.view.resultBanner(st.game.tick),
         match: cmp('result_match_ja', rb.x, rb.y),
-        lose0: cmp('result_lose_ja', w0.x, w0.y),
-        win1: cmp('result_win_ja', w1.x, w1.y),
-        log: window.__p2like.bus.log.filter((e) => ['akane_lose', 'character_fall', 'zunko_win', 'result_cracker'].includes(e.id)).map((e) => e.id),
+        loseSide: st.game.result?.winner === 0 ? cmp('result_lose_ja', w1.x, w1.y) : cmp('result_lose_ja', w0.x, w0.y),
+        winSide: st.game.result?.winner === 0 ? cmp('result_win_ja', w0.x, w0.y) : cmp('result_win_ja', w1.x, w1.y),
+        log: window.__p2like.bus.log.filter((e) => ['akane_lose', 'zunko_lose', 'character_fall', 'akane_win', 'zunko_win', 'result_cracker'].includes(e.id)).map((e) => e.id),
       };
     });
     await unfreeze();
     const drawn = (c) => c.opaque > 0 && c.bad / c.opaque < 0.02;
     check(
-      '修正R1：対戦デモの決着後、中央の「対戦結果」を描かない。左右の敗北（1P）／勝利（2P）は描き、敗者の落下・勝者ボイス・クラッカーは鳴る',
-      r1.winner === 1 && r1.banner === null && !drawn(r1.match) && r1.match.bad / r1.match.opaque > 0.3 && drawn(r1.lose0) && drawn(r1.win1) && ['akane_lose', 'character_fall', 'zunko_win', 'result_cracker'].every((id) => r1.log.includes(id)),
+      '修正R1：対戦デモの決着後、中央の「対戦結果」を描かない。左右の敗北／勝利は描き、敗者の落下・勝者ボイス・クラッカーは鳴る（V320-FIX-05：seed 5 で勝者は seed に依存）',
+      r1.banner === null && !drawn(r1.match) && r1.match.bad / r1.match.opaque > 0.3 && drawn(r1.loseSide) && drawn(r1.winSide) && [`${['akane', 'zunko'][1 - r1.winner]}_lose`, 'character_fall', `${['akane', 'zunko'][r1.winner]}_win`, 'result_cracker'].every((id) => r1.log.includes(id)),
       JSON.stringify(r1),
     );
     await toPhase('versus:black');
@@ -1905,57 +1918,47 @@ try {
       p.roleStock = [1, 2, 3, 4, 5, 6].map((n) => g.factory.make(n, 'spade'));
     });
     await key('KeyH', 60);
-    const role = { frames: {}, seen: {} };
-    for (let i = 0; i < 24; i++) {
-      const r = await ev(() => {
-        const sc = window.__p2like.gameScene();
-        const A = window.__p2like.app.assets;
-        const g = sc.game;
-        const logo = sc.roleNames.logoAt(0, g.tick);
-        if (!logo || logo.logo !== 15) return null;
-        const cv = document.getElementById('screen');
-        const n = Number(cv.dataset.scale) || 1;
-        const rr = A.layout.pRect(0, 'role_logo');
-        const out = {};
-        for (const ph of ['A', 'B', 'C']) {
-          const f = A.atlas.role(15, ph);
-          const img = A.images.get(f.sheet);
-          const t = document.createElement('canvas');
-          t.width = f.w;
-          t.height = f.h;
-          const tg = t.getContext('2d', { willReadFrequently: true });
-          tg.drawImage(img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
-          const a = tg.getImageData(0, 0, f.w, f.h).data;
-          const s2 = document.createElement('canvas');
-          s2.width = f.w;
-          s2.height = f.h;
-          const sg = s2.getContext('2d', { willReadFrequently: true });
-          sg.imageSmoothingEnabled = false;
-          sg.drawImage(cv, rr.x * n, rr.y * n, f.w * n, f.h * n, 0, 0, f.w, f.h);
-          const b = sg.getImageData(0, 0, f.w, f.h).data;
-          let opaque = 0;
-          let bad = 0;
-          for (let k = 0; k < a.length; k += 4) {
-            if (a[k + 3] < 255) continue;
-            opaque++;
-            if (Math.abs(a[k] - b[k]) > 2 || Math.abs(a[k + 1] - b[k + 1]) > 2 || Math.abs(a[k + 2] - b[k + 2]) > 2) bad++;
-          }
-          out[ph] = { rect: [f.x, f.y, f.w, f.h], opaque, bad };
+    // V320-FIX-05：役名ロゴは固定時間（単役750ms、イン／アウト各120ms）。実時間の間引き取得ではなく、宣言からの tick を指定して
+    // 静止区間（120〜630ms）の各位相の時刻で描画し、A/B/C の切出しと画素一致を確かめる
+    const role = await ev(() => {
+      const sc = window.__p2like.gameScene();
+      const A = window.__p2like.app.assets;
+      const v = sc.view;
+      const show = sc.roleNames.schedules[0].current;
+      const out = { frames: {}, seen: {}, logo: show?.logos[0] ?? null };
+      if (!show) return out;
+      const w = show.windows[0];
+      const rr = A.layout.pRect(0, 'role_logo');
+      for (const ph of ['A', 'B', 'C']) {
+        const f = A.atlas.role(15, ph);
+        out.frames[ph] = [f.x, f.y, f.w, f.h];
+        // 静止区間の中で、その位相になる tick（90ms 周期：A=0〜、B=90〜、C=180〜 の3周期目以降）
+        let t = w.inEnd;
+        while (t < w.outStart && ['A', 'B', 'C'][Math.floor((t - w.start) / 5.4) % 3] !== ph) t++;
+        const c = document.createElement('canvas');
+        c.width = 640;
+        c.height = 360;
+        const cg = c.getContext('2d', { willReadFrequently: true });
+        v.render(cg, t);
+        const tc = document.createElement('canvas');
+        tc.width = f.w;
+        tc.height = f.h;
+        const tg = tc.getContext('2d', { willReadFrequently: true });
+        tg.drawImage(A.images.get(f.sheet), f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+        const a = tg.getImageData(0, 0, f.w, f.h).data;
+        const b = cg.getImageData(rr.x, rr.y, f.w, f.h).data;
+        let opaque = 0;
+        let bad = 0;
+        for (let k = 0; k < a.length; k += 4) {
+          if (a[k + 3] < 255) continue;
+          opaque++;
+          if (Math.abs(a[k] - b[k]) > 2 || Math.abs(a[k + 1] - b[k + 1]) > 2 || Math.abs(a[k + 2] - b[k + 2]) > 2) bad++;
         }
-        return out;
-      });
-      if (r) {
-        for (const ph of ['A', 'B', 'C']) {
-          role.frames[ph] = r[ph].rect;
-          if (r[ph].bad === 0 && r[ph].opaque > 0 && !role.seen[ph]) {
-            role.seen[ph] = true;
-            await shot(`V320R_role15_${ph}`);
-          }
-        }
+        if (opaque > 0 && bad === 0) out.seen[ph] = t - w.start;
       }
-      if (Object.keys(role.seen).length === 3) break;
-      await wait(70);
-    }
+      return out;
+    });
+    await shot('V320R_role15_hold');
     check(
       'v3.2.0 r 役名 role_15（r2）：切出し［480,576／640／704,160,64］のまま、宣言時の表示が A・B・C の各位相と画素一致',
       ['A', 'B', 'C'].every((p, i) => role.frames[p]?.join() === `480,${576 + i * 64},160,64`) && Object.keys(role.seen).length === 3,
