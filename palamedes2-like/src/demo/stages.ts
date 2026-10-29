@@ -17,7 +17,7 @@ import { chainFocusBox } from '../view/chainHud';
 import { GameView, type HudInfo } from '../view/gameView';
 import { RoleNameDirector, Staging } from '../view/presentation';
 import { Mode2LessonRunner, MODE2_LESSON } from './mode2Lesson';
-import { LessonRunner, pageText, pieceKind, TUTORIAL_SCRIPT, type LessonDef, type PageKey } from './lesson';
+import { LessonRunner, pageText, pieceKind, READ_MS, TUTORIAL_SCRIPT, type LessonDef, type PageKey, type Reading } from './lesson';
 import { drawFocus, drawTutorialPanel, PANEL, type HintLayout, type PanelContent } from './panel';
 import { SingleAutoController } from './singleAuto';
 
@@ -110,7 +110,8 @@ const PAGE_EXTRAS: Partial<Record<PageKey, { icons?: string[]; pieces?: string[]
   basic_move: { icons: ['move_left', 'move_right'] },
   rotate: { icons: ['column_cycle'] },
   success1: { icons: ['launch'] },
-  success2: { pieces: ['3♠', '6♠', '1♥', '6♦'] },
+  success2: { pieces: ['3♠', '6♠'] },
+  adjacent_wrap: { pieces: ['1♥', '6♦'] },
   rise: { icons: ['raise'] },
   limit: { icons: ['raise'] },
   natural: { icons: ['raise'] },
@@ -118,10 +119,68 @@ const PAGE_EXTRAS: Partial<Record<PageKey, { icons?: string[]; pieces?: string[]
   avoid: { icons: ['declare_role'] },
 };
 
-export function pageContent(key: PageKey): PanelContent {
+export function pageContent(key: PageKey, panel = 0): PanelContent {
   const t = pageText(key);
   const x = PAGE_EXTRAS[key];
-  return { heading: t.heading, lines: t.lines, icons: x?.icons, pieces: x?.pieces?.map(pieceKind) };
+  return { heading: t.heading, lines: t.panels[Math.min(panel, t.panels.length - 1)], icons: x?.icons, pieces: x?.pieces?.map(pieceKind) };
+}
+
+/**
+ * V320-FIX-04 第13.1節 読書の関門：説明ページごとに実時間 READ_MS を確保する。
+ * 手動（遊び方）：READ_MS 後に送り案内を出し、新しい決定押下で進む（早い決定は無視・予約しない。押しっぱなしで送らない）。
+ * 放置デモ：READ_MS 後に自動で進む。ゲーム時計は止まり、この実時間だけが進む
+ */
+export class ReadingGate {
+  private key = '';
+  /** 現在の説明を表示してからの実時間（ms） */
+  ms = 0;
+  /** 進んだ説明の記録（自動検証用：頁・パネル・表示した実時間・進め方） */
+  readonly log: { page: PageKey; panel: number; ms: number; by: 'auto' | 'confirm' }[] = [];
+
+  constructor(readonly manual: boolean) {}
+
+  private sync(r: Reading | null): void {
+    const k = r ? `${r.page}#${r.panel}#${this.log.length}` : '';
+    if (k !== this.key) {
+      this.key = k;
+      this.ms = 0;
+    }
+  }
+
+  /** 実時間を進める。放置デモで読み終えたら true（呼出し側が release） */
+  update(r: Reading | null, dtMs: number): boolean {
+    this.sync(r);
+    if (!r) return false;
+    this.ms += dtMs;
+    if (!this.manual && this.ms >= READ_MS) {
+      this.log.push({ page: r.page, panel: r.panel, ms: this.ms, by: 'auto' });
+      return true;
+    }
+    return false;
+  }
+
+  /** 決定押下（手動）。読書時間を満たしていれば true（呼出し側が release）。早い押下は捨てる */
+  confirm(r: Reading | null): boolean {
+    this.sync(r);
+    if (!r || !this.manual || this.ms < READ_MS) return false;
+    this.log.push({ page: r.page, panel: r.panel, ms: this.ms, by: 'confirm' });
+    return true;
+  }
+
+  /** 送り案内（手動で読書時間を満たした後だけ） */
+  prompt(r: Reading | null): string | null {
+    this.sync(r);
+    if (!r || !this.manual || this.ms < READ_MS) return null;
+    return TUTORIAL_SCRIPT.advance_hint[r.prompt];
+  }
+}
+
+/** 読書区間を持つ舞台（遊び方の手動送り・放置デモの自動送り） */
+export interface ReadingStage extends Stage {
+  readonly gate: ReadingGate;
+  readonly reading: Reading | null;
+  /** 決定押下（遊び方）。読み終えていなければ何もしない */
+  confirm(): void;
 }
 
 // ---------------------------------------------------------------- 教材
@@ -133,7 +192,7 @@ interface Focus {
 }
 
 /** 教材の舞台（基本操作・4/4/6・ピンチ）。単一プレイヤーのシングル表示（右パネルを説明に使う） */
-export class LessonStage implements Stage {
+export class LessonStage implements ReadingStage {
   readonly hint: HintLayout = 'single';
   readonly runner: LessonRunner;
   private readonly presenter: Presenter;
@@ -143,13 +202,16 @@ export class LessonStage implements Stage {
   private focus: Focus | null = null;
   private advanced = false;
   readonly bgm: BgmId = 'single';
+  readonly gate: ReadingGate;
 
   constructor(
     private readonly host: StageHost,
     readonly def: LessonDef,
-    /** 手動閲覧（遊び方）では最後に止まる。放置デモでは finished で次へ */
+    /** 手動閲覧（遊び方）：説明は決定で送る。放置デモ：説明は時間で送る */
+    manual = false,
     seed: number = DEMO.lessonSeed,
   ) {
+    this.gate = new ReadingGate(manual);
     this.runner = new LessonRunner(def, () => {
       if (this.roleInfo?.clearOnPage) this.roleInfo = null;
     }, { seed });
@@ -166,8 +228,18 @@ export class LessonStage implements Stage {
     return this.runner.game;
   }
 
+  get reading(): Reading | null {
+    return this.runner.reading.current;
+  }
+
+  confirm(): void {
+    if (this.gate.confirm(this.reading)) this.runner.releaseReading();
+  }
+
   update(dtMs: number): void {
     this.advanced = false;
+    // 読書中はゲームを進めない（教材の時計・飛行・猶予は止まり、読書の実時間だけが進む）
+    if (this.gate.update(this.reading, dtMs)) this.runner.releaseReading();
     this.driver.advance(dtMs);
     this.presenter.sync();
     this.scan();
@@ -207,13 +279,15 @@ export class LessonStage implements Stage {
   /** 現在のパネル内容（頁＋宣言中の役名・実例・実際の消去数） */
   panel(): PanelContent {
     const page = this.runner.page;
-    const base = page ? pageContent(page) : {};
+    const rd = this.reading;
+    const base = page ? pageContent(page, rd && rd.page === page ? rd.panel : pageText(page).panels.length - 1) : {};
     const r = this.roleInfo;
     if (!r) return base;
     const fits = measureBitmap(this.host.assets.tutorial?.font.def ?? { glyphs: {}, cell: [16, 16], line_height: 22, format: '' }, r.heading) <= PANEL.heading.w;
     return {
       heading: fits ? r.heading : (base.heading ?? ''),
-      lines: [...(base.lines ?? []).slice(0, PANEL.body.maxLines - 1), `${TUTORIAL_SCRIPT.role_list.labels.clear}${fullDigits(r.han)}${TUTORIAL_SCRIPT.role_list.labels.lines_unit}`],
+      // V320-FIX-04：承認済み本文を途中で切らない（宣言前に読書済み）。役処理中は役名・消去数・採択ピースだけを示す
+      lines: [`${TUTORIAL_SCRIPT.role_list.labels.clear}${fullDigits(r.han)}${TUTORIAL_SCRIPT.role_list.labels.lines_unit}`],
       pieces: r.pieces,
     };
   }
@@ -368,13 +442,18 @@ export class VersusDemoStage implements Stage {
  * 実イベント（詰まり・カウントダウン・場の更新・クリア）で説明を切り替える。CPU・固定尺のページ送りは使わない。
  * 得点・公式記録は表示も保存もしない。READY／GO は出さない
  */
-export class Mode2Stage implements Stage {
+export class Mode2Stage implements ReadingStage {
   readonly hint: HintLayout = 'single';
   readonly runner: Mode2LessonRunner;
   private readonly presenter: Presenter;
   private readonly driver: FixedStepDriver;
+  readonly gate: ReadingGate;
 
-  constructor(private readonly host: StageHost) {
+  constructor(
+    private readonly host: StageHost,
+    manual = false,
+  ) {
+    this.gate = new ReadingGate(manual);
     this.runner = new Mode2LessonRunner();
     this.presenter = new Presenter(host, this.runner.game, ['kotaro'], MODE2_LESSON.seed, true);
     this.driver = new FixedStepDriver({ tickMs: this.runner.game.tickMs, step: () => void this.runner.tick() });
@@ -393,7 +472,16 @@ export class Mode2Stage implements Stage {
     return this.runner.done;
   }
 
+  get reading(): Reading | null {
+    return this.runner.reading.current;
+  }
+
+  confirm(): void {
+    if (this.gate.confirm(this.reading)) this.runner.releaseReading();
+  }
+
   update(dtMs: number): void {
+    if (this.gate.update(this.reading, dtMs)) this.runner.releaseReading();
     this.driver.advance(dtMs);
     this.presenter.sync();
   }
@@ -402,7 +490,8 @@ export class Mode2Stage implements Stage {
     const g = this.runner.game;
     const t = this.runner.paused || g.result ? g.tick : g.tick + this.driver.alpha;
     this.presenter.render(ctx, t, { hideSingleInfo: true, hideStartBanner: true });
-    drawTutorialPanel(ctx, this.host.assets, pageContent(this.page));
+    const rd = this.reading;
+    drawTutorialPanel(ctx, this.host.assets, pageContent(this.page, rd && rd.page === this.page ? rd.panel : pageText(this.page).panels.length - 1));
   }
 }
 

@@ -2,14 +2,33 @@
 import { describe, expect, it } from 'vitest';
 import type { GameEvent } from '../src/core/game';
 import { pieceLabel } from '../src/core/pieces';
-import { LESSON_BASIC, LESSON_PINCH, LessonRunner, rolesLesson, type LessonDef } from '../src/demo/lesson';
+import { LESSON_BASIC, LESSON_CRACK, LESSON_PINCH, LessonRunner, rolesLesson, type LessonDef } from '../src/demo/lesson';
 
-function runAll(def: LessonDef, maxTicks = 60 * 120) {
+/** V320-FIX-04：読書区間は呼出し側が解除する（ここでは放置デモと同じく 300tick＝5000ms で解除）。読書の開始・終了tickも記録 */
+export function drive(r: LessonRunner, maxTicks = 60 * 400, readTicks = 300) {
+  const reads: { page: string; panel: number; gameTick: number }[] = [];
+  let n = 0;
+  for (let i = 0; i < maxTicks && !r.done; i++) {
+    const rd = r.reading.current;
+    if (rd) {
+      if (n === 0) reads.push({ page: rd.page, panel: rd.panel, gameTick: r.game.tick });
+      if (++n >= readTicks) {
+        n = 0;
+        r.releaseReading();
+      }
+      continue;
+    }
+    r.tick();
+  }
+  return reads;
+}
+
+function runAll(def: LessonDef, maxTicks = 60 * 400) {
   const pages: string[] = [];
   const r = new LessonRunner(def, (p) => pages.push(p));
   const heights: string[] = [];
-  for (let i = 0; i < maxTicks && !r.done; i++) r.tick();
-  return { r, g: r.game, pages, heights };
+  const reads = drive(r, maxTicks);
+  return { r, g: r.game, pages, heights, reads };
 }
 
 const ev = <T extends GameEvent['type']>(g: { events: GameEvent[] }, t: T) => g.events.filter((e): e is Extract<GameEvent, { type: T }> => e.type === t);
@@ -40,7 +59,15 @@ describe('4/4/6 共用教材（設計書 第6節）を本編の処理で実行',
     const r = new LessonRunner(rolesLesson());
     const seen: string[] = [colHeights(r.game)];
     let last = seen[0];
-    for (let i = 0; i < 60 * 120 && !r.done; i++) {
+    let n = 0;
+    for (let i = 0; i < 60 * 400 && !r.done; i++) {
+      if (r.paused) {
+        if (++n >= 300) {
+          n = 0;
+          r.releaseReading();
+        }
+        continue;
+      }
       r.tick();
       const h = colHeights(r.game);
       if (h !== last) {
@@ -68,8 +95,8 @@ describe('4/4/6 共用教材（設計書 第6節）を本編の処理で実行',
     expect(rises.map((x) => x.kind)).toEqual(['manual', 'manual', 'manual', 'manual', 'manual', 'manual']);
   });
 
-  it('時間：成功間隔1200ms、宣言は最終成功の300/500/800ms後、役終了→最初の成功1200ms、役を挟む連続取得の消費は2000ms以内', () => {
-    const { g } = runAll(rolesLesson());
+  it('時間（ゲーム内時間・読書区間を除く）：成功間隔1200ms、役終了→最初の成功1200ms。宣言は読書の直後。打上連鎖・役連鎖は猶予内で途切れない', () => {
+    const { g, reads } = runAll(rolesLesson());
     const ms = (t: number) => Math.round(t * g.tickMs);
     const succ = ev(g, 'arrive').map((a) => a.tick);
     const decl = ev(g, 'declare').map((d) => d.tick);
@@ -79,19 +106,24 @@ describe('4/4/6 共用教材（設計書 第6節）を本編の処理で実行',
     gaps.forEach((d, i) => {
       if (!roleGaps.includes(i)) expect(ms(d), `gap${i}`).toBe(1200);
     });
-    expect([ms(decl[0] - succ[3]), ms(decl[1] - succ[7]), ms(decl[2] - succ[13])]).toEqual([300, 500, 800]);
     expect([ms(succ[4] - ends[0]), ms(succ[8] - ends[1])]).toEqual([1200, 1200]);
-    // 役処理中は停止：成功→宣言＋役終了→成功 の消費
-    expect(ms(decl[0] - succ[3] + succ[4] - ends[0])).toBeLessThan(2000);
-    expect(ms(decl[1] - succ[7] + succ[8] - ends[1])).toBeLessThan(2000);
-    // 次宣言までの有効時間（役連鎖の消費）5300／8000ms、いずれも12000ms以内
-    expect([ms(decl[1] - ends[0]), ms(decl[2] - ends[1])]).toEqual([5300, 8000]);
+    // 役処理中は停止：成功→宣言＋役終了→成功 の打上連鎖の消費は 3000ms 未満
+    expect(ms(decl[0] - succ[3] + succ[4] - ends[0])).toBeLessThan(3000);
+    expect(ms(decl[1] - succ[7] + succ[8] - ends[1])).toBeLessThan(3000);
+    // 次宣言までの役連鎖の消費（役処理中は停止）は 12000ms 以内
+    expect(ms(decl[1] - ends[0])).toBeLessThan(12000);
+    expect(ms(decl[2] - ends[1])).toBeLessThan(12000);
+    // 読書区間（ゲーム停止）は取得前・宣言前・役終了後：役処理中・飛行中に置かない
+    const roles = decl.map((d, i) => [d, ends[i]]);
+    for (const rd of reads) for (const [a, b] of roles) expect(rd.gameTick < a || rd.gameTick >= b, `${rd.page}@${rd.gameTick}`).toBe(true);
+    expect(reads.map((x) => x.page)).toEqual(['role_ready', 'role_ready', 'declare', 'line_clear', 'streak', 'streak_rate', 'flush', 'chain', 'chain3']);
   });
 });
 
 describe('基本操作・ピンチの教材', () => {
   it('基本操作：列2を3回入替（元へ戻る）→列1の2♠成功→列3の4♦失敗（場2♠）→帰還→手動上昇', () => {
-    const { r, g } = runAll(LESSON_BASIC);
+    const { r, g, reads } = runAll(LESSON_BASIC);
+    expect(reads.map((x) => x.page)).toEqual(['basic_move', 'rotate', 'success1', 'success2', 'adjacent_wrap', 'fail', 'fail', 'rise']);
     expect(r.problems).toEqual([]);
     expect(ev(g, 'rotate').map((x) => x.col)).toEqual([1, 1, 1]);
     const a = ev(g, 'arrive');
@@ -117,6 +149,24 @@ describe('基本操作・ピンチの教材', () => {
     ]);
     expect(g.result?.outcome).toBe('gameOver');
     expect(Math.round((g.result!.tick - start.tick) * g.tickMs)).toBe(4000);
-    expect(pages).toEqual(['limit', 'natural', 'pinch', 'avoid', 'miss']);
+    expect(pages).toEqual(['limit', 'natural', 'pinch', 'attack_pinch', 'avoid', 'miss']);
+  });
+
+  it('ピンチ：猶予の3→2→1の途中に読書を挟まない（ゲームオーバーの説明は終了後）', () => {
+    const { g, reads } = runAll(LESSON_PINCH);
+    const start = ev(g, 'pinchWarn').find((x) => x.state === 'start')!.tick;
+    const end = g.result!.tick;
+    for (const rd of reads) expect(rd.gameTick < start || rd.gameTick >= end, `${rd.page}@${rd.gameTick}`).toBe(true);
+    expect(reads.at(-1)).toMatchObject({ page: 'miss' });
+  });
+
+  it('V320-FIX-04 ヒビの独立例：2回成功→失敗で切れ予約（ヒビ）→もう一度失敗で連鎖が切れる', () => {
+    const { r, g } = runAll(LESSON_CRACK);
+    expect(r.problems).toEqual([]);
+    expect(ev(g, 'arrive').map((a) => a.success)).toEqual([true, true, false, false]);
+    expect(ev(g, 'streakCut').map((x) => [x.state, x.count])).toEqual([
+      ['reserved', 2],
+      ['ended', 2],
+    ]);
   });
 });

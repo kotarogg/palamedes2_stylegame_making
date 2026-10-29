@@ -163,7 +163,7 @@ describe('v3.2.0 記録の登録（本編シーン）', () => {
   it('MODE2説明教材：クリアしても記録しない（記録の処理を持たない）', () => {
     const app = makeApp();
     const st = new Mode2Stage({ assets: fakeAssets(), bus: new AudioBus('./') });
-    for (let i = 0; i < 60 * 80 && !st.finished; i++) st.update(1000 / 60);
+    for (let i = 0; i < 60 * 200 && !st.finished; i++) st.update(1000 / 60); // V320-FIX-04：説明ごとに5000msの読書
     expect(st.finished).toBe(true);
     expect(app.records).toEqual(emptyRecords());
   });

@@ -1,8 +1,9 @@
 // 遊び方・放置デモ：台本文字の収録・寸法、役一覧の値、SINGLE自動操作の抽選、対戦デモの seed、章の進行・暗転・割り込み・入力の規則
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { App } from '../src/app';
 import { AudioBus } from '../src/audio/audioBus';
-import { computeAttack } from '../src/core/attack';
+import { computeAttack, numberRoleAttackBonus } from '../src/core/attack';
 import type { Game } from '../src/core/game';
 import { Match, SingleSession } from '../src/core/match';
 import { createSeededRng } from '../src/core/rng';
@@ -16,14 +17,15 @@ import { CpuController } from '../src/input/cpu';
 import type { PadState } from '../src/input/controller';
 import { defaultSettings } from '../src/input/settings';
 import { measureBitmap, uncovered, type BitmapFontDef } from '../src/view/bitmapFont';
-import { fakeAssets, readJson } from './helpers';
+import { fakeAssets, readJson, ROOT } from './helpers';
 
 const font = readJson<BitmapFontDef>('public/gfx/data/tutorial_font_16.json');
 
 describe('台本と収録文字（tutorial_font_16：V320-FIX-04 採用版 388字）', () => {
   const S = TUTORIAL_SCRIPT;
   const all: string[] = [
-    ...Object.values(S.pages).flatMap((p) => [p.heading, ...p.lines]),
+    ...Object.values(S.pages).flatMap((p) => [p.heading, ...p.panels.flat()]),
+    ...Object.values(S.advance_hint),
     ...S.return_hint.two_lines,
     S.return_hint.one_line,
     S.title_hint,
@@ -54,48 +56,59 @@ describe('台本と収録文字（tutorial_font_16：V320-FIX-04 採用版 388�
     for (const ch of Object.keys(font.glyphs).slice(327)) expect(f.glyphs[ch].advance, ch).toBe(16);
   });
 
-  it('本文は最大4行・各行168px以内（10全角相当。縮小しない）、見出し168px以内、戻る案内は1行192px（領域196px）', () => {
+  it('本文は1ページ最大4行・各行168px以内（10全角相当。縮小しない）、見出し168px以内、戻る案内は1行192px（領域196px）', () => {
     for (const [k, p] of Object.entries(S.pages)) {
-      expect(p.lines.length, k).toBeLessThanOrEqual(PANEL.body.maxLines);
-      for (const l of [p.heading, ...p.lines]) expect(measureBitmap(font, l), `${k}:${l}`).toBeLessThanOrEqual(PANEL.body.w);
+      expect(measureBitmap(font, p.heading), k).toBeLessThanOrEqual(PANEL.heading.w);
+      for (const panel of p.panels) {
+        expect(panel.length, k).toBeLessThanOrEqual(PANEL.body.maxLines);
+        for (const l of panel) expect(measureBitmap(font, l), `${k}:${l}`).toBeLessThanOrEqual(PANEL.body.w);
+      }
     }
-    // 宣言中は本文3行＋「消去Ｎライン」
-    for (const k of ['declare', 'flush', 'chain', 'chain3', 'line_clear'] as const) expect(S.pages[k].lines.length, k).toBeLessThanOrEqual(3);
     expect(measureBitmap(font, S.return_hint.one_line)).toBe(192);
     for (const l of S.return_hint.two_lines) expect(measureBitmap(font, l)).toBeLessThanOrEqual(PANEL.body.w);
+    for (const l of Object.values(S.advance_hint)) expect(measureBitmap(font, l)).toBeLessThanOrEqual(PANEL.body.w);
     // 教材の役名（宣言時の見出し）
     for (const n of ['フォーカード', 'フラッシュ', 'スーパーストレート']) expect(measureBitmap(font, n)).toBeLessThanOrEqual(PANEL.heading.w);
   });
 
-  it('台本の改行・本文は設計書 第5節の文と一致（台本データで改行）', () => {
-    expect(S.pages.chain3.lines).toEqual(['３回続けて宣言', '役連鎖が３連鎖に！']);
-    expect(S.pages.miss.lines).toEqual(['猶予がなくなると', 'ミス！', '打ち上げ失敗とは', '別のミス条件だよ']);
-    expect(S.pages.pinch.lines).toEqual(['７段のまま次の', '自然上昇を迎えると', 'ピンチ！']);
-    // v3.2.0 PM 追加指示
-    expect(S.pages.m2_intro.lines).toEqual(['６列から選んで', '場へ出そう', 'となりの数字なら', '成功！']);
-    expect(S.pages.streak_rate.lines).toEqual(['打上連鎖で', '攻撃力アップ', '対戦で力を発揮！']);
+  it('V320-FIX-04 付録A：40項目の見出し・本文は原文どおり（表示は改行とページ分割だけ。行頭に句読点・空白を置かない）。付録Bの送り案内', () => {
+    const order = readFileSync(new URL('docs/V320_FIX04_PROGRAMMER_ORDER_20261029.md', ROOT), 'utf8');
+    const appendix = order.slice(order.indexOf('## 付録A'), order.indexOf('## 付録B'));
+    const rows = [...appendix.matchAll(/^\|([a-z0-9_]+)\|([^|]+)\|([^|]+)\|$/gm)].map((m) => ({ id: m[1], heading: m[2], text: m[3] }));
+    expect(rows).toHaveLength(40);
+    expect(Object.keys(S.pages).sort()).toEqual(rows.map((r) => r.id).sort());
+    for (const r of rows) {
+      const p = S.pages[r.id as keyof typeof S.pages];
+      expect(p.heading, r.id).toBe(r.heading);
+      expect(p.text, r.id).toBe(r.text);
+      expect(p.panels.flat().join(''), r.id).toBe(r.text);
+      for (const l of p.panels.flat()) expect(/^[、。！？　]/.test(l), `${r.id}:${l}`).toBe(false);
+    }
+    expect(S.advance_hint).toEqual({ demo: '決定で実演へ', next: '決定で次へ' });
   });
 });
 
 describe('役一覧（本体の役データを共用）', () => {
-  it('16役の実例は本体の役判定でその役名ロゴ1つだけになる。消去＝合計翻数、基本攻撃＝max(合計翻数−1,0)（倍率1・連鎖加算なし）', () => {
+  it('16役の実例は本体の役判定でその役名ロゴ1つだけになる。消去＝合計翻数、基本攻撃＝max(合計翻数−1,0)＋数字役ボーナス（倍率1・連鎖加算なし）', () => {
     const roles = TUTORIAL_SCRIPT.role_list.roles;
     expect(roles.map((r) => r.logo)).toEqual([...Array(16).keys()]);
     for (const r of roles) {
       const res = evaluateSubset(r.example.map((c, i) => ({ id: i + 1, ...pieceKind(c) })));
       expect(roleLogoIndices(res), r.name).toEqual([r.logo]);
       expect(roleDisplayName([r.logo])).toBe(r.name);
-      expect(computeAttack(res.han, 100, 1).power, r.name).toBe(Math.max(res.han - 1, 0));
+      // V320-FIX-04：数字役ボーナス（4ピース+1・6ピース+2）を含む新式
+      expect(computeAttack(res.han, 100, 1, 4, res.numberRole).power, r.name).toBe(Math.max(res.han - 1, 0) + numberRoleAttackBonus(res.numberRole));
     }
     const v = (name: string) => {
       const r = roles.find((x) => x.name === name)!;
       const h = evaluateSubset(r.example.map((c, i) => ({ id: i + 1, ...pieceKind(c) }))).han;
-      return [h, computeAttack(h, 100, 1).power];
+      const res = evaluateSubset(r.example.map((c, i) => ({ id: i + 1, ...pieceKind(c) })));
+      return [h, computeAttack(h, 100, 1, 4, res.numberRole).power];
     };
     expect([v('フォーカード'), v('フラッシュ'), v('スーパーストレート')]).toEqual([
-      [1, 0],
+      [1, 1],
       [3, 2],
-      [3, 2],
+      [3, 4],
     ]);
   });
 });

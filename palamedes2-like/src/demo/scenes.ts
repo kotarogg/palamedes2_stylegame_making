@@ -13,9 +13,9 @@ import { drawBackground, drawFooter, drawMenuItems, drawMenuTitle, MENU_ITEM } f
 import { drawFrame } from '../view/assets';
 import { drawBitmapText, TUTORIAL_COLORS } from '../view/bitmapFont';
 import { GameView } from '../view/gameView';
-import { LESSON_BASIC, LESSON_PINCH, pieceKind, rolesLesson, TUTORIAL_SCRIPT } from './lesson';
+import { LESSON_BASIC, LESSON_CRACK, LESSON_M1_SINGLE, LESSON_M1_VERSUS, LESSON_PINCH, pieceKind, rolesLesson, TUTORIAL_SCRIPT } from './lesson';
 import { drawReturnHint, drawTutorialPanel, PANEL, type HintLayout } from './panel';
-import { DEMO, fullDigits, LessonStage, Mode2Stage, SingleDemoStage, VersusDemoStage, type Stage } from './stages';
+import { DEMO, fullDigits, LessonStage, Mode2Stage, SingleDemoStage, VersusDemoStage, type ReadingStage, type Stage } from './stages';
 
 /**
  * パッドの「新しい」操作だけを拾う（開始時に押していたボタン・傾きは、一度離すまで数えない）。
@@ -244,11 +244,13 @@ export class HelpMenuScene implements Scene {
     const back = () => this.app.setScene(new HelpMenuScene(this.app, this.from, this.cursor));
     if (t === 'roles') return this.app.setScene(new RoleListScene(this.app, back));
     if (t === 'text') return this.app.openHelpText(back);
+    // V320-FIX-04：手動の遊び方は説明ごとに5000ms読ませ、決定で送る（manual＝true）。
+    // MODE1 は「シングル」「対戦」（静止見本の説明）と「ピンチとゲームオーバー」（実演）。連鎖説明はヒビの独立例を追加
     const stages: Record<Exclude<HelpTopic, 'roles' | 'text'>, ((a: App) => Stage)[]> = {
-      basic: [(a) => new LessonStage(a, LESSON_BASIC)],
-      mode1: [(a) => new LessonStage(a, rolesLesson('first')), (a) => new LessonStage(a, LESSON_PINCH)],
-      streak: [(a) => new LessonStage(a, rolesLesson('all'))],
-      mode2: [(a) => new Mode2Stage(a)],
+      basic: [(a) => new LessonStage(a, LESSON_BASIC, true)],
+      mode1: [(a) => new LessonStage(a, LESSON_M1_SINGLE, true), (a) => new LessonStage(a, LESSON_M1_VERSUS, true), (a) => new LessonStage(a, LESSON_PINCH, true)],
+      streak: [(a) => new LessonStage(a, rolesLesson('all'), true), (a) => new LessonStage(a, LESSON_CRACK, true)],
+      mode2: [(a) => new Mode2Stage(a, true)],
     };
     this.app.setScene(new HelpLessonScene(this.app, stages[t], back));
   }
@@ -267,6 +269,11 @@ export class HelpMenuScene implements Scene {
     );
     drawFooter(ctx, A, '上下：選択　A／Enter：実演する　B／Esc：戻る');
   }
+}
+
+/** 読書区間を持つ舞台か */
+export function readingOf(stage: Stage | null): ReadingStage | null {
+  return stage && 'gate' in stage && 'confirm' in stage ? (stage as ReadingStage) : null;
 }
 
 /** 遊び方の説明実演（手動閲覧）。B／Esc で目次へ。最後は「もう一度」「戻る」 */
@@ -292,7 +299,11 @@ export class HelpLessonScene implements Scene {
       this.leave();
       return;
     }
-    if (this.choice === null) return;
+    if (this.choice === null) {
+      // 説明の送り：読書時間（5000ms）後の新しい決定だけ。早い決定は捨てる（予約しない）
+      if (ev.key === 'confirm' && !ev.repeat) readingOf(this.stage)?.confirm();
+      return;
+    }
     if (ev.key === 'up' || ev.key === 'down' || ev.key === 'left' || ev.key === 'right') {
       this.choice = this.choice === 0 ? 1 : 0;
       bus.playSfx('ui_move');
@@ -332,6 +343,10 @@ export class HelpLessonScene implements Scene {
     const S = TUTORIAL_SCRIPT.help_choices;
     const o = { outline: TUTORIAL_COLORS.outline };
     if (this.choice === null) {
+      // 送り案内（付録B）：読書時間の後だけ。戻る案内は消さない
+      const rs = readingOf(this.stage);
+      const prompt = rs?.gate.prompt(rs.reading);
+      if (prompt) drawBitmapText(ctx, font, prompt, PANEL.hint.x, PANEL.hint.y, { ...o, color: TUTORIAL_COLORS.heading });
       drawBitmapText(ctx, font, 'B/Esc:' + S.back, PANEL.hint.x, PANEL.hint.y + PANEL.hint.step, { ...o, color: TUTORIAL_COLORS.secondary });
       return;
     }
