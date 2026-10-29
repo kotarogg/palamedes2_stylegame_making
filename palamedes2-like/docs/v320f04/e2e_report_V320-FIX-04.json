@@ -43,13 +43,69 @@
    "pass": true,
    "detail": "{\"n\":1566,\"x\":24,\"y\":65,\"w\":48,\"h\":54}",
    "kind": "direct-state"
+  },
+  {
+   "name": "第5章 候補補助：出せる最上段だけ（差は盤面の中の1段分＝高さ32以内）。シアン輪郭の不透明度は 0.50〜0.95 を1000ms周期",
+   "pass": true,
+   "detail": "{\"cols\":[0,2,3],\"box\":{\"n\":348,\"x\":65,\"y\":257,\"w\":126,\"h\":30},\"alphas\":[0.5,0.73,0.95,0.73,0.5]}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第12章 CPU観戦：メインメニューの MODE2 とオプションの間。設定の初期値（MODE1・アカネ初級・ずん子初級・2本先取・7秒）",
+   "pass": true,
+   "detail": "[\"モード=MODE1\",\"左キャラ=アカネ\",\"左の強さ=初級\",\"右キャラ=東北ずん子\",\"右の強さ=初級\",\"先取本数=2本先取\",\"自然上昇=7秒\",\"観戦開始\",\"戻る\"]",
+   "kind": "natural-ui"
+  },
+  {
+   "name": "第12章 CPU観戦：決定で開始（左右CPU・補助表示なし）、「CPU観戦中」の小見出し",
+   "pass": true,
+   "detail": "{\"kind\":\"watch\",\"devices\":[{\"kind\":\"cpu\",\"level\":\"easy\"},{\"kind\":\"cpu\",\"level\":\"easy\"}]}",
+   "kind": "natural-ui"
+  },
+  {
+   "name": "第12章 CPU観戦：Esc で終了確認（ゲームは進行）→「終了する」で観戦設定へ",
+   "pass": true,
+   "detail": "{\"q\":{\"quit\":1,\"tick\":311},\"q2\":329,\"back\":\"WatchSettingsScene\"}",
+   "kind": "natural-ui"
+  },
+  {
+   "name": "第13章 遊び方 MODE1：説明を5000ms読ませてから「決定で次へ」。早い決定は無視",
+   "pass": true,
+   "detail": "{\"early\":{\"prompt\":null,\"page\":\"m1_single\"},\"prompt\":\"決定で次へ\",\"next\":{\"page\":\"m1_endless\",\"panel\":0}}",
+   "kind": "natural-ui"
+  },
+  {
+   "name": "第11章 MODE2 結果（場の更新あり）：総合ベストを記録、専用は作らない",
+   "pass": true,
+   "detail": "{\"refresh\":1,\"rec\":{\"total\":{\"bestMs\":1300,\"bestTicks\":78,\"rule\":\"mode2_V320-FIX-04\"},\"noReset\":null}}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第11章 MODE2 結果（ノーリセット）：総合ベストを記録、ノーリセット専用ベストを記録",
+   "pass": true,
+   "detail": "{\"refresh\":0,\"rec\":{\"total\":{\"bestMs\":1283.3333333333335,\"bestTicks\":77,\"rule\":\"mode2_V320-FIX-04\"},\"noReset\":{\"bestMs\":1283.3333333333335,\"bestTicks\":77,\"rule\":\"mode2_V320-FIX-04\"}}}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第10章 20面クリアで全ステージクリア（ボーナス20000・倍率なし）。記録に20面ルール識別",
+   "pass": true,
+   "detail": "{\"outcome\":\"allStagesClear\",\"bonus\":20000,\"rec\":{\"score\":20010,\"maxStage\":20,\"completed\":true,\"rule\":\"stage20_V320-FIX-04\"}}",
+   "kind": "direct-state"
   }
  ],
  "shots": [
   "docs/v320f04/screens/V320F04_versus_1x.png",
   "docs/v320f04/screens/V320F04_attack_cancel_1x.png",
   "docs/v320f04/screens/V320F04_attack_cancel_stock_1x.png",
-  "docs/v320f04/screens/V320F04_single_rate_max_1x.png"
+  "docs/v320f04/screens/V320F04_single_rate_max_1x.png",
+  "docs/v320f04/screens/V320F04_assist_1x.png",
+  "docs/v320f04/screens/V320F04_assist_board_top_3x.png",
+  "docs/v320f04/screens/V320F04_watch_settings_1x.png",
+  "docs/v320f04/screens/V320F04_watch_playing_1x.png",
+  "docs/v320f04/screens/V320F04_help_mode1_single_1x.png",
+  "docs/v320f04/screens/V320F04_mode2_result_refresh_1x.png",
+  "docs/v320f04/screens/V320F04_mode2_result_noReset_1x.png",
+  "docs/v320f04/screens/V320F04_stage20_clear_1x.png"
  ],
  "errors": []
 }

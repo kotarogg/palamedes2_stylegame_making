@@ -193,8 +193,8 @@ try {
   const pngs = ok('.png');
   const jsons = ok('.json').map((p) => p.split('/').pop()).sort();
   check(
-    '明示読込一覧の49PNG＋v3.1.0追加9PNG＋遊び方UI3PNG（tutorial_assets.json）だけを取得（旧版・見本・previews を読まない）、JSON8件',
-    pngs.length === 61 && pngs.every((p) => p.includes('/gfx/assets/')) && jsons.join() === 'additional_assets_v310.json,credits_text.json,font_styles.json,game_loading_list.json,graphics_manifest_v3.json,screen_layout_v2.json,tutorial_assets.json,tutorial_font_16.json',
+    '明示読込一覧の49PNG＋v3.1.0追加9PNG＋遊び方UI3PNG＋V320-FIX-04追加9PNG（v320_fix04_assets.json）だけを取得（旧版・見本・previews・source を読まない）、JSON9件',
+    pngs.length === 70 && pngs.every((p) => p.includes('/gfx/assets/')) && jsons.join() === 'additional_assets_v310.json,credits_text.json,font_styles.json,game_loading_list.json,graphics_manifest_v3.json,screen_layout_v2.json,tutorial_assets.json,tutorial_font_16.json,v320_fix04_assets.json',
     `png=${pngs.length} json=${jsons.join(',')}`,
   );
   const wavs = ok('.wav');
@@ -246,7 +246,7 @@ try {
   );
   await shot('S02_menu');
   const menuArt = await ev(() => [window.__cmp('menu_kotaro', 'menu_kotaro', 16, 163), window.__cmp('menu_akane', 'menu_akane', 480, 163)]);
-  check('メインメニュー（MODE1／MODE2／オプション／遊び方）：両脇の menu_kotaro・menu_akane を原寸・原点どおりに描画（画素一致）', menuArt.every((m) => m.bad === 0 && m.opaque > 0) && (await ev(() => window.__p2like.scene().stack[0].items.map((i) => i.label).join())) === 'MODE1,MODE2,オプション,遊び方', JSON.stringify(menuArt));
+  check('メインメニュー（MODE1／MODE2／CPU観戦／オプション／遊び方）：両脇の menu_kotaro・menu_akane を原寸・原点どおりに描画（画素一致）', menuArt.every((m) => m.bad === 0 && m.opaque > 0) && (await ev(() => window.__p2like.scene().stack[0].items.map((i) => i.label).join())) === 'MODE1,MODE2,CPU観戦,オプション,遊び方', JSON.stringify(menuArt));
 
   // ---- パッドだけで CPU対戦（READY／GO はCPUの相手＝アカネ） ----
   await pad(0, 200); // MODE1
@@ -398,7 +398,8 @@ try {
     const first = g.events.find((e) => e.player === 1 && ['move', 'launch', 'rotate'].includes(e.type) && e.tick >= g.playStartTick);
     return { round: sc.session.round, wins: sc.session.wins, firstCpuCmd: first ? first.tick - g.playStartTick : null };
   });
-  check('B1：CPU対戦の第2ラウンドでも CPU が開始直後から操作（1.5秒以内）', r2.round === 2 && r2.firstCpuCmd !== null && r2.firstCpuCmd <= 90, JSON.stringify(r2));
+  // V320-FIX-04：初級は最初の操作の前にも必須判断待ち（最大500ms）＋既存の追加停止（最大1300ms）を置くため、上限を 1.8秒＋0.2秒へ
+  check('B1：CPU対戦の第2ラウンドでも CPU が開始直後から操作（初級の必須待ち＋追加停止の最大1.8秒＋0.2秒以内）', r2.round === 2 && r2.firstCpuCmd !== null && r2.firstCpuCmd <= 120, JSON.stringify(r2));
 
   // ---- S14 CPU対戦の終了：勝ち＝次の相手へ／同じ相手と再戦／メニュー ----
   const firstTo = await ev(() => window.__p2like.gameScene().session.settings.firstTo);
@@ -910,7 +911,9 @@ try {
       }
       return { n, center: n ? Math.round((sx / n) * 10) / 10 : null };
     };
-    const titles = hl.map((l) => ({ role: goldIn(l.roleTitle), ren: goldIn(l.roleSub), up: goldIn(l.streakTitle), ren2: goldIn(l.streakSub), cx: l.cx }));
+    // V320-FIX-04：見出しは PM検収合格の見出しPNG（原寸1倍、body_origin で旧文字セルへ）。不透明画素が素材と一致
+    void goldIn;
+    const titles = hl.map((l) => [l.roleTitle, l.roleSub, l.streakTitle, l.streakSub].map((r) => ({ id: r.id, x: r.x, y: r.y, ...cmpImg(img(r.id), 0, 0, r.w, r.h, r.x, r.y) })));
     // 数字 0／3／12／19／99／999 × ヒビあり／なし：帯の外の画素が基準描画と同じ（盤面・ゲージ・画面端へ出ない）
     const sweep = {};
     const shots1x = {};
@@ -972,12 +975,12 @@ try {
   }
   const notOld = (r) => r.opaque > 0 && r.bad / r.opaque > 0.5;
   check(
-    'V320-FIX-03 連鎖HUD：旧位置（上部の打上連鎖見出し画像）へ描かない。見出し「役」「連鎖」「打上」「連鎖」を左右の縦帯に描き、横方向の中心が中心線（x24／x616）から1px以内',
-    notOld(v310.oldLabel0) && notOld(v310.oldLabel1) && v310.titles.every((t) => ['role', 'ren', 'up', 'ren2'].every((k) => t[k].n > 20 && Math.abs(t[k].center - t.cx) <= 1)),
+    'V320-FIX-04 連鎖HUD：旧位置（上部の打上連鎖見出し画像）へ描かない。見出しPNG（役・連鎖・打上・連鎖）を左右の縦帯の表の位置（1P x2／2P x594、y129・166・256・276）へ原寸で描画（画素一致）',
+    notOld(v310.oldLabel0) && notOld(v310.oldLabel1) && v310.titles.every((t, p) => t.map((x) => [x.x, x.y].join()).join('/') === [[2, 129], [2, 166], [2, 256], [2, 276]].map(([x, y]) => [x + 592 * p, y].join()).join('/') && t.every((x) => x.opaque > 100 && x.bad === 0)),
     JSON.stringify({ old: [v310.oldLabel0, v310.oldLabel1], titles: v310.titles }),
   );
   check(
-    'V320-FIX-03 連鎖HUD：数字 0／3／12／19／99／999 とヒビあり／なしで、変化は縦帯の中だけ（盤面・ゲージ・受攻撃ストック・画面上部へ出ない）。攻撃倍率の表示なし。倍率の計算は維持（12＝×1.25、19＝×1.75）',
+    'V320-FIX-03/04 連鎖HUD：数字 0／3／12／19／99／999 とヒビあり／なしで、変化は縦帯の中だけ（盤面・ゲージ・受攻撃ストック・画面上部へ出ない）。攻撃倍率の表示なし。倍率の計算は維持（12＝×1.25、19＝×1.75）',
     Object.values(v310.sweep).every((x) => x.outside === 0) && Object.entries(v310.sweep).filter(([k]) => k !== '0').every(([, x]) => x.inside > 0) && v310.mult.join() === '125,175',
     JSON.stringify({ sweep: v310.sweep, mult: v310.mult }),
   );
@@ -1196,8 +1199,9 @@ try {
       const s = g.single;
       const p = g.players[0];
       if (finalStage) {
-        s.stage = 10;
-        s.quota = 180;
+        // V320-FIX-04：全20面。最終面は20面（ノルマ300）
+        s.stage = 20;
+        s.quota = 300;
       }
       s.progress = s.quota - 1;
       const col = p.board.cols[p.selectedCol];
@@ -1250,9 +1254,10 @@ try {
     const nr = await ev(() => {
       const sc = window.__p2like.gameScene();
       const g = sc.game;
-      return { outcome: g.result?.outcome, refresh: g.refreshCount, label: sc.view.noResetLabel(g.tick), count: window.__p2like.app.records.mode2NoReset };
+      const rec = window.__p2like.app.records;
+      return { outcome: g.result?.outcome, refresh: g.refreshCount, label: sc.view.noResetLabel(g.tick), ticks: g.elapsedTicks(), best: rec.mode2Single, noResetBest: rec.mode2NoResetBest, count: rec.mode2NoReset };
     });
-    check('v3.2.0 MODE2 シングル：場の更新0回のクリアで「ノーリセットクリア」をクリア演出の中に付記し、達成回数を記録', nr.outcome === 'clear' && nr.refresh === 0 && nr.label?.text === 'ノーリセットクリア！' && nr.count >= 1, JSON.stringify(nr));
+    check('V320-FIX-04 MODE2 シングル：場の更新0回のクリアで「ノーリセットクリア」を付記し、総合ベストとノーリセット専用ベストを tick で記録（達成回数は加算しない）', nr.outcome === 'clear' && nr.refresh === 0 && nr.label?.text === 'ノーリセットクリア！' && nr.noResetBest?.bestTicks === nr.ticks && nr.best?.bestTicks === nr.ticks && nr.count === 0, JSON.stringify(nr));
   }
   check('MODE2 シングル：盤面を空にしてクリア', (await ev(() => window.__p2like.game().result?.outcome)) === 'clear');
   await toMenu();
@@ -1288,7 +1293,7 @@ try {
   await toMenu();
 
   // ---- オプション（S19〜S24）・遊び方（S25） ----
-  await ev(() => (window.__p2like.scene().stack[0].cursor = 2));
+  await ev(() => (window.__p2like.scene().stack[0].cursor = 3));
   await key('Enter', 200);
   check('オプション：音／操作／対戦／表示／クレジット／遊び方／デモ再生／設定初期化／戻る', (await sceneName()) === 'OptionsScene' && (await ev(() => window.__p2like.scene().rows().map((r) => r.label).join())) === '音,操作,対戦,表示,クレジット,遊び方,デモ再生,設定初期化,戻る');
   await shot('S19_options');
@@ -1343,13 +1348,13 @@ try {
   check('クレジット：左右でページ切替、URLを選んで決定で外部ブラウザ（window.open）、ページ位置を維持', opened.urls.join() === 'https://x.com/Vno_kotaro' && opened.page === 1 && opened.scene === 'CreditsScene', JSON.stringify(opened));
   await key('Escape', 200);
   await key('Escape', 200);
-  await ev(() => (window.__p2like.scene().stack[0].cursor = 3));
+  await ev(() => (window.__p2like.scene().stack[0].cursor = 4));
   await key('Enter');
   check('遊び方：メインメニューの既存入口から目次へ', (await sceneName()) === 'HelpMenuScene');
   await shot('S25_help');
   await key('Escape');
   // 設定初期化の確認
-  await ev(() => (window.__p2like.scene().stack[0].cursor = 2));
+  await ev(() => (window.__p2like.scene().stack[0].cursor = 3));
   await key('Enter');
   for (let i = 0; i < 7; i++) await key('ArrowDown');
   await key('Enter', 200);
@@ -1417,14 +1422,16 @@ try {
 
     // オプションの「デモ再生」：最初の説明から。開始に使った決定入力・押したままのパッドを持ち越さない
     await toMenu();
-    await ev(() => (window.__p2like.scene().stack[0].cursor = 2));
+    await ev(() => (window.__p2like.scene().stack[0].cursor = 3));
     await key('Enter', 150);
     await ev(() => (window.__p2like.scene().cursor = 6));
     await ev(() => {
       window.__padOn = true;
       window.__pad.buttons[0].pressed = true; // 押したまま開始
     });
-    await key('Enter', 300);
+    // 押したままのパッドの決定で開始（同じ押下をキーボードと重ねない：重ねるとキー入力がデモの終了操作になる）
+    await wait(300);
+    if ((await sceneName()) !== 'DemoScene') await key('Enter', 300);
     const opt = await ev(() => ({ scene: window.__p2like.scene().constructor.name, by: window.__p2like.scene().startedBy, ch: window.__p2like.scene().chapterId, ending: window.__p2like.scene().ending }));
     await ev(() => (window.__pad.axes[0] = 0.3)); // 小さな傾き（ドリフト相当）
     await wait(300);
@@ -1481,7 +1488,8 @@ try {
           gen: sc.generation,
         };
       });
-      if (st?.ch === 'roles' && st.phase === 'fadeOut') lessonCheck = st;
+      // 4/4/6 の章の最後に見えた状態（読書区間で章が長くなったため、暗転の瞬間ではなく最終観測を使う）
+      if (st?.ch === 'roles') lessonCheck = st;
       if (!st) break;
     }
     const chapters = [...new Set(seq.filter((s) => s.includes(':')).map((s) => s.split(':')[0]))];
@@ -1601,11 +1609,11 @@ try {
     await ff(1500);
     const missing = await ev(() => [...window.__p2like.demo.missingGlyphs]);
     // v3.2.0：新しい台本（目次「連鎖説明」・MODE2説明）の13字は共通フォントに未収録（素材待ち。PMへ追加を依頼）。それ以外の代替描画がないこと
-    check('説明・案内の文字はすべて共通ビットマップフォント（採用版327字）に収録（代替描画なし）', missing.length === 0, `未収録：${missing.map((u) => String.fromCodePoint(parseInt(u.slice(2), 16))).join('')}`);
+    check('説明・案内の文字はすべて共通ビットマップフォント（V320-FIX-04 採用版388字）に収録（代替描画なし）', missing.length === 0, `未収録：${missing.map((u) => String.fromCodePoint(parseInt(u.slice(2), 16))).join('')}`);
 
     // 遊び方：目次（5項目＋操作一覧）→役一覧（16役）→戻る→目次→戻る→呼出元
     await toMenu();
-    await ev(() => (window.__p2like.scene().stack[0].cursor = 3));
+    await ev(() => (window.__p2like.scene().stack[0].cursor = 4));
     await key('Enter', 150);
     const items = await ev(() => window.__p2like.scene().constructor.name);
     await key('ArrowDown');
@@ -1619,13 +1627,13 @@ try {
       await key('ArrowRight', 60);
     }
     check('役一覧：1役ずつ16役、役名ロゴは本体の表示名対応どおり（R01〜R16）', items === 'HelpMenuScene' && roles.map((r) => r.logos.join('+')).join() === [...Array(16).keys()].join(), JSON.stringify(roles.map((r) => [r.logos, r.clear, r.attack])));
-    check('役一覧の値は本体の役データ：フォーカード消去1/基本攻撃0、フラッシュ3/2、スーパーストレート3/2', roles[0].clear === 1 && roles[0].attack === 0 && roles[12].clear === 3 && roles[12].attack === 2 && roles[6].clear === 3 && roles[6].attack === 2);
+    check('役一覧の値は本体の役データ（V320-FIX-04 新式）：フォーカード消去1/基本攻撃1、フラッシュ3/2、スーパーストレート3/4、ストレートフラッシュ4/4', roles[0].clear === 1 && roles[0].attack === 1 && roles[12].clear === 3 && roles[12].attack === 2 && roles[6].clear === 3 && roles[6].attack === 4 && roles[13].attack === 4, JSON.stringify(roles.map((x) => [x.clear, x.attack])));
     await key('Escape', 150);
     const backToc = await sceneName();
     await key('Escape', 150);
     const backMenu = await sceneName();
     // オプションから入った場合はオプションへ戻る
-    await ev(() => (window.__p2like.scene().stack[0].cursor = 2));
+    await ev(() => (window.__p2like.scene().stack[0].cursor = 3));
     await key('Enter', 150);
     await ev(() => (window.__p2like.scene().cursor = 5));
     await key('Enter', 150);
@@ -1646,7 +1654,7 @@ try {
     check('v3.2.0 メインメニュー最上位の戻る（Esc）でタイトルへ。無操作デモ待機は0から。戻る入力でメニューへ再進入しない', t1.scene === 'TitleScene' && t1.idle < 1000 && t2 === 'TitleScene', JSON.stringify({ t1, t2 }));
 
     await toMenu();
-    await ev(() => (window.__p2like.scene().stack[0].cursor = 3));
+    await ev(() => (window.__p2like.scene().stack[0].cursor = 4));
     await key('Enter', 150);
     await raf();
     await shot('V320_help_menu');
@@ -1680,7 +1688,11 @@ try {
     await key('Enter', 200);
     const sr = await ev(() => {
       const sc = window.__p2like.scene();
-      for (let i = 0; i < 60 * 90 && sc.stage.runner?.page !== 'streak_rate'; i++) sc.update(1000 / 60);
+      // V320-FIX-04：読書区間（5000ms）の後に決定で送る
+      for (let i = 0; i < 60 * 240 && sc.stage.runner?.page !== 'streak_rate'; i++) {
+        sc.update(1000 / 60);
+        if (sc.stage.reading && sc.stage.gate.ms >= 5000 && sc.stage.reading.page !== 'streak_rate') sc.stage.confirm();
+      }
       return { page: sc.stage.runner?.page };
     });
     await raf();
@@ -1718,7 +1730,10 @@ try {
     for (const want of ['streak', 'chain']) {
       const r = await ev((want) => {
         const sc = window.__p2like.scene();
-        for (let i = 0; i < 60 * 120 && sc.stage.focus?.kind !== want && !sc.stage.finished; i++) sc.update(1000 / 60);
+        for (let i = 0; i < 60 * 300 && sc.stage.focus?.kind !== want && !sc.stage.finished; i++) {
+          sc.update(1000 / 60);
+          if (sc.stage.reading && sc.stage.gate.ms >= 5000) sc.stage.confirm();
+        }
         const st = sc.stage;
         if (st.focus?.kind !== want) return { found: false };
         const c = document.createElement('canvas');
@@ -1750,10 +1765,11 @@ try {
       }
       focusCheck[want] = r;
     }
-    const exp = { streak: [0, 257, 48, 61], chain: [0, 129, 48, 96] };
+    // V320-FIX-04：見出し画像の実際の装飾範囲（visible）と数字の最大範囲の外接＋1px（chainFocusBox）
+    const exp = { streak: [0, 256, 48, 62], chain: [0, 129, 48, 96] };
     const inside = (bb, e) => bb[0] >= e[0] && bb[1] >= e[1] && bb[0] + bb[2] <= e[0] + e[2] && bb[1] + bb[3] <= e[1] + e[3];
     check(
-      'V320-FIX-03 教材の注目枠：打上連鎖は［0,257,48,61］、役連鎖は［0,129,48,96］（縦帯の注目行＋1px）の内側に描き、本文・戻る案内（x≧384）へ掛からない',
+      'V320-FIX-04 教材の注目枠：打上連鎖は［0,256,48,62］、役連鎖は［0,129,48,96］（見出し画像の装飾範囲と数字の外接＋1px）の内側に描き、本文・戻る案内（x≧384）へ掛からない',
       ['streak', 'chain'].every((k) => focusCheck[k].found && inside(focusCheck[k].bbox, exp[k])),
       JSON.stringify(focusCheck),
     );
@@ -1766,11 +1782,13 @@ try {
       ev((want) => {
         const sc = window.__p2like.scene();
         sc.__pages ??= [];
-        for (let i = 0; i < 60 * 120; i++) {
+        for (let i = 0; i < 60 * 400; i++) {
           const r = sc.stage.runner;
           if (sc.__pages.at(-1) !== r.page) sc.__pages.push(r.page);
           if (want === 'choice' ? sc.choice !== null : r.page === want && !(want === 'm2_refresh' && r.game.phase !== 'countdown')) break;
           sc.update(1000 / 60);
+          // V320-FIX-04：説明は5000ms読んだ後に決定で送る
+          if (sc.stage.reading && sc.stage.gate.ms >= 5000) sc.stage.confirm();
         }
         const r = sc.stage.runner;
         const g = r.game;
@@ -1780,7 +1798,7 @@ try {
     await shot('V320_mode2_lesson_intro');
     const m2Body = await bodyLit(170, 258);
     const m2Lines = await ev(() => window.__p2like.scene().stage.runner.page);
-    check('v3.2.0 r MODE2冒頭：4行「６列から選んで／場へ出そう／となりの数字なら／成功！」を本文領域内に原寸表示（4行目 y236〜252、例／戻る案内 y266・y310 と重ならない）', m2Lines === 'm2_intro' && m2Body.inside > 50 && m2Body.outside === 0, JSON.stringify({ m2Lines, m2Body }));
+    check('V320-FIX-04 MODE2冒頭：付録A「6列の一番上から、場に出せるピースを選ぼう！」を本文領域内に原寸表示（例／戻る案内 y266・y310 と重ならない）', m2Lines === 'm2_intro' && m2Body.inside > 50 && m2Body.outside === 0, JSON.stringify({ m2Lines, m2Body }));
     const a = await advance('m2_refresh');
     await raf();
     await shot('V320_mode2_lesson_countdown');
@@ -1811,9 +1829,9 @@ try {
     const e = await advance('choice');
     await raf();
     await shot('V320_mode2_lesson_choice');
-    const want = ['m2_intro', 'm2_refresh', 'm2_suit', 'm2_number', 'm2_adjacent', 'm2_rule', 'm2_clear', 'm2_versus'];
+    const want = ['m2_intro', 'm2_refresh', 'm2_suit', 'm2_number', 'm2_adjacent', 'm2_rule', 'm2_difference', 'm2_clear', 'm2_versus', 'm2_versus_refresh'];
     check(
-      'v3.2.0 MODE2説明：固定盤面・固定入力を通常の Mode2Game へ渡し、場の更新1回（カウントダウン中）→同じ記号→同じ数字→1と6→クリア条件→クリア→対戦の補足→「もう一度／戻る」。頁は実イベント順',
+      'V320-FIX-04 MODE2説明：通常の Mode2Game で完走。場の更新の説明は詰まりの前に読み（カウントダウン中は止めない）→場の更新1回→同じ記号→同じ数字→1と6→クリア条件→MODE2のルール→クリア→対戦→対戦の場の更新→「もう一度／戻る」',
       a.page === 'm2_refresh' && b.refresh === 1 && d.result === 'clear' && d.remaining === 0 && e.choice !== null && JSON.stringify(e.pages) === JSON.stringify(want) && e.problems.length === 0,
       JSON.stringify({ a, b, c, d, e }),
     );
@@ -1844,7 +1862,7 @@ try {
       return { on: window.__p2like.app.settings.assist, hud: sc.view.hud.assist, targets: sc.view.assistTargets(0).length, singleRule: off };
     });
     check('v3.2.0 補助表示：既定ON、人間（1P）の出せる最上段を囲む。本編SINGLEの情報枠の線は維持', as.on === true && as.hud.join() === '0' && as.targets > 0 && as.singleRule > 100, JSON.stringify(as));
-    // V320-FIX-03：SINGLE の得点倍率は上部［24,94,120,34］へ独立表示。打上連鎖数は縦帯（上部へ重複表示しない）
+    // V320-FIX-04：SINGLE の得点倍率は合成領域（24,64,48,56）へ見出しPNG・倍率数字で表示。旧Notoの見出し・数字は描かない
     const sr1 = await ev(() => {
       const sc = window.__p2like.gameScene();
       const g = sc.game;
@@ -1869,7 +1887,7 @@ try {
         if (Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]) <= 6) continue;
         const x = (i / 4) % 640;
         const y = Math.floor(i / 4 / 640);
-        if (x >= 24 && x < 144 && y >= 94 && y < 128) inArea++;
+        if (x >= 24 && x < 72 && y >= 64 && y < 120) inArea++;
         else outArea++;
       }
       const mul = g.currentScoreMultiplier(p);
@@ -1878,7 +1896,7 @@ try {
     writeFileSync(new URL('screens/V320F03_single_1x.png', OUT), Buffer.from(sr1.png.split(',')[1], 'base64'));
     shots.push('screens/V320F03_single_1x.png');
     delete sr1.png;
-    check('V320-FIX-03 SINGLE：得点倍率（見出し・値）は上部の倍率領域［24,94,120,34］の中だけに描く（削除しない・他へ出ない）', sr1.inArea > 30 && sr1.outArea === 0, JSON.stringify(sr1));
+    check('V320-FIX-04 SINGLE：得点倍率（得点・倍率見出しPNGと倍率数字）は合成領域［24,64,48,56］の中だけに描く（旧領域［24,94,120,34］・左端の外へ出ない）', sr1.inArea > 300 && sr1.outArea === 0, JSON.stringify(sr1));
 
     // v3.2.0 r：役名ロゴ role_15（スーパーストレートフラッシュ、r2 で「ス」「パ」を修正）。実際の宣言で表示し、A/B/C の切出しと画素一致
     await ev(() => {

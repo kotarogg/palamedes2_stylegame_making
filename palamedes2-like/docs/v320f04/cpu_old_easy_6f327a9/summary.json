@@ -1,0 +1,1241 @@
+{
+ "id": "V320-FIX-04",
+ "cpuConfig": {
+  "version": "cpu-v3.2.0-initial",
+  "adjustment": null
+ },
+ "seeds": "1〜20",
+ "caps": {
+  "mode2Sec": 120,
+  "mode1Sec": 300
+ },
+ "levels": [
+  "easy"
+ ],
+ "note": "CPU同士の机上計測（ゲーム内時間は60tick/秒換算）。人間向けの難易度の合格を示すものではない。未完了は平均から除外し unfinished に件数を明示",
+ "wallSec": 1,
+ "groups": {
+  "mode2Single.easy": {
+   "n": 60,
+   "completed": 60,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 60,
+    "mean": 50.03,
+    "median": 49.93,
+    "p10": 43.66,
+    "p90": 56.77,
+    "min": 39.17,
+    "max": 62.13
+   },
+   "winners": {
+    "-": 60
+   },
+   "launchIntervalSec": {
+    "n": 60,
+    "mean": 1.2,
+    "median": 1.19,
+    "p10": 1.05,
+    "p90": 1.36,
+    "min": 0.94,
+    "max": 1.48
+   },
+   "declareIntervalSec": {
+    "n": 0
+   },
+   "mandatorySecPerRun": {
+    "n": 60,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 60,
+    "mean": 21.3,
+    "median": 20.85,
+    "p10": 17.35,
+    "p90": 26.53,
+    "min": 14.2,
+    "max": 29.8
+   },
+   "forgetSecPerRun": {
+    "n": 60,
+    "mean": 0.53,
+    "median": 0.55,
+    "p10": 0.18,
+    "p90": 0.83,
+    "min": 0,
+    "max": 1.33
+   },
+   "refreshes": {
+    "n": 60,
+    "mean": 1.77,
+    "median": 1,
+    "p10": 0.9,
+    "p90": 3,
+    "min": 0,
+    "max": 6
+   },
+   "refreshWaitSec": {
+    "n": 60,
+    "mean": 5.3,
+    "median": 3,
+    "p10": 2.7,
+    "p90": 9,
+    "min": 0,
+    "max": 18
+   }
+  },
+  "mode2Single.easy.kotaro": {
+   "n": 20,
+   "completed": 20,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 20,
+    "mean": 47.35,
+    "median": 47.24,
+    "p10": 43.32,
+    "p90": 52.45,
+    "min": 39.93,
+    "max": 56.6
+   },
+   "winners": {
+    "-": 20
+   },
+   "launchIntervalSec": {
+    "n": 20,
+    "mean": 1.13,
+    "median": 1.13,
+    "p10": 1.04,
+    "p90": 1.26,
+    "min": 0.96,
+    "max": 1.36
+   },
+   "declareIntervalSec": {
+    "n": 0
+   },
+   "mandatorySecPerRun": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 20,
+    "mean": 18.84,
+    "median": 18.55,
+    "p10": 15.99,
+    "p90": 21.13,
+    "min": 14.2,
+    "max": 26.5
+   },
+   "forgetSecPerRun": {
+    "n": 20,
+    "mean": 0.5,
+    "median": 0.55,
+    "p10": 0.16,
+    "p90": 1.1,
+    "min": 0,
+    "max": 1.1
+   },
+   "refreshes": {
+    "n": 20,
+    "mean": 1.65,
+    "median": 1.5,
+    "p10": 0.9,
+    "p90": 3,
+    "min": 0,
+    "max": 4
+   },
+   "refreshWaitSec": {
+    "n": 20,
+    "mean": 4.95,
+    "median": 4.5,
+    "p10": 2.7,
+    "p90": 9,
+    "min": 0,
+    "max": 12
+   }
+  },
+  "mode2Single.easy.akane": {
+   "n": 20,
+   "completed": 20,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 20,
+    "mean": 50.11,
+    "median": 50.61,
+    "p10": 43.06,
+    "p90": 56.14,
+    "min": 39.17,
+    "max": 58.05
+   },
+   "winners": {
+    "-": 20
+   },
+   "launchIntervalSec": {
+    "n": 20,
+    "mean": 1.2,
+    "median": 1.21,
+    "p10": 1.01,
+    "p90": 1.33,
+    "min": 0.94,
+    "max": 1.39
+   },
+   "declareIntervalSec": {
+    "n": 0
+   },
+   "mandatorySecPerRun": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 20,
+    "mean": 21.08,
+    "median": 20.65,
+    "p10": 17.26,
+    "p90": 24.98,
+    "min": 15.9,
+    "max": 26.8
+   },
+   "forgetSecPerRun": {
+    "n": 20,
+    "mean": 0.62,
+    "median": 0.67,
+    "p10": 0.31,
+    "p90": 0.83,
+    "min": 0,
+    "max": 1.33
+   },
+   "refreshes": {
+    "n": 20,
+    "mean": 1.9,
+    "median": 1,
+    "p10": 0,
+    "p90": 3.1,
+    "min": 0,
+    "max": 6
+   },
+   "refreshWaitSec": {
+    "n": 20,
+    "mean": 5.7,
+    "median": 3,
+    "p10": 0,
+    "p90": 9.3,
+    "min": 0,
+    "max": 18
+   }
+  },
+  "mode2Single.easy.zunko": {
+   "n": 20,
+   "completed": 20,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 20,
+    "mean": 52.65,
+    "median": 52.75,
+    "p10": 47.08,
+    "p90": 58.17,
+    "min": 43.67,
+    "max": 62.13
+   },
+   "winners": {
+    "-": 20
+   },
+   "launchIntervalSec": {
+    "n": 20,
+    "mean": 1.26,
+    "median": 1.27,
+    "p10": 1.12,
+    "p90": 1.4,
+    "min": 1.05,
+    "max": 1.48
+   },
+   "declareIntervalSec": {
+    "n": 0
+   },
+   "mandatorySecPerRun": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 20,
+    "mean": 23.99,
+    "median": 23.35,
+    "p10": 20.69,
+    "p90": 28.11,
+    "min": 17.9,
+    "max": 29.8
+   },
+   "forgetSecPerRun": {
+    "n": 20,
+    "mean": 0.47,
+    "median": 0.5,
+    "p10": 0.18,
+    "p90": 0.62,
+    "min": 0,
+    "max": 1
+   },
+   "refreshes": {
+    "n": 20,
+    "mean": 1.75,
+    "median": 1.5,
+    "p10": 1,
+    "p90": 3,
+    "min": 0,
+    "max": 4
+   },
+   "refreshWaitSec": {
+    "n": 20,
+    "mean": 5.25,
+    "median": 4.5,
+    "p10": 3,
+    "p90": 9,
+    "min": 0,
+    "max": 12
+   }
+  },
+  "mode2Versus.easy": {
+   "n": 60,
+   "completed": 60,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 60,
+    "mean": 49.76,
+    "median": 48.8,
+    "p10": 44.3,
+    "p90": 55.34,
+    "min": 43.18,
+    "max": 64.6
+   },
+   "winners": {
+    "left": 33,
+    "right": 27
+   },
+   "launchIntervalSec": {
+    "n": 60,
+    "mean": 1.23,
+    "median": 1.21,
+    "p10": 1.13,
+    "p90": 1.37,
+    "min": 1.05,
+    "max": 1.48
+   },
+   "declareIntervalSec": {
+    "n": 0
+   },
+   "mandatorySecPerRun": {
+    "n": 60,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 60,
+    "mean": 42.99,
+    "median": 43.1,
+    "p10": 37.16,
+    "p90": 48.15,
+    "min": 31.5,
+    "max": 62
+   },
+   "forgetSecPerRun": {
+    "n": 60,
+    "mean": 1.06,
+    "median": 0.95,
+    "p10": 0.55,
+    "p90": 1.69,
+    "min": 0,
+    "max": 2.3
+   },
+   "refreshes": {
+    "n": 60,
+    "mean": 0.57,
+    "median": 0,
+    "p10": 0,
+    "p90": 2,
+    "min": 0,
+    "max": 3
+   },
+   "refreshWaitSec": {
+    "n": 60,
+    "mean": 1.79,
+    "median": 0,
+    "p10": 0,
+    "p90": 6,
+    "min": 0,
+    "max": 10.5
+   }
+  },
+  "mode2Versus.easy.kotaro-akane": {
+   "n": 20,
+   "completed": 20,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 20,
+    "mean": 49.74,
+    "median": 48.02,
+    "p10": 44.33,
+    "p90": 55.44,
+    "min": 43.18,
+    "max": 61.47
+   },
+   "winners": {
+    "left": 14,
+    "right": 6
+   },
+   "launchIntervalSec": {
+    "n": 20,
+    "mean": 1.24,
+    "median": 1.21,
+    "p10": 1.14,
+    "p90": 1.38,
+    "min": 1.05,
+    "max": 1.47
+   },
+   "declareIntervalSec": {
+    "n": 0
+   },
+   "mandatorySecPerRun": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 20,
+    "mean": 42.14,
+    "median": 42.1,
+    "p10": 37.3,
+    "p90": 46.67,
+    "min": 36.3,
+    "max": 50.4
+   },
+   "forgetSecPerRun": {
+    "n": 20,
+    "mean": 1.11,
+    "median": 1.04,
+    "p10": 0.65,
+    "p90": 1.63,
+    "min": 0.17,
+    "max": 2.3
+   },
+   "refreshes": {
+    "n": 20,
+    "mean": 0.6,
+    "median": 0,
+    "p10": 0,
+    "p90": 2,
+    "min": 0,
+    "max": 3
+   },
+   "refreshWaitSec": {
+    "n": 20,
+    "mean": 1.95,
+    "median": 0,
+    "p10": 0,
+    "p90": 6,
+    "min": 0,
+    "max": 10.5
+   }
+  },
+  "mode2Versus.easy.akane-zunko": {
+   "n": 20,
+   "completed": 20,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 20,
+    "mean": 49.47,
+    "median": 48.79,
+    "p10": 44.25,
+    "p90": 54.21,
+    "min": 44.07,
+    "max": 64.6
+   },
+   "winners": {
+    "left": 11,
+    "right": 9
+   },
+   "launchIntervalSec": {
+    "n": 20,
+    "mean": 1.21,
+    "median": 1.19,
+    "p10": 1.13,
+    "p90": 1.32,
+    "min": 1.08,
+    "max": 1.48
+   },
+   "declareIntervalSec": {
+    "n": 0
+   },
+   "mandatorySecPerRun": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 20,
+    "mean": 43.64,
+    "median": 42.75,
+    "p10": 37.88,
+    "p90": 47.29,
+    "min": 37.2,
+    "max": 62
+   },
+   "forgetSecPerRun": {
+    "n": 20,
+    "mean": 1.05,
+    "median": 0.98,
+    "p10": 0.57,
+    "p90": 1.69,
+    "min": 0.33,
+    "max": 1.97
+   },
+   "refreshes": {
+    "n": 20,
+    "mean": 0.5,
+    "median": 0,
+    "p10": 0,
+    "p90": 1.1,
+    "min": 0,
+    "max": 2
+   },
+   "refreshWaitSec": {
+    "n": 20,
+    "mean": 1.58,
+    "median": 0,
+    "p10": 0,
+    "p90": 3.3,
+    "min": 0,
+    "max": 7.5
+   }
+  },
+  "mode2Versus.easy.zunko-kotaro": {
+   "n": 20,
+   "completed": 20,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 20,
+    "mean": 50.07,
+    "median": 50.09,
+    "p10": 44.44,
+    "p90": 55.41,
+    "min": 44.08,
+    "max": 59.12
+   },
+   "winners": {
+    "right": 12,
+    "left": 8
+   },
+   "launchIntervalSec": {
+    "n": 20,
+    "mean": 1.25,
+    "median": 1.25,
+    "p10": 1.14,
+    "p90": 1.36,
+    "min": 1.09,
+    "max": 1.45
+   },
+   "declareIntervalSec": {
+    "n": 0
+   },
+   "mandatorySecPerRun": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 20,
+    "mean": 43.19,
+    "median": 43.1,
+    "p10": 35.08,
+    "p90": 48.74,
+    "min": 31.5,
+    "max": 50.3
+   },
+   "forgetSecPerRun": {
+    "n": 20,
+    "mean": 1,
+    "median": 0.95,
+    "p10": 0.53,
+    "p90": 1.54,
+    "min": 0,
+    "max": 2.27
+   },
+   "refreshes": {
+    "n": 20,
+    "mean": 0.6,
+    "median": 0.5,
+    "p10": 0,
+    "p90": 1.1,
+    "min": 0,
+    "max": 2
+   },
+   "refreshWaitSec": {
+    "n": 20,
+    "mean": 1.84,
+    "median": 1.5,
+    "p10": 0,
+    "p90": 3.3,
+    "min": 0,
+    "max": 6.75
+   }
+  },
+  "mode1.easy": {
+   "n": 60,
+   "completed": 60,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 60,
+    "mean": 62.79,
+    "median": 56.85,
+    "p10": 42.1,
+    "p90": 92.37,
+    "min": 28.08,
+    "max": 121.77
+   },
+   "winners": {
+    "left": 31,
+    "right": 29
+   },
+   "launchIntervalSec": {
+    "n": 60,
+    "mean": 1.52,
+    "median": 1.51,
+    "p10": 1.41,
+    "p90": 1.63,
+    "min": 1.33,
+    "max": 1.75
+   },
+   "declareIntervalSec": {
+    "n": 60,
+    "mean": 7.69,
+    "median": 7.64,
+    "p10": 6.96,
+    "p90": 8.6,
+    "min": 6.3,
+    "max": 9.12
+   },
+   "mandatorySecPerRun": {
+    "n": 60,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 60,
+    "mean": 50.25,
+    "median": 47.43,
+    "p10": 33.61,
+    "p90": 75.22,
+    "min": 18.57,
+    "max": 90.35
+   },
+   "forgetSecPerRun": {
+    "n": 60,
+    "mean": 1.04,
+    "median": 0.95,
+    "p10": 0.36,
+    "p90": 1.59,
+    "min": 0.12,
+    "max": 3
+   },
+   "refreshes": {
+    "n": 60,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "refreshWaitSec": {
+    "n": 60,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "attackPower": {
+    "n": 60,
+    "mean": 52.02,
+    "median": 45.5,
+    "p10": 24,
+    "p90": 84.5,
+    "min": 9,
+    "max": 149
+   },
+   "canceled": {
+    "n": 60,
+    "mean": 13.25,
+    "median": 11,
+    "p10": 3.9,
+    "p90": 25,
+    "min": 0,
+    "max": 42
+   },
+   "sent": {
+    "n": 60,
+    "mean": 44.57,
+    "median": 40.5,
+    "p10": 21.9,
+    "p90": 73.4,
+    "min": 9,
+    "max": 126
+   },
+   "received": {
+    "n": 60,
+    "mean": 44.57,
+    "median": 40.5,
+    "p10": 21.9,
+    "p90": 73.4,
+    "min": 9,
+    "max": 126
+   },
+   "overflow": {
+    "n": 60,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "pinches": {
+    "n": 60,
+    "mean": 7.5,
+    "median": 6,
+    "p10": 2.9,
+    "p90": 13.1,
+    "min": 1,
+    "max": 26
+   },
+   "pinchReleases": {
+    "n": 60,
+    "mean": 6.05,
+    "median": 5,
+    "p10": 1,
+    "p90": 12,
+    "min": 0,
+    "max": 24
+   },
+   "declares": {
+    "n": 60,
+    "mean": 15.63,
+    "median": 14.5,
+    "p10": 10,
+    "p90": 23.1,
+    "min": 7,
+    "max": 34
+   },
+   "defeatCause": {
+    "attack_pinch": 59,
+    "natural_rise_pinch": 1
+   }
+  },
+  "mode1.easy.kotaro-akane": {
+   "n": 20,
+   "completed": 20,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 20,
+    "mean": 65.08,
+    "median": 61.47,
+    "p10": 50.53,
+    "p90": 87.41,
+    "min": 30.35,
+    "max": 108.52
+   },
+   "winners": {
+    "left": 11,
+    "right": 9
+   },
+   "launchIntervalSec": {
+    "n": 20,
+    "mean": 1.5,
+    "median": 1.5,
+    "p10": 1.4,
+    "p90": 1.61,
+    "min": 1.38,
+    "max": 1.68
+   },
+   "declareIntervalSec": {
+    "n": 20,
+    "mean": 7.73,
+    "median": 7.75,
+    "p10": 6.95,
+    "p90": 8.98,
+    "min": 6.48,
+    "max": 9.12
+   },
+   "mandatorySecPerRun": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 20,
+    "mean": 50.83,
+    "median": 48.36,
+    "p10": 37.75,
+    "p90": 65.01,
+    "min": 23.93,
+    "max": 84.23
+   },
+   "forgetSecPerRun": {
+    "n": 20,
+    "mean": 1.25,
+    "median": 1.26,
+    "p10": 0.54,
+    "p90": 2.07,
+    "min": 0.27,
+    "max": 3
+   },
+   "refreshes": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "refreshWaitSec": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "attackPower": {
+    "n": 20,
+    "mean": 54.8,
+    "median": 50.5,
+    "p10": 31.3,
+    "p90": 89.5,
+    "min": 17,
+    "max": 105
+   },
+   "canceled": {
+    "n": 20,
+    "mean": 14.95,
+    "median": 13.5,
+    "p10": 4.8,
+    "p90": 25.2,
+    "min": 2,
+    "max": 41
+   },
+   "sent": {
+    "n": 20,
+    "mean": 46.5,
+    "median": 44,
+    "p10": 26.6,
+    "p90": 77.3,
+    "min": 15,
+    "max": 83
+   },
+   "received": {
+    "n": 20,
+    "mean": 46.5,
+    "median": 44,
+    "p10": 26.6,
+    "p90": 77.3,
+    "min": 15,
+    "max": 83
+   },
+   "overflow": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "pinches": {
+    "n": 20,
+    "mean": 6.85,
+    "median": 6.5,
+    "p10": 3.9,
+    "p90": 10.2,
+    "min": 1,
+    "max": 14
+   },
+   "pinchReleases": {
+    "n": 20,
+    "mean": 5.35,
+    "median": 5,
+    "p10": 1.9,
+    "p90": 9.1,
+    "min": 0,
+    "max": 12
+   },
+   "declares": {
+    "n": 20,
+    "mean": 16.15,
+    "median": 15.5,
+    "p10": 11,
+    "p90": 23.2,
+    "min": 7,
+    "max": 28
+   },
+   "defeatCause": {
+    "attack_pinch": 20
+   }
+  },
+  "mode1.easy.akane-zunko": {
+   "n": 20,
+   "completed": 20,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 20,
+    "mean": 61.47,
+    "median": 56.08,
+    "p10": 39.67,
+    "p90": 99.83,
+    "min": 28.62,
+    "max": 121.77
+   },
+   "winners": {
+    "left": 11,
+    "right": 9
+   },
+   "launchIntervalSec": {
+    "n": 20,
+    "mean": 1.54,
+    "median": 1.54,
+    "p10": 1.45,
+    "p90": 1.63,
+    "min": 1.33,
+    "max": 1.75
+   },
+   "declareIntervalSec": {
+    "n": 20,
+    "mean": 7.8,
+    "median": 7.7,
+    "p10": 7.08,
+    "p90": 8.65,
+    "min": 6.61,
+    "max": 8.95
+   },
+   "mandatorySecPerRun": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 20,
+    "mean": 50.47,
+    "median": 46.17,
+    "p10": 31.51,
+    "p90": 88.05,
+    "min": 23.28,
+    "max": 90.35
+   },
+   "forgetSecPerRun": {
+    "n": 20,
+    "mean": 0.99,
+    "median": 0.9,
+    "p10": 0.58,
+    "p90": 1.41,
+    "min": 0.27,
+    "max": 2.02
+   },
+   "refreshes": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "refreshWaitSec": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "attackPower": {
+    "n": 20,
+    "mean": 49.6,
+    "median": 42,
+    "p10": 23.8,
+    "p90": 77.2,
+    "min": 9,
+    "max": 149
+   },
+   "canceled": {
+    "n": 20,
+    "mean": 12.7,
+    "median": 10,
+    "p10": 2.9,
+    "p90": 23.5,
+    "min": 0,
+    "max": 42
+   },
+   "sent": {
+    "n": 20,
+    "mean": 42.6,
+    "median": 35.5,
+    "p10": 21.9,
+    "p90": 65.3,
+    "min": 9,
+    "max": 126
+   },
+   "received": {
+    "n": 20,
+    "mean": 42.6,
+    "median": 35.5,
+    "p10": 21.9,
+    "p90": 65.3,
+    "min": 9,
+    "max": 126
+   },
+   "overflow": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "pinches": {
+    "n": 20,
+    "mean": 7.8,
+    "median": 5.5,
+    "p10": 3,
+    "p90": 13.5,
+    "min": 2,
+    "max": 26
+   },
+   "pinchReleases": {
+    "n": 20,
+    "mean": 6.35,
+    "median": 4.5,
+    "p10": 1.9,
+    "p90": 12.4,
+    "min": 1,
+    "max": 24
+   },
+   "declares": {
+    "n": 20,
+    "mean": 15.2,
+    "median": 14,
+    "p10": 9,
+    "p90": 22.4,
+    "min": 7,
+    "max": 34
+   },
+   "defeatCause": {
+    "attack_pinch": 19,
+    "natural_rise_pinch": 1
+   }
+  },
+  "mode1.easy.zunko-kotaro": {
+   "n": 20,
+   "completed": 20,
+   "unfinished": 0,
+   "gameSecCompleted": {
+    "n": 20,
+    "mean": 61.82,
+    "median": 50.64,
+    "p10": 44.42,
+    "p90": 84.94,
+    "min": 28.08,
+    "max": 110.37
+   },
+   "winners": {
+    "right": 11,
+    "left": 9
+   },
+   "launchIntervalSec": {
+    "n": 20,
+    "mean": 1.52,
+    "median": 1.52,
+    "p10": 1.42,
+    "p90": 1.63,
+    "min": 1.36,
+    "max": 1.74
+   },
+   "declareIntervalSec": {
+    "n": 20,
+    "mean": 7.54,
+    "median": 7.57,
+    "p10": 6.94,
+    "p90": 8.25,
+    "min": 6.3,
+    "max": 8.43
+   },
+   "mandatorySecPerRun": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "extraStopSecPerRun": {
+    "n": 20,
+    "mean": 49.46,
+    "median": 44.83,
+    "p10": 34.49,
+    "p90": 66.36,
+    "min": 18.57,
+    "max": 85.08
+   },
+   "forgetSecPerRun": {
+    "n": 20,
+    "mean": 0.88,
+    "median": 0.95,
+    "p10": 0.2,
+    "p90": 1.53,
+    "min": 0.12,
+    "max": 1.63
+   },
+   "refreshes": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "refreshWaitSec": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "attackPower": {
+    "n": 20,
+    "mean": 51.65,
+    "median": 43,
+    "p10": 23.6,
+    "p90": 82.2,
+    "min": 20,
+    "max": 113
+   },
+   "canceled": {
+    "n": 20,
+    "mean": 12.1,
+    "median": 8.5,
+    "p10": 4,
+    "p90": 24.1,
+    "min": 3,
+    "max": 33
+   },
+   "sent": {
+    "n": 20,
+    "mean": 44.6,
+    "median": 40.5,
+    "p10": 20.6,
+    "p90": 70.3,
+    "min": 16,
+    "max": 94
+   },
+   "received": {
+    "n": 20,
+    "mean": 44.6,
+    "median": 40.5,
+    "p10": 20.6,
+    "p90": 70.3,
+    "min": 16,
+    "max": 94
+   },
+   "overflow": {
+    "n": 20,
+    "mean": 0,
+    "median": 0,
+    "p10": 0,
+    "p90": 0,
+    "min": 0,
+    "max": 0
+   },
+   "pinches": {
+    "n": 20,
+    "mean": 7.85,
+    "median": 6.5,
+    "p10": 2,
+    "p90": 14.2,
+    "min": 2,
+    "max": 20
+   },
+   "pinchReleases": {
+    "n": 20,
+    "mean": 6.45,
+    "median": 5.5,
+    "p10": 1,
+    "p90": 12.3,
+    "min": 0,
+    "max": 18
+   },
+   "declares": {
+    "n": 20,
+    "mean": 15.55,
+    "median": 12,
+    "p10": 10,
+    "p90": 22.2,
+    "min": 8,
+    "max": 29
+   },
+   "defeatCause": {
+    "attack_pinch": 20
+   }
+  }
+ }
+}
