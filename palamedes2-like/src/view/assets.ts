@@ -32,6 +32,45 @@ export interface Assets {
   extra: Record<string, ExtraAssetDef>;
   /** 遊び方・放置デモ用UI（tutorial_assets.json）。読込前・検証環境では無い */
   tutorial?: TutorialAssets;
+  /** V320-FIX-04 追加画像（v320_fix04_assets.json：見出し8枚・倍率数字1枚）。画像は images に同じ id で入る */
+  fix04?: Fix04Assets;
+}
+
+/** V320-FIX-04 見出しPNG（原寸1倍。body_origin＝旧文字セル左上に合わせる点、visible_xywh＝描画画素の外接） */
+export interface Fix04Label {
+  id: string;
+  file: string;
+  canvas: [number, number];
+  body_origin: [number, number];
+  visible_xywh: [number, number, number, number];
+  sha256: string;
+}
+
+/** 倍率数字シートの1字（セル矩形・可視範囲・正規化offset・送り） */
+export interface RateGlyph {
+  char: string;
+  rect: [number, number, number, number];
+  visible_xywh: [number, number, number, number];
+  offset: [number, number];
+  advance: number;
+}
+
+export interface Fix04AssetsJson {
+  format: string;
+  assets: { id: string; file: string; canvas: [number, number]; body_origin?: [number, number]; visible_xywh?: [number, number, number, number]; sha256: string }[];
+  score_rate_numeric: { sheet: string; cell: [number, number]; baseline_y: number; glyphs: RateGlyph[] };
+}
+
+export interface Fix04Assets {
+  labels: Record<string, Fix04Label>;
+  rate: Fix04AssetsJson['score_rate_numeric'];
+}
+
+export function fix04Assets(def: Fix04AssetsJson): Fix04Assets {
+  return {
+    labels: Object.fromEntries(def.assets.filter((a) => a.body_origin).map((a) => [a.id, a as Fix04Label])),
+    rate: def.score_rate_numeric,
+  };
 }
 
 /** 遊び方・放置デモ用UI（tutorial_assets.json の3画像。画像は images に同じ id で入る） */
@@ -114,7 +153,7 @@ async function loadFont(baseUrl: string, styles: FontStyles): Promise<boolean> {
 
 export async function loadAssets(baseUrl: string, darkAlpha: number): Promise<Assets> {
   const root = `${baseUrl}${GFX_ROOT}`;
-  const [raw, list, layoutData, fontStyles, credits, additional, tutorialDef, tutorialFont] = await Promise.all([
+  const [raw, list, layoutData, fontStyles, credits, additional, tutorialDef, tutorialFont, fix04Def] = await Promise.all([
     loadJson<RawManifestV3>(`${root}data/graphics_manifest_v3.json`),
     loadJson<LoadingList>(`${root}data/game_loading_list.json`),
     loadJson<ScreenLayout>(`${baseUrl}data/screen_layout_v2.json`),
@@ -123,6 +162,7 @@ export async function loadAssets(baseUrl: string, darkAlpha: number): Promise<As
     loadJson<AdditionalAssetsV310>(`${root}data/additional_assets_v310.json`),
     loadJson<TutorialAssetsJson>(`${root}data/tutorial_assets.json`),
     loadJson<BitmapFontDef>(`${root}data/tutorial_font_16.json`),
+    loadJson<Fix04AssetsJson>(`${root}data/v320_fix04_assets.json`),
   ]);
   const { manifest, targets } = normalizeManifest(raw, list);
   // 明示読込一覧の画像だけを読む。読み込み失敗・寸法違いは素材名を示して起動を止める
@@ -152,6 +192,14 @@ export async function loadAssets(baseUrl: string, darkAlpha: number): Promise<As
         images.set(a.id, img);
       }),
     ),
+    // V320-FIX-04 追加画像（見出し・倍率数字。寸法違いは起動を止める）
+    Promise.all(
+      fix04Def.assets.map(async (a) => {
+        const img = await loadImage(`${root}${a.file}`);
+        if (img.width !== a.canvas[0] || img.height !== a.canvas[1]) throw new Error(`${a.file}: size ${img.width}x${img.height} != ${a.canvas.join('x')}`);
+        images.set(a.id, img);
+      }),
+    ),
   ]);
   return {
     atlas: new SpriteAtlas(manifest),
@@ -164,6 +212,7 @@ export async function loadAssets(baseUrl: string, darkAlpha: number): Promise<As
     fontLoaded,
     extra: Object.fromEntries(additional.assets.map((a) => [a.id, a])),
     tutorial: tutorialAssets(tutorialDef, tutorialFont, images),
+    fix04: fix04Assets(fix04Def),
   };
 }
 

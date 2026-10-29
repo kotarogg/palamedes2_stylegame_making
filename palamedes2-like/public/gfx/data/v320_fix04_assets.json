@@ -1,0 +1,428 @@
+{
+ "format": "v320_fix04_assets_v1",
+ "change_id": "V320-FIX-04",
+ "app_version": "3.2.0",
+ "source": "PM検収合格グラフィック（Drive 1kZgzJIRjP7xZqgVAcno7KFVQWHTNxvPN）asset_definitions.json／score_rate_numeric.json",
+ "display_scale": 1,
+ "assets": [
+  {
+   "id": "label_role_main",
+   "file": "assets/label_role_main.png",
+   "text": "役",
+   "canvas": [
+    44,
+    36
+   ],
+   "body_origin": [
+    6,
+    1
+   ],
+   "visible_xywh": [
+    2,
+    1,
+    38,
+    34
+   ],
+   "sha256": "ceab1088a8ee7753d832b6542e16505107532ddc2c1c45bed03ede544739aef0"
+  },
+  {
+   "id": "label_role_chain_sub",
+   "file": "assets/label_role_chain_sub.png",
+   "text": "連鎖",
+   "canvas": [
+    44,
+    20
+   ],
+   "body_origin": [
+    6,
+    2
+   ],
+   "visible_xywh": [
+    2,
+    1,
+    37,
+    18
+   ],
+   "sha256": "9fa419040cff5d17e1946981a5ab606e1418896a8667de2bd9696a731df3c93d"
+  },
+  {
+   "id": "label_launch_main",
+   "file": "assets/label_launch_main.png",
+   "text": "打上",
+   "canvas": [
+    44,
+    20
+   ],
+   "body_origin": [
+    6,
+    2
+   ],
+   "visible_xywh": [
+    2,
+    1,
+    37,
+    18
+   ],
+   "sha256": "531121a582c694a63eea445049867197f212cf3d895af4e988df61ea0c391b12"
+  },
+  {
+   "id": "label_launch_chain_sub",
+   "file": "assets/label_launch_chain_sub.png",
+   "text": "連鎖",
+   "canvas": [
+    44,
+    20
+   ],
+   "body_origin": [
+    6,
+    2
+   ],
+   "visible_xywh": [
+    2,
+    1,
+    37,
+    18
+   ],
+   "sha256": "2fb1cc26d31dbb4d54456317243eb676fbc78c962b1b52560c963273216191e4"
+  },
+  {
+   "id": "label_score_main",
+   "file": "assets/label_score_main.png",
+   "text": "得点",
+   "canvas": [
+    44,
+    20
+   ],
+   "body_origin": [
+    6,
+    2
+   ],
+   "visible_xywh": [
+    2,
+    1,
+    38,
+    18
+   ],
+   "sha256": "6dd5a23e0f25ce05c67d4e73c469fc53dcb0f45ab800b008393bae9438e69b2a"
+  },
+  {
+   "id": "label_score_rate",
+   "file": "assets/label_score_rate.png",
+   "text": "倍率",
+   "canvas": [
+    44,
+    20
+   ],
+   "body_origin": [
+    6,
+    2
+   ],
+   "visible_xywh": [
+    2,
+    1,
+    37,
+    18
+   ],
+   "sha256": "9b5107c3147c23026ee8afcd3a75ae4f0da6681720b6baa8fc774e54fb54bb3d"
+  },
+  {
+   "id": "label_attack",
+   "file": "assets/label_attack.png",
+   "text": "攻撃",
+   "canvas": [
+    44,
+    20
+   ],
+   "body_origin": [
+    6,
+    2
+   ],
+   "visible_xywh": [
+    2,
+    1,
+    37,
+    18
+   ],
+   "sha256": "9abdb1128c991b599397db375f8686292a44ed8e123abbe2e5c45cf54966f4e4"
+  },
+  {
+   "id": "label_cancel",
+   "file": "assets/label_cancel.png",
+   "text": "相殺",
+   "canvas": [
+    44,
+    20
+   ],
+   "body_origin": [
+    6,
+    2
+   ],
+   "visible_xywh": [
+    2,
+    1,
+    38,
+    18
+   ],
+   "sha256": "30349ee2a39eaab2df39d43908ae29c10a5584db4ca4d59d95ff796bfaf705ab"
+  },
+  {
+   "id": "score_rate_numeric_sheet",
+   "file": "assets/score_rate_numeric_sheet.png",
+   "canvas": [
+    192,
+    20
+   ],
+   "sha256": "140433c8e4e7c8dbb94c40604d2ee179d9bf36bd02cdea429b1be38e4a4ab8c9"
+  }
+ ],
+ "score_rate_numeric": {
+  "sheet": "score_rate_numeric_sheet",
+  "cell": [
+   16,
+   20
+  ],
+  "baseline_y": 17,
+  "glyphs": [
+   {
+    "char": "0",
+    "rect": [
+     0,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     1,
+     2,
+     13,
+     17
+    ],
+    "offset": [
+     -1,
+     0
+    ],
+    "advance": 14
+   },
+   {
+    "char": "1",
+    "rect": [
+     16,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     1,
+     2,
+     11,
+     17
+    ],
+    "offset": [
+     -1,
+     0
+    ],
+    "advance": 12
+   },
+   {
+    "char": "2",
+    "rect": [
+     32,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     1,
+     2,
+     13,
+     17
+    ],
+    "offset": [
+     -1,
+     0
+    ],
+    "advance": 14
+   },
+   {
+    "char": "3",
+    "rect": [
+     48,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     1,
+     2,
+     13,
+     17
+    ],
+    "offset": [
+     -1,
+     0
+    ],
+    "advance": 14
+   },
+   {
+    "char": "4",
+    "rect": [
+     64,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     1,
+     2,
+     14,
+     17
+    ],
+    "offset": [
+     -1,
+     0
+    ],
+    "advance": 15
+   },
+   {
+    "char": "5",
+    "rect": [
+     80,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     1,
+     2,
+     13,
+     17
+    ],
+    "offset": [
+     -1,
+     0
+    ],
+    "advance": 14
+   },
+   {
+    "char": "6",
+    "rect": [
+     96,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     1,
+     2,
+     13,
+     17
+    ],
+    "offset": [
+     -1,
+     0
+    ],
+    "advance": 14
+   },
+   {
+    "char": "7",
+    "rect": [
+     112,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     2,
+     2,
+     12,
+     17
+    ],
+    "offset": [
+     -2,
+     0
+    ],
+    "advance": 13
+   },
+   {
+    "char": "8",
+    "rect": [
+     128,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     1,
+     2,
+     13,
+     17
+    ],
+    "offset": [
+     -1,
+     0
+    ],
+    "advance": 14
+   },
+   {
+    "char": "9",
+    "rect": [
+     144,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     1,
+     2,
+     13,
+     17
+    ],
+    "offset": [
+     -1,
+     0
+    ],
+    "advance": 14
+   },
+   {
+    "char": "×",
+    "rect": [
+     160,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     2,
+     5,
+     13,
+     14
+    ],
+    "offset": [
+     -2,
+     0
+    ],
+    "advance": 14
+   },
+   {
+    "char": ".",
+    "rect": [
+     176,
+     0,
+     16,
+     20
+    ],
+    "visible_xywh": [
+     2,
+     13,
+     6,
+     6
+    ],
+    "offset": [
+     -2,
+     0
+    ],
+    "advance": 7
+   }
+  ]
+ }
+}

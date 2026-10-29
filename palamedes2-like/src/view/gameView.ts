@@ -11,7 +11,7 @@ import { evaluateStock, glowSegments } from '../core/roles';
 import type { Piece, PlayerId } from '../core/types';
 import { drawFrame, drawNineSlice, type Assets } from './assets';
 import { drawBitmapText } from './bitmapFont';
-import { CHAIN_HUD, chainHudLayout, type ChainHudLayout, type TextRow } from './chainHud';
+import { CHAIN_HUD, chainHudLayout, crackShakeOffset, labelAt, rateRun, type ChainHudLayout, type HudLabelId, type LabelRow } from './chainHud';
 import type { ManifestFrame } from './data';
 import { arcPoint, barY, CELL, cellX, columnCenterX, descentY, easeInOutSine, easeOutQuad, lerp, progress, Z, type BoardRect } from './geometry';
 import { characterPose, crackerPose, type ResultPlan } from './presentation';
@@ -173,6 +173,8 @@ interface PlayerVis {
   pinchCount: { value: 3 | 2 | 1; start: number } | null;
   /** v3.1.0 連鎖切り予約中のヒビ画像（予約発生時に3種から1つ選び、予約中は固定）。null＝予約なし */
   crack: string | null;
+  /** V320-FIX-04 揺れの起点（予約に入ったtick。数字の更新では動かさない）。null＝予約なし */
+  crackStart: number | null;
 }
 
 interface DrawItem {
@@ -275,6 +277,7 @@ export class GameView {
       stock: { reservedPx: null, slideFromPx: null, endTick: null },
       pinchCount: null,
       crack: null,
+      crackStart: null,
     }));
   }
 
@@ -561,6 +564,7 @@ export class GameView {
       case 'streakCut':
         // 予約発生時に3種から1つ（試合の乱数は使わず、発生tickとプレイヤーから決める）。終了で解除し、新しい連鎖へ残さない
         v.crack = e.state === 'reserved' ? STREAK_CRACKS[(e.tick * 7 + e.player * 3) % STREAK_CRACKS.length] : null;
+        v.crackStart = e.state === 'reserved' ? e.tick : null;
         break;
       case 'roleEnd':
         v.role = null;
@@ -1089,7 +1093,7 @@ export class GameView {
       const board = this.boards[p];
       if (g.mode === 'mode1') {
         const st = (g as Game).players[p];
-        this.drawChainHud(ctx, p, st, ms);
+        this.drawChainHud(ctx, p, st, ms, t);
         this.drawChainGauge(ctx, p, st);
         // 危険の残り時間：自然上昇の危険猶予と攻撃ピンチ猶予のうち早い期限（どちらも自分の役処理中は止まる）
         const rest = g.result ? null : this.dangerRemainingTicks(st);
@@ -1126,22 +1130,32 @@ export class GameView {
     return out;
   }
 
+  /** V320-FIX-04 補助表示の不透明度：0.50〜0.95 を 1000ms 周期で緩やかに往復（共有時計。乱数なし） */
+  static assistAlpha(ms: number): number {
+    const ph = (((ms % 1000) + 1000) % 1000) / 1000;
+    return 0.725 - 0.225 * Math.cos(ph * 2 * Math.PI);
+  }
+
   private drawAssist(ctx: CanvasRenderingContext2D, t: number): void {
+    // 結果確定後は出さない（MODE2 の場更新中は assistTargets が空）
+    if (this.game.result) return;
+    const alpha = GameView.assistAlpha(this.glowClockMs(t));
     for (const p of this.hud.assist ?? []) {
       const cols = this.assistTargets(p);
       if (!cols.length) continue;
       const st = this.game.players[p];
       ctx.save();
-      // 役成立光とは別の控えめな輪郭（点滅しない）。数字・柄を隠さないよう枠の外周だけ
-      ctx.strokeStyle = 'rgba(255,241,214,0.85)';
+      // V320-FIX-04 第5章：ピース外形の内周側（外周から1px内側）に1pxのシアン輪郭。数字・柄は塗らない
+      ctx.strokeStyle = '#69e0e6';
+      ctx.globalAlpha = alpha;
       ctx.lineWidth = 1;
       for (const c of cols) {
         const top = st.board.cols[c][0];
         if (!top || top.kind !== 'piece') continue;
         const k = this.localK(top.piece.id, 0, t).k;
         const x = cellX(this.boards[p], c);
-        const y = this.pieceBar(p, t) + CELL * k;
-        ctx.strokeRect(x + 0.5, y + 0.5, CELL - 1, CELL - 1);
+        const y = Math.round(this.pieceBar(p, t) + CELL * k);
+        ctx.strokeRect(x + 1.5, y + 1.5, CELL - 3, CELL - 3);
       }
       ctx.restore();
     }
@@ -1187,45 +1201,80 @@ export class GameView {
     return { sheet: id, id, x: 0, y: 0, w: d.canvas[0], h: d.canvas[1], reserved: false };
   }
 
-  /** V320-FIX-03 連鎖HUD（役連鎖・打上連鎖の縦帯）の配置。定義は chainHud.ts の1か所。テスト・検証・教材の注目枠が参照する */
+  /** 連鎖HUD（役連鎖・打上連鎖の縦帯）の配置。定義は chainHud.ts の1か所。テスト・検証・教材の注目枠が参照する */
   chainHud(p: PlayerId): ChainHudLayout {
     return chainHudLayout(p);
   }
 
+  /** V320-FIX-04 見出しPNGを原寸1倍で描く（素材が無い検証環境では描かない） */
+  private drawLabel(ctx: CanvasRenderingContext2D, r: LabelRow): void {
+    const img = this.assets.images.get(r.id);
+    if (img) ctx.drawImage(img, r.x, r.y);
+  }
+
   /**
-   * V320-FIX-03 連鎖HUD：盤面外側の縦帯に、上から「役」（2倍）「連鎖」・役連鎖数・攻撃加算（対戦のみ）、「打上」「連鎖」・打上連鎖数。
-   * 見出しは共通16pxビットマップ文字（原寸、「役」だけ整数2倍）と暗色の縁取り。数字は既存S12（多色・等比収め、打上連鎖のヒビ）。
-   * 旧位置（上部の打上連鎖見出し画像・外側の役連鎖見出しの1/2縮小）には描かない
+   * 打上連鎖数の揺れ（V320-FIX-04 第4.2節）。切り予約中だけ、予約に入ったtickからの経過で決める整数オフセット。
+   * 結果確定後は止める（予約の解除・連鎖切れ・新ラウンドでは予約自体が無くなる）
    */
-  private drawChainHud(ctx: CanvasRenderingContext2D, p: PlayerId, st: PlayerState, ms: number): void {
+  crackShake(p: PlayerId, t: number): readonly [number, number] {
+    const g = this.mode1;
+    if (!g || g.result) return [0, 0];
+    const st = g.players[p];
+    if (!g.streakActive(st) || !st.streakCutReserved) return [0, 0];
+    const v = this.pv[p];
+    // ステージ持ち越しなど、表示側が予約イベントを見ていない場合は最初に描いたtickを起点にする
+    if (v.crackStart === null) v.crackStart = t;
+    return crackShakeOffset((t - v.crackStart) * g.tickMs);
+  }
+
+  /**
+   * 連鎖HUD：盤面外側の縦帯に、上から「役」「連鎖」・役連鎖数・攻撃加算（対戦のみ）、「打上」「連鎖」・打上連鎖数。
+   * 見出しは V320-FIX-04 の見出しPNG（原寸1倍、body_origin で旧文字セルへ合わせる）。数字は既存S12（多色・等比収め、打上連鎖のヒビ）
+   */
+  private drawChainHud(ctx: CanvasRenderingContext2D, p: PlayerId, st: PlayerState, ms: number, t: number): void {
     const g = this.mode1!;
     const l = chainHudLayout(p);
-    const font = this.assets.tutorial?.font;
     const phase = numericPhase(ms);
-    const title = (r: TextRow) => drawBitmapText(ctx, font, r.text, l.cx, r.y, { align: 'center', color: CHAIN_HUD.color, outline: CHAIN_HUD.outline, scale: r.scale });
     // 役連鎖
-    title(l.roleTitle);
-    title(l.roleSub);
+    this.drawLabel(ctx, l.roleTitle);
+    this.drawLabel(ctx, l.roleSub);
     const chain = st.chainRemaining > 0 ? st.chainCount : 0;
     drawNumericScaled(ctx, this.assets, String(chain), l.roleDigits.cx, l.roleDigits.y, l.roleDigits.h, l.roleDigits.maxW, 'center', phase);
     if (!this.isSingle) {
       const bonus = chain > 0 ? Math.min(chain - 1, g.config.chainBonusMax) : 0;
       drawText(ctx, `＋${bonus}`, l.plus.cx, l.plus.y, { align: 'center', size: l.plus.size, weight: 800, color: '#f2b950' });
     }
-    // 打上連鎖（ヒビは予約中だけ。数字にだけ付ける）
-    title(l.streakTitle);
-    title(l.streakSub);
+    // 打上連鎖（ヒビは予約中だけ。数字とヒビを一つの合成として揺らす）
+    this.drawLabel(ctx, l.streakTitle);
+    this.drawLabel(ctx, l.streakSub);
     const active = g.streakActive(st);
     const count = active ? st.streakCount : 0;
     const crack = active && st.streakCutReserved ? (this.pv[p].crack ?? STREAK_CRACKS[p]) : null;
-    drawNumericScaled(ctx, this.assets, String(count), l.streakDigits.cx, l.streakDigits.y, l.streakDigits.h, l.streakDigits.maxW, 'center', phase, crack);
-    // SINGLE の得点倍率：上部の既存倍率領域へ独立表示（打上連鎖数は重複表示しない）。教材は攻撃倍率の扱いのため描かない
-    if (this.isSingle && this.hud.streakRate !== 'attack') {
-      const r = CHAIN_HUD.singleRate;
-      const m = g.currentScoreMultiplier(st);
-      drawText(ctx, r.heading.text, r.heading.x, r.heading.y, { size: r.heading.size, color: TEXT_COLORS.secondary });
-      drawNumericScaled(ctx, this.assets, multiplierText(m.num, m.den), r.value.x, r.value.y, r.value.h, r.value.maxW, 'left', phase);
-    }
+    const [sx, sy] = crack ? this.crackShake(p, t) : [0, 0];
+    drawNumericScaled(ctx, this.assets, String(count), l.streakDigits.cx + sx, l.streakDigits.y + sy, l.streakDigits.h, l.streakDigits.maxW, 'center', phase, crack);
+    if (this.showsScoreRate) this.drawScoreRate(ctx, st);
+  }
+
+  /** SINGLE の得点倍率を出すか（SINGLE のゲーム画面だけ。教材・MODE2・対戦には出さない） */
+  get showsScoreRate(): boolean {
+    const g = this.mode1;
+    return !!g?.single && this.isSingle && !this.hud.hideSingleInfo && this.hud.streakRate !== 'attack';
+  }
+
+  /** SINGLE の得点倍率（V320-FIX-04 第4.3節）：得点・倍率見出しPNGと倍率数字シート（1倍、幅48の中央） */
+  private drawScoreRate(ctx: CanvasRenderingContext2D, st: PlayerState): void {
+    const r = CHAIN_HUD.singleRate;
+    const lab = (x: { dx: number; dy: number; id: HudLabelId }) => this.drawLabel(ctx, { ...labelAt(x.id, 0, 0), x: r.area.x + x.dx, y: r.area.y + x.dy });
+    lab(r.score);
+    lab(r.rate);
+    const def = this.assets.fix04?.rate;
+    const img = def && this.assets.images.get(def.sheet);
+    if (!def || !img) return;
+    const m = this.mode1!.currentScoreMultiplier(st);
+    const run = rateRun(def.glyphs, multiplierText(m.num, m.den));
+    const x0 = r.area.x + Math.floor((r.area.w - run.width) / 2);
+    const y0 = r.area.y + r.digitsTop;
+    for (const c of run.cells) ctx.drawImage(img, c.g.rect[0], c.g.rect[1], c.g.rect[2], c.g.rect[3], x0 + c.dx, y0, c.g.rect[2], c.g.rect[3]);
   }
 
   private drawWins(ctx: CanvasRenderingContext2D, p: PlayerId, t: number): void {

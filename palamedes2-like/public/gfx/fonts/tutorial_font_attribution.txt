@@ -1,6 +1,13 @@
-Noto Sans JP — Version 2.004
-© 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
-License: SIL Open Font License 1.1 (OFL.txt)
-Bitmap derivative: tutorial_font_16, 2026-10-26. Native16px rasterization + pixel edits. Original TTF is not included.
+Adobe
 
-2026-10-28 extension:14glyphs (requested13 plus ノ required by verification text). Source TTF and existing313bitmap glyphs unchanged.
+Ryoko NISHIZUKA 西塚涼子 (kana, bopomofo & ideographs); Paul D. Hunt (Latin, Greek & Cyrillic); Sandoll Communications 산돌커뮤니케이션, Soo-young JANG 장수영 & Joo-yeon KANG 강주연 (hangul elements, letters & syllables)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1. This Font Software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the SIL Open Font License for the specific language, permissions and limitations governing your use of this Font Software.
+
+http://scripts.sil.org/OFL
+
+© 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
+
+本納品の加工：既存採用Noto Sans JP2.004から原寸ラスタ字形を制作し、見出しの輪郭・色面・亮部・影と数字の段階的傾き、白マスク24字を追加。TTF自体は改変・再配布していません。レンダリング画像はゲーム素材として使用可能。ソースのフォント由来マスクについてもOFL1.1と権利表記を保持します。画像生成AI不使用。
+
+FONT-SUPPLEMENT-01追記：前回351字版へNoto Sans JP2.004・16px・400・threshold100の原寸白マスク36字とU+3000を追加。既存351字は改変なし。画像生成モデル不使用。

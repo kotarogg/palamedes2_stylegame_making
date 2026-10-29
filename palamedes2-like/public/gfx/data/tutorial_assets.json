@@ -9,7 +9,7 @@
       "file": "assets/tutorial_font_16.png",
       "dimensions": [
         512,
-        176
+        208
       ],
       "origin": [
         0,
@@ -24,18 +24,19 @@
         255
       ],
       "color_space": "sRGB",
-      "sha256": "cf1e34465edee757215837a73c9a651689a327ba1e948becff06fe2bbe118546",
+      "sha256": "42875fb3a365cd06d1abb061acf08532fa40a711e739e246845eacf45237c102",
       "cell": [
         16,
         16
       ],
       "columns": 32,
-      "glyph_count": 327,
+      "glyph_count": 388,
       "frames": "data/tutorial_font_16.json",
       "purpose": "16px共通本文・見出し・案内用の白マスク",
       "line_height": 22,
       "ascii_advance": 8,
-      "fullwidth_advance": 16
+      "fullwidth_advance": 16,
+      "font_supplement": "FONT-SUPPLEMENT-01（388字。V320-FIX-04で組込み）"
     },
     {
       "id": "tutorial_action_icons",

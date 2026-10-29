@@ -1,5 +1,5 @@
 {
- "about": "第3版プレイ版の必須素材（画像49・JSON5・フォント・OFL・音声117）。scripts/check-release.mjs が照合する　v3.1.0：追加画像9（additional_assets_v310.json）と定義JSONを追加。　v3.1.0ボイス：差替え11本・ピンチボイス3本追加（ボイス75）。　遊び方・放置デモ：tutorial_assets.json の3画像・定義JSON2件・フォント権利表記を追加。",
+ "about": "第3版プレイ版の必須素材（画像49・JSON5・フォント・OFL・音声117）。scripts/check-release.mjs が照合する　v3.1.0：追加画像9（additional_assets_v310.json）と定義JSONを追加。　v3.1.0ボイス：差替え11本・ピンチボイス3本追加（ボイス75）。　遊び方・放置デモ：tutorial_assets.json の3画像・定義JSON2件・フォント権利表記を追加。　V320-FIX-04：見出し8・倍率数字1の追加PNG9と定義JSON（v320_fix04_assets.json）、説明フォント388字版（FONT-SUPPLEMENT-01）へ更新。",
  "files": [
   {
    "path": "gfx/assets/akane_sheet.png",
@@ -922,8 +922,8 @@
   },
   {
    "path": "gfx/assets/tutorial_font_16.png",
-   "size": 12797,
-   "sha256": "cf1e34465edee757215837a73c9a651689a327ba1e948becff06fe2bbe118546"
+   "size": 15806,
+   "sha256": "42875fb3a365cd06d1abb061acf08532fa40a711e739e246845eacf45237c102"
   },
   {
    "path": "gfx/assets/tutorial_action_icons.png",
@@ -937,18 +937,68 @@
   },
   {
    "path": "gfx/data/tutorial_assets.json",
-   "size": 4834,
-   "sha256": "24e842fd9a8d1c69814a4e868193d790c69f9cbca44789656740b7e8bffe77ee"
+   "size": 4919,
+   "sha256": "088cc1361d15c6bc67df97fb9272f077f9fe6b12ccd6a0c229841a4af270d01c"
   },
   {
    "path": "gfx/data/tutorial_font_16.json",
-   "size": 89283,
-   "sha256": "314a31e58c22b64e1f006f36d44fca0f40cb26cbd59739d0a0170ed1d10bda79"
+   "size": 107771,
+   "sha256": "ed5ee59fbf496ba9d09804df24005893527868f3ca61effd53774442c2fe7447"
   },
   {
    "path": "gfx/fonts/tutorial_font_attribution.txt",
-   "size": 409,
-   "sha256": "e4e8d757ac6cdcc7388f22347f76b909d656bd4ca79bdb819e74c5036ddb297d"
+   "size": 1322,
+   "sha256": "c99ac15886a646a7a4e9b096b803fa382e528f2aa7beece11a95363a3674746c"
+  },
+  {
+   "path": "gfx/assets/label_role_main.png",
+   "size": 736,
+   "sha256": "ceab1088a8ee7753d832b6542e16505107532ddc2c1c45bed03ede544739aef0"
+  },
+  {
+   "path": "gfx/assets/label_role_chain_sub.png",
+   "size": 546,
+   "sha256": "9fa419040cff5d17e1946981a5ab606e1418896a8667de2bd9696a731df3c93d"
+  },
+  {
+   "path": "gfx/assets/label_launch_main.png",
+   "size": 435,
+   "sha256": "531121a582c694a63eea445049867197f212cf3d895af4e988df61ea0c391b12"
+  },
+  {
+   "path": "gfx/assets/label_launch_chain_sub.png",
+   "size": 577,
+   "sha256": "2fb1cc26d31dbb4d54456317243eb676fbc78c962b1b52560c963273216191e4"
+  },
+  {
+   "path": "gfx/assets/label_score_main.png",
+   "size": 570,
+   "sha256": "6dd5a23e0f25ce05c67d4e73c469fc53dcb0f45ab800b008393bae9438e69b2a"
+  },
+  {
+   "path": "gfx/assets/label_score_rate.png",
+   "size": 554,
+   "sha256": "9b5107c3147c23026ee8afcd3a75ae4f0da6681720b6baa8fc774e54fb54bb3d"
+  },
+  {
+   "path": "gfx/assets/label_attack.png",
+   "size": 572,
+   "sha256": "9abdb1128c991b599397db375f8686292a44ed8e123abbe2e5c45cf54966f4e4"
+  },
+  {
+   "path": "gfx/assets/label_cancel.png",
+   "size": 575,
+   "sha256": "30349ee2a39eaab2df39d43908ae29c10a5584db4ca4d59d95ff796bfaf705ab"
+  },
+  {
+   "path": "gfx/assets/score_rate_numeric_sheet.png",
+   "size": 1269,
+   "sha256": "140433c8e4e7c8dbb94c40604d2ee179d9bf36bd02cdea429b1be38e4a4ab8c9"
+  },
+  {
+   "path": "gfx/data/v320_fix04_assets.json",
+   "size": 5540,
+   "sha256": "6766665a4a188cacf01f0a00c2a5748e0ca5f7a5911a03150d8211feaf46af95"
   }
  ]
 }

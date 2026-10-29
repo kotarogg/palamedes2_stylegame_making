@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { DEFAULT_CONFIG, type GameConfig } from '../src/core/config';
 import { Game, type Command } from '../src/core/game';
 import type { Piece, PlayerId, Suit } from '../src/core/types';
-import type { Assets, CreditsText, ExtraAssetDef, FontStyles } from '../src/view/assets';
+import { fix04Assets, type Assets, type CreditsText, type ExtraAssetDef, type Fix04AssetsJson, type FontStyles } from '../src/view/assets';
 import { Layout, normalizeManifest, SpriteAtlas, type LoadingList, type RawManifestV3, type ScreenLayout, type SpriteManifest } from '../src/view/data';
 
 export const ROOT = new URL('..', import.meta.url);
@@ -30,6 +30,7 @@ export const fakeAssets = (): Assets => ({
   credits: readJson<CreditsText>('public/gfx/data/credits_text.json'),
   fontLoaded: true,
   extra: Object.fromEntries(readJson<{ assets: ExtraAssetDef[] }>('public/gfx/data/additional_assets_v310.json').assets.map((a) => [a.id, a])),
+  fix04: fix04Assets(readJson<Fix04AssetsJson>('public/gfx/data/v320_fix04_assets.json')),
 });
 
 const SUIT: Record<string, Suit> = { s: 'spade', d: 'diamond', c: 'club', h: 'heart' };

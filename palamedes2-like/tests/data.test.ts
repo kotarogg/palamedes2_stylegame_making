@@ -36,7 +36,9 @@ describe('第3版 採用グラフィック（graphics_manifest_v3：14シート�
     const onDisk = [...readdirSync(gfx('assets')).filter((f) => f.endsWith('.png')).map((f) => `assets/${f}`), ...readdirSync(gfx('assets/legacy')).map((f) => `assets/legacy/${f}`)];
     // 遊び方・放置デモ用UI（tutorial_assets.json の3枚）も別定義で同梱する
     const tutorial = (JSON.parse(readFileSync(gfx('data/tutorial_assets.json'), 'utf8')) as { assets: { file: string }[] }).assets.map((a) => a.file);
-    expect(onDisk.sort()).toEqual([...pngs, ...extra, ...tutorial].sort());
+    // V320-FIX-04 追加画像（v320_fix04_assets.json の9枚）も別定義で同梱する
+    const fix04 = (JSON.parse(readFileSync(gfx('data/v320_fix04_assets.json'), 'utf8')) as { assets: { file: string }[] }).assets.map((a) => a.file);
+    expect(onDisk.sort()).toEqual([...pngs, ...extra, ...tutorial, ...fix04].sort());
   });
 
   it('再利用の9シート（S4〜S12）は第2.3版の採用PNGとバイト同一。v3.2.0 で修正を採用した S7・S9 は採用版のハッシュ', () => {

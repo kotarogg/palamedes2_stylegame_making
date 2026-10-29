@@ -20,7 +20,7 @@ import { fakeAssets, readJson } from './helpers';
 
 const font = readJson<BitmapFontDef>('public/gfx/data/tutorial_font_16.json');
 
-describe('台本と収録文字（tutorial_font_16：v3.2.0 採用版 327字）', () => {
+describe('台本と収録文字（tutorial_font_16：V320-FIX-04 採用版 388字）', () => {
   const S = TUTORIAL_SCRIPT;
   const all: string[] = [
     ...Object.values(S.pages).flatMap((p) => [p.heading, ...p.lines]),
@@ -41,17 +41,17 @@ describe('台本と収録文字（tutorial_font_16：v3.2.0 採用版 327字）'
     expect([...new Set([...all, '打上連鎖', 'ノーリセットクリア！'].flatMap((s) => uncovered(font, s)))].join('')).toBe('');
   });
 
-  it('v3.2.0 採用フォント：327字・512×176。既存313字の定義（矩形・送り・offset）は第1版のまま、追加14字は末尾', () => {
-    expect(Object.keys(font.glyphs)).toHaveLength(327);
-    const f = font as unknown as { glyph_count: number; size: number[]; glyphs: Record<string, { rect: number[]; advance: number }> };
-    expect(f.glyph_count).toBe(327);
-    expect(f.size).toEqual([512, 176]);
-    const added = Object.keys(font.glyphs).slice(313).join('');
-    expect(added).toBe('、んウダリ切後新明更残説離ノ');
+  it('V320-FIX-04 採用フォント（FONT-SUPPLEMENT-01）：388字・512×208。既存327字の定義（矩形・送り・offset）は不変、追加61字は末尾。U+3000 は透明・送り16', () => {
+    expect(Object.keys(font.glyphs)).toHaveLength(388);
+    const f = font as unknown as { glyph_count: number; size: number[]; glyphs: Record<string, { rect: number[]; advance: number; offset: number[]; ink_box: unknown }> };
+    expect(f.glyph_count).toBe(388);
+    expect(f.size).toEqual([512, 208]);
+    expect(Object.keys(font.glyphs).slice(313, 327).join('')).toBe('、んウダリ切後新明更残説離ノ');
     // 既存の代表字（ASCII 8px・全角16px）の字送りは不変
     expect(f.glyphs[' '].advance).toBe(8);
     expect(f.glyphs['の'].advance).toBe(16);
-    for (const ch of added) expect(f.glyphs[ch].advance, ch).toBe(16);
+    expect(f.glyphs['\u3000']).toMatchObject({ rect: [48, 192, 16, 16], advance: 16, offset: [0, 0], ink_box: null });
+    for (const ch of Object.keys(font.glyphs).slice(327)) expect(f.glyphs[ch].advance, ch).toBe(16);
   });
 
   it('本文は最大4行・各行168px以内（10全角相当。縮小しない）、見出し168px以内、戻る案内は1行192px（領域196px）', () => {
