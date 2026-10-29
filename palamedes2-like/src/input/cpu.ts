@@ -36,6 +36,11 @@ interface DecisionStop {
 /** CPU 設定（cpu_config_v320.json と同じ形）。確率は0〜100%、時間は ms */
 export interface CpuConfig {
   version: string;
+  /** 調整識別子（V320-FIX-04 以降） */
+  adjustment?: string;
+  /** V320-FIX-04 必須判断待ち（表に無い難易度は待ちなし。初級のみ） */
+  mandatoryWait?: Partial<Record<Difficulty, { normalMs: [number, number, number]; pinchMs: [number, number, number] }>>;
+  mandatoryWaitWeights?: [number, number, number];
   /** 時間候補（短／標準／長）の選択確率 */
   decisionStopWeights: [number, number, number];
   decisionStop: Record<Difficulty, DecisionStop>;
@@ -57,7 +62,7 @@ export const CPU_CONFIG = rawConfig as unknown as CpuConfig;
 /** 1回の判断で行う抽選の記録（自動検証用） */
 export interface CpuDecisionLog {
   tick: number;
-  kind: 'decisionStop' | 'bestPick' | 'forget' | 'sixChallenge' | 'declareFour' | 'declareSix' | 'seventhImprove' | 'manualRise';
+  kind: 'mandatoryWait' | 'decisionStop' | 'bestPick' | 'forget' | 'sixChallenge' | 'declareFour' | 'declareSix' | 'seventhImprove' | 'manualRise';
   pct: number;
   hit: boolean;
   detail?: string;
@@ -94,6 +99,11 @@ interface Seventh {
 
 /** 計測用の件数（v3.2.0 第10章）。停止・失念は抽選対象・当選・実停止を分けて数える */
 export interface CpuStats {
+  /** V320-FIX-04 必須判断待ち：回数・合計（tick、半減後）・設定上の合計（ms、半減前）・ピンチ移行の半減回数 */
+  mandatoryCount: number;
+  mandatoryTicks: number;
+  mandatoryMs: number;
+  mandatoryHalved: number;
   stopRolls: number;
   stopHits: number;
   /** 判断停止の合計（tick、ピンチ移行の半減後） */
@@ -117,6 +127,10 @@ export interface CpuStats {
 }
 
 const emptyStats = (): CpuStats => ({
+  mandatoryCount: 0,
+  mandatoryTicks: 0,
+  mandatoryMs: 0,
+  mandatoryHalved: 0,
   stopRolls: 0,
   stopHits: 0,
   stopTicks: 0,
@@ -142,6 +156,8 @@ type AnyPlayer = PlayerState | Mode2Player;
 export class CpuController implements Controller {
   private plan: Plan | null = null;
   private stopUntil = 0;
+  /** V320-FIX-04 必須判断待ちの終了tick（必須待ち→判断時停止の順。stopUntil はその後の判断時停止の終了） */
+  private mandatoryUntil = 0;
   /** 実行中の停止の種類と、判断停止を始めた時の状況（通常停止中のピンチ移行で残りを半分にする） */
   private stopKind: 'decision' | 'forget' | null = null;
   private stopSit: Situation = 'normal';
@@ -176,6 +192,7 @@ export class CpuController implements Controller {
   reset(): void {
     this.plan = null;
     this.stopUntil = 0;
+    this.mandatoryUntil = 0;
     this.stopKind = null;
     this.stopRolled = false;
     this.noForgetNext = false;
@@ -216,14 +233,23 @@ export class CpuController implements Controller {
         this.stats.seventhLost++;
         this.seventh = null;
       }
-      // 通常の判断停止中にピンチへ移った：その時点の残り停止時間を半分に（引き直さない・1回だけ）
+      // 通常の待ち（必須待ち・判断時停止）の途中でピンチへ移った：その時点の未消化分をそれぞれ半分に（引き直さない・1回だけ）
       if (this.stopKind === 'decision' && this.stopSit === 'normal' && tick < this.stopUntil && game.pinchRemainingTicks(q) !== null) {
-        const rest = this.stopUntil - tick;
-        const half = Math.round(rest / 2);
-        this.stopUntil = tick + half;
+        const restM = Math.max(0, this.mandatoryUntil - tick);
+        const restS = this.stopUntil - Math.max(tick, this.mandatoryUntil);
+        const halfM = Math.round(restM / 2);
+        const halfS = Math.round(restS / 2);
+        this.mandatoryUntil = tick + halfM;
+        this.stopUntil = this.mandatoryUntil + halfS;
         this.stopSit = 'pinch';
-        this.stats.stopHalved++;
-        this.stats.stopTicks -= rest - half;
+        if (restM > 0) {
+          this.stats.mandatoryHalved++;
+          this.stats.mandatoryTicks -= restM - halfM;
+        }
+        if (restS > 0) {
+          this.stats.stopHalved++;
+          this.stats.stopTicks -= restS - halfS;
+        }
       }
     }
     // 実行可能性確認：既存の入力可否（発射・上詰め・入替・不成立の硬直、役処理中、移動中）に従う
@@ -243,12 +269,33 @@ export class CpuController implements Controller {
     return out.map((type) => ({ player: this.player, type }) as Command);
   }
 
-  /** 判断時の停止：判断の機会につき1回抽選。当たれば時間候補（短／標準／長）を weights で選ぶ。戻り値：停止したか */
+  /**
+   * 判断の機会の待ち（判断の機会につき1回）：V320-FIX-04 の必須判断待ち（初級のみ）→ 既存の判断時停止（抽選）の順。
+   * 判断時停止は当たれば時間候補（短／標準／長）を weights で選ぶ。戻り値：待つか
+   */
   private decisionStop(game: AnyGame, sit: Situation, tick: number): boolean {
     this.stopRolled = true;
+    const mw = this.cfg.mandatoryWait?.[this.level];
+    let at = tick;
+    if (mw) {
+      const w = this.cfg.mandatoryWaitWeights ?? [25, 50, 25];
+      const r = this.rng.next() * (w[0] + w[1] + w[2]);
+      const i = r < w[0] ? 0 : r < w[0] + w[1] ? 1 : 2;
+      const ms = (sit === 'pinch' ? mw.pinchMs : mw.normalMs)[i];
+      const ticks = game.ticks(ms);
+      this.log.push({ tick, kind: 'mandatoryWait', pct: 100, hit: true, detail: `${sit} ${ms}ms` });
+      this.stats.mandatoryCount++;
+      this.stats.mandatoryMs += ms;
+      this.stats.mandatoryTicks += ticks;
+      at = tick + ticks;
+    }
+    this.mandatoryUntil = at;
+    this.stopUntil = at;
+    this.stopKind = at > tick ? 'decision' : null;
+    this.stopSit = sit;
     const s = this.cfg.decisionStop[this.level];
     this.stats.stopRolls++;
-    if (!this.roll('decisionStop', s.pct[this.character], tick, sit)) return false;
+    if (!this.roll('decisionStop', s.pct[this.character], tick, sit)) return at > tick;
     const w = this.cfg.decisionStopWeights;
     const r = this.rng.next() * (w[0] + w[1] + w[2]);
     const i = r < w[0] ? 0 : r < w[0] + w[1] ? 1 : 2;
@@ -258,10 +305,18 @@ export class CpuController implements Controller {
     this.stats.stopMs += ms;
     this.stats.stopTicks += ticks;
     this.log[this.log.length - 1].detail = `${sit} ${ms}ms`;
-    this.stopUntil = tick + ticks;
+    this.stopUntil = at + ticks;
     this.stopKind = 'decision';
-    this.stopSit = sit;
     return true;
+  }
+
+  /** 必須判断待ちの期待値（ms）。無い難易度は0 */
+  private expectedMandatoryMs(sit: Situation): number {
+    const mw = this.cfg.mandatoryWait?.[this.level];
+    if (!mw) return 0;
+    const w = this.cfg.mandatoryWaitWeights ?? [25, 50, 25];
+    const ms = sit === 'pinch' ? mw.pinchMs : mw.normalMs;
+    return (ms[0] * w[0] + ms[1] * w[1] + ms[2] * w[2]) / (w[0] + w[1] + w[2]);
   }
 
   /** 判断停止の期待値（ms）：停止確率 × 時間候補の加重平均 */
@@ -274,13 +329,13 @@ export class CpuController implements Controller {
   }
 
   /**
-   * ピンチの所要見積り（ms）：操作（移動・発射・上詰め）＋未消化の停止＋今後の判断（取得ごとに判断停止と失念の期待値）＋宣言受理（1tick）＋安全余裕。
+   * ピンチの所要見積り（ms）：操作（移動・発射・上詰め）＋未消化の待ち（必須待ち・停止）＋今後の判断（取得ごとに必須待ち・判断停止・失念の期待値）＋宣言受理（1tick）＋安全余裕。
    * 成立役の導入（約700ms）は猶予が止まるため加えない。これが有効な残り猶予未満なら時間内とする
    */
   private pinchNeedMs(game: AnyGame, opsMs: number, steps: number): number {
     const f = this.cfg.forget[this.level].pinch[this.character];
     const pending = Math.max(0, this.stopUntil - (game.tick + 1)) * game.tickMs;
-    return opsMs + pending + steps * (this.expectedStopMs('pinch') + (f.pct / 100) * f.ms) + game.tickMs + this.cfg.pinchMarginMs[this.level];
+    return opsMs + pending + steps * (this.expectedMandatoryMs('pinch') + this.expectedStopMs('pinch') + (f.pct / 100) * f.ms) + game.tickMs + this.cfg.pinchMarginMs[this.level];
   }
 
   // ---- MODE1 ----

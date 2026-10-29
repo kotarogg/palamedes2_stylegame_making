@@ -58,7 +58,7 @@ import type { Assets } from './view/assets';
 import { GameView } from './view/gameView';
 import { readyDurationMs, RoleNameDirector, Staging } from './view/presentation';
 import { fixedScaleChoices, MAX_FIXED_SCALE } from './view/scale';
-import { drawText, formatTime, TEXT_COLORS } from './view/text';
+import { drawText, formatTime, TEXT_COLORS, UI_FONT } from './view/text';
 import { drawBitmapText, TUTORIAL_COLORS } from './view/bitmapFont';
 import { TUTORIAL_SCRIPT } from './demo/lesson';
 import { DEMO } from './demo/stages';
@@ -68,6 +68,8 @@ export const W = 640;
 export const H = 360;
 /** v3.1.0 パズルシーンの開始前待機（表示準備完了後、試合開始処理へ進むまで） */
 export const PRESTART_MS = 1000;
+/** V320-FIX-04 CPU観戦：ラウンド結果演出の完了後、次ラウンドへ自動で進むまでの保持 */
+export const WATCH_ROUND_HOLD_MS = 1500;
 
 export interface Scene {
   /** マウスのクリック（画面上の押下） */
@@ -126,6 +128,12 @@ export class App {
   cpuPlayer: Character = 'kotaro';
   /** CPU対戦の現在の相手（1Pのキャラを除いた固定順の先頭から。保存しない） */
   cpuOpponent: Character = cpuOrderFor('kotaro')[0];
+  /** V320-FIX-04 CPU観戦の設定（起動中だけ保持。通常の対戦設定とは別） */
+  watch: WatchSettings = defaultWatchSettings();
+  /** 開発用：CPU観戦の固定seed（指定時だけ再戦でも同じseed。一般向けの設定には出さない） */
+  watchFixedSeed: number | null = null;
+  /** 開発用：CPU観戦のラウンド記録（seed・左右キャラ／強さ・自然上昇・勝敗・ゲーム内時間・決着原因） */
+  readonly watchLog: WatchLogEntry[] = [];
   /** クレジットのページ位置（URLを開いて戻っても維持） */
   creditsPage = 0;
   /** 開発版だけ：人間のプレイの計測記録（第21章。製品画面には出さない） */
@@ -266,6 +274,13 @@ export class App {
   // ---- 試合開始 ----
 
   /** characters：シングル＝コタロー、CPU対戦＝1Pの選択キャラ対現在の相手、2P対戦＝キャラ選択の結果 */
+  /** V320-FIX-04 CPU観戦を現在の観戦設定で始める（再戦も新しいseed。開発用固定seedの指定時だけ同じseed） */
+  startWatch(): void {
+    this.bus.stopEffects();
+    const w = this.watch;
+    this.setScene(new GameScene(this, w.mode, 'watch', undefined, [w.left, w.right], { ...w }));
+  }
+
   startGame(mode: GameMode, kind: 'single' | 'cpu' | '2p', singleMode?: SingleMode, characters?: readonly Character[], opts: { keepSelectVoices?: boolean } = {}): void {
     // キャラクター選択から：決定ボイス（select）だけは止めずに終端まで鳴らす。他の声・SEは止める
     this.bus.stopEffects(opts.keepSelectVoices ? ['select'] : []);
@@ -373,31 +388,32 @@ export class MenuScene implements Scene {
     const root: MenuItem[] = [
       {
         label: 'MODE1',
-        desc: '役をそろえてラインを消す。対戦では攻撃を送り合う',
+        desc: MENU_DESC.mode1,
         children: [
           {
             label: 'シングル',
-            desc: '1人で遊ぶ（コタロー）',
+            desc: MENU_DESC.m1_single,
             children: [
-              { label: 'ひたすら', desc: 'Lv1〜20。消去数でLvが上がり、自然上昇が速くなる', run: () => a.startGame('mode1', 'single', 'endless') },
-              { label: 'ステージクリア', desc: '全10ステージ。各ステージの消去ノルマを達成する', run: () => a.startGame('mode1', 'single', 'stage') },
+              { label: 'ひたすら', desc: MENU_DESC.endless, run: () => a.startGame('mode1', 'single', 'endless') },
+              { label: 'ステージクリア', desc: MENU_DESC.stage, run: () => a.startGame('mode1', 'single', 'stage') },
             ],
           },
-          { label: 'CPU対戦', desc: 'キャラクターを選んでCPUと対戦（相手は残る2人を順に）', run: () => a.setScene(new CpuCharacterSelectScene(a, 'mode1', 'kotaro')) },
-          { label: '2P対戦', desc: '1台のPCで2人対戦（キャラクター選択へ）', run: () => a.setScene(new CharacterSelectScene(a, 'mode1')) },
+          { label: 'CPU対戦', desc: MENU_DESC.m1_cpu, run: () => a.setScene(new CpuCharacterSelectScene(a, 'mode1', 'kotaro')) },
+          { label: '2P対戦', desc: MENU_DESC.m1_2p, run: () => a.setScene(new CharacterSelectScene(a, 'mode1')) },
         ],
       },
       {
         label: 'MODE2',
-        desc: '場のカードへ出せるピースを打ち上げ、先に盤面を空にする',
+        desc: MENU_DESC.mode2,
         children: [
-          { label: 'シングル', desc: '盤面を空にするまでのタイムを競う', run: () => a.startGame('mode2', 'single', 'mode2') },
-          { label: 'CPU対戦', desc: 'キャラクターを選んでCPUと対戦（相手は残る2人を順に）', run: () => a.setScene(new CpuCharacterSelectScene(a, 'mode2', 'kotaro')) },
-          { label: '2P対戦', desc: '1台のPCで2人対戦（キャラクター選択へ）', run: () => a.setScene(new CharacterSelectScene(a, 'mode2')) },
+          { label: 'シングル', desc: MENU_DESC.m2_single, run: () => a.startGame('mode2', 'single', 'mode2') },
+          { label: 'CPU対戦', desc: MENU_DESC.m2_cpu, run: () => a.setScene(new CpuCharacterSelectScene(a, 'mode2', 'kotaro')) },
+          { label: '2P対戦', desc: MENU_DESC.m2_2p, run: () => a.setScene(new CharacterSelectScene(a, 'mode2')) },
         ],
       },
+      { label: 'CPU観戦', desc: MENU_DESC.watch, run: () => a.setScene(new WatchSettingsScene(a)) },
       { label: 'オプション', desc: '音・操作・対戦・表示・クレジット', run: () => a.setScene(new OptionsScene(a)) },
-      { label: '遊び方', desc: '操作とルールの説明（実演・役一覧・MODE2）', run: () => a.openHelp('menu') },
+      { label: '遊び方', desc: MENU_DESC.help, run: () => a.openHelp('menu') },
     ];
     this.stack = [{ title: 'メインメニュー', items: root, cursor: 0 }];
     for (const label of openPath) {
@@ -455,7 +471,10 @@ export class MenuScene implements Scene {
     const t = this.top;
     drawMenuTitle(ctx, t.title);
     drawMenuItems(ctx, A, t.items.map((i) => i.label), t.cursor);
-    drawText(ctx, t.items[t.cursor].desc, 320, MENU_DESC_Y(t.items.length), { align: 'center', size: 11, color: TEXT_COLORS.secondary, maxWidth: 300 });
+    // V320-FIX-04 付録C：説明は採用Noto描画のまま、300pxの1行へ縮小せず全角空白の区切りで行分けする。記録欄はその下
+    const descLines = menuDescLines(ctx, t.items[t.cursor].desc);
+    descLines.forEach((l, i) => drawText(ctx, l, 320, MENU_DESC_Y(t.items.length) + i * MENU_DESC_PITCH, { align: 'center', size: 11, color: TEXT_COLORS.secondary }));
+    const bestY = MENU_DESC_Y(t.items.length) + (descLines.length - 1) * MENU_DESC_PITCH + 22;
     const r = this.app.records;
     if (t.title.endsWith('シングル')) {
       const best: string[] = [];
@@ -468,7 +487,7 @@ export class MenuScene implements Scene {
         if (r.mode2Single) best.push(`最短クリア ${formatTime(r.mode2Single.bestMs)}`);
         if (r.mode2NoResetBest) best.push(`ノーリセット最短 ${formatTime(r.mode2NoResetBest.bestMs)}`);
       }
-      best.forEach((b, i) => drawText(ctx, b, 320, MENU_DESC_Y(t.items.length) + 22 + i * 18, { align: 'center', size: 11, color: ACCENT, maxWidth: 300 }));
+      best.forEach((b, i) => drawText(ctx, b, 320, bestY + i * 18, { align: 'center', size: 11, color: ACCENT, maxWidth: 300 }));
     }
     drawFooter(ctx, A);
   }
@@ -756,6 +775,162 @@ export class CpuCharacterSelectScene implements Scene {
 
 /** メニュー項目の下の説明文のY（項目数に合わせて項目の直下） */
 const MENU_DESC_Y = (n: number) => MENU_ITEM.y + MENU_ITEM.pitch * n + 10;
+const MENU_DESC_PITCH = 15;
+const MENU_DESC_MAX_W = 300;
+
+/** V320-FIX-04 付録C：承認済みメニュー説明（本文は変更しない。表示の行分けだけ） */
+export const MENU_DESC = {
+  mode1: '役をそろえてライン消去！　連鎖で高得点と強力な攻撃を狙おう！',
+  m1_single: '1人プレイで、ハイスコアに挑戦しよう！',
+  endless: '連鎖をつないで得点アップ！　Lv20までのレベルアップに挑戦！',
+  stage: '消去ノルマを達成して、次のステージへ進もう！',
+  m1_cpu: '好きなキャラを選んで対戦！　役と攻撃でCPUに挑もう！',
+  m1_2p: '2人で役と攻撃の真剣勝負！　相手のピンチを狙おう！',
+  mode2: '出せるピースを次々に打ち上げよう！　速さと判断力のパズル！',
+  m2_single: '全部出し切るまでのタイムに挑戦！　自己ベストを更新しよう！',
+  m2_cpu: 'CPUと早出し勝負！　相手より先に全部出し切ろう！',
+  m2_2p: '同じ場のカードを取り合う早出し勝負！　先に全部出した方の勝ち！',
+  watch: 'キャラと強さを選んで、CPU同士の対戦を観戦しよう！',
+  help: '実演を見ながら、操作・役・モードごとの遊び方を覚えよう！',
+} as const;
+
+/**
+ * メニュー説明の行分け：幅300pxに収まらなければ文の区切り（全角空白）で改行し、なお収まらない行は読点・中黒の後ろで改行する。
+ * 文字は縮小しない・本文は変えない（区切りの全角空白は行頭・行末に残さない）
+ */
+export function menuDescLines(ctx: CanvasRenderingContext2D | null, text: string, measure?: (s: string) => number): string[] {
+  const w = measure ?? ((s: string) => (ctx ? ((ctx.font = `600 11px ${UI_FONT}`), ctx.measureText(s).width) : [...s].length * 11));
+  if (w(text) <= MENU_DESC_MAX_W) return [text];
+  const out: string[] = [];
+  for (const seg of text.split('　').filter((x) => x.length > 0)) {
+    let rest = seg;
+    while (w(rest) > MENU_DESC_MAX_W) {
+      const chars = [...rest];
+      let cut = -1;
+      for (let i = 1; i < chars.length; i++) if ('、。！？・'.includes(chars[i - 1]) && w(chars.slice(0, i).join('')) <= MENU_DESC_MAX_W) cut = i;
+      if (cut < 0) break;
+      out.push(chars.slice(0, cut).join(''));
+      rest = chars.slice(cut).join('');
+    }
+    out.push(rest);
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- CPU観戦（V320-FIX-04 第12章）
+
+export interface WatchSettings {
+  mode: GameMode;
+  left: Character;
+  leftLevel: Difficulty;
+  right: Character;
+  rightLevel: Difficulty;
+  firstTo: FirstTo;
+  /** MODE1 の自然上昇（ms）：7000／5000／3000 */
+  riseMs: 7000 | 5000 | 3000;
+}
+
+/** 初期値：MODE1、左アカネ初級、右ずん子初級、2本先取、自然上昇7秒 */
+export const defaultWatchSettings = (): WatchSettings => ({ mode: 'mode1', left: 'akane', leftLevel: 'easy', right: 'zunko', rightLevel: 'easy', firstTo: 2, riseMs: 7000 });
+
+export interface WatchLogEntry {
+  seed: number;
+  mode: GameMode;
+  left: { character: Character; level: Difficulty };
+  right: { character: Character; level: Difficulty };
+  riseMs: number | null;
+  round: number;
+  winner: 'left' | 'right' | 'draw';
+  gameMs: number;
+  outcome: string;
+  cause: string;
+}
+
+const WATCH_CHARS: readonly Character[] = ['kotaro', 'akane', 'zunko'];
+const WATCH_RISE: readonly WatchSettings['riseMs'][] = [7000, 5000, 3000];
+const RISE_DIFFICULTY: Record<WatchSettings['riseMs'], Difficulty> = { 7000: 'easy', 5000: 'normal', 3000: 'hard' };
+
+/** 左右同キャラ不可：変更時は相手が選んでいるキャラを飛ばして次の候補へ */
+export function nextWatchCharacter(cur: Character, other: Character, dir: -1 | 1): Character {
+  let i = WATCH_CHARS.indexOf(cur);
+  do i = (i + dir + WATCH_CHARS.length) % WATCH_CHARS.length;
+  while (WATCH_CHARS[i] === other);
+  return WATCH_CHARS[i];
+}
+
+export class WatchSettingsScene implements Scene {
+  cursor = 0;
+  readonly rawKeys = false;
+
+  constructor(private readonly app: App) {
+    app.bus.playBgm('menu');
+  }
+
+  private get w(): WatchSettings {
+    return this.app.watch;
+  }
+
+  rows(): OptRowDef[] {
+    const w = this.w;
+    const adjust = (f: () => void) => () => {
+      f();
+      this.app.bus.playSfx('ui_adjust');
+    };
+    const rows: OptRowDef[] = [
+      { label: 'モード', value: w.mode === 'mode1' ? 'MODE1' : 'MODE2', arrows: true, change: adjust(() => (w.mode = w.mode === 'mode1' ? 'mode2' : 'mode1')) },
+      { label: '左キャラ', value: CHARACTER_NAME[w.left], arrows: true, change: (d) => adjust(() => (w.left = nextWatchCharacter(w.left, w.right, d)))() },
+      { label: '左の強さ', value: DIFFICULTY_LABEL[w.leftLevel], arrows: true, change: (d) => adjust(() => (w.leftLevel = cycle(DIFFS, w.leftLevel, d)))() },
+      { label: '右キャラ', value: CHARACTER_NAME[w.right], arrows: true, change: (d) => adjust(() => (w.right = nextWatchCharacter(w.right, w.left, d)))() },
+      { label: '右の強さ', value: DIFFICULTY_LABEL[w.rightLevel], arrows: true, change: (d) => adjust(() => (w.rightLevel = cycle(DIFFS, w.rightLevel, d)))() },
+      { label: '先取本数', value: `${w.firstTo}本先取`, arrows: true, change: (d) => adjust(() => (w.firstTo = cycle([1, 2, 3] as FirstTo[], w.firstTo, d)))() },
+    ];
+    // MODE2 では自然上昇の項目を出さない
+    if (w.mode === 'mode1') rows.push({ label: '自然上昇', value: `${w.riseMs / 1000}秒`, arrows: true, change: (d) => adjust(() => (w.riseMs = cycle(WATCH_RISE, w.riseMs, d)))() });
+    rows.push({ label: '観戦開始', confirm: () => this.app.startWatch() }, { label: '戻る', confirm: () => this.app.toMenu(['CPU観戦']) });
+    return rows;
+  }
+
+  onNav(ev: NavEvent): void {
+    const bus = this.app.bus;
+    const rows = this.rows();
+    switch (ev.key) {
+      case 'up':
+      case 'down': {
+        const n = rows.length;
+        this.cursor = (this.cursor + (ev.key === 'up' ? n - 1 : 1)) % n;
+        bus.playSfx('ui_move');
+        return;
+      }
+      case 'left':
+      case 'right':
+        rows[this.cursor].change?.(ev.key === 'left' ? -1 : 1);
+        // モード切替で行数が変わっても同じ項目を指す
+        this.cursor = Math.min(this.cursor, this.rows().length - 1);
+        return;
+      case 'confirm': {
+        const r = rows[this.cursor];
+        if (r.confirm) {
+          bus.playSfx('ui_confirm');
+          r.confirm();
+        } else r.change?.(1);
+        return;
+      }
+      case 'back':
+        bus.playSfx('ui_cancel');
+        this.app.toMenu(['CPU観戦']);
+        return;
+      default:
+        return;
+    }
+  }
+
+  update(): void {}
+
+  render(ctx: CanvasRenderingContext2D): void {
+    drawOptionPanel(ctx, this.app.assets, 'CPU観戦', this.rows(), this.cursor);
+    drawFooter(ctx, this.app.assets, '↑↓：項目　←→：変更　A／Enter：決定　B／Esc：戻る');
+  }
+}
 
 // ---------------------------------------------------------------- オプション
 
@@ -1231,14 +1406,14 @@ const HELP_PAGES: { title: string; lines: string[] }[] = [
       '受けた攻撃は2秒後にまとめて処理：0.4秒ごとに1段、3段ごとに小休止',
       '待機中（枠の下）の攻撃だけを自分の攻撃で相殺できる',
       '7段で自然上昇・攻撃を迎えると4秒の猶予（1秒後から3・2・1）。6段以下に戻せなければ負け',
-      '連続取得（2秒以内）で倍率アップ、役連鎖（12秒以内）で攻撃が増える',
+      '打上連鎖（3秒以内）で倍率アップ、役連鎖（12秒以内）で攻撃が増える',
     ],
   },
   {
     title: 'MODE1 シングル',
     lines: [
       'ひたすら：消去数でLvが上がる（Lv20でMAX）。Lv11で一度ゆっくりに',
-      'ステージクリア：全10ステージ。各ステージの消去ノルマを達成する',
+      'ステージクリア：全20ステージ。各ステージの消去ノルマを達成する',
       '成功1個＝消去数1、役の1ライン消去＝消去数6',
       '得点：成功10点×得点倍率、1ライン100点×宣言時の得点倍率',
       '全消し500点、ステージクリアは1000点×面番号',
@@ -1331,17 +1506,35 @@ export class GameScene implements Scene {
   private holdMs: number | null = PRESTART_MS;
   private holdRendered = false;
 
+  /** V320-FIX-04 CPU観戦：結果演出の完了から次ラウンドまでの保持（ms） */
+  private watchHoldMs = 0;
+  readonly seed: number;
+
   constructor(
     readonly app: App,
     readonly mode: GameMode,
-    readonly kind: 'single' | 'cpu' | '2p',
+    readonly kind: 'single' | 'cpu' | '2p' | 'watch',
     readonly singleMode?: SingleMode,
     readonly characters: readonly Character[] = kind === 'single' ? ['kotaro'] : ['kotaro', 'akane'],
+    /** CPU観戦の設定（kind＝'watch' のときだけ） */
+    readonly watch?: WatchSettings,
   ) {
     const s = app.settings;
-    const seed = (Math.random() * 4294967295) >>> 0;
+    const seed = kind === 'watch' && app.watchFixedSeed !== null ? app.watchFixedSeed >>> 0 : (Math.random() * 4294967295) >>> 0;
+    this.seed = seed;
     this.announcerRng = createSeededRng((Math.random() * 4294967295) >>> 0);
-    this.devices = kind === 'cpu' ? [s.devices[0], { kind: 'cpu', level: s.npcLevel }] : kind === 'single' ? [s.devices[0]] : [s.devices[0], s.devices[1]];
+    // CPU観戦は左右とも CPU（人間の入力機器・補助表示なし。プレイヤーの対戦設定は使わない・書き換えない）
+    this.devices =
+      kind === 'watch' && watch
+        ? [
+            { kind: 'cpu', level: watch.leftLevel },
+            { kind: 'cpu', level: watch.rightLevel },
+          ]
+        : kind === 'cpu'
+          ? [s.devices[0], { kind: 'cpu', level: s.npcLevel }]
+          : kind === 'single'
+            ? [s.devices[0]]
+            : [s.devices[0], s.devices[1]];
     const readyMsFor = () => {
       this.nextAnnouncer = this.pickAnnouncer();
       return readyDurationMs(app.bus.voiceDurationMs(this.nextAnnouncer, 'ready'));
@@ -1349,7 +1542,9 @@ export class GameScene implements Scene {
     this.session =
       kind === 'single'
         ? new SingleSession({ mode: singleMode ?? 'endless', seed, readyMsFor })
-        : new Match({ firstTo: s.firstTo, difficulty: s.difficulty, seed, mode, readyMsFor });
+        : kind === 'watch' && watch
+          ? new Match({ firstTo: watch.firstTo, difficulty: RISE_DIFFICULTY[watch.riseMs], seed, mode, readyMsFor })
+          : new Match({ firstTo: s.firstTo, difficulty: s.difficulty, seed, mode, readyMsFor });
     // 決定入力の受付は演出側（勝者演出の開始後）で判定する
     this.session.resultMinMs = 0;
     this.bgm = kind === 'single' ? 'single' : 'versus';
@@ -1380,6 +1575,7 @@ export class GameScene implements Scene {
   private pickAnnouncer(): Character {
     if (this.kind === 'single') return 'kotaro';
     if (this.kind === 'cpu') return this.characters[1];
+    // 2P対戦・CPU観戦：両者から等確率
     return this.characters[this.announcerRng.next() < 0.5 ? 0 : 1];
   }
 
@@ -1439,7 +1635,38 @@ export class GameScene implements Scene {
     }
     if (s.game !== before) this.onNewRound();
     this.recordIfDone();
+    this.logWatch();
     this.devMeasure();
+  }
+
+  private watchLogged = false;
+
+  /** V320-FIX-04 CPU観戦：ラウンドごとの記録（開発用。SINGLE の正式成績には書かない） */
+  private logWatch(): void {
+    const w = this.watch;
+    const g = this.game;
+    if (this.kind !== 'watch' || !w || !g.result || this.watchLogged) return;
+    this.watchLogged = true;
+    const r = g.result;
+    const m = this.session as Match;
+    let cause: string = r.outcome;
+    if (g.mode === 'mode1' && r.winner !== null) {
+      const loser = (g as Game).players[1 - r.winner];
+      const ev = [...(g as Game).events].reverse().find((e) => (e.type === 'danger' || e.type === 'attackPinch') && e.player === loser.id && e.state === 'defeat');
+      cause = ev ? (ev.type === 'danger' ? 'natural_rise_pinch' : 'attack_pinch') : r.outcome;
+    }
+    this.app.watchLog.push({
+      seed: this.seed,
+      mode: w.mode,
+      left: { character: w.left, level: w.leftLevel },
+      right: { character: w.right, level: w.rightLevel },
+      riseMs: w.mode === 'mode1' ? w.riseMs : null,
+      round: m.round,
+      winner: r.winner === null ? 'draw' : r.winner === 0 ? 'left' : 'right',
+      gameMs: Math.round((r.tick - g.playStartTick) * g.tickMs),
+      outcome: r.outcome,
+      cause,
+    });
   }
 
   /** 開発版だけ：ラウンドごとの計測記録（window.__p2like.metrics()／F8 で保存） */
@@ -1469,6 +1696,8 @@ export class GameScene implements Scene {
     this.finalCursor = 0;
     this.recorded = false;
     this.mode2Submit = null;
+    this.watchHoldMs = 0;
+    this.watchLogged = false;
     this.holdMs = PRESTART_MS;
     this.holdRendered = false;
   }
@@ -1503,7 +1732,8 @@ export class GameScene implements Scene {
 
   onKey(code: string, repeat: boolean): boolean {
     if (this.app.deps.dev && this.devKey(code)) return true;
-    const owner = this.keyboardOwner();
+    // CPU観戦：1Pの設定機器（キーボード）から終了確認を開ける（2P入力は不要）
+    const owner = this.keyboardOwner() ?? (this.kind === 'watch' ? 0 : null);
     const dlg = owner !== null ? this.quit.find((q) => q.source === 'keyboard') : undefined;
     // 終了確認（キーボード）：確認を開いたプレイヤーの割当キーと、他のキーボード操作者に割り当てていない共有キー（←→・Esc・Enter・Backspace）
     // だけを確認へ振り分ける。相手の割当キーは相手のコントローラーへ渡す（共有キーボードでも相手の操作を奪わない）
@@ -1579,7 +1809,8 @@ export class GameScene implements Scene {
   onNav(ev: NavEvent): void {
     if (ev.source.kind !== 'pad') return; // キーボードは onKey で扱う
     const padIndex = ev.source.index;
-    const player = this.devices.findIndex((d) => d.kind === 'gamepad' && d.index === padIndex);
+    // CPU観戦：パッドからも1Pとして終了確認・結果の選択を行う
+    const player = this.kind === 'watch' ? 0 : this.devices.findIndex((d) => d.kind === 'gamepad' && d.index === padIndex);
     const dlg = this.quit.find((q) => typeof q.source === 'object' && q.source.pad === padIndex);
     if (dlg) {
       if (ev.key === 'left' || ev.key === 'right') this.moveDialog(dlg);
@@ -1619,13 +1850,23 @@ export class GameScene implements Scene {
   private decideDialog(d: QuitDialog): void {
     if (d.cursor === 1) {
       this.app.bus.playSfx('ui_confirm');
-      this.app.toMenu();
+      // CPU観戦は中止して観戦設定へ戻る
+      if (this.kind === 'watch') {
+        this.app.bus.stopEffects();
+        this.app.setScene(new WatchSettingsScene(this.app));
+      } else this.app.toMenu();
     } else this.closeDialog(d);
   }
 
   /** 試合終了後の選択肢（第15章）。CPU対戦：勝ち＝次の相手へ／同じ相手と再戦／メニュー、負け＝同じ相手に再挑戦／メニュー。2P：再戦／キャラ選択／メニュー */
   finalChoices(): { label: string; act: 'next' | 'rematch' | 'select' | 'menu' }[] {
     const s = this.session;
+    if (this.kind === 'watch')
+      return [
+        { label: '再戦', act: 'rematch' },
+        { label: '観戦設定へ', act: 'select' },
+        { label: 'メインメニューへ', act: 'menu' },
+      ];
     if (s instanceof Match) {
       if (this.kind === 'cpu') {
         return s.matchWinner === 0
@@ -1675,10 +1916,13 @@ export class GameScene implements Scene {
         return this.app.startGame(this.mode, 'cpu');
       case 'select':
         this.app.bus.stopEffects();
+        if (this.kind === 'watch') return this.app.setScene(new WatchSettingsScene(this.app));
         // CPU対戦は現在の1Pキャラを選択位置にして戻る
         if (this.kind === 'cpu') return this.app.setScene(new CpuCharacterSelectScene(this.app, this.mode, this.app.cpuPlayer));
         return this.app.setScene(new CharacterSelectScene(this.app, this.mode));
       case 'rematch': {
+        // CPU観戦の再戦：同じ設定・新しいseed（開発用固定seedの指定時だけ同じseed）
+        if (this.kind === 'watch') return this.app.startWatch();
         const before = s.game;
         if (s instanceof Match) s.rematch();
         else s.restart();
@@ -1715,6 +1959,12 @@ export class GameScene implements Scene {
     this.director.sync();
     this.roleNames.update();
     this.staging.update();
+    // CPU観戦：敗者→勝者の結果演出の完了（決定を受け付けられる時点）から1500ms保持して次ラウンドへ自動進行
+    const s = this.session;
+    if (this.kind === 'watch' && s instanceof Match && s.state === 'roundResult' && this.staging.acceptReady) {
+      this.watchHoldMs += dtMs;
+      if (this.watchHoldMs >= WATCH_ROUND_HOLD_MS) this.confirmQueued = true;
+    }
     // 最終結果はファンファーレ後にメニュー曲へ（同じ曲なら再始動しない）
     if (this.finished && this.staging.acceptReady) this.app.bus.playBgm('menu');
   }
@@ -1745,11 +1995,13 @@ export class GameScene implements Scene {
     const phase = (['A', 'B', 'C'] as const)[Math.floor(ms / 90) % 3];
     if (g.result && this.staging.acceptReady) {
       if (this.finished || (s instanceof SingleSession && s.state === 'result')) this.drawResult(ctx, phase);
-      else drawText(ctx, '決定（A／Enter／発射）で次のラウンドへ', 320, 18, { align: 'center', size: 10, box: true });
+      else if (this.kind !== 'watch') drawText(ctx, '決定（A／Enter／発射）で次のラウンドへ', 320, 18, { align: 'center', size: 10, box: true });
     }
+    // CPU観戦中と分かる小さな見出し（中央上部の MODE 表示と場のカードの間。既存表示に掛けない）
+    if (this.kind === 'watch' && !this.finished) drawText(ctx, 'CPU観戦中', 320, 24, { align: 'center', size: 10, color: TEXT_COLORS.secondary });
     for (const q of this.quit) {
       const x = q.player === 0 ? 16 : 336;
-      drawConfirm(ctx, A, `${q.player + 1}P：メニューへ戻りますか？`, ['続ける', '終了する'], q.cursor, x, 110, 'ゲームは止まっていません');
+      drawConfirm(ctx, A, this.kind === 'watch' ? '観戦をやめて設定へ戻りますか？' : `${q.player + 1}P：メニューへ戻りますか？`, ['続ける', '終了する'], q.cursor, x, 110, 'ゲームは止まっていません');
     }
   }
 
@@ -1771,7 +2023,10 @@ export class GameScene implements Scene {
     if (s instanceof Match) {
       head = 'extra:result_match_ja'; // 対戦（CPU・2P）の最終結果
       const w = s.matchWinner;
-      if (this.kind === 'cpu') {
+      if (this.kind === 'watch') {
+        const lv = (p: PlayerId) => DIFFICULTY_LABEL[p === 0 ? this.watch!.leftLevel : this.watch!.rightLevel];
+        lines.push(w === null ? '引分け' : `${w === 0 ? '左' : '右'} ${CHARACTER_NAME[this.characters[w]]}（${lv(w)}）の勝ち`);
+      } else if (this.kind === 'cpu') {
         const opp = CHARACTER_NAME[this.characters[1]];
         lines.push(w === 0 ? `勝利！　次の相手：${CHARACTER_NAME[nextCpuOpponent(this.app.cpuPlayer, this.app.cpuOpponent)]}` : `${w === null ? '引分け' : '敗北'}　相手：${opp}`);
       } else lines.push(w === null ? '引分け' : `${w + 1}P WIN　${2 - w}P LOSE`);

@@ -49,6 +49,7 @@ describe('v3.2.0 判断時の停止', () => {
 
   it('通常の停止中にピンチへ移ったら、その時点の残り停止時間を半分に（1回だけ・引き直さない）', () => {
     const cfg = clone();
+    delete cfg.mandatoryWait; // 既存の判断時停止だけを確認（V320-FIX-04 の必須待ちは v320_fix04_cpu.test.ts）
     cfg.decisionStop.easy.pct.kotaro = 100;
     cfg.decisionStopWeights = [0, 100, 0]; // 1000ms ＝ 60tick
     const g = makeGame({ base: '1s', boards: { 0: { 0: ['2s'], 1: ['3d'], 2: ['3d'], 3: ['3d'], 4: ['3d'], 5: ['3d'] }, 1: EMPTY } });
