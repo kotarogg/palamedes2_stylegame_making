@@ -159,19 +159,24 @@ export function rateRun(glyphs: readonly RateGlyphDef[], text: string): { width:
 }
 
 /**
- * 相殺・送信の表示（V320-FIX-04 第9章）：攻撃が確定した既存イベントの canceled／sent を、中央領域の左右レーンへ。
- * 1P＝左レーン x264〜318、2P＝右レーン x322〜376。見出しPNGはレーン中央へ原寸（描画画素の中心で合わせる）、
- * 相殺：見出し y166・数字 y188、攻撃：見出し y214・数字 y236。数字はS12・高さ上限17・幅上限50。0の行は空ける
+ * 相殺・送信の表示（V320-FIX-04 第9章、V320-FIX-04-R1 で配置を変更）：攻撃が確定した既存イベントの canceled／sent を表示する。
+ * R1：中央エリアは受ストック（最大29＋待機28で x269〜291／349〜371・y145〜346）と待機数の表示に占められ、
+ * 見出し画像（可視幅37〜38px）を原寸で置ける空きが列の間に約28pxしかないため、両立できない。
+ * 代替として、各プレイヤー側の外側の縦帯（1P x0〜48、2P x592〜640）の連鎖HUDより上（y48〜124）へ置く。
+ * 見出しPNGは帯の中心（x24／x616）へ原寸、相殺：見出し y48・数字 y68、攻撃：見出し y87・数字 y107。数字はS12・高さ17・幅46。0の行は空ける
  */
 export const ATTACK_RESULT = {
   durationMs: 900,
-  lanes: { 0: { x: 264, w: 54 }, 1: { x: 322, w: 54 } },
-  cancel: { id: 'label_cancel', headingY: 166, digitsY: 188 },
-  attack: { id: 'label_attack', headingY: 214, digitsY: 236 },
-  digits: { h: 17, maxW: 50 },
+  lanes: { 0: { x: 0, w: 48 }, 1: { x: 592, w: 48 } },
+  cancel: { id: 'label_cancel', headingY: 48, digitsY: 68 },
+  attack: { id: 'label_attack', headingY: 87, digitsY: 107 },
+  digits: { h: 17, maxW: 46 },
   /** 送信>0 の光点：送信側の攻撃数字付近から相手の受ストック上端へ */
   dotMs: 250,
 } as const;
+
+/** V320-FIX-04（PM初期座標）の中央レーン。受ストックと重なるため R1 で不採用（記録として残す） */
+export const ATTACK_RESULT_CENTER_V320_FIX04 = { lanes: { 0: { x: 264, w: 54 }, 1: { x: 322, w: 54 } }, cancel: { headingY: 166, digitsY: 188 }, attack: { headingY: 214, digitsY: 236 }, digits: { h: 17, maxW: 50 } } as const;
 
 export interface AttackResultRow {
   kind: 'cancel' | 'attack';

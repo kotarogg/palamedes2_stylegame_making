@@ -103,19 +103,56 @@ await ev(() => {
     for (const s of [p0.incoming, p1.incoming]) Object.assign(s, { nextPending: 8 });
     const e = window.__f4.canvas(); v.render(e.x, t + 6);
     const atkStockShot = e.c.toDataURL('image/png');
+    // V320-FIX-04-R1：双方の受ストック最大（予約29＋待機28）・双方の相殺＋攻撃を同時に表示。
+    // 受ストック（アイコン・枠・待機数）の描画画素が、表示の有無で1画素も変わらない（覆わない・裏へ隠さない）
+    for (const s of [p0.incoming, p1.incoming]) Object.assign(s, { blockActive: true, blockReserved: 29, blockRemaining: 27, waveRemaining: 2, nextPending: 28 });
+    v.pv[0].attackShow = { canceled: 12, sent: 29, start: t };
+    v.pv[1].attackShow = { canceled: 14, sent: 29, start: t };
+    const mOn = window.__f4.canvas(); v.render(mOn.x, t + 20); // 光点（250ms）の後
+    const maxShot = mOn.c.toDataURL('image/png');
+    const saved = [v.pv[0].attackShow, v.pv[1].attackShow];
+    v.pv[0].attackShow = null; v.pv[1].attackShow = null;
+    const mOff = window.__f4.canvas(); v.render(mOff.x, t + 20);
+    void saved;
+    const maxDiff = window.__f4.diffBox(mOff.c, mOn.c);
+    // 差の出た画素が受ストック領域（列の外接＋待機数）に1つもないこと
+    const plans = [0, 1].map((p) => v.stockDrawPlan(p, t + 20));
+    const regions = plans.map((pl) => {
+      const xs = pl.entries.flatMap((e) => [e.x, e.x + e.w]);
+      const ys = pl.entries.flatMap((e) => [e.y, e.y + e.h]);
+      const lb = pl.label;
+      return { x0: Math.min(...xs, lb.align === 'left' ? lb.x + 20 : lb.x - 20) - 1, x1: Math.max(...xs, lb.align === 'left' ? lb.x + 20 : lb.x) + 1, y0: Math.min(...ys) - 1, y1: Math.max(...ys) + 1 };
+    });
+    const da = mOn.x.getImageData(0, 0, 640, 360).data;
+    const db = mOff.x.getImageData(0, 0, 640, 360).data;
+    let inStock = 0;
+    const outBoxes = [];
+    for (let i = 0; i < da.length; i += 4) {
+      if (da[i] === db[i] && da[i + 1] === db[i + 1] && da[i + 2] === db[i + 2]) continue;
+      const x = (i / 4) % 640, y = Math.floor(i / 4 / 640);
+      if (regions.some((g) => x >= g.x0 && x <= g.x1 && y >= g.y0 && y <= g.y1)) inStock++;
+      if (!((x < 48 || x >= 592) && y >= 48 && y < 125)) outBoxes.push([x, y]);
+    }
+    v.pv[0].attackShow = { canceled: 12, sent: 29, start: t };
+    v.pv[1].attackShow = { canceled: 14, sent: 29, start: t };
+    const maxRows = [0, 1].map((p) => v.attackResult(p, t + 20).rows.map((x) => [x.kind, x.value]));
+    v.pv[0].attackShow = { canceled: 3, sent: 4, start: t };
+    v.pv[1].attackShow = { canceled: 0, sent: 2, start: t };
+    for (const [i, s] of inc.entries()) Object.assign([p0.incoming, p1.incoming][i], s);
     Object.assign(p0.incoming, inc[0]);
     Object.assign(p1.incoming, inc[1]);
     const rows = [0, 1].map((p) => v.attackResult(p, t + 6));
     const after = [0, 1].map((p) => v.attackResult(p, t + 54)); // 900ms
     const stock = [0, 1].map((p) => v.stockDrawPlan(p, t + 6).entries.map((e) => [e.x, e.y, e.w, e.h]));
     v.pv[0].attackShow = null; v.pv[1].attackShow = null;
-    return { base, shake, shakeDiff, atkShot, atkStockShot, rows, after, stock, hud: [v.chainHud(0), v.chainHud(1)] };
+    return { base, shake, shakeDiff, atkShot, atkStockShot, maxShot, maxDiff, inStock, outBoxes: outBoxes.length, regions, maxRows, rows, after, stock, hud: [v.chainHud(0), v.chainHud(1)] };
   });
-  shots.push(save('V320F04_versus_1x', r.base), save('V320F04_attack_cancel_1x', r.atkShot), save('V320F04_attack_cancel_stock_1x', r.atkStockShot));
+  shots.push(save('V320F04_versus_1x', r.base), save('V320F04_attack_cancel_1x', r.atkShot), save('V320F04_attack_cancel_stock_1x', r.atkStockShot), save('V320F04R1_attack_cancel_stock_max29_1x', r.maxShot));
+  check('R1 第9章：双方の受ストック最大（予約29＋待機28）と双方の相殺・攻撃表示が同時でも、受ストック（アイコン・枠・待機数）の画素は表示の有無で不変。表示は外側の縦帯 x0〜48／592〜640・y48〜124 の中だけ', r.maxDiff.n > 0 && r.inStock === 0 && r.outBoxes === 0 && JSON.stringify(r.maxRows) === JSON.stringify([[['cancel', 12], ['attack', 29]], [['cancel', 14], ['attack', 29]]]), JSON.stringify({ diff: r.maxDiff, inStock: r.inStock, out: r.outBoxes, regions: r.regions, rows: r.maxRows }));
   check('第4.1節 見出しPNG左上：役(2,129)/(594,129)・連鎖(2,166)・打上(2,256)・連鎖(2,276)', r.hud[0].roleTitle.x === 2 && r.hud[0].roleTitle.y === 129 && r.hud[1].roleTitle.x === 594 && r.hud[0].roleSub.y === 166 && r.hud[0].streakTitle.y === 256 && r.hud[0].streakSub.y === 276);
   check('第4.2節 揺れ：600ms周期の最初の200ms、(0,0)→(-1,0)→(1,-1)→(0,1)', JSON.stringify(r.shake.map((s) => s.off)) === JSON.stringify([[0, 0], [-1, 0], [1, -1], [0, 1], [0, 0], [0, 0]]), JSON.stringify(r.shake));
   check('第4.2節 揺れの描画差は打上連鎖数の行（縦帯 x0〜48・y299〜318）の中だけ', r.shakeDiff.n > 0 && r.shakeDiff.x >= 0 && r.shakeDiff.x + r.shakeDiff.w <= 48 && r.shakeDiff.y >= 299 && r.shakeDiff.y + r.shakeDiff.h <= 318, JSON.stringify(r.shakeDiff));
-  check('第9章 相殺・攻撃：1Pは相殺→攻撃の2段（左レーン）、2Pは攻撃のみ（右レーン・上段は空ける）。900msで消える', r.rows[0].rows.map((x) => x.kind).join() === 'cancel,attack' && r.rows[1].rows.map((x) => x.kind).join() === 'attack' && r.after.every((x) => x === null), JSON.stringify(r.rows.map((x) => x.rows.map((y) => [y.kind, y.label.x, y.label.y, y.digits.cx, y.digits.y]))));
+  check('第9章（R1配置）相殺・攻撃：1Pは相殺→攻撃の2段（左の縦帯）、2Pは攻撃のみ（右の縦帯・上段は空ける）。900msで消える', r.rows[0].rows.map((x) => x.kind).join() === 'cancel,attack' && r.rows[1].rows.map((x) => x.kind).join() === 'attack' && r.after.every((x) => x === null), JSON.stringify(r.rows.map((x) => x.rows.map((y) => [y.kind, y.label.x, y.label.y, y.digits.cx, y.digits.y]))));
   check('第9章 送信>0 で光点（250ms以内）', !!r.rows[0].dot && !!r.rows[1].dot, JSON.stringify(r.rows.map((x) => x.dot)));
   writeFileSync(new URL('attack_result_layout.json', OUT), JSON.stringify({ rows: r.rows, stock: r.stock }, null, 1));
 }
@@ -297,6 +334,64 @@ for (const kind of ['refresh', 'noReset']) {
   });
   shots.push(save('V320F04_stage20_clear_1x', r.png));
   check('第10章 20面クリアで全ステージクリア（ボーナス20000・倍率なし）。記録に20面ルール識別', r.outcome === 'allStagesClear' && r.ev20?.bonus === 20000 && r.ev20?.final === true && r.rec?.rule === 'stage20_V320-FIX-04' && r.rec?.completed === true, JSON.stringify({ outcome: r.outcome, bonus: r.ev20?.bonus, rec: r.rec }));
+}
+
+// ---- R1. MODE2 ノーリセット表示は SINGLE だけ（実際の画面描画で確認）----
+for (const kind of ['single', '2p', 'cpu', 'watch']) {
+  await ev((kind) => {
+    const app = window.__p2like.app;
+    if (kind === 'watch') {
+      app.watch.mode = 'mode2';
+      app.startWatch();
+    } else app.startGame('mode2', kind, kind === 'single' ? 'mode2' : undefined, kind === '2p' ? ['kotaro', 'akane'] : undefined);
+  }, kind);
+  await page.waitForTimeout(3500);
+  await ev(() => {
+    const g = window.__p2like.game();
+    const p = g.players[0];
+    p.board.cols.forEach((c) => (c.length = 0));
+    p.board.cols[p.selectedCol].push({ kind: 'piece', piece: g.factory.make(g.base.n, g.base.suit === 'spade' ? 'heart' : 'spade') });
+  });
+  if (kind !== 'watch') await page.keyboard.press('KeyF');
+  await page.waitForFunction(() => !!window.__p2like.game()?.result, null, { timeout: 30000 });
+  // 結果演出の開始後（勝敗の見出し・付記が出る時点）、SINGLE の結果パネルが出る前
+  await page.waitForTimeout(900);
+  const r = await ev(() => {
+    const sc = window.__p2like.gameScene();
+    const g = sc.game;
+    const v = sc.view;
+    const t = g.tick;
+    // 実際の画面（シーンの描画）と、同じシーン描画で付記を強制表示／強制非表示にしたものを比べる
+    const real = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(sc), 'noResetShown');
+    const actual = window.__f4.canvas(); sc.render(actual.x, 0);
+    const shown = sc.noResetShown;
+    Object.defineProperty(sc, 'noResetShown', { configurable: true, get: () => g.result.winner ?? 0 });
+    const forced = window.__f4.canvas(); sc.render(forced.x, 0);
+    const lbl = v.noResetLabel(t);
+    Object.defineProperty(sc, 'noResetShown', { configurable: true, get: () => null });
+    const none = window.__f4.canvas(); sc.render(none.x, 0);
+    delete sc.noResetShown;
+    void real;
+    const box = { x: lbl.x - 90, y: lbl.y - 2, w: 180, h: 20 };
+    const grab = (c) => c.getContext('2d').getImageData(box.x, box.y, box.w, box.h).data;
+    const same = (a, b) => { let n = 0; for (let i = 0; i < a.length; i += 4) if (a[i] !== b[i] || a[i + 1] !== b[i + 1] || a[i + 2] !== b[i + 2]) n++; return n; };
+    const A = grab(actual.c), F = grab(forced.c), N = grab(none.c);
+    const rec = window.__p2like.app.records;
+    return { kind: sc.kind, outcome: g.result.outcome, winner: g.result.winner, refresh: g.refreshCount, shown, lbl, diffForced: same(A, F), diffNone: same(A, N), forcedVsNone: same(F, N), noResetBest: rec.mode2NoResetBest, total: rec.mode2Single, png: actual.c.toDataURL('image/png') };
+  });
+  shots.push(save(`V320F04R1_mode2_noreset_${kind}_1x`, r.png));
+  delete r.png;
+  const drawn = r.forcedVsNone > 0 && r.diffForced === 0;
+  const notDrawn = r.forcedVsNone > 0 && r.diffNone === 0;
+  if (kind === 'single') check('R1 MODE2 SINGLE：場の更新0回のクリアで「ノーリセットクリア！」を画面に描画（画素一致）し、総合・ノーリセット専用ベストを記録', r.outcome === 'clear' && r.refresh === 0 && r.shown === 0 && drawn && !!r.noResetBest && !!r.total, JSON.stringify(r), 'direct-state');
+  else check(`R1 MODE2 ${kind}：場の更新0回で1Pが勝っても「ノーリセットクリア！」を描画しない（画面の該当範囲が非表示の描画と一致）。記録なし`, r.outcome === 'win' && r.winner === 0 && r.refresh === 0 && r.shown === null && notDrawn && r.noResetBest === null && r.total === null, JSON.stringify(r), 'direct-state');
+  await ev(() => {
+    // 次のモードの前に記録を空へ（SINGLE の記録が対戦側の判定に混ざらないように）
+    const rec = window.__p2like.app.records;
+    rec.mode2Single = null;
+    rec.mode2NoResetBest = null;
+    window.__p2like.app.toMenu();
+  });
 }
 
 writeFileSync(new URL('e2e_report_V320-FIX-04.json', OUT), JSON.stringify({ id: 'V320-FIX-04', fontStandin: !!STANDIN, results, shots, errors }, null, 1));

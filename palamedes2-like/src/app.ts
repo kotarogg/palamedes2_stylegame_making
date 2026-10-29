@@ -1984,7 +1984,7 @@ export class GameScene implements Scene {
       matchOver: false,
       // v3.2.0 出せるピースの補助表示：人間のプレイヤーだけ（オプションで共通ON/OFF）
       assist: this.app.settings.assist ? this.humans() : [],
-      noReset: g.mode === 'mode2' && g.result ? (g as Mode2Game).noResetAchiever() : null,
+      noReset: this.noResetShown,
       characters: this.characters,
       roleLogo: (p, tick) => this.roleNames.logoAt(p, Math.floor(tick)),
       preStart: this.holdMs !== null,
@@ -2003,6 +2003,12 @@ export class GameScene implements Scene {
       const x = q.player === 0 ? 16 : 336;
       drawConfirm(ctx, A, this.kind === 'watch' ? '観戦をやめて設定へ戻りますか？' : `${q.player + 1}P：メニューへ戻りますか？`, ['続ける', '終了する'], q.cursor, x, 110, 'ゲームは止まっていません');
     }
+  }
+
+  /** V320-FIX-04-R1：ノーリセットの達成表示（MODE2 SINGLE だけ。CPU対戦・2P対戦・CPU観戦では出さない）。自動検証用に公開 */
+  get noResetShown(): PlayerId | null {
+    const g = this.game;
+    return this.kind === 'single' && g.mode === 'mode2' && g.result ? (g as Mode2Game).noResetAchiever() : null;
   }
 
   private playerLabel(p: PlayerId): string {

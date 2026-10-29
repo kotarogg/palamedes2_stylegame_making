@@ -214,18 +214,18 @@ describe('V320-FIX-04 相殺・送信の表示（第9章）', () => {
     return { g, v, a: a! };
   }
 
-  it('相殺・攻撃の両方：上段「相殺 N」（y166/188）、下段「攻撃 N」（y214/236）。1Pは左レーン x264〜318 の中央', () => {
+  it('V320-FIX-04-R1 相殺・攻撃の両方：上段「相殺 N」（y48/68）、下段「攻撃 N」（y87/107）。1Pは外側の縦帯 x0〜48 の中央（x24）', () => {
     const { v, a } = setup(3);
     expect(a.counter).toMatchObject({ canceled: 3, sent: 2 });
     const r = v.attackResult(0, a.tick)!;
     expect(r.rows.map((x) => [x.kind, x.value, x.label.y, x.digits.y, x.digits.cx])).toEqual([
-      ['cancel', 3, 166, 188, 291],
-      ['attack', 2, 214, 236, 291],
+      ['cancel', 3, 48, 68, 24],
+      ['attack', 2, 87, 107, 24],
     ]);
     for (const x of r.rows) {
-      expect(x.label.visible.x).toBeGreaterThanOrEqual(264);
-      expect(x.label.visible.x + x.label.visible.w).toBeLessThanOrEqual(318);
-      expect(x.digits).toMatchObject({ h: 17, maxW: 50 });
+      expect(x.label.visible.x).toBeGreaterThanOrEqual(0);
+      expect(x.label.visible.x + x.label.visible.w).toBeLessThanOrEqual(48);
+      expect(x.digits).toMatchObject({ h: 17, maxW: 46 });
     }
     expect(r.dot).not.toBeNull();
     expect(v.attackResult(1, a.tick)).toBeNull();
@@ -234,7 +234,7 @@ describe('V320-FIX-04 相殺・送信の表示（第9章）', () => {
   it('相殺0：攻撃だけ（上段は空ける）。送信0：相殺だけで光点なし。900msで終了', () => {
     const s = setup(0);
     const r = s.v.attackResult(0, s.a.tick)!;
-    expect(r.rows.map((x) => [x.kind, x.label.y])).toEqual([['attack', 214]]);
+    expect(r.rows.map((x) => [x.kind, x.label.y])).toEqual([['attack', 87]]);
     expect(s.v.attackResult(0, s.a.tick + 53)).not.toBeNull();
     expect(s.v.attackResult(0, s.a.tick + 54)).toBeNull(); // 900ms
     expect(s.v.attackResult(0, s.a.tick + 15)!.dot).toBeNull(); // 光点は250msまで
@@ -253,5 +253,44 @@ describe('V320-FIX-04 相殺・送信の表示（第9章）', () => {
     g.result = null;
     v.reset(makeGame({ boards: { 0: EMPTY, 1: EMPTY } }));
     expect(v.attackResult(0, a.tick)).toBeNull();
+  });
+});
+
+describe('V320-FIX-04-R1 相殺・送信の表示と受ストック・連鎖HUD・盤面の非干渉', () => {
+  const overlapB = (a: Box, b: Box) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  it('双方の受ストック最大（予約29＋待機28）と双方の相殺・攻撃表示が同時でも、表示（見出し可視範囲・数字の最大枠・光点の始点）は受ストック・待機数・連鎖HUD・盤面・勝利数に重ならない', () => {
+    const g = makeGame({ boards: { 0: EMPTY, 1: EMPTY } });
+    const v = new GameView(g, fakeAssets());
+    while (!g.playing) g.step();
+    for (const p of g.players) Object.assign(p.incoming, { blockActive: true, blockReserved: 29, blockRemaining: 27, waveRemaining: 2, nextPending: 28 });
+    const L = fakeAssets().layout;
+    for (const p of P) {
+      const rows = (v as unknown as { pv: { attackShow: unknown }[] }).pv;
+      rows[p].attackShow = { canceled: 12, sent: 29, start: g.tick };
+    }
+    for (const p of P) {
+      const r = v.attackResult(p, g.tick)!;
+      expect(r.rows).toHaveLength(2);
+      const boxes: Box[] = r.rows.flatMap((x) => [x.label.visible, { x: x.digits.cx - x.digits.maxW / 2, y: x.digits.y, w: x.digits.maxW, h: x.digits.h }]);
+      for (const q of P) {
+        const plan = v.stockDrawPlan(q, g.tick);
+        for (const e of plan.entries) for (const b of boxes) expect(overlapB(b, { x: e.x, y: e.y, w: e.w, h: e.h }), `${p}→stock${q}`).toBe(false);
+        const lb = plan.label!;
+        const lbox: Box = { x: lb.align === 'left' ? lb.x - 2 : lb.x - 20, y: lb.y - 2, w: 22, h: 16 };
+        for (const b of boxes) expect(overlapB(b, lbox), `${p}→label${q}`).toBe(false);
+        const hud = chainHudLayout(q);
+        for (const b of boxes) {
+          for (const row of [hud.roleTitle.visible, hud.roleSub.visible, hud.streakTitle.visible, hud.streakSub.visible]) expect(overlapB(b, row)).toBe(false);
+          for (const k of ['board', 'chain_gauge', 'stock_background', 'win_counter', 'role_logo']) expect(overlapB(b, L.pRect(q, k)), `${p}:${k}${q}`).toBe(false);
+        }
+      }
+      // 自分の側の縦帯（48px）の中
+      const strip = chainHudLayout(p).strip;
+      for (const b of boxes) {
+        expect(b.x).toBeGreaterThanOrEqual(strip.x);
+        expect(b.x + b.w).toBeLessThanOrEqual(strip.x + strip.w);
+        expect(b.y + b.h).toBeLessThanOrEqual(chainHudLayout(p).roleTitle.visible.y);
+      }
+    }
   });
 });

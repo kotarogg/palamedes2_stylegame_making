@@ -201,7 +201,7 @@ export interface HudInfo {
   roleLogo?: (p: PlayerId, tick: number) => { logo: number; since: number } | null;
   /** v3.2.0 出せるピースの補助表示を出すプレイヤー（人間側。空・未指定なら出さない） */
   assist?: readonly PlayerId[];
-  /** v3.2.0 MODE2 ノーリセットクリアの達成者（対戦は勝者、シングルは 0）。クリア／勝利演出の中で付記 */
+  /** MODE2 ノーリセットクリアの達成者（V320-FIX-04-R1：表示は SINGLE だけ＝0。対戦・観戦は null）。クリア演出の中で付記 */
   noReset?: PlayerId | null;
   /** 遊び方・デモ：READY／GO の見出しを出さない（教材は入力受付の開始から始める） */
   hideStartBanner?: boolean;
