@@ -446,7 +446,9 @@ describe('v3.1.0 代替攻撃ボイスと役名ボイス：同時に鳴らさな
     expect(dir.roleVoiceImminent()).toBe(false); // 再生開始済み（鳴っている声は AudioBus 側で判定）
     (g as { tick: number }).tick = 5;
     (g.events as GameEvent[]).push({ type: 'declare', tick: 5, player: 0, logos: [3], chainCount: 2 } as unknown as GameEvent);
-    dir.update(); // 先頭ロゴ保持中 → 表示待ち
-    expect(dir.roleVoiceImminent()).toBe(true);
+    // V320-FIX-05 で更新：先頭ロゴ表示中の新宣言も即開始（表示待ちを作らない）→ 取り込み後は予定なし
+    expect(dir.roleVoiceImminent()).toBe(true); // 未取り込みの宣言
+    dir.update();
+    expect(dir.roleVoiceImminent()).toBe(false);
   });
 });

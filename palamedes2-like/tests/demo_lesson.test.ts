@@ -107,16 +107,15 @@ describe('4/4/6 共用教材（設計書 第6節）を本編の処理で実行',
       if (!roleGaps.includes(i)) expect(ms(d), `gap${i}`).toBe(1200);
     });
     expect([ms(succ[4] - ends[0]), ms(succ[8] - ends[1])]).toEqual([1200, 1200]);
-    // 役処理中は停止：成功→宣言＋役終了→成功 の打上連鎖の消費は 3000ms 未満
-    expect(ms(decl[0] - succ[3] + succ[4] - ends[0])).toBeLessThan(3000);
-    expect(ms(decl[1] - succ[7] + succ[8] - ends[1])).toBeLessThan(3000);
-    // 次宣言までの役連鎖の消費（役処理中は停止）は 12000ms 以内
-    expect(ms(decl[1] - ends[0])).toBeLessThan(12000);
-    expect(ms(decl[2] - ends[1])).toBeLessThan(12000);
+    // V320-FIX-05 で更新：打上連鎖は時間制限なし（旧：成功→宣言＋役終了→成功の消費が3000ms未満）。連鎖は切れずに14まで続く
+    expect(ev(g, 'streakCut')).toEqual([]);
+    // 次宣言までの役連鎖の消費（役処理中は停止）は 10000ms 以内（V320-FIX-05：10秒）
+    expect(ms(decl[1] - ends[0])).toBeLessThan(10000);
+    expect(ms(decl[2] - ends[1])).toBeLessThan(10000);
     // 読書区間（ゲーム停止）は取得前・宣言前・役終了後：役処理中・飛行中に置かない
     const roles = decl.map((d, i) => [d, ends[i]]);
     for (const rd of reads) for (const [a, b] of roles) expect(rd.gameTick < a || rd.gameTick >= b, `${rd.page}@${rd.gameTick}`).toBe(true);
-    expect(reads.map((x) => x.page)).toEqual(['role_ready', 'role_ready', 'declare', 'line_clear', 'streak', 'streak_rate', 'flush', 'chain', 'chain3']);
+    expect(reads.map((x) => x.page)).toEqual(['role_ready', 'role_ready', 'declare', 'line_clear', 'streak', 'streak', 'streak_rate', 'flush', 'chain', 'chain3']); // V320-FIX-05：streak は2パネル
   });
 });
 
@@ -160,13 +159,17 @@ describe('基本操作・ピンチの教材', () => {
     expect(reads.at(-1)).toMatchObject({ page: 'miss' });
   });
 
-  it('V320-FIX-04 ヒビの独立例：2回成功→失敗で切れ予約（ヒビ）→もう一度失敗で連鎖が切れる', () => {
+  // V320-FIX-05 で更新：成功してもヒビ（予約）は残ることを実演に含める（旧：2回成功→失敗→失敗）
+  it('V320-FIX-05 ヒビの独立例：成功→失敗でヒビ→成功してもヒビは残る（連鎖2）→再失敗で連鎖が切れる。時間では切れない', () => {
     const { r, g } = runAll(LESSON_CRACK);
     expect(r.problems).toEqual([]);
-    expect(ev(g, 'arrive').map((a) => a.success)).toEqual([true, true, false, false]);
-    expect(ev(g, 'streakCut').map((x) => [x.state, x.count])).toEqual([
-      ['reserved', 2],
-      ['ended', 2],
+    expect(ev(g, 'arrive').map((a) => a.success)).toEqual([true, false, true, false]);
+    expect(ev(g, 'arrive').map((a) => a.streak)).toEqual([1, 0, 2, 0]);
+    expect(ev(g, 'streakCut').map((x) => [x.state, x.count, x.reason])).toEqual([
+      ['reserved', 1, 'miss'],
+      ['ended', 2, 'miss'],
     ]);
+    // 予約中の成功の後も予約は解除されていない（間に解除イベントなし）
+    expect(ev(g, 'streakCut')).toHaveLength(2);
   });
 });

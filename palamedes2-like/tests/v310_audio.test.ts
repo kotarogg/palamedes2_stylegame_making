@@ -115,8 +115,9 @@ describe('v3.1.0 役宣言の代表ボイス：20%で攻撃ボイス、両方は
     names.update();
     const decl = r.sfx.find((s) => s.id.startsWith('role_declare_'))!;
     expect(decl.gainDb).toBe(EVENT_GAIN_DB.declareWithVoice);
-    // 表示待ちの途中に次の宣言が来た場合（代表ボイスは待ちの後）は 0dB
-    expect(names.voiceStartsNow(0, g.tick + 1)).toBe(false);
+    // V320-FIX-05 で更新：表示待ちを作らないため、次の宣言でも代表ボイスは宣言と同時（旧：先頭保持中は待ちの後で 0dB）
+    expect(names.voiceStartsNow(0, g.tick + 1)).toBe(true);
+    // 代表ボイスと同時でない宣言（voiceWithDeclare＝false の経路）は従来どおり 0dB
     const d2 = new SoundDirector(r.bus, g, ['kotaro', 'akane'], { attachDelayMs: 120, voiceWithDeclare: () => false });
     d2.sync();
     expect(r.sfx.filter((s) => s.id.startsWith('role_declare_')).at(-1)!.gainDb).toBe(0);

@@ -1,0 +1,922 @@
+{
+ "id": "V320-FIX-05",
+ "note": "Node での再生要求の記録（実音は再生していない）。tick は60Hz。聴感は未確認",
+ "mapping": [
+  {
+   "logo": "R01",
+   "name": "フォーカード",
+   "voiceLine": "role_01"
+  },
+  {
+   "logo": "R02",
+   "name": "ニコニコ",
+   "voiceLine": "role_02"
+  },
+  {
+   "logo": "R03",
+   "name": "ストレート",
+   "voiceLine": "role_03"
+  },
+  {
+   "logo": "R04",
+   "name": "ハイストレート",
+   "voiceLine": "role_04"
+  },
+  {
+   "logo": "R05",
+   "name": "フルカード",
+   "voiceLine": "role_05"
+  },
+  {
+   "logo": "R06",
+   "name": "ニコニコニコ",
+   "voiceLine": "role_06"
+  },
+  {
+   "logo": "R07",
+   "name": "スーパーストレート",
+   "voiceLine": "role_07"
+  },
+  {
+   "logo": "R08",
+   "name": "フォーブラック",
+   "voiceLine": "role_08"
+  },
+  {
+   "logo": "R09",
+   "name": "フォーレッド",
+   "voiceLine": "role_09"
+  },
+  {
+   "logo": "R10",
+   "name": "オールブラック",
+   "voiceLine": "role_10"
+  },
+  {
+   "logo": "R11",
+   "name": "オールレッド",
+   "voiceLine": "role_11"
+  },
+  {
+   "logo": "R12",
+   "name": "オールマーク",
+   "voiceLine": "role_12"
+  },
+  {
+   "logo": "R13",
+   "name": "フラッシュ",
+   "voiceLine": "role_13"
+  },
+  {
+   "logo": "R14",
+   "name": "ストレートフラッシュ",
+   "voiceLine": "role_14"
+  },
+  {
+   "logo": "R15",
+   "name": "ハイストレートフラッシュ",
+   "voiceLine": "role_15"
+  },
+  {
+   "logo": "R16",
+   "name": "スーパーストレートフラッシュ",
+   "voiceLine": "role_16"
+  }
+ ],
+ "roleVoiceSec": {
+  "kotaro": [
+   1.305,
+   1.568,
+   1.555,
+   1.725,
+   1.5,
+   2.355,
+   2.705,
+   1.545,
+   1.7,
+   1.61,
+   1.29,
+   1.32,
+   1.495,
+   2.825,
+   2.535,
+   3.48
+  ],
+  "akane": [
+   0.839,
+   0.779,
+   0.855,
+   1.07,
+   0.858,
+   1.068,
+   1.316,
+   0.967,
+   0.814,
+   1.038,
+   0.865,
+   0.865,
+   0.8,
+   1.361,
+   1.539,
+   1.791
+  ],
+  "zunko": [
+   0.777,
+   0.705,
+   0.732,
+   0.952,
+   0.761,
+   0.96,
+   1.193,
+   0.809,
+   0.721,
+   0.876,
+   0.797,
+   0.831,
+   0.614,
+   1.155,
+   1.332,
+   1.595
+  ]
+ },
+ "scenarios": [
+  {
+   "name": "単役（フォーカード）・代替なし",
+   "declares": [
+    {
+     "player": 0,
+     "declareTick": 73,
+     "logos": [
+      "R01"
+     ],
+     "windows": [
+      {
+       "logo": "R01",
+       "start": 73,
+       "end": 118
+      }
+     ],
+     "voice": "role",
+     "voiceFile": "voice/voice_kotaro_role_01.wav",
+     "voiceMs": null,
+     "names": [
+      "フォーカード"
+     ],
+     "fileSec": 1.305,
+     "voiceRequest": {
+      "t": 1217,
+      "tick": 73,
+      "id": "kotaro_role_01",
+      "skipped": null
+     }
+    }
+   ],
+   "voices": [
+    {
+     "t": 1217,
+     "tick": 73,
+     "id": "kotaro_role_01",
+     "skipped": null
+    }
+   ],
+   "drawChanges": [
+    {
+     "tick": 74,
+     "player": 0,
+     "logos": [
+      "R01"
+     ]
+    },
+    {
+     "tick": 74,
+     "player": 1,
+     "logos": []
+    },
+    {
+     "tick": 118,
+     "player": 0,
+     "logos": []
+    }
+   ]
+  },
+  {
+   "name": "数字役＋属性役（フォーカード＋フォーブラック）",
+   "declares": [
+    {
+     "player": 0,
+     "declareTick": 73,
+     "logos": [
+      "R01",
+      "R08"
+     ],
+     "windows": [
+      {
+       "logo": "R01",
+       "start": 73,
+       "end": 118
+      },
+      {
+       "logo": "R08",
+       "start": 111,
+       "end": 147
+      }
+     ],
+     "voice": "role",
+     "voiceFile": "voice/voice_kotaro_role_01.wav",
+     "voiceMs": null,
+     "names": [
+      "フォーカード",
+      "フォーブラック"
+     ],
+     "fileSec": 1.305,
+     "voiceRequest": {
+      "t": 1217,
+      "tick": 73,
+      "id": "kotaro_role_01",
+      "skipped": null
+     }
+    }
+   ],
+   "voices": [
+    {
+     "t": 1217,
+     "tick": 73,
+     "id": "kotaro_role_01",
+     "skipped": null
+    }
+   ],
+   "drawChanges": [
+    {
+     "tick": 74,
+     "player": 0,
+     "logos": [
+      "R01"
+     ]
+    },
+    {
+     "tick": 74,
+     "player": 1,
+     "logos": []
+    },
+    {
+     "tick": 111,
+     "player": 0,
+     "logos": [
+      "R01",
+      "R08"
+     ]
+    },
+    {
+     "tick": 118,
+     "player": 0,
+     "logos": [
+      "R08"
+     ]
+    },
+    {
+     "tick": 147,
+     "player": 0,
+     "logos": []
+    }
+   ]
+  },
+  {
+   "name": "専用複合（スーパーストレートフラッシュ、コタロー長い音声3.48秒）",
+   "declares": [
+    {
+     "player": 0,
+     "declareTick": 73,
+     "logos": [
+      "R16"
+     ],
+     "windows": [
+      {
+       "logo": "R16",
+       "start": 73,
+       "end": 118
+      }
+     ],
+     "voice": "role",
+     "voiceFile": "voice/voice_kotaro_role_16.wav",
+     "voiceMs": null,
+     "names": [
+      "スーパーストレートフラッシュ"
+     ],
+     "fileSec": 3.48,
+     "voiceRequest": {
+      "t": 1217,
+      "tick": 73,
+      "id": "kotaro_role_16",
+      "skipped": null
+     }
+    }
+   ],
+   "voices": [
+    {
+     "t": 1217,
+     "tick": 73,
+     "id": "kotaro_role_16",
+     "skipped": null
+    }
+   ],
+   "drawChanges": [
+    {
+     "tick": 74,
+     "player": 0,
+     "logos": [
+      "R16"
+     ]
+    },
+    {
+     "tick": 74,
+     "player": 1,
+     "logos": []
+    },
+    {
+     "tick": 118,
+     "player": 0,
+     "logos": []
+    }
+   ]
+  },
+  {
+   "name": "代替ボイスあり（100%：攻撃ボイス）",
+   "declares": [
+    {
+     "player": 0,
+     "declareTick": 73,
+     "logos": [
+      "R01",
+      "R08"
+     ],
+     "windows": [
+      {
+       "logo": "R01",
+       "start": 73,
+       "end": 118
+      },
+      {
+       "logo": "R08",
+       "start": 111,
+       "end": 147
+      }
+     ],
+     "voice": "attack",
+     "voiceFile": "voice/voice_zunko_attack.wav",
+     "voiceMs": null,
+     "names": [
+      "フォーカード",
+      "フォーブラック"
+     ],
+     "fileSec": 1.089,
+     "voiceRequest": {
+      "t": 1217,
+      "tick": 73,
+      "id": "zunko_attack",
+      "skipped": null
+     }
+    }
+   ],
+   "voices": [
+    {
+     "t": 1217,
+     "tick": 73,
+     "id": "zunko_attack",
+     "skipped": null
+    }
+   ],
+   "drawChanges": [
+    {
+     "tick": 74,
+     "player": 0,
+     "logos": [
+      "R01"
+     ]
+    },
+    {
+     "tick": 74,
+     "player": 1,
+     "logos": []
+    },
+    {
+     "tick": 111,
+     "player": 0,
+     "logos": [
+      "R01",
+      "R08"
+     ]
+    },
+    {
+     "tick": 118,
+     "player": 0,
+     "logos": [
+      "R08"
+     ]
+    },
+    {
+     "tick": 147,
+     "player": 0,
+     "logos": []
+    }
+   ]
+  },
+  {
+   "name": "左右同時宣言",
+   "declares": [
+    {
+     "player": 0,
+     "declareTick": 73,
+     "logos": [
+      "R04"
+     ],
+     "windows": [
+      {
+       "logo": "R04",
+       "start": 73,
+       "end": 118
+      }
+     ],
+     "voice": "role",
+     "voiceFile": "voice/voice_akane_role_04.wav",
+     "voiceMs": null,
+     "names": [
+      "ハイストレート"
+     ],
+     "fileSec": 1.07,
+     "voiceRequest": {
+      "t": 1217,
+      "tick": 73,
+      "id": "akane_role_04",
+      "skipped": null
+     }
+    },
+    {
+     "player": 1,
+     "declareTick": 74,
+     "logos": [
+      "R09"
+     ],
+     "windows": [
+      {
+       "logo": "R09",
+       "start": 74,
+       "end": 119
+      }
+     ],
+     "voice": "role",
+     "voiceFile": "voice/voice_zunko_role_09.wav",
+     "voiceMs": null,
+     "names": [
+      "フォーレッド"
+     ],
+     "fileSec": 0.721,
+     "voiceRequest": {
+      "t": 1233,
+      "tick": 74,
+      "id": "zunko_role_09",
+      "skipped": null
+     }
+    }
+   ],
+   "voices": [
+    {
+     "t": 1217,
+     "tick": 73,
+     "id": "akane_role_04",
+     "skipped": null
+    },
+    {
+     "t": 1233,
+     "tick": 74,
+     "id": "zunko_role_09",
+     "skipped": null
+    }
+   ],
+   "drawChanges": [
+    {
+     "tick": 75,
+     "player": 0,
+     "logos": [
+      "R04"
+     ]
+    },
+    {
+     "tick": 75,
+     "player": 1,
+     "logos": [
+      "R09"
+     ]
+    },
+    {
+     "tick": 118,
+     "player": 0,
+     "logos": []
+    },
+    {
+     "tick": 119,
+     "player": 1,
+     "logos": []
+    }
+   ]
+  },
+  {
+   "name": "次の宣言（同じプレイヤー。役処理中は宣言できないため、役処理の終了後＝前の表示の終了後）",
+   "declares": [
+    {
+     "player": 0,
+     "declareTick": 73,
+     "logos": [
+      "R01",
+      "R08"
+     ],
+     "windows": [
+      {
+       "logo": "R01",
+       "start": 73,
+       "end": 118
+      },
+      {
+       "logo": "R08",
+       "start": 111,
+       "end": 147
+      }
+     ],
+     "voice": "role",
+     "voiceFile": "voice/voice_kotaro_role_01.wav",
+     "voiceMs": null,
+     "names": [
+      "フォーカード",
+      "フォーブラック"
+     ],
+     "fileSec": 1.305,
+     "voiceRequest": {
+      "t": 1217,
+      "tick": 73,
+      "id": "kotaro_role_01",
+      "skipped": null
+     }
+    },
+    {
+     "player": 0,
+     "declareTick": 234,
+     "logos": [
+      "R13"
+     ],
+     "windows": [
+      {
+       "logo": "R13",
+       "start": 234,
+       "end": 279
+      }
+     ],
+     "voice": "role",
+     "voiceFile": "voice/voice_kotaro_role_13.wav",
+     "voiceMs": null,
+     "names": [
+      "フラッシュ"
+     ],
+     "fileSec": 1.495,
+     "voiceRequest": {
+      "t": 3900,
+      "tick": 234,
+      "id": "kotaro_role_13",
+      "skipped": null
+     }
+    }
+   ],
+   "voices": [
+    {
+     "t": 1217,
+     "tick": 73,
+     "id": "kotaro_role_01",
+     "skipped": null
+    },
+    {
+     "t": 3900,
+     "tick": 234,
+     "id": "kotaro_role_13",
+     "skipped": null
+    }
+   ],
+   "drawChanges": [
+    {
+     "tick": 74,
+     "player": 0,
+     "logos": [
+      "R01"
+     ]
+    },
+    {
+     "tick": 74,
+     "player": 1,
+     "logos": []
+    },
+    {
+     "tick": 111,
+     "player": 0,
+     "logos": [
+      "R01",
+      "R08"
+     ]
+    },
+    {
+     "tick": 118,
+     "player": 0,
+     "logos": [
+      "R08"
+     ]
+    },
+    {
+     "tick": 147,
+     "player": 0,
+     "logos": []
+    },
+    {
+     "tick": 235,
+     "player": 0,
+     "logos": [
+      "R13"
+     ]
+    },
+    {
+     "tick": 279,
+     "player": 0,
+     "logos": []
+    }
+   ]
+  },
+  {
+   "name": "相手の宣言が自分の表示中に入る（左右は独立）",
+   "declares": [
+    {
+     "player": 0,
+     "declareTick": 73,
+     "logos": [
+      "R01",
+      "R08"
+     ],
+     "windows": [
+      {
+       "logo": "R01",
+       "start": 73,
+       "end": 118
+      },
+      {
+       "logo": "R08",
+       "start": 111,
+       "end": 147
+      }
+     ],
+     "voice": "role",
+     "voiceFile": "voice/voice_kotaro_role_01.wav",
+     "voiceMs": null,
+     "names": [
+      "フォーカード",
+      "フォーブラック"
+     ],
+     "fileSec": 1.305,
+     "voiceRequest": {
+      "t": 1217,
+      "tick": 73,
+      "id": "kotaro_role_01",
+      "skipped": null
+     }
+    },
+    {
+     "player": 1,
+     "declareTick": 94,
+     "logos": [
+      "R13"
+     ],
+     "windows": [
+      {
+       "logo": "R13",
+       "start": 94,
+       "end": 139
+      }
+     ],
+     "voice": "role",
+     "voiceFile": "voice/voice_akane_role_13.wav",
+     "voiceMs": null,
+     "names": [
+      "フラッシュ"
+     ],
+     "fileSec": 0.8,
+     "voiceRequest": {
+      "t": 1567,
+      "tick": 94,
+      "id": "akane_role_13",
+      "skipped": null
+     }
+    }
+   ],
+   "voices": [
+    {
+     "t": 1217,
+     "tick": 73,
+     "id": "kotaro_role_01",
+     "skipped": null
+    },
+    {
+     "t": 1567,
+     "tick": 94,
+     "id": "akane_role_13",
+     "skipped": null
+    }
+   ],
+   "drawChanges": [
+    {
+     "tick": 74,
+     "player": 0,
+     "logos": [
+      "R01"
+     ]
+    },
+    {
+     "tick": 74,
+     "player": 1,
+     "logos": []
+    },
+    {
+     "tick": 95,
+     "player": 1,
+     "logos": [
+      "R13"
+     ]
+    },
+    {
+     "tick": 111,
+     "player": 0,
+     "logos": [
+      "R01",
+      "R08"
+     ]
+    },
+    {
+     "tick": 118,
+     "player": 0,
+     "logos": [
+      "R08"
+     ]
+    },
+    {
+     "tick": 139,
+     "player": 1,
+     "logos": []
+    },
+    {
+     "tick": 147,
+     "player": 0,
+     "logos": []
+    }
+   ]
+  },
+  {
+   "name": "勝敗の割込み",
+   "declares": [
+    {
+     "player": 0,
+     "declareTick": 73,
+     "logos": [
+      "R01",
+      "R08"
+     ],
+     "windows": [
+      {
+       "logo": "R01",
+       "start": 73,
+       "end": 118
+      },
+      {
+       "logo": "R08",
+       "start": 111,
+       "end": 147
+      }
+     ],
+     "voice": "role",
+     "voiceFile": "voice/voice_kotaro_role_01.wav",
+     "voiceMs": null,
+     "names": [
+      "フォーカード",
+      "フォーブラック"
+     ],
+     "fileSec": 1.305,
+     "voiceRequest": {
+      "t": 1217,
+      "tick": 73,
+      "id": "kotaro_role_01",
+      "skipped": null
+     }
+    }
+   ],
+   "voices": [
+    {
+     "t": 1217,
+     "tick": 73,
+     "id": "kotaro_role_01",
+     "skipped": null
+    }
+   ],
+   "drawChanges": [
+    {
+     "tick": 74,
+     "player": 0,
+     "logos": [
+      "R01"
+     ]
+    },
+    {
+     "tick": 74,
+     "player": 1,
+     "logos": []
+    },
+    {
+     "tick": 94,
+     "player": 0,
+     "logos": []
+    }
+   ]
+  },
+  {
+   "name": "ボイス無効（音量0・ミュート）",
+   "declares": [
+    {
+     "player": 0,
+     "declareTick": 73,
+     "logos": [
+      "R01",
+      "R08"
+     ],
+     "windows": [
+      {
+       "logo": "R01",
+       "start": 73,
+       "end": 118
+      },
+      {
+       "logo": "R08",
+       "start": 111,
+       "end": 147
+      }
+     ],
+     "voice": "role",
+     "voiceFile": "voice/voice_kotaro_role_01.wav",
+     "voiceMs": null,
+     "names": [
+      "フォーカード",
+      "フォーブラック"
+     ],
+     "fileSec": 1.305,
+     "voiceRequest": {
+      "t": 1217,
+      "tick": 73,
+      "id": "kotaro_role_01",
+      "skipped": null
+     }
+    }
+   ],
+   "voices": [
+    {
+     "t": 1217,
+     "tick": 73,
+     "id": "kotaro_role_01",
+     "skipped": null
+    }
+   ],
+   "drawChanges": [
+    {
+     "tick": 74,
+     "player": 0,
+     "logos": [
+      "R01"
+     ]
+    },
+    {
+     "tick": 74,
+     "player": 1,
+     "logos": []
+    },
+    {
+     "tick": 111,
+     "player": 0,
+     "logos": [
+      "R01",
+      "R08"
+     ]
+    },
+    {
+     "tick": 118,
+     "player": 0,
+     "logos": [
+      "R08"
+     ]
+    },
+    {
+     "tick": 147,
+     "player": 0,
+     "logos": []
+    }
+   ]
+  }
+ ]
+}

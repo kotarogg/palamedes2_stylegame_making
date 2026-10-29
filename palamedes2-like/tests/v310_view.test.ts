@@ -9,8 +9,9 @@ import { EMPTY, fakeAssets, makeGame, rows, stepN, toPlay } from './helpers';
 const atk = (player: PlayerId, lines: number): Command => ({ player, type: 'debugAttack', lines });
 const cmd = (player: PlayerId, type: Command['type']): Command => ({ player, type }) as Command;
 
-describe('v3.1.0 ピンチの数字（表示状態）', () => {
-  it('到達〜1000ms未満は数字なし、1000msで3（上から出現）、2000msで2、3000msで1。期限・解除で消える', () => {
+// V320-FIX-05 で更新：盤面上の大型 3/2/1 と「危険○秒」を廃止し、盤面の上の帯の警告「ピンチ」「ピンチ X.X秒」へ置換
+describe('V320-FIX-05 ピンチ警告（表示状態）', () => {
+  it('到達〜1000ms未満は「ピンチ」、1000ms以降は「ピンチ X.X秒」（0.1秒単位で切上げ）。期限（敗北）で消える。1P は (88,16,144,14)', () => {
     const g = makeGame({ boards: { 0: rows(7), 1: EMPTY } });
     const v = new GameView(g, fakeAssets());
     toPlay(g);
@@ -20,21 +21,29 @@ describe('v3.1.0 ピンチの数字（表示状態）', () => {
     const at = (dt: number) => {
       while (g.tick < t0 + dt) g.step();
       v.syncEvents();
-      return v.pinchCountView(0, g.tick);
+      return v.pinchWarnView(0);
     };
-    expect(at(59)).toBeNull();
-    const c3 = at(60)!;
-    expect(c3.value).toBe(3);
-    expect(c3.alpha).toBe(0); // 出現の始まり（上から）
-    expect(c3.y).toBeLessThan(at(70)!.y); // 停止位置へ下りる
-    expect(at(120)!.value).toBe(2);
-    expect(at(180)!.value).toBe(1);
-    const b = fakeAssets().layout.pRect(0, 'win_lose_banner');
-    expect(at(200)).toMatchObject({ value: 1, x: b.x, y: b.y, alpha: 1 });
-    expect(at(240)).toBeNull(); // 期限（敗北）
+    expect(at(0)).toMatchObject({ text: 'ピンチ', cx: 160, area: { x: 88, y: 16, w: 144, h: 14 } });
+    expect(at(59)?.text).toBe('ピンチ');
+    // 残秒はゲームの有効な残り猶予（tick）を 0.1秒単位で切上げ
+    const want = () => `ピンチ ${(Math.ceil((g.pinchRemainingTicks(g.players[0])! * g.tickMs) / 100) / 10).toFixed(1)}秒`;
+    expect(at(60)?.text).toBe('ピンチ 3.0秒');
+    let lastText = '';
+    for (let dt = 61; dt < 300 && !g.result; dt++) {
+      const w = at(dt);
+      if (!w) break;
+      expect(w.text, `dt=${dt}`).toBe(want());
+      expect(w.text, `dt=${dt}`).not.toBe('ピンチ 0.0秒'); // 期限前に 0.0秒 と見せない
+      lastText = w.text;
+    }
+    expect(lastText).toBe('ピンチ 0.1秒');
+    while (!g.result) g.step();
+    v.syncEvents();
+    expect(v.pinchWarnView(0)).toBeNull(); // 期限（敗北）で消える
+    expect(v.pinchWarnView(1)).toBeNull();
   });
 
-  it('役処理中は数字が止まる（壁時計で1000msを過ぎても、有効な残り猶予が進まなければ切り替わらない）', () => {
+  it('役処理中は残秒が止まる（有効な残り猶予が進まなければ表示も進まない）', () => {
     const g = makeGame({ boards: { 0: rows(7), 1: EMPTY } });
     const v = new GameView(g, fakeAssets());
     toPlay(g);
@@ -42,11 +51,11 @@ describe('v3.1.0 ピンチの数字（表示状態）', () => {
     while (!g.events.some((e) => e.type === 'attackPinch')) g.step();
     stepN(g, 61);
     v.syncEvents();
-    expect(v.pinchCountView(0, g.tick)?.value).toBe(3);
+    const before = v.pinchWarnView(0)?.text;
     g.players[0].role = { stage: 'intro', stageEnd: g.tick + 1000 } as never; // 役処理中（タイマー停止）を模擬
     stepN(g, 100);
     v.syncEvents();
-    expect(v.pinchCountView(0, g.tick)?.value).toBe(3);
+    expect(v.pinchWarnView(0)?.text).toBe(before);
   });
 });
 

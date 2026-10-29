@@ -8,7 +8,7 @@ import type { AnyGame } from '../src/core/match';
 import type { PlayerId } from '../src/core/types';
 import { CharacterSelect, cpuOrderFor, CpuCharacterSelect, creditPages, nextCpuOpponent } from '../src/app';
 import { CHARACTER_SHEET, GameView } from '../src/view/gameView';
-import { crackerPose, planResult, RoleNameDirector, RoleNameSchedule } from '../src/view/presentation';
+import { crackerPose, planResult, RoleNameDirector, RoleNameSchedule, roleSlide } from '../src/view/presentation';
 import { counterAnchorOffset, DEFAULT_STOCK_VIEW, discardAnchorOffset, pendingGroupY, stockColumnLayout, stockGroupHeight, stockIcons } from '../src/view/stockLayout';
 import { EMPTY, fakeAssets, makeGame, rows, setStock, stepN, toPlay } from './helpers';
 
@@ -210,40 +210,59 @@ describe('キャラクター分離（第15章）・結果演出（第14章）', 
 describe('役名表示の予定（第13章 B4・B5）', () => {
   const ticks = (ms: number) => Math.round((ms * 60) / 1000);
 
-  it('先頭ロゴ＝代表役：保持 max(600ms, ボイス尺)＋150ms、後続ロゴは各600ms。開始時に代表役ボイス', () => {
+  // V320-FIX-05 で更新：旧「先頭はボイス尺まで保持」「先頭保持中の新宣言は表示待ち」は、固定の時系列（先頭750ms・後続600ms・出入り120ms重複）と
+  // 新宣言での打切りに置き換え（依頼書 第6章）
+  it('V320-FIX-05 固定の時系列：先頭750ms・後続600ms・重複120ms・全体1230ms。ボイス尺では延長しない。宣言と同時に代表ボイス', () => {
+    expect(RoleNameSchedule.windowsMs(2)).toEqual([
+      { start: 0, inEnd: 120, outStart: 630, end: 750 },
+      { start: 630, inEnd: 750, outStart: 1110, end: 1230 },
+    ]);
+    expect(RoleNameSchedule.windowsMs(1)).toEqual([{ start: 0, inEnd: 120, outStart: 630, end: 750 }]);
     const heads: number[] = [];
     const s = new RoleNameSchedule(ticks, undefined, (logo, t) => heads.push(logo, t));
-    s.declare([3, 7, 9], 900, 100);
+    s.declare([3, 7], 3480, 100); // ボイス3.48秒でも表示時間は同じ
     expect(heads).toEqual([3, 100]);
-    expect(s.logoAt(100)).toEqual({ logo: 3, since: 100 });
-    expect(s.logoAt(100 + 54 + 8)).toEqual({ logo: 3, since: 100 }); // 900ms＋150ms の手前
-    expect(s.logoAt(100 + 54 + 9)).toEqual({ logo: 7, since: 163 });
-    expect(s.logoAt(163 + 36)).toEqual({ logo: 9, since: 199 });
-    expect(s.logoAt(199 + 36)).toBeNull();
-    // ボイスが短い／不明なら600ms
-    const t = new RoleNameSchedule(ticks);
-    t.declare([1], 300, 0);
-    expect(t.current).toMatchObject({ headStart: 0, waitEnd: 36 + 9, end: 45 });
-    t.declare([2], null, 100);
-    expect(t.current).toMatchObject({ headStart: 100, waitEnd: 145 });
+    expect(s.current!.windows).toEqual([
+      { logo: 3, start: 100, inEnd: 107, outStart: 138, end: 145 },
+      { logo: 7, start: 138, inEnd: 145, outStart: 167, end: 174 },
+    ]);
+    expect(s.logosAt(100).map((x) => [x.logo, x.phase])).toEqual([[3, 'in']]);
+    expect(s.logosAt(120).map((x) => [x.logo, x.phase])).toEqual([[3, 'hold']]);
+    expect(s.logosAt(140).map((x) => [x.logo, x.phase])).toEqual([
+      [3, 'out'],
+      [7, 'in'],
+    ]); // 重なりは切替中の120msだけ（後続が前面）
+    expect(s.logosAt(150).map((x) => [x.logo, x.phase])).toEqual([[7, 'hold']]);
+    expect(s.logosAt(170).map((x) => [x.logo, x.phase])).toEqual([[7, 'out']]);
+    expect(s.logosAt(174)).toEqual([]);
+    expect(s.logoAt(150)).toEqual({ logo: 7, since: 138 }); // 色替えは各ロゴの表示開始が起点
   });
 
-  it('後続ロゴ表示中の新宣言は後続を中止して即開始。先頭保持中の新宣言は最新1件だけ待たせる', () => {
+  it('V320-FIX-05 新しい宣言は旧表示を打ち切り、新宣言の先頭から開始（古い後続を残さない・後から再開しない・表示待ちを作らない）', () => {
     const heads: number[] = [];
     const s = new RoleNameSchedule(ticks, undefined, (logo) => heads.push(logo));
-    s.declare([1, 2, 3], 600, 0); // waitEnd 45
-    s.declare([4], 600, 50); // 後続表示中 → 中止して即開始
-    expect(s.logoAt(50)).toEqual({ logo: 4, since: 50 });
-    s.declare([5, 6], 600, 60); // 先頭保持中 → 表示待ち
-    s.declare([7], 600, 70); // 最新1件だけ
-    expect(s.hasPending).toBe(true);
-    s.update(94);
-    expect(s.logoAt(94)?.logo).toBe(4);
-    s.update(95); // 4 の先頭＋待機の終了で 7 を開始（5,6 は捨てる）
-    expect(s.logoAt(95)).toEqual({ logo: 7, since: 95 });
-    expect(heads).toEqual([1, 4, 7]);
+    s.declare([1, 2], 600, 0);
+    s.declare([4], 600, 20); // 先頭表示中の新宣言 → 即開始
+    expect(s.hasPending).toBe(false);
+    expect(s.logosAt(20).map((x) => x.logo)).toEqual([4]);
+    expect(s.logosAt(40).map((x) => x.logo)).toEqual([4]); // 旧後続（2）は出さない
+    expect(heads).toEqual([1, 4]);
+    s.update(65);
+    expect(s.current).toBeNull();
     s.stop();
-    expect(s.logoAt(96)).toBeNull();
+    expect(s.logoAt(66)).toBeNull();
+  });
+
+  it('V320-FIX-05 横スライド：1P は左→右、2P は右→左。イン ease-out・アウト ease-in（16px、整数px）、透明度は線形', () => {
+    expect(roleSlide({ phase: 'in', u: 0 }, 1)).toEqual({ dx: -16, alpha: 0 });
+    expect(roleSlide({ phase: 'in', u: 0.5 }, 1)).toEqual({ dx: -4, alpha: 0.5 });
+    expect(roleSlide({ phase: 'in', u: 1 }, 1)).toEqual({ dx: 0, alpha: 1 });
+    expect(roleSlide({ phase: 'hold', u: 1 }, 1)).toEqual({ dx: 0, alpha: 1 });
+    expect(roleSlide({ phase: 'out', u: 0.5 }, 1)).toEqual({ dx: 4, alpha: 0.5 });
+    expect(roleSlide({ phase: 'out', u: 1 }, 1)).toEqual({ dx: 16, alpha: 0 });
+    expect(roleSlide({ phase: 'in', u: 0 }, -1).dx).toBe(16);
+    expect(roleSlide({ phase: 'out', u: 1 }, -1).dx).toBe(-16);
+    expect(Number.isInteger(roleSlide({ phase: 'in', u: 0.37 }, 1).dx)).toBe(true);
   });
 
   it('結果で表示・表示待ちをすべて消す。ゲーム処理（攻撃・段の時刻）は延長しない', () => {

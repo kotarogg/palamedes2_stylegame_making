@@ -1987,7 +1987,7 @@ export class GameScene implements Scene {
       assist: this.app.settings.assist ? this.humans() : [],
       noReset: this.noResetShown,
       characters: this.characters,
-      roleLogo: (p, tick) => this.roleNames.logoAt(p, Math.floor(tick)),
+      roleLogos: (p, t) => this.roleNames.logosAt(p, t),
       preStart: this.holdMs !== null,
     };
     this.view.render(ctx, t);

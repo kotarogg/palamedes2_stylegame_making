@@ -6,7 +6,7 @@
 // 役名表示（第13章 B4・B5）：宣言時に表示リスト・代表役・開始時刻を確定し、先頭ロゴと代表役ボイスを同時開始。
 // 時間はすべて設定値（PM指定初期値）。
 import type { AudioBus } from '../audio/audioBus';
-import { ROLE_ALT_ATTACK_VOICE_PCT, roleVoiceLine, VOICE_PRIORITY, type Character } from '../audio/audioMap';
+import { ROLE_ALT_ATTACK_VOICE_PCT, roleVoiceLine, VOICE_PRIORITY, voiceFile, type Character } from '../audio/audioMap';
 import { createSeededRng, type Rng } from '../core/rng';
 import type { GameEvent } from '../core/game';
 import type { AnyGame } from '../core/match';
@@ -148,34 +148,65 @@ export function crackerPose(plan: ResultPlan | null, tick: number, tickMs: numbe
 // ---------------------------------------------------------------- 役名表示（B4・B5）
 
 export interface RoleNameConfig {
-  /** 先頭ロゴの保持時間の下限（実際は max(600ms, 代表役ボイスのファイル尺)） */
+  /** 先頭ロゴの表示時間＝既存固定設定の先頭600ms＋追加待機150ms（出入りを含む。ボイス尺では延長しない） */
   headMinMs: number;
-  /** 先頭ロゴを表示したままの追加待機 */
   headWaitMs: number;
-  /** 後続ロゴ1件の表示時間 */
+  /** 後続ロゴ1件の表示時間（出入りを含む） */
   followMs: number;
+  /** V320-FIX-05 横スライドの出入り（ms）と移動量（論理px） */
+  slideInMs: number;
+  slideOutMs: number;
+  slidePx: number;
 }
 
-export const DEFAULT_ROLE_NAME: RoleNameConfig = { headMinMs: 600, headWaitMs: 150, followMs: 600 };
+export const DEFAULT_ROLE_NAME: RoleNameConfig = { headMinMs: 600, headWaitMs: 150, followMs: 600, slideInMs: 120, slideOutMs: 120, slidePx: 16 };
+
+/** 1枚のロゴの表示区間（tick。宣言時刻からの ms を一度だけ tick へ換算した境界） */
+export interface RoleLogoWindow {
+  logo: number;
+  start: number;
+  inEnd: number;
+  outStart: number;
+  end: number;
+}
 
 export interface RoleShow {
   logos: number[];
-  /** 先頭ロゴ（代表役）の開始tick＝代表役ボイスの開始 */
+  /** 宣言（先頭ロゴの表示開始＝代表ボイスの要求）tick */
   headStart: number;
-  /** 先頭ロゴ＋追加待機の終了tick（ここから後続ロゴ） */
-  waitEnd: number;
+  windows: RoleLogoWindow[];
   /** 全ロゴの終了tick */
   end: number;
 }
 
+/** 表示中のロゴ1枚：区間（イン／静止／アウト）と区間内の進み 0〜1 */
+export interface RoleLogoView {
+  logo: number;
+  /** A/B/C 色替えの起点（このロゴの表示開始） */
+  since: number;
+  phase: 'in' | 'hold' | 'out';
+  u: number;
+}
+
 /**
- * 1プレイヤーの役名表示の予定。未確定の攻撃時刻から比率を毎フレーム再計算しない。
- * - 後続ロゴ表示中の新宣言：古い後続を即中止し、新宣言の先頭ロゴと代表役ボイスを開始（古い表示は再開しない）
- * - 先頭ロゴ保持中（＋追加待機）の新宣言：最新1件だけを表示待ちにし、先頭＋待機の終了で古い後続より優先して開始
+ * V320-FIX-05 役名ロゴの横スライド：イン＝外側 slidePx から基準位置へ減速（ease-out quadratic）・透明度0→1、
+ * アウト＝基準位置から内側 slidePx へ加速（ease-in quadratic）・透明度1→0。dir：1P＝+1（左→右）、2P＝−1（右→左）。位置は整数px
+ */
+export function roleSlide(v: Pick<RoleLogoView, 'phase' | 'u'>, dir: 1 | -1, px = DEFAULT_ROLE_NAME.slidePx): { dx: number; alpha: number } {
+  const u = Math.max(0, Math.min(1, v.u));
+  if (v.phase === 'in') return { dx: Math.round(-px * (1 - u) * (1 - u) * dir) || 0, alpha: u };
+  if (v.phase === 'out') return { dx: Math.round(px * u * u * dir) || 0, alpha: 1 - u };
+  return { dx: 0, alpha: 1 };
+}
+
+/**
+ * 1プレイヤーの役名表示の予定（V320-FIX-05）。時間は固定：先頭750ms・後続600ms、出入り120msは各表示時間に含め、
+ * 先行役のアウトと後続役のインを同じ120msに重ねる（2役：0〜750ms 先頭、630〜1230ms 後続）。ボイス尺・デコード状態では変えない。
+ * 各境界は宣言時刻からの ms を一度だけ tick 換算する（区間ごとの丸めを積み上げない）。
+ * 新しい宣言では旧表示を打ち切り、新宣言の先頭から始める（古い後続を残さない・後から再開しない）
  */
 export class RoleNameSchedule {
   current: RoleShow | null = null;
-  private pending: { logos: number[]; holdTicks: number; voice: RoleVoiceKind } | null = null;
 
   constructor(
     private readonly ticks: (ms: number) => number,
@@ -183,58 +214,65 @@ export class RoleNameSchedule {
     private readonly onHeadStart: (logo: number, tick: number, voice: RoleVoiceKind) => void = () => undefined,
   ) {}
 
-  private start(logos: number[], holdTicks: number, tick: number, voice: RoleVoiceKind): void {
-    const waitEnd = tick + holdTicks + this.ticks(this.cfg.headWaitMs);
-    this.current = { logos, headStart: tick, waitEnd, end: waitEnd + this.ticks(this.cfg.followMs) * Math.max(0, logos.length - 1) };
+  /** 宣言からの各ロゴの区間（ms） */
+  static windowsMs(n: number, cfg: RoleNameConfig = DEFAULT_ROLE_NAME): { start: number; inEnd: number; outStart: number; end: number }[] {
+    const out: { start: number; inEnd: number; outStart: number; end: number }[] = [];
+    let start = 0;
+    for (let i = 0; i < n; i++) {
+      const len = i === 0 ? cfg.headMinMs + cfg.headWaitMs : cfg.followMs;
+      const end = start + len;
+      out.push({ start, inEnd: start + cfg.slideInMs, outStart: end - cfg.slideOutMs, end });
+      start = end - cfg.slideOutMs; // 次のロゴのインを、このロゴのアウトと重ねる
+    }
+    return out;
+  }
+
+  /** 宣言と同時に先頭ロゴを表示し代表ボイスを要求するため、常に true（表示待ちを作らない） */
+  startsNow(_tick: number): boolean {
+    return true;
+  }
+
+  /** 宣言（logos は既存の表示順。voiceMs は記録用で表示時間には使わない。voice＝役名／代替の攻撃ボイス） */
+  declare(logos: number[], _voiceMs: number | null, tick: number, voice: RoleVoiceKind = 'role'): void {
+    if (logos.length === 0) return;
+    // 換算は宣言時刻からの ms ごとに一度だけ（0ms は宣言 tick。ゲームの ms→tick 換算は最小1tickのため0を別扱い）
+    const at = (ms: number) => (ms <= 0 ? tick : tick + this.ticks(ms));
+    const windows = RoleNameSchedule.windowsMs(logos.length, this.cfg).map((w, i) => ({ logo: logos[i], start: at(w.start), inEnd: at(w.inEnd), outStart: at(w.outStart), end: at(w.end) }));
+    this.current = { logos, headStart: tick, windows, end: windows[windows.length - 1].end };
     this.onHeadStart(logos[0], tick, voice);
   }
 
-  /** この tick に宣言したら先頭ロゴ（と代表ボイス）がすぐ始まるか（前の表示の待ち中なら後になる） */
-  startsNow(tick: number): boolean {
-    return !(this.current && tick < this.current.waitEnd);
-  }
-
-  /** 宣言（logos は既存の表示順。voiceMs は代表ボイスの取得済みファイル尺。音量0・ミュートでも同じ。voice＝役名／代替の攻撃ボイス） */
-  declare(logos: number[], voiceMs: number | null, tick: number, voice: RoleVoiceKind = 'role'): void {
-    if (logos.length === 0) return;
-    const holdTicks = this.ticks(Math.max(this.cfg.headMinMs, voiceMs ?? 0));
-    if (this.current && tick < this.current.waitEnd) {
-      this.pending = { logos, holdTicks, voice };
-      return;
-    }
-    this.pending = null;
-    this.start(logos, holdTicks, tick, voice);
-  }
-
   update(tick: number): void {
-    const c = this.current;
-    if (!c) return;
-    if (this.pending && tick >= c.waitEnd) {
-      const p = this.pending;
-      this.pending = null;
-      this.start(p.logos, p.holdTicks, c.waitEnd, p.voice);
-      return;
-    }
-    if (tick >= c.end) this.current = null;
+    if (this.current && tick >= this.current.end) this.current = null;
   }
 
-  /** 表示中のロゴと、その表示開始tick（A/B/C の色替えの起点）。なければ null */
-  logoAt(tick: number): { logo: number; since: number } | null {
+  /** 表示中のロゴ（描画順＝先頭→後続。重なる120msは2枚）。t は補間用に小数可 */
+  logosAt(t: number): RoleLogoView[] {
     const c = this.current;
-    if (!c || tick < c.headStart) return null;
-    if (tick < c.waitEnd) return { logo: c.logos[0], since: c.headStart };
-    const i = 1 + Math.floor((tick - c.waitEnd) / Math.max(1, this.ticks(this.cfg.followMs)));
-    if (i >= c.logos.length) return null;
-    return { logo: c.logos[i], since: c.waitEnd + (i - 1) * this.ticks(this.cfg.followMs) };
+    if (!c) return [];
+    const out: RoleLogoView[] = [];
+    for (const w of c.windows) {
+      if (t < w.start || t >= w.end) continue;
+      if (t < w.inEnd) out.push({ logo: w.logo, since: w.start, phase: 'in', u: (t - w.start) / Math.max(1, w.inEnd - w.start) });
+      else if (t >= w.outStart) out.push({ logo: w.logo, since: w.start, phase: 'out', u: (t - w.outStart) / Math.max(1, w.end - w.outStart) });
+      else out.push({ logo: w.logo, since: w.start, phase: 'hold', u: 1 });
+    }
+    return out;
+  }
+
+  /** 前面のロゴ（互換用：重なり中は後続） */
+  logoAt(tick: number): { logo: number; since: number } | null {
+    const v = this.logosAt(tick);
+    const f = v[v.length - 1];
+    return f ? { logo: f.logo, since: f.since } : null;
   }
 
   get hasPending(): boolean {
-    return this.pending !== null;
+    return false;
   }
 
   stop(): void {
     this.current = null;
-    this.pending = null;
   }
 }
 
@@ -252,6 +290,8 @@ export class RoleNameDirector {
   private readonly rng: Rng;
   /** 抽選の記録（自動検証用） */
   readonly voiceLog: { player: PlayerId; tick: number; voice: RoleVoiceKind; forced: boolean }[] = [];
+  /** V320-FIX-05 宣言ごとの表示と代表ボイスの対応（自動検証・調査用） */
+  readonly showLog: { player: PlayerId; declareTick: number; logos: string[]; windows: { logo: string; start: number; end: number }[]; voice: RoleVoiceKind; voiceFile: string; voiceMs: number | null }[] = [];
 
   constructor(
     private game: AnyGame,
@@ -310,6 +350,17 @@ export class RoleNameDirector {
         const line = voice === 'attack' ? 'attack' : roleVoiceLine(e.logos[0]);
         const voiceMs = this.bus?.voiceDurationMs(this.characters[e.player], line) ?? null;
         this.schedules[e.player].declare(e.logos, voiceMs, e.tick, voice);
+        // V320-FIX-05 役名と読み上げの対応記録：ロゴR番号・表示区間・代表ボイスのファイル（自動検証・調査用）
+        const show = this.schedules[e.player].current!;
+        this.showLog.push({
+          player: e.player,
+          declareTick: e.tick,
+          logos: e.logos.map((l) => `R${String(l + 1).padStart(2, '0')}`),
+          windows: show.windows.map((w) => ({ logo: `R${String(w.logo + 1).padStart(2, '0')}`, start: w.start, end: w.end })),
+          voice,
+          voiceFile: voiceFile(this.characters[e.player], line),
+          voiceMs,
+        });
       } else if (e.type === 'roundEnd') for (const s of this.schedules) s.stop();
     }
     if (this.game.result) return;
@@ -318,6 +369,11 @@ export class RoleNameDirector {
 
   logoAt(p: PlayerId, tick: number): { logo: number; since: number } | null {
     return this.game.result ? null : (this.schedules[p]?.logoAt(tick) ?? null);
+  }
+
+  /** V320-FIX-05 表示中のロゴ（最大2枚。先頭→後続の順）。勝敗確定後は無し */
+  logosAt(p: PlayerId, t: number): RoleLogoView[] {
+    return this.game.result ? [] : (this.schedules[p]?.logosAt(t) ?? []);
   }
 }
 

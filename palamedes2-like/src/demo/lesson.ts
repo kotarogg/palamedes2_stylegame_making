@@ -523,8 +523,8 @@ export const LESSON_PINCH: LessonDef = {
 };
 
 /**
- * V320-FIX-04 連鎖切り予約（ヒビ）の独立例：場3♠。2♠・1♥を成功（打上連鎖2）→4♦失敗でヒビ→5♣失敗で連鎖が切れる。
- * 成功継続の 4/4/6 教材とは別の盤面（4/4/6 を壊さない）
+ * 連鎖切り予約（ヒビ）の独立例：場3♠。V320-FIX-05：2♠成功（打上連鎖1）→4♦失敗でヒビ（切り予約）→1♥成功（連鎖2、ヒビは残る）→5♣失敗で連鎖が切れる。
+ * 時間の経過では切れない（待ちだけで切れる実演はしない）。成功継続の 4/4/6 教材とは別の盤面（4/4/6 を壊さない）
  */
 export const LESSON_CRACK: LessonDef = {
   id: 'crack',
@@ -540,12 +540,13 @@ export const LESSON_CRACK: LessonDef = {
     { op: 'page', page: 'streak_crack' },
     { op: 'act', action: 'launch' },
     { op: 'until', event: 'arrive', maxMs: 1000 },
-    { op: 'move', col: 1 },
-    { op: 'act', action: 'launch' },
-    { op: 'until', event: 'arrive', maxMs: 1000 },
     { op: 'move', col: 2 },
     { op: 'act', action: 'launch' },
     { op: 'until', event: 'streakCut', maxMs: 1000, match: (e) => e.type === 'streakCut' && e.state === 'reserved' },
+    { op: 'wait', ms: 600 },
+    { op: 'move', col: 1 },
+    { op: 'act', action: 'launch' },
+    { op: 'until', event: 'arrive', maxMs: 1000, match: (e) => e.type === 'arrive' && e.success },
     { op: 'wait', ms: 600 },
     { op: 'move', col: 3 },
     { op: 'act', action: 'launch' },

@@ -92,7 +92,7 @@ class Presenter {
   render(ctx: CanvasRenderingContext2D, t: number, hud: HudInfo): void {
     this.view.hud = {
       characters: this.characters,
-      roleLogo: (p, tick) => this.roleNames.logoAt(p, Math.floor(tick)),
+      roleLogos: (p, t) => this.roleNames.logosAt(p, t),
       result: this.staging.plan,
       ...hud,
     };

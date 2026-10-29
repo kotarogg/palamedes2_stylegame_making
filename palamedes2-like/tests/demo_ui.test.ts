@@ -77,11 +77,22 @@ describe('台本と収録文字（tutorial_font_16：V320-FIX-04 採用版 388�
     const rows = [...appendix.matchAll(/^\|([a-z0-9_]+)\|([^|]+)\|([^|]+)\|$/gm)].map((m) => ({ id: m[1], heading: m[2], text: m[3] }));
     expect(rows).toHaveLength(40);
     expect(Object.keys(S.pages).sort()).toEqual(rows.map((r) => r.id).sort());
+    // V320-FIX-05 で更新：streak・streak_crack は FIX-05 依頼書 第7章の本文（見出し・本文・パネル）を正とする
+    const o5 = readFileSync(new URL('docs/V320_FIX05_PROGRAMMER_ORDER_20261029.md', ROOT), 'utf8');
+    const sec = (id: string) => o5.slice(o5.indexOf(`${id}：\n`), o5.indexOf('\n\n', o5.indexOf(`${id}：\n`)));
+    for (const id of ['streak', 'streak_crack']) {
+      const t = sec(id);
+      const r = rows.find((x) => x.id === id)!;
+      r.heading = /見出し：(.+)/.exec(t)![1];
+      r.text = /本文：(.+)/.exec(t)![1];
+      const panels = [...t.matchAll(/パネル\d：(.+)/g)].map((m) => [...m[1].matchAll(/『([^』]+)』/g)].map((x) => x[1]));
+      expect(S.pages[id as 'streak'].panels, id).toEqual(panels);
+    }
     for (const r of rows) {
       const p = S.pages[r.id as keyof typeof S.pages];
       expect(p.heading, r.id).toBe(r.heading);
       expect(p.text, r.id).toBe(r.text);
-      expect(p.panels.flat().join(''), r.id).toBe(r.text);
+      expect(p.panels.flat().join('').replaceAll('　', ''), r.id).toBe(r.text.replaceAll('　', '')); // 区切りの全角空白は行の境目で省略可（既存の正規化規則）
       for (const l of p.panels.flat()) expect(/^[、。！？　]/.test(l), `${r.id}:${l}`).toBe(false);
     }
     expect(S.advance_hint).toEqual({ demo: '決定で実演へ', next: '決定で次へ' });

@@ -14,11 +14,22 @@ import { drawBitmapText } from './bitmapFont';
 import { ATTACK_RESULT, attackResultRows, CHAIN_HUD, chainHudLayout, crackShakeOffset, labelAt, rateRun, type AttackResultRow, type ChainHudLayout, type HudLabelId, type LabelRow } from './chainHud';
 import type { ManifestFrame } from './data';
 import { arcPoint, barY, CELL, cellX, columnCenterX, descentY, easeInOutSine, easeOutQuad, lerp, progress, Z, type BoardRect } from './geometry';
-import { characterPose, crackerPose, type ResultPlan } from './presentation';
+import { characterPose, crackerPose, roleSlide, type ResultPlan, type RoleLogoView } from './presentation';
 import { afterimageDurationMs, counterAnchorOffset, DEFAULT_STOCK_VIEW, discardAnchorOffset, FRAME_PAD, pendingGroupY, stockColumnLayout, stockGroupHeight, type StockDrawEntry, type StockViewConfig } from './stockLayout';
-import { drawNumericScaled, drawText, formatTime, multiplierText, numericPhase, TEXT_COLORS } from './text';
+import { drawNumericScaled, drawText, formatTime, multiplierText, numericPhase, TEXT_COLORS, UI_FONT } from './text';
 
 /** v3.1.0 連鎖切り予約のヒビ（採用3種） */
+/** V320-FIX-05 ピンチ警告の配置・文字（採用Noto 12px、縁取り1px） */
+export const PINCH_WARN = {
+  areas: { 0: { x: 88, y: 16, w: 144, h: 14 }, 1: { x: 408, y: 16, w: 144, h: 14 } },
+  /** 文字の上端（textBaseline top）の領域上端からのずれ。可視範囲が y16〜30 に収まるよう実描画で確認 */
+  textDy: 0,
+  size: 12,
+  color: '#ffb454',
+  outline: '#081827',
+  word: 'ピンチ',
+} as const;
+
 export const STREAK_CRACKS = ['streak_crack_01', 'streak_crack_02', 'streak_crack_03'] as const;
 /** 連鎖HUD（役連鎖・打上連鎖）の座標・寸法・倍率は chainHud.ts（V320-FIX-03）で一元管理する */
 
@@ -199,6 +210,8 @@ export interface HudInfo {
   characters?: readonly Character[];
   /** 役名表示の予定（RoleNameDirector）。表示中のロゴと表示開始tick */
   roleLogo?: (p: PlayerId, tick: number) => { logo: number; since: number } | null;
+  /** V320-FIX-05 表示中の役名ロゴ（最大2枚、先頭→後続。横スライドの区間つき）。あれば roleLogo より優先 */
+  roleLogos?: (p: PlayerId, t: number) => RoleLogoView[];
   /** v3.2.0 出せるピースの補助表示を出すプレイヤー（人間側。空・未指定なら出さない） */
   assist?: readonly PlayerId[];
   /** MODE2 ノーリセットクリアの達成者（V320-FIX-04-R1：表示は SINGLE だけ＝0。対戦・観戦は null）。クリア演出の中で付記 */
@@ -776,7 +789,7 @@ export class GameView {
       this.put(items, Z.ui, this.loop(fr, t, this.ticksOf(250)), board.x - 8, board.y - 8);
     }
     if (this.game.mode === 'mode1') this.collectMode1Player(items, p, t);
-    if (this.game.mode === 'mode1') this.collectPinchCount(items, p, t);
+    // V320-FIX-05：盤面上の大型 3/2/1 は出さない（ピンチの警告は盤面上部の pinchWarnView）
     // 勝敗表示（S9 160×64）：勝敗ありの対戦のみ。勝利数加算と同時に表示
     const r = this.hud.result;
     if (r && r.kind === 'versus' && t >= r.startTick) {
@@ -786,37 +799,37 @@ export class GameView {
     }
   }
 
-  /** v3.1.0 ピンチの 3/2/1（枠なしの S9 数字。既存の上から出現→停止→下へ消える動き）。表示は有効な残り猶予に同期。テスト・検証用に公開 */
-  pinchCountView(p: PlayerId, t: number): { value: 3 | 2 | 1; x: number; y: number; alpha: number } | null {
-    const g = this.mode1!;
-    const v = this.pv[p];
+  /**
+   * V320-FIX-05 ピンチ警告（盤面の上の帯。1P (88,16,144,14) 中心 x160、2P (408,16,144,14) 中心 x480）：
+   * 到達〜実減算1000ms は「ピンチ」、以降は「ピンチ 3.0秒」（自然上昇の危険猶予と攻撃ピンチ猶予の早い方。0.1秒単位で切上げ。役処理中は減らない）。
+   * 解除・勝敗確定で消す（新ラウンド・メニューでは表示状態ごと破棄）。テスト・検証用に公開
+   */
+  pinchWarnView(p: PlayerId): { text: string; cx: number; y: number; area: { x: number; y: number; w: number; h: number } } | null {
+    const g = this.mode1;
+    if (!g || g.result) return null;
     const st = g.players[p];
-    if (!v.pinchCount || g.result) return null;
-    const rest = g.pinchRemainingTicks(st);
+    if (!st || !st.pinchWarn.active) return null;
+    const rest = this.dangerRemainingTicks(st);
     if (rest === null) return null;
-    const b = this.assets.layout.pRect(p, 'win_lose_banner');
-    const fade = this.pvc.countdownFadeMs;
-    const off = this.pvc.countdownOffsetPx;
-    const el = (t - v.pinchCount.start) * g.tickMs;
-    // この数字が終わるまで（次の数字・期限まで）の残り：ゲーム側の残り猶予から求める（役処理中は止まる）
-    const toNext = rest * g.tickMs - (v.pinchCount.value - 1) * 1000;
-    let dy = 0;
-    let alpha = 1;
-    if (el < fade) {
-      const a = Math.max(0, el / fade);
-      dy = Math.round(-off * (1 - a));
-      alpha = a;
-    } else if (toNext < fade) {
-      const a = 1 - Math.max(0, toNext) / fade;
-      dy = Math.round(off * a);
-      alpha = 1 - a;
-    }
-    return { value: v.pinchCount.value, x: b.x, y: b.y + dy, alpha: Math.max(0, Math.min(1, alpha)) };
+    const area = PINCH_WARN.areas[p];
+    let text: string = PINCH_WARN.word;
+    if (st.pinchWarn.value !== null) text = `${PINCH_WARN.word} ${(Math.ceil((rest * g.tickMs) / 100) / 10).toFixed(1)}秒`;
+    return { text, cx: area.x + area.w / 2, y: area.y + PINCH_WARN.textDy, area };
   }
 
-  private collectPinchCount(items: DrawItem[], p: PlayerId, t: number): void {
-    const c = this.pinchCountView(p, t);
-    if (c) this.put(items, Z.banner, this.frame('S9', `show_countdown_${c.value}_${this.s9Phase(t)}`), c.x, c.y, { alpha: c.alpha });
+  private drawPinchWarn(ctx: CanvasRenderingContext2D, p: PlayerId): void {
+    const w = this.pinchWarnView(p);
+    if (!w) return;
+    ctx.save();
+    ctx.font = `700 ${PINCH_WARN.size}px ${UI_FONT}`;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'center';
+    // 1px の暗い縁取り（8方向）→ 警告色。枠・点滅なし
+    ctx.fillStyle = PINCH_WARN.outline;
+    for (const [dx, dy] of [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]) ctx.fillText(w.text, w.cx + dx, w.y + dy);
+    ctx.fillStyle = PINCH_WARN.color;
+    ctx.fillText(w.text, w.cx, w.y);
+    ctx.restore();
   }
 
   private collectMode1Player(items: DrawItem[], p: PlayerId, t: number): void {
@@ -836,13 +849,20 @@ export class GameView {
       }
     }
     if (!this.isSingle) this.collectAttackStock(items, p, t);
-    // 役名ロゴ（S7 A/B/C）：表示予定は RoleNameDirector（第13章）。ゲーム処理の時間とは独立
-    const logo = this.hud.roleLogo?.(p, t) ?? null;
-    if (logo) {
-      const r = L.pRect(p, 'role_logo');
-      const letter = (['A', 'B', 'C'] as const)[Math.floor((t - logo.since) / this.ticksOf(this.vc.roleFrameMs)) % 3];
-      this.put(items, Z.roleName, this.assets.atlas.role(logo.logo, letter), r.x, r.y);
+    // 役名ロゴ（S7 A/B/C、原寸・定位置）：表示予定は RoleNameDirector。ゲーム処理の時間とは独立。
+    // V320-FIX-05：イン／アウト120msの横スライド（1P 左→右、2P 右→左、16px）と透明度。切替中は2枚（後続を前面）
+    const r = L.pRect(p, 'role_logo');
+    for (const lv of this.roleLogoViews(p, t)) {
+      const letter = (['A', 'B', 'C'] as const)[Math.floor((t - lv.since) / this.ticksOf(this.vc.roleFrameMs)) % 3];
+      this.put(items, Z.roleName, this.assets.atlas.role(lv.logo, letter), r.x + lv.dx, r.y, { alpha: lv.alpha < 1 ? lv.alpha : undefined });
     }
+  }
+
+  /** V320-FIX-05 描画する役名ロゴ（位置ずれ・透明度つき）。テスト・検証用に公開 */
+  roleLogoViews(p: PlayerId, t: number): { logo: number; since: number; dx: number; alpha: number }[] {
+    if (this.hud.roleLogos) return this.hud.roleLogos(p, t).map((v) => ({ logo: v.logo, since: v.since, ...roleSlide(v, p === 0 ? 1 : -1) }));
+    const l = this.hud.roleLogo?.(p, t) ?? null;
+    return l ? [{ ...l, dx: 0, alpha: 1 }] : [];
   }
 
   /** 攻撃段の接着位置：画面下から飛来 → 揺れ（最大2px）。テスト・検証用に公開 */
@@ -1100,9 +1120,9 @@ export class GameView {
         const st = (g as Game).players[p];
         this.drawChainHud(ctx, p, st, ms, t);
         this.drawChainGauge(ctx, p, st);
-        // 危険の残り時間：自然上昇の危険猶予と攻撃ピンチ猶予のうち早い期限（どちらも自分の役処理中は止まる）
-        const rest = g.result ? null : this.dangerRemainingTicks(st);
-        if (rest !== null) drawText(ctx, `危険 ${((rest * g.tickMs) / 1000).toFixed(1)}秒`, board.x + board.w / 2, board.y + 4, { align: 'center', size: 12, weight: 700, color: '#ff8a8a', box: true });
+        // V320-FIX-05：盤面上の「危険○秒」は出さず、盤面の上の帯へピンチ警告（自然上昇の危険猶予と攻撃ピンチ猶予の早い方）
+        void board;
+        this.drawPinchWarn(ctx, p);
       } else {
         // MODE2：役・攻撃の要素は出さない。手役ストックと同じ領域に残りピース数
         const m2 = g as Mode2Game;
