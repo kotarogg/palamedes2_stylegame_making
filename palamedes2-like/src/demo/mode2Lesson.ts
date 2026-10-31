@@ -6,7 +6,7 @@
 // カウントダウン（3/2/1）・場の更新の演出中は止めない。複数の説明は順に表示する（即置換しない）。
 import type { Command } from '../core/game';
 import { Mode2Game } from '../core/mode2';
-import { ItemClock, pieceKind, type PageKey } from './lesson';
+import { ItemClock, pieceKind, type PageKey, type SyncEvent, type TextStep } from './lesson';
 
 /** 初期盤面：上から下の7行、左から右の6列（S＝♠、D＝♦、C＝♣、H＝♥） */
 export const MODE2_LESSON_ROWS = ['4H 1D 2C 1S 2D 1C', '1S 6H 6S 1H 1H 5H', '3D 2D 4C 5S 4H 2C', '6C 1C 5S 3D 5D 1S', '4H 5S 4C 4H 1C 3H', '2H 6D 3C 4H 5S 5S', '2H 5C 4D 3H 2S 5H'].map((r) =>
@@ -22,6 +22,15 @@ export const MODE2_LESSON = {
   /** 各到達成功後の教材用の最低間隔（既存の上詰め硬直と重ねてよい） */
   gapTicks: 12,
 } as const;
+
+/**
+ * V320-FIX-06-R1 説明の実イベント同期：場の更新の2枚目（そのあと場のカードが変わる）はカウントダウンの「1」で、
+ * クリアの説明は残り0のクリア（roundEnd）で同じ項目内に切り替える（クリア処理が終わってから後追いで始めない）
+ */
+const STEPS: Partial<Record<PageKey, readonly TextStep[]>> = {
+  m2_refresh: [{ on: 'countdown', match: (e) => e.value === 1, panel: 1 }],
+  m2_difference: [{ on: 'roundEnd', match: (e) => e.outcome === 'clear', page: 'm2_clear' }],
+};
 
 type Stage = 'intro' | 'first' | 'refresh' | 'explain' | 'rest' | 'clear' | 'done';
 
@@ -104,7 +113,7 @@ export class Mode2LessonRunner {
     }
     const page = this.queue.shift();
     if (!page) return;
-    this.items.begin(page);
+    this.items.begin(page, STEPS[page] ?? [], this.game.tick);
     this.page = page;
     this.onPage(page);
     if (page === 'm2_refresh') this.stage = 'first'; // 詰まりの実演はこの項目から
@@ -121,7 +130,8 @@ export class Mode2LessonRunner {
   /** 1tick 分（項目の時計は毎回進む）。最低時間の残りを待つ間はゲームを進めない。戻り値：ゲームを進めたか */
   tick(): boolean {
     if (this.done) return false;
-    this.items.clock++;
+    this.items.setGameTick(this.game.tick);
+    this.items.advance();
     this.pump();
     if (this.done || this.holding) return false;
     const g = this.game;
@@ -137,6 +147,7 @@ export class Mode2LessonRunner {
     const g = this.game;
     for (; this.cursor < g.events.length; this.cursor++) {
       const e = g.events[this.cursor];
+      this.items.onEvent(e as unknown as SyncEvent);
       if (e.type === 'arrive') {
         this.waitingArrive = false;
         if (e.success) this.lastArrive = e.tick;
@@ -148,7 +159,7 @@ export class Mode2LessonRunner {
       } else if (e.type === 'roundEnd') {
         if (e.outcome === 'clear' && g.remaining(g.players[0]) === 0) {
           this.stage = 'clear';
-          this.enqueue('m2_clear');
+          // m2_clear は m2_difference の項目内でクリアと同時に表示（R1）
           this.enqueue('m2_versus');
           this.enqueue('m2_versus_refresh');
         } else {

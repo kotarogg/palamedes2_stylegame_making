@@ -2,15 +2,17 @@
 //   npx vitest run --config tools/vitest.measure.config.ts tools/cpu-fix06.measure.ts
 // MODE1：各難易度 × 同難易度の3組（コタロー対アカネ／アカネ対ずん子／ずん子対コタロー）× seed1〜5 ＝45ラウンド。1ラウンド180ゲーム秒上限。
 // MODE2：各難易度 × 各キャラクター × seed1〜5 のシングル ＝45回（同じ seed は同じ初期盤面・場。識別情報を記録）。測定用の必勝処理なし。
-// 遊び方：全説明項目の開始・実演完了・最低表示時間・次項目への移行（ms）とパネルごとの表示時間。
+// 遊び方：全説明項目の開始・実演完了・最低表示時間・次項目への移行（ms）と、説明ごとの表示区間・きっかけの実イベント・項目中の実イベント。
+// V320-FIX-06-R1：ピンチは PinchTracker（プレイヤーごと、なし→あり＝開始、あり→両方なし＝復帰、敗北は復帰に含めない）。
+// MODE2 は R1 で影響がないため既定では再実行しない（MEASURE_MODE2=1 で再実行。しない場合は既存の mode2_runs.csv・summary.json の mode2 をそのまま残す）
 // CPU同士の机上計測であり、人間の勝率・遊びやすさを示すものではない。
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { it } from 'vitest';
 import type { Character } from '../src/audio/audioMap';
 import { AudioBus } from '../src/audio/audioBus';
 import { DEFAULT_CONFIG, NATURAL_RISE_MS, type Difficulty } from '../src/core/config';
 import { Game } from '../src/core/game';
-import { measureRound, RoundRecorder } from '../src/core/metrics';
+import { measureRound, PinchTracker, RoundRecorder } from '../src/core/metrics';
 import { Mode2Game } from '../src/core/mode2';
 import { pieceLabel } from '../src/core/pieces';
 import { countTextChars, LESSON_BASIC, LESSON_CRACK, LESSON_M1_SINGLE, LESSON_M1_VERSUS, LESSON_PINCH, pageText, rolesLesson, type ItemRecord, type LessonDef } from '../src/demo/lesson';
@@ -97,11 +99,14 @@ function mode1(level: Difficulty, [a, b]: [Character, Character], seed: number) 
   const g = new Game({ seed, config: { ...DEFAULT_CONFIG, naturalRiseIntervalMs: NATURAL_RISE_MS[level] } });
   const cpus = [new CpuController(0, level, seed * 3, a), new CpuController(1, level, seed * 5 + 1, b)];
   const rec = new RoundRecorder(g);
+  const pinch = new PinchTracker(g);
   const limit = g.playStartTick + Math.round(CAP_MS / TICK_MS);
   while (!g.result && g.tick < limit) {
     g.step([...cpus[0].poll(g), ...cpus[1].poll(g)]);
     rec.sample();
+    pinch.sample();
   }
+  const pc = pinch.finish();
   const m = rec.finish();
   const ev = g.events;
   const r = g.result;
@@ -133,8 +138,18 @@ function mode1(level: Difficulty, [a, b]: [Character, Character], seed: number) 
     applied: g.players.reduce((s, p) => s + p.incoming.stats.applied, 0),
     overflow: g.players.reduce((s, p) => s + p.incoming.stats.overflow, 0),
     pinchDiscarded: g.players.reduce((s, p) => s + p.incoming.stats.pinchDiscarded, 0),
-    pinches: ev.filter((e) => e.type === 'pinchWarn' && e.state === 'start').length,
-    recoveries: ev.filter((e) => (e.type === 'danger' || e.type === 'attackPinch') && e.state === 'release').length,
+    // 主指標（R1）：プレイヤーごとの「有効なピンチ猶予なし→あり」と「あり→両方なし」（敗北は含めない）。左＋右の合計と左右別
+    pinchStarts: pc[0].starts + pc[1].starts,
+    pinchRecoveries: pc[0].recoveries + pc[1].recoveries,
+    pinchDefeats: pc[0].defeatedInPinch + pc[1].defeatedInPinch,
+    pinchOngoingAtEnd: pc[0].ongoingAtEnd + pc[1].ongoingAtEnd,
+    pinchLeft: `${pc[0].starts}/${pc[0].recoveries}/${pc[0].defeatedInPinch}/${pc[0].ongoingAtEnd}`,
+    pinchRight: `${pc[1].starts}/${pc[1].recoveries}/${pc[1].defeatedInPinch}/${pc[1].ongoingAtEnd}`,
+    // 補助指標：自然の危険猶予・攻撃ピンチ猶予それぞれの開始／解除（重複を含む。主指標とは単位が異なる）
+    auxNaturalGrace: ev.filter((e) => e.type === 'danger' && e.state === 'grace').length,
+    auxNaturalRelease: ev.filter((e) => e.type === 'danger' && e.state === 'release').length,
+    auxAttackGrace: ev.filter((e) => e.type === 'attackPinch' && e.state === 'grace').length,
+    auxAttackRelease: ev.filter((e) => e.type === 'attackPinch' && e.state === 'release').length,
     launchOk: ev.filter((e) => e.type === 'arrive' && e.success).length,
     launchFail: ev.filter((e) => e.type === 'arrive' && !e.success).length,
     ...sp,
@@ -174,12 +189,7 @@ const host = () => ({ assets: fakeAssets(), bus: new AudioBus('./') });
 
 function itemRows(where: string, items: ItemRecord[]) {
   return items.map((x, i) => {
-    const panels = pageText(x.page).panels;
     const end = x.endTick ?? x.startTick;
-    const panelMs = x.panelTicks.map((t, k) => r2(((k + 1 < x.panelTicks.length ? x.panelTicks[k + 1] : end) - t) * TICK_MS));
-    const panelChars = panels.map((l) => countTextChars(l.join('')));
-    // 文章ごとの表示時間が、その文章だけに初期式（1秒＋文字数÷8秒）を当てた値より短いもの
-    const short = panelMs.map((ms, k) => (panelMs.length > 1 && ms < 1000 + (panelChars[k] / 8) * 1000 ? `panel${k + 1}:${ms}ms<${1000 + panelChars[k] * 125}ms` : null)).filter(Boolean);
     return {
       where,
       order: i + 1,
@@ -193,10 +203,37 @@ function itemRows(where: string, items: ItemRecord[]) {
       nextMs: x.endTick === null ? null : r2(x.endTick * TICK_MS),
       shownMs: r2((end - x.startTick) * TICK_MS),
       heldMs: x.doneTick === null ? null : r2((end - x.doneTick) * TICK_MS),
-      panelMs: panelMs.join('/'),
-      shortPanels: short.join(' '),
+      texts: x.segments.map((s) => `${s.page}#${s.panel + 1}`).join(' > '),
     };
   });
+}
+
+/** 説明の表示区間（照合用）：頁・パネル・開始／終了・きっかけの実イベント・その区間に起きた実イベント */
+function segmentRows(where: string, items: ItemRecord[]) {
+  return items.flatMap((x) =>
+    x.segments.map((s, k) => {
+      const end = s.endTick ?? x.endTick ?? s.startTick;
+      const during = x.events.filter((e) => e.tick >= s.startTick && (k + 1 < x.segments.length ? e.tick < x.segments[k + 1].startTick : true));
+      const decl = during.find((e) => e.type === 'declare');
+      const text = pageText(s.page).panels[s.panel].join('');
+      return {
+        where,
+        item: x.page,
+        page: s.page,
+        panel: s.panel + 1,
+        text,
+        chars: countTextChars(text),
+        trigger: s.trigger,
+        startMs: r2(s.startTick * TICK_MS),
+        endMs: r2(end * TICK_MS),
+        shownMs: r2((end - s.startTick) * TICK_MS),
+        triggerGameTick: s.gameTick,
+        // 宣言後は役名・消去数の表示（宣言以後に切り替えた説明は消去数と併記）
+        roleOverlayFromMs: decl ? r2(decl.tick * TICK_MS) : null,
+        events: during.map((e) => `${e.type}@${e.gameTick}(${r2(e.tick * TICK_MS)}ms)${e.detail ? `[${e.detail}]` : ''}`).join(' '),
+      };
+    }),
+  );
 }
 
 function runStage(make: () => PacedStage, maxMs = 300_000) {
@@ -242,17 +279,21 @@ it('V320-FIX-06 計測', () => {
           maxChain: nums((r) => r.maxChain),
           totals: { baseAttack: tot((r) => r.baseAttack), streakBonus: tot((r) => r.streakBonus), chainBonus: tot((r) => r.chainBonus), power: tot((r) => r.power), canceled: tot((r) => r.canceled), sent: tot((r) => r.sent), applied: tot((r) => r.applied), overflow: tot((r) => r.overflow), pinchDiscarded: tot((r) => r.pinchDiscarded) },
           perRound: { power: nums((r) => r.power), canceled: nums((r) => r.canceled), sent: nums((r) => r.sent), applied: nums((r) => r.applied) },
-          pinches: nums((r) => r.pinches),
-          recoveries: nums((r) => r.recoveries),
+          pinchStarts: nums((r) => r.pinchStarts),
+          pinchRecoveries: nums((r) => r.pinchRecoveries),
+          pinchTotals: { starts: tot((r) => r.pinchStarts), recoveries: tot((r) => r.pinchRecoveries), defeatsInPinch: tot((r) => r.pinchDefeats), ongoingAtEnd: tot((r) => r.pinchOngoingAtEnd) },
+          aux: { naturalGrace: tot((r) => r.auxNaturalGrace), naturalRelease: tot((r) => r.auxNaturalRelease), attackGrace: tot((r) => r.auxAttackGrace), attackRelease: tot((r) => r.auxAttackRelease) },
           speed: { moveGapMinTick: Math.min(...rows.map((r) => r.moveGapMinTick ?? 999)), afterMoveMinTick: Math.min(...rows.map((r) => r.afterMoveMinTick ?? 999)), moveGapMeanTick: summary(rows.map((r) => r.moveGapMeanTick ?? 0)), launchGapMeanMs: summary(rows.map((r) => r.launchGapMeanMs ?? 0)) },
         },
       ];
     }),
   );
 
-  const m2 = LEVELS.flatMap((lv) => CHARS.flatMap((ch) => SEEDS.map((s) => mode2(lv, ch, s))));
-  writeFileSync(new URL('mode2_runs.csv', OUT), csv(m2));
-  const m2sum = Object.fromEntries(
+  const prev = existsSync(new URL('summary.json', OUT)) ? JSON.parse(readFileSync(new URL('summary.json', OUT), 'utf8')) : {};
+  const runM2 = process.env.MEASURE_MODE2 === '1' || !prev.mode2;
+  const m2 = runM2 ? LEVELS.flatMap((lv) => CHARS.flatMap((ch) => SEEDS.map((s) => mode2(lv, ch, s)))) : [];
+  if (runM2) writeFileSync(new URL('mode2_runs.csv', OUT), csv(m2));
+  const m2sum = !runM2 ? prev.mode2 : Object.fromEntries(
     LEVELS.map((lv) => {
       const rows = m2.filter((r) => r.level === lv);
       const done = rows.filter((r) => r.cleared);
@@ -284,16 +325,22 @@ it('V320-FIX-06 計測', () => {
     ['help:mode1#2', LESSON_M1_VERSUS],
     ['help:mode1#3 / demo:pinch', LESSON_PINCH],
   ];
-  const help = lessons.flatMap(([where, def]) => {
+  const logs: [string, ItemRecord[]][] = lessons.map(([where, def]) => {
     const st = runStage(() => new LessonStage(host(), def));
     if (!st.finished) throw new Error(`${where} not finished`);
-    return itemRows(where, st.items.log);
+    return [where, st.items.log];
   });
   const m2st = runStage(() => new Mode2Stage(host()));
   if (!m2st.finished) throw new Error('mode2 lesson not finished');
-  help.push(...itemRows('help:mode2', m2st.items.log));
+  logs.push(['help:mode2', m2st.items.log]);
+  const help = logs.flatMap(([w, l]) => itemRows(w, l));
+  const segs = logs.flatMap(([w, l]) => segmentRows(w, l));
   writeFileSync(new URL('help_items.csv', OUT), csv(help));
+  writeFileSync(new URL('help_segments.csv', OUT), csv(segs));
 
-  writeFileSync(new URL('summary.json', OUT), JSON.stringify({ meta, mode1: m1sum, mode2: m2sum, helpShortPanels: help.filter((h) => h.shortPanels).map((h) => `${h.where} ${h.page}: ${h.shortPanels}`) }, null, 1));
-  console.log(JSON.stringify({ mode1: Object.fromEntries(Object.entries(m1sum).map(([k, v]) => [k, { decided: v.decided, undecided: v.undecided, sec: v.gameSecDecidedOnly, causes: v.causes }])), mode2: Object.fromEntries(Object.entries(m2sum).map(([k, v]) => [k, { cleared: v.cleared, sec: v.clearSec }])) }, null, 1));
+  writeFileSync(
+    new URL('summary.json', OUT),
+    JSON.stringify({ meta: { ...meta, revision: 'V320-FIX-06-R1', mode2Rerun: runM2, pinchUnit: 'プレイヤーごと：有効なピンチ猶予なし→あり＝開始、あり→両方なし＝復帰（敗北は含めない）' }, mode1: m1sum, mode2: m2sum }, null, 1),
+  );
+  console.log(JSON.stringify({ mode1: Object.fromEntries(Object.entries(m1sum).map(([k, v]) => [k, { decided: v.decided, undecided: v.undecided, pinch: v.pinchTotals, aux: v.aux }])) }, null, 1));
 });

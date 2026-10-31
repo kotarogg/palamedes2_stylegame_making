@@ -35,8 +35,9 @@ describe('MODE2 説明教材（固定盤面・固定入力・seed 20261027）', 
   });
 
   it('説明は順に表示（V320-FIX-06：自動進行）：冒頭・場の更新（詰まりの前）→同じ記号→同じ数字→1と6→クリア条件→MODE2のルール→クリア→対戦では→対戦の場の更新。カウントダウン中に読まない', () => {
-    const { pages, g } = run();
-    expect(pages.map((p) => p.page)).toEqual(['m2_intro', 'm2_refresh', 'm2_suit', 'm2_number', 'm2_adjacent', 'm2_rule', 'm2_difference', 'm2_clear', 'm2_versus', 'm2_versus_refresh']);
+    const { pages, g, r } = run();
+    // V320-FIX-06-R1：「クリア！」は MODE2 のルールの項目内でクリア（roundEnd）と同時に表示（クリア処理の後追いにしない）
+    expect(pages.map((p) => p.page)).toEqual(['m2_intro', 'm2_refresh', 'm2_suit', 'm2_number', 'm2_adjacent', 'm2_rule', 'm2_difference', 'm2_versus', 'm2_versus_refresh']);
     const stuck = g.events.find((e) => e.type === 'stuck')!;
     const refresh = g.events.find((e) => e.type === 'cardRefresh')!;
     // 詰まり〜場の更新（3/2/1）の間に説明を始めない
@@ -44,7 +45,13 @@ describe('MODE2 説明教材（固定盤面・固定入力・seed 20261027）', 
     expect(pages[1].tick).toBeLessThan(stuck.tick);
     expect(pages[2].tick).toBeGreaterThanOrEqual(refresh.tick);
     const end = g.events.find((e) => e.type === 'roundEnd')!;
-    expect(pages[7].tick).toBe(end.tick);
+    const clear = r.items.log.flatMap((x) => x.segments).find((s) => s.page === 'm2_clear')!;
+    expect([clear.gameTick, clear.trigger]).toEqual([end.tick, `roundEnd@${end.tick}`]);
+    // 場の更新の2枚目はカウントダウンの「1」と同時
+    const cd1 = g.events.find((e) => e.type === 'countdown' && e.value === 1)!;
+    const rs = r.items.log.find((x) => x.page === 'm2_refresh')!.segments;
+    expect(rs.map((s) => s.panel)).toEqual([0, 1]);
+    expect(rs[1].gameTick).toBe(cd1.tick);
   });
 
   it('カウントダウン中も止めない：3→2→1 は1000msごと。クリア時間は詰まり・カウントダウン・場の更新を含む通常のゲーム内時間', () => {

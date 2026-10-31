@@ -127,20 +127,24 @@ describe('自動進行（LessonRunner）', () => {
     expect(r.problems).toEqual([]);
   });
 
-  it('複数パネルの頁は、最低時間を文字数で按分した時刻にパネルを切り替える（切替ごとに時間を加算しない）', () => {
-    const r = new LessonRunner(rolesLesson());
+  // V320-FIX-06-R1 で更新：実演のある頁はイベントで切り替える（v320_fix06r1_sync.test.ts）。文字数按分は実演の無い（文字だけの）頁だけ
+  it('文字だけの複数パネルの頁は、最低時間を文字数で按分した時刻にパネルを切り替える（項目は最低時間ちょうどで移行）', () => {
+    const r = new LessonRunner(LESSON_M1_SINGLE);
     for (let i = 0; i < 60 * 120 && !r.done; i++) r.tick();
-    const st = r.items.log.find((x) => x.page === 'streak')!;
-    expect(pageText('streak').panels).toHaveLength(2);
-    expect(st.panelTicks).toHaveLength(2);
-    expect(st.panelTicks[1] - st.startTick).toBeLessThan(st.minTicks);
-    expect(st.panelTicks[1]).toBeGreaterThan(st.startTick);
+    const st = r.items.log.find((x) => x.page === 'm1_endless')!;
+    expect(pageText('m1_endless').panels).toHaveLength(2);
+    expect(st.segments.map((x) => [x.panel, x.trigger])).toEqual([
+      [0, 'start'],
+      [1, 'time'],
+    ]);
+    expect(st.segments[1].startTick - st.startTick).toBeLessThan(st.minTicks);
+    expect(st.endTick! - st.startTick).toBe(st.minTicks);
   });
 });
 
 describe('舞台・画面', () => {
   it('役名スライドが残る間は次の項目へ進まない（役処理の終了＝役名表示の終了後）', () => {
-    const st = new LessonStage(host(), rolesLesson('first'));
+    const st = new LessonStage(host(), rolesLesson());
     const roleNames = (st as unknown as { presenter: { roleNames: { logosAt: (p: 0, t: number) => unknown[] } } }).presenter.roleNames;
     let checked = false;
     let lastPages = 0;
@@ -148,7 +152,8 @@ describe('舞台・画面', () => {
       st.update(F);
       if (st.items.log.length !== lastPages) {
         lastPages = st.items.log.length;
-        if (st.items.current?.page === 'line_clear') {
+        // R1：宣言の項目（ライン消去の説明を含む）の次の項目＝打上連鎖
+        if (st.items.current?.page === 'streak') {
           expect(roleNames.logosAt(0, st.game.tick)).toEqual([]);
           checked = true;
         }
@@ -162,19 +167,24 @@ describe('舞台・画面', () => {
     const st = new LessonStage(host(), LESSON_PINCH);
     for (let i = 0; i < 60 * 90 && !st.finished; i++) st.update(F);
     expect(st.finished).toBe(true);
-    const avoid = st.items.log.find((x) => x.page === 'avoid')!;
-    const miss = st.items.log.find((x) => x.page === 'miss')!;
-    expect(miss.startTick).toBeGreaterThanOrEqual(avoid.doneTick!);
+    // R1：ゲームオーバーの説明はゲームオーバーと同時（同じ項目内）。結果演出の受付可能時刻までを実演の処理に含めてから次の項目へ
+    const nat = st.items.log.find((x) => x.page === 'natural')!;
+    const next = st.items.log.find((x) => x.page === 'attack_pinch')!;
+    const miss = nat.segments.find((x) => x.page === 'miss')!;
+    expect(miss.gameTick).toBe(st.game.result!.tick);
+    expect(nat.doneTick!).toBeGreaterThan(miss.startTick);
+    expect(next.startTick).toBeGreaterThanOrEqual(nat.doneTick!);
     expect(st.game.result?.outcome).toBe('gameOver');
   });
 
-  it('MODE2 説明：自動で完走（詰まり→3/2/1→場の更新→全ピース消化→クリア処理→説明10項目）', () => {
+  it('MODE2 説明：自動で完走（詰まり→3/2/1→場の更新→全ピース消化→クリア処理→説明10頁・9項目）', () => {
     const st = new Mode2Stage(host());
     for (let i = 0; i < 60 * 400 && !st.finished; i++) st.update(F);
     expect(st.finished).toBe(true);
     expect(st.game.result?.outcome).toBe('clear');
     expect(st.game.remaining(st.game.players[0])).toBe(0);
-    expect(st.items.log.map((x) => x.page)).toEqual(['m2_intro', 'm2_refresh', 'm2_suit', 'm2_number', 'm2_adjacent', 'm2_rule', 'm2_difference', 'm2_clear', 'm2_versus', 'm2_versus_refresh']);
+    expect(st.items.log.map((x) => x.page)).toEqual(['m2_intro', 'm2_refresh', 'm2_suit', 'm2_number', 'm2_adjacent', 'm2_rule', 'm2_difference', 'm2_versus', 'm2_versus_refresh']);
+    expect(st.items.log.flatMap((x) => x.segments.map((s) => s.page))).toContain('m2_clear');
     for (const x of st.items.log) expect(x.endTick! - x.startTick).toBeGreaterThanOrEqual(x.minTicks);
   });
 

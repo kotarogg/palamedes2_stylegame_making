@@ -161,7 +161,7 @@ export class LessonStage implements PacedStage {
   private readonly presenter: Presenter;
   private readonly driver: FixedStepDriver;
   private cursor = 0;
-  private roleInfo: { heading: string; clear: number; pieces: { n: number; suit: Suit }[]; clearOnPage: boolean } | null = null;
+  private roleInfo: { heading: string; clear: number; pieces: { n: number; suit: Suit }[]; clearOnPage: boolean; tick: number } | null = null;
   private focus: Focus | null = null;
   private advanced = false;
   readonly bgm: BgmId = 'single';
@@ -226,7 +226,7 @@ export class LessonStage implements PacedStage {
           this.focus = { kind: 'stock', untilTick: T(60000) };
           break;
         case 'declare':
-          this.roleInfo = { heading: roleDisplayName(e.logos), clear: e.result.clear, pieces: e.result.subset.map((p) => ({ n: p.n, suit: p.suit })), clearOnPage: false };
+          this.roleInfo = { heading: roleDisplayName(e.logos), clear: e.result.clear, pieces: e.result.subset.map((p) => ({ n: p.n, suit: p.suit })), clearOnPage: false, tick: e.tick };
           this.focus = { kind: 'chain', untilTick: T(1500) };
           break;
         case 'roleEnd':
@@ -241,18 +241,16 @@ export class LessonStage implements PacedStage {
 
   /** 現在のパネル内容（頁＋宣言中の役名・実例・実際の消去数） */
   panel(): PanelContent {
-    const page = this.runner.page;
-    const it = this.items.current;
-    const base = page ? pageContent(page, it && it.page === page ? this.items.panel : pageText(page).panels.length - 1) : {};
+    // V320-FIX-06-R1：表示中の説明（実イベントに同期した頁・パネル）
+    const tx = this.items.text;
+    const base = tx ? pageContent(tx.page, tx.panel) : {};
     const r = this.roleInfo;
     if (!r) return base;
     const fits = measureBitmap(this.host.assets.tutorial?.font.def ?? { glyphs: {}, cell: [16, 16], line_height: 22, format: '' }, r.heading) <= PANEL.heading.w;
-    return {
-      heading: fits ? r.heading : (base.heading ?? ''),
-      // 役処理中は役名・消去数（V320-FIX-06 の数値表）・採択ピースだけを示す
-      lines: [`${TUTORIAL_SCRIPT.role_list.labels.clear}${fullDigits(r.clear)}${TUTORIAL_SCRIPT.role_list.labels.lines_unit}`],
-      pieces: r.pieces,
-    };
+    const clearLine = `${TUTORIAL_SCRIPT.role_list.labels.clear}${fullDigits(r.clear)}${TUTORIAL_SCRIPT.role_list.labels.lines_unit}`;
+    // 役処理中は役名・消去数（数値表）・採択ピース。宣言以後に切り替わった説明（ライン消去・3連鎖達成）は消去数の上に並べる
+    const during = tx && tx.gameTick >= r.tick ? (base.lines ?? []).slice(0, PANEL.body.maxLines - 1) : [];
+    return { heading: fits ? r.heading : (base.heading ?? ''), lines: [...during, clearLine], pieces: r.pieces };
   }
 
   render(ctx: CanvasRenderingContext2D): void {
@@ -448,8 +446,8 @@ export class Mode2Stage implements PacedStage {
     const g = this.runner.game;
     const t = this.runner.holding || g.result ? g.tick : g.tick + this.driver.alpha;
     this.presenter.render(ctx, t, { hideSingleInfo: true, hideStartBanner: true });
-    const it = this.items.current;
-    drawTutorialPanel(ctx, this.host.assets, pageContent(this.page, it && it.page === this.page ? this.items.panel : pageText(this.page).panels.length - 1));
+    const tx = this.items.text;
+    drawTutorialPanel(ctx, this.host.assets, tx ? pageContent(tx.page, tx.panel) : pageContent(this.page, pageText(this.page).panels.length - 1));
   }
 }
 

@@ -214,6 +214,83 @@ await ev(() => {
   check('第7章 遊び方：項目へ入った時点で説明と実演を自動開始（最初の移動は開始直後）。実演完了（移動3回＋待ち）後は最低表示時間の残りだけ待って次項目（列入れ替え）へ', r.startPage === 'basic_move' && r.firstMoveTick !== null && r.firstMoveTick <= r.startGameTick + 2 && a.done !== null && a.done - a.start < a.min && a.end - a.start === a.min && r.log[1]?.page === 'rotate', JSON.stringify({ log: r.log, first: r.firstMoveTick, t0: r.startGameTick }), 'natural-ui');
 }
 
+// ---- 6. R1：役一覧の副ページ（オールマーク・フラッシュの6個）----
+{
+  const r = await ev(() => {
+    const app = window.__p2like.app;
+    app.toMenu();
+    app.openHelp('menu');
+    const help = app.scene;
+    help.cursor = 3;
+    help.onNav({ key: 'confirm', source: { kind: 'keyboard' } });
+    const sc = app.scene;
+    const out = {};
+    for (const [i, sub] of [[11, 0], [11, 1], [12, 0], [12, 1]]) {
+      while (!(sc.index === i && sc.sub === sub)) sc.onNav({ key: 'right', source: { kind: 'keyboard' } });
+      const c = window.__f4.canvas();
+      sc.render(c.x, 300);
+      const v = sc.info();
+      out[`${i}_${sub}`] = { counter: sc.counter(), pieces: v.pieces, val: `${v.clear}/${v.attack}`, png: c.c.toDataURL('image/png') };
+    }
+    sc.onNav({ key: 'back', source: { kind: 'keyboard' } });
+    return out;
+  });
+  for (const [k, x] of Object.entries(r)) if (k.endsWith('_1')) shots.push(save(`V320F06R1_role_list_${k}_6pieces_1x`, x.png));
+  const got = Object.fromEntries(Object.entries(r).map(([k, x]) => [k, `${x.counter} ${x.pieces}個 ${x.val}`]));
+  check('R1 第2項 役一覧：オールマーク・フラッシュは同じ役の副ページで4個／6個の実例と消去・基本攻撃を表示（12/16・1/2 4個2/2 → 2/2 6個3/3、13/16・1/2 4個3/2 → 2/2 6個4/3）', JSON.stringify(got) === JSON.stringify({ '11_0': '12/16・1/2 4個 2/2', '11_1': '12/16・2/2 6個 3/3', '12_0': '13/16・1/2 4個 3/2', '12_1': '13/16・2/2 6個 4/3' }), JSON.stringify(got), 'natural-ui');
+}
+
+// ---- 7. R1：説明と実演の同期（ライン消去・連鎖切り予約）----
+{
+  const r = await ev(() => {
+    const app = window.__p2like.app;
+    app.toMenu();
+    app.openHelp('menu');
+    const help = app.scene;
+    help.cursor = 2; // 連鎖説明（4/4/6 → ヒビ）
+    help.onNav({ key: 'confirm', source: { kind: 'keyboard' } });
+    const sc = app.scene;
+    const out = { pngs: {} };
+    const snap = (k) => {
+      const c = window.__f4.canvas();
+      sc.render(c.x, 0);
+      out.pngs[k] = c.c.toDataURL('image/png');
+    };
+    // 最初のライン消去の tick（同じフレーム）
+    for (let i = 0; i < 60 * 60; i++) {
+      sc.update(1000 / 60);
+      const g = sc.stage.game;
+      const lc = g.events.find((e) => e.type === 'lineClear');
+      if (lc) {
+        out.lineClear = { tick: lc.tick, text: sc.stage.items.text, lines: sc.stage.panel().lines };
+        snap('line_clear');
+        break;
+      }
+    }
+    // ヒビ教材へ（連鎖説明の2つ目の舞台）
+    for (let i = 0; i < 60 * 120 && sc.stage.def?.id !== 'crack'; i++) sc.update(1000 / 60);
+    const st = sc.stage;
+    const seen = [];
+    for (let i = 0; i < 60 * 30 && !st.finished; i++) {
+      sc.update(1000 / 60);
+      const tx = st.items.text;
+      const key = `${tx.page}#${tx.panel}`;
+      if (seen.at(-1) !== key) {
+        seen.push(key);
+        const p = st.game.players[0];
+        out[`crack_${tx.panel}`] = { streak: p.streakCount, reserved: p.streakCutReserved };
+        if (tx.panel === 1) snap('crack_success_keeps');
+      }
+    }
+    out.seen = seen;
+    out.segments = st.items.log[0].segments.map((x) => [x.panel + 1, x.trigger]);
+    return out;
+  });
+  for (const [k, png] of Object.entries(r.pngs)) shots.push(save(`V320F06R1_sync_${k}_1x`, png));
+  check('R1 第1項 ライン消去：最初のライン消去と同じフレームに「ライン消去」の説明（＋消去数）を表示', r.lineClear && r.lineClear.text.page === 'line_clear' && r.lineClear.lines[0] === '強い役ほど、' && r.lineClear.lines.at(-1) === '消去２ライン', JSON.stringify(r.lineClear));
+  check('R1 第1項 連鎖切り予約：ヒビ発生→（予約中の成功）「成功してもヒビは残る」表示時は予約が残る→次の打ち上げで「もう一度失敗すると切れる」', JSON.stringify(r.seen) === JSON.stringify(['streak_crack#0', 'streak_crack#1', 'streak_crack#2']) && r.crack_1.reserved === true && r.crack_1.streak === 2 && r.segments.length === 4, JSON.stringify({ seen: r.seen, c1: r.crack_1, segments: r.segments }), 'natural-ui');
+}
+
 writeFileSync(new URL('e2e_report_V320-FIX-06.json', OUT), JSON.stringify({ id: 'V320-FIX-06', fontStandin: !!STANDIN, results, shots, errors }, null, 1));
 console.log(`${results.filter((r) => r.pass).length}/${results.length} passed; errors=${errors.length}`, errors.slice(0, 5));
 await browser.close();

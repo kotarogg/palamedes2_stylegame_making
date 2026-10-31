@@ -23,7 +23,10 @@
   },
   "mode1Adjust": "V320-FIX-05_mode1_perception",
   "capSec": 180,
-  "note": "CPU同士の机上計測。人間の勝率・遊びやすさを示すものではない"
+  "note": "CPU同士の机上計測。人間の勝率・遊びやすさを示すものではない",
+  "revision": "V320-FIX-06-R1",
+  "mode2Rerun": false,
+  "pinchUnit": "プレイヤーごと：有効なピンチ猶予なし→あり＝開始、あり→両方なし＝復帰（敗北は含めない）"
  },
  "mode1": {
   "easy": {
@@ -143,7 +146,7 @@
      "max": 19
     }
    },
-   "pinches": {
+   "pinchStarts": {
     "n": 15,
     "mean": 2.8,
     "median": 2,
@@ -151,13 +154,25 @@
     "min": 1,
     "max": 6
    },
-   "recoveries": {
+   "pinchRecoveries": {
     "n": 15,
-    "mean": 2.13,
-    "median": 3,
-    "sd": 2.09,
+    "mean": 1.47,
+    "median": 1,
+    "sd": 1.45,
     "min": 0,
-    "max": 7
+    "max": 4
+   },
+   "pinchTotals": {
+    "starts": 42,
+    "recoveries": 22,
+    "defeatsInPinch": 15,
+    "ongoingAtEnd": 5
+   },
+   "aux": {
+    "naturalGrace": 17,
+    "naturalRelease": 6,
+    "attackGrace": 46,
+    "attackRelease": 26
    },
    "speed": {
     "moveGapMinTick": 12,
@@ -307,7 +322,7 @@
      "max": 81
     }
    },
-   "pinches": {
+   "pinchStarts": {
     "n": 15,
     "mean": 12.13,
     "median": 9,
@@ -315,13 +330,25 @@
     "min": 2,
     "max": 32
    },
-   "recoveries": {
+   "pinchRecoveries": {
     "n": 15,
-    "mean": 16.8,
-    "median": 12,
-    "sd": 12.95,
+    "mean": 10.67,
+    "median": 7,
+    "sd": 8.5,
     "min": 1,
-    "max": 42
+    "max": 31
+   },
+   "pinchTotals": {
+    "starts": 182,
+    "recoveries": 160,
+    "defeatsInPinch": 14,
+    "ongoingAtEnd": 8
+   },
+   "aux": {
+    "naturalGrace": 65,
+    "naturalRelease": 59,
+    "attackGrace": 215,
+    "attackRelease": 193
    },
    "speed": {
     "moveGapMinTick": 9,
@@ -476,7 +503,7 @@
      "max": 125
     }
    },
-   "pinches": {
+   "pinchStarts": {
     "n": 15,
     "mean": 31.93,
     "median": 33,
@@ -484,13 +511,25 @@
     "min": 21,
     "max": 43
    },
-   "recoveries": {
+   "pinchRecoveries": {
     "n": 15,
-    "mean": 58.27,
-    "median": 58,
-    "sd": 11.54,
-    "min": 41,
-    "max": 79
+    "mean": 31,
+    "median": 31,
+    "sd": 6.16,
+    "min": 21,
+    "max": 41
+   },
+   "pinchTotals": {
+    "starts": 479,
+    "recoveries": 465,
+    "defeatsInPinch": 1,
+    "ongoingAtEnd": 13
+   },
+   "aux": {
+    "naturalGrace": 332,
+    "naturalRelease": 325,
+    "attackGrace": 563,
+    "attackRelease": 549
    },
    "speed": {
     "moveGapMinTick": 7,
@@ -734,17 +773,5 @@
     "max": 976.02
    }
   }
- },
- "helpShortPanels": [
-  "help:basic / demo:basic fail: panel1:2500ms<3125ms panel2:4000ms<4375ms",
-  "help:streak#1 / demo:roles role_ready: panel1:2750ms<3250ms panel2:2750ms<3250ms",
-  "help:streak#1 / demo:roles streak: panel1:3216.67ms<3625ms panel2:2166.67ms<2750ms",
-  "help:streak#2 streak_crack: panel1:3033.33ms<3625ms panel2:1750ms<2500ms panel3:2466.67ms<3125ms",
-  "help:mode1#1 m1_endless: panel1:2083.33ms<2750ms panel2:4050ms<4375ms",
-  "help:mode1#2 m1_versus: panel1:1983.33ms<2625ms panel2:3516.67ms<3875ms",
-  "help:mode1#2 m1_counter: panel1:3116.67ms<3625ms panel2:3133.33ms<3625ms",
-  "help:mode1#2 m1_win: panel1:3000ms<3500ms panel2:3000ms<3500ms",
-  "help:mode1#3 / demo:pinch limit: panel1:2850ms<3250ms panel2:1900ms<2500ms",
-  "help:mode2 m2_refresh: panel1:3066.67ms<3500ms panel2:2316.67ms<2875ms"
- ]
+ }
 }

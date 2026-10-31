@@ -31,6 +31,24 @@
    "pass": true,
    "detail": "{\"log\":[{\"page\":\"basic_move\",\"start\":1,\"done\":115,\"min\":195,\"end\":196},{\"page\":\"rotate\",\"start\":196,\"done\":null,\"min\":263,\"end\":null}],\"first\":73,\"t0\":73}",
    "kind": "natural-ui"
+  },
+  {
+   "name": "R1 第2項 役一覧：オールマーク・フラッシュは同じ役の副ページで4個／6個の実例と消去・基本攻撃を表示（12/16・1/2 4個2/2 → 2/2 6個3/3、13/16・1/2 4個3/2 → 2/2 6個4/3）",
+   "pass": true,
+   "detail": "{\"11_0\":\"12/16・1/2 4個 2/2\",\"11_1\":\"12/16・2/2 6個 3/3\",\"12_0\":\"13/16・1/2 4個 3/2\",\"12_1\":\"13/16・2/2 6個 4/3\"}",
+   "kind": "natural-ui"
+  },
+  {
+   "name": "R1 第1項 ライン消去：最初のライン消去と同じフレームに「ライン消去」の説明（＋消去数）を表示",
+   "pass": true,
+   "detail": "{\"tick\":614,\"text\":{\"page\":\"line_clear\",\"panel\":0,\"gameTick\":614},\"lines\":[\"強い役ほど、\",\"たくさんのラインを\",\"消せちゃうよ！\",\"消去２ライン\"]}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "R1 第1項 連鎖切り予約：ヒビ発生→（予約中の成功）「成功してもヒビは残る」表示時は予約が残る→次の打ち上げで「もう一度失敗すると切れる」",
+   "pass": true,
+   "detail": "{\"seen\":[\"streak_crack#0\",\"streak_crack#1\",\"streak_crack#2\"],\"c1\":{\"streak\":2,\"reserved\":true},\"segments\":[[1,\"start\"],[1,\"streakCut@129\"],[2,\"arrive@262\"],[3,\"launch@419\"]]}",
+   "kind": "natural-ui"
   }
  ],
  "shots": [
@@ -43,7 +61,11 @@
   "docs/v320f06/screens/V320F06_stock_cancel_effect_1x.png",
   "docs/v320f06/screens/V320F06_help_basic_start_1x.png",
   "docs/v320f06/screens/V320F06_help_basic_done_1x.png",
-  "docs/v320f06/screens/V320F06_help_basic_next_1x.png"
+  "docs/v320f06/screens/V320F06_help_basic_next_1x.png",
+  "docs/v320f06/screens/V320F06R1_role_list_11_1_6pieces_1x.png",
+  "docs/v320f06/screens/V320F06R1_role_list_12_1_6pieces_1x.png",
+  "docs/v320f06/screens/V320F06R1_sync_line_clear_1x.png",
+  "docs/v320f06/screens/V320F06R1_sync_crack_success_keeps_1x.png"
  ],
  "errors": []
 }

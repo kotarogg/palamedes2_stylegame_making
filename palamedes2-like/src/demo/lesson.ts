@@ -36,16 +36,56 @@ export function countTextChars(text: string): number {
   return [...text.replace(/[\s\u3000]/g, '')].length;
 }
 
-/** 頁の最低表示時間（ms。小数を含む） */
-export function minDisplayMs(page: PageKey): number {
+/**
+ * 項目の最低表示時間（ms。小数を含む）。項目内で別の頁の説明へ切り替える場合（V320-FIX-06-R1）は、
+ * 項目に属する説明すべての文字数で初期式を計算する。perPageMs に項目の頁（最初の頁）があればその値
+ */
+export function minDisplayMs(page: PageKey, also: readonly PageKey[] = []): number {
   const o = HELP_TIMING.perPageMs[page];
   if (o !== undefined) return o;
-  return Math.max(HELP_TIMING.floorMs, HELP_TIMING.baseMs + (countTextChars(pageText(page).text) / HELP_TIMING.charsPerSec) * 1000);
+  const pages = [...new Set([page, ...also])];
+  const chars = pages.reduce((n, p) => n + countTextChars(pageText(p).text), 0);
+  return Math.max(HELP_TIMING.floorMs, HELP_TIMING.baseMs + (chars / HELP_TIMING.charsPerSec) * 1000);
 }
 
-/** 頁の最低表示時間（tick、切り上げ） */
-export function minDisplayTicks(page: PageKey, tickRate = 60): number {
-  return Math.ceil((minDisplayMs(page) * tickRate) / 1000 - 1e-9);
+/** 項目の最低表示時間（tick、切り上げ） */
+export function minDisplayTicks(page: PageKey, tickRate = 60, also: readonly PageKey[] = []): number {
+  return Math.ceil((minDisplayMs(page, also) * tickRate) / 1000 - 1e-9);
+}
+
+/** 照合用に記録する実イベントの種類 */
+const SYNC_EVENTS = new Set(['move', 'rotate', 'launch', 'arrive', 'returned', 'rise', 'roleAvailable', 'declare', 'lineClear', 'attack', 'roleEnd', 'streakCut', 'pinchWarn', 'danger', 'roundEnd', 'stuck', 'countdown', 'cardRefresh']);
+
+/** 実イベント（MODE1・MODE2 共通の最小形） */
+export interface SyncEvent {
+  type: string;
+  tick: number;
+  [k: string]: unknown;
+}
+
+/**
+ * V320-FIX-06-R1 説明の切替（実イベント同期）：項目の中で、条件のイベントが起きた時点で説明を切り替える。
+ * 手順は順番に評価する（前の切替が起きるまで次の条件は数えない）。page 省略時は項目の頁、panel 省略時は0
+ */
+export interface TextStep {
+  on: string;
+  match?: (e: SyncEvent) => boolean;
+  /** 何回目の一致で切り替えるか（既定1） */
+  count?: number;
+  page?: PageKey;
+  panel?: number;
+}
+
+/** 表示した説明の区間（照合用） */
+export interface TextSegment {
+  page: PageKey;
+  panel: number;
+  /** 表示開始（項目時計 tick）と、その時のゲーム tick */
+  startTick: number;
+  gameTick: number;
+  /** 切替のきっかけ：start（項目開始）／time（文字だけの項目の文字数按分）／イベント種類@ゲームtick */
+  trigger: string;
+  endTick: number | null;
 }
 
 /** 1項目の記録（検証・報告用。tick は項目時計＝舞台の開始からの tick） */
@@ -57,35 +97,88 @@ export interface ItemRecord {
   doneTick: number | null;
   /** 次の項目へ移った（または教材を終えた）tick */
   endTick: number | null;
-  /** パネル（本文の分割）ごとの表示開始 tick */
-  panelTicks: number[];
+  /** 表示した説明の区間（頁・パネル・時刻・きっかけ） */
+  segments: TextSegment[];
+  /** 項目中の実イベント（照合用：種類・ゲームtick・取り込んだ項目時計 tick・要約） */
+  events: { type: string; gameTick: number; tick: number; detail: string }[];
 }
 
+const eventDetail = (e: SyncEvent): string => {
+  const keys = ['col', 'success', 'streak', 'state', 'reason', 'count', 'value', 'chainCount', 'index', 'planned', 'heightAfter', 'kind', 'outcome', 'logos'];
+  return keys
+    .filter((k) => e[k] !== undefined)
+    .map((k) => `${k}=${Array.isArray(e[k]) ? (e[k] as unknown[]).join('+') : String(e[k])}`)
+    .join(' ');
+};
+
 /**
- * 項目の時計（V320-FIX-06）：舞台の1tickごとに clock を進める（実演の停止中も進む）。
- * パネルが複数ある頁は、最低表示時間を各パネルの文字数で按分した時刻に切り替える（切替ごとに時間を加算しない。最後のパネルは項目の終わりまで）
+ * 項目の時計（V320-FIX-06／R1）：舞台の1tickごとに clock を進める（実演の停止中も進む）。
+ * 説明の切替は、手順（steps）があれば実イベントに同期し、無い複数パネルの頁（文字だけの項目）は最低表示時間を文字数で按分した時刻。
+ * 最後の説明は項目の終わりまで表示する
  */
 export class ItemClock {
   clock = 0;
   current: ItemRecord | null = null;
   readonly log: ItemRecord[] = [];
   private offsets: number[] = [0];
+  private steps: readonly TextStep[] = [];
+  private stepIndex = 0;
+  private stepHits = 0;
+  private gameTick = 0;
 
   constructor(readonly tickRate = 60) {}
 
-  begin(page: PageKey): void {
+  begin(page: PageKey, steps: readonly TextStep[] = [], gameTick = 0): void {
     this.close();
     const minTicks = minDisplayTicks(page, this.tickRate);
+    this.steps = steps;
+    this.stepIndex = 0;
+    this.stepHits = 0;
+    this.gameTick = gameTick;
     const panels = pageText(page).panels.map((l) => countTextChars(l.join('')));
     const total = panels.reduce((a, b) => a + b, 0) || 1;
     let acc = 0;
-    this.offsets = panels.map((n) => {
-      const o = Math.floor((minTicks * acc) / total);
-      acc += n;
-      return o;
-    });
-    this.current = { page, startTick: this.clock, minTicks, doneTick: null, endTick: null, panelTicks: [this.clock] };
+    // 手順が無い複数パネルの頁だけ時間で按分（手順がある頁はイベントで切り替える）
+    this.offsets = steps.length
+      ? [0]
+      : panels.map((n) => {
+          const o = Math.floor((minTicks * acc) / total);
+          acc += n;
+          return o;
+        });
+    this.current = { page, startTick: this.clock, minTicks, doneTick: null, endTick: null, segments: [{ page, panel: 0, startTick: this.clock, gameTick, trigger: 'start', endTick: null }], events: [] };
     this.log.push(this.current);
+  }
+
+  /** 舞台の1tick（実演の停止中も呼ぶ）。文字だけの複数パネルの頁は按分した時刻にパネルを切り替える */
+  advance(): void {
+    this.clock++;
+    void this.text;
+  }
+
+  /** ゲーム tick の通知（時間按分の区間の記録用） */
+  setGameTick(t: number): void {
+    this.gameTick = t;
+  }
+
+  private push(page: PageKey, panel: number, trigger: string, gameTick: number): void {
+    const c = this.current!;
+    const last = c.segments[c.segments.length - 1];
+    last.endTick = this.clock;
+    c.segments.push({ page, panel, startTick: this.clock, gameTick, trigger, endTick: null });
+  }
+
+  /** 実イベントの取り込み：照合用に記録し、次の手順の条件なら説明を切り替える */
+  onEvent(e: SyncEvent): void {
+    const c = this.current;
+    if (!c) return;
+    if (SYNC_EVENTS.has(e.type)) c.events.push({ type: e.type, gameTick: e.tick, tick: this.clock, detail: eventDetail(e) });
+    const st = this.steps[this.stepIndex];
+    if (!st || st.on !== e.type || (st.match && !st.match(e))) return;
+    if (++this.stepHits < (st.count ?? 1)) return;
+    this.stepIndex++;
+    this.stepHits = 0;
+    this.push(st.page ?? c.page, st.panel ?? 0, `${e.type}@${e.tick}`, e.tick);
   }
 
   /** 現在の項目の経過 tick */
@@ -93,14 +186,19 @@ export class ItemClock {
     return this.current ? this.clock - this.current.startTick : 0;
   }
 
-  /** 表示中のパネル番号 */
-  get panel(): number {
+  /** 表示中の説明（頁・パネル・表示開始のゲーム tick）。項目外は直前の項目の最後の説明 */
+  get text(): { page: PageKey; panel: number; gameTick: number } | null {
     const c = this.current;
-    if (!c) return 0;
-    let i = 0;
-    for (let k = 0; k < this.offsets.length; k++) if (this.elapsed >= this.offsets[k]) i = k;
-    while (c.panelTicks.length <= i) c.panelTicks.push(c.startTick + this.offsets[c.panelTicks.length]);
-    return i;
+    if (c && !this.steps.length && this.offsets.length > 1) {
+      let i = 0;
+      for (let k = 0; k < this.offsets.length; k++) if (this.elapsed >= this.offsets[k]) i = k;
+      const last = c.segments[c.segments.length - 1];
+      if (last.panel < i) this.push(c.page, i, 'time', this.gameTick);
+    }
+    const r = c ?? this.log[this.log.length - 1];
+    if (!r) return null;
+    const s = r.segments[r.segments.length - 1];
+    return { page: s.page, panel: s.panel, gameTick: s.gameTick };
   }
 
   /** 実演の全処理が完了した（最初の1回だけ記録） */
@@ -108,15 +206,24 @@ export class ItemClock {
     if (this.current && this.current.doneTick === null) this.current.doneTick = this.clock;
   }
 
+  /**
+   * 最低表示時間の経過：項目開始から項目の頁の最低時間、かつ項目内で別の頁の説明へ切り替えた場合は
+   * 最後に切り替えた説明の表示開始からその頁の最低時間（R1：後から切り替えた説明も読めるようにする。実演の途中では止めない）
+   */
   get minElapsed(): boolean {
-    return !this.current || this.elapsed >= this.current.minTicks;
+    const c = this.current;
+    if (!c) return true;
+    if (this.elapsed < c.minTicks) return false;
+    const last = [...c.segments].reverse().find((s) => s.page !== c.page);
+    return !last || this.clock - last.startTick >= minDisplayTicks(last.page, this.tickRate);
   }
 
   /** 項目を閉じる（次の項目へ・終了） */
   close(): void {
     if (this.current) {
-      void this.panel;
+      void this.text;
       this.current.endTick = this.clock;
+      this.current.segments[this.current.segments.length - 1].endTick = this.clock;
     }
     this.current = null;
   }
@@ -146,7 +253,7 @@ export type LessonOp =
    * 締めの演出）が終わり、かつ直前の項目の最低表示時間が経過したら、この項目を表示して続く実演を同じ tick から始める。
    * 実演完了後に最低時間の残りを待つ間はゲームを止め、完了画面と説明を保つ
    */
-  | { op: 'page'; page: PageKey }
+  | { op: 'page'; page: PageKey; steps?: readonly TextStep[] }
   /** ゲームを進めたまま待つ */
   | { op: 'wait'; ms: number }
   /** 左右移動で列 col（0〜5）へ（操作可能になるたびに1歩） */
@@ -259,12 +366,14 @@ export class LessonRunner {
   /** 1tick 分の進行（項目の時計は毎回進む）。戻り値：このtickにゲームを進めたか */
   tick(): boolean {
     if (this.done) return false;
-    this.items.clock++;
+    this.items.setGameTick(this.game.tick);
+    this.items.advance();
     this.scanEvents();
     this.holding = false;
     const cmds = this.run();
     if (this.done || this.holding) return false;
     this.game.step(cmds);
+    this.scanEvents(); // R1：このtickのイベントで同じフレームに説明を切り替える
     return true;
   }
 
@@ -294,6 +403,7 @@ export class LessonRunner {
     const ev = this.game.events;
     for (; this.cursor < ev.length; this.cursor++) {
       const e = ev[this.cursor];
+      this.items.onEvent(e as unknown as SyncEvent);
       if (e.type === 'arrive' && e.success) this.lastSuccessTick = e.tick;
       else if (e.type === 'roleEnd') this.lastRoleEndTick = e.tick;
     }
@@ -315,7 +425,7 @@ export class LessonRunner {
         case 'page':
           // 直前の項目の実演が完了し、最低表示時間が経過してから次の項目へ（実演の途中に停止を挟まない）
           if (this.items.current && !this.atBoundary()) return [];
-          this.items.begin(op.page);
+          this.items.begin(op.page, op.steps, g.tick);
           this.page = op.page;
           this.onPage(op.page);
           this.pc++;
@@ -450,8 +560,10 @@ export const LESSON_BASIC: LessonDef = {
     { op: 'wait', ms: 800 },
     { op: 'page', page: 'success2' },
     { op: 'page', page: 'adjacent_wrap' },
-    { op: 'page', page: 'fail' },
+    // R1：2枚目（戻るまで打ち上げできない）は失敗の到達（跳ね返り開始）で表示
+    { op: 'page', page: 'fail', steps: [{ on: 'arrive', match: (e) => e.success === false, panel: 1 }] },
     { op: 'move', col: 2 },
+    { op: 'wait', ms: 1500 },
     { op: 'act', action: 'launch' },
     { op: 'until', event: 'returned', maxMs: 3000 },
     { op: 'wait', ms: 500 },
@@ -501,29 +613,33 @@ function acquire(cols: readonly number[], firstAnchor: 'roleEnd' | 'now', gap: n
 export function rolesLesson(part: 'all' | 'first' = 'all'): LessonDef {
   const T = ROLES_TIMING;
   const g = T.successGapMs;
+  // V320-FIX-06-R1：説明を実イベントへ同期。2個目の取得で2枚目（役ができると光る。3・4個目の取得と成立光をその説明中に見せる）、
+  // 宣言の前に説明を読める待ち（ゲームは進行・成立光は点灯）、宣言の項目内で最初のライン消去に「ライン消去」の説明、
+  // 3回目の宣言（3連鎖）で「3連鎖達成」。終わった動作の説明を後から始めない
   const first: LessonOp[] = [
-    { op: 'page', page: 'role_ready' },
+    { op: 'page', page: 'role_ready', steps: [{ on: 'arrive', match: (e) => e.success === true, count: 2, panel: 1 }] },
     { op: 'move', col: 0 },
     { op: 'wait', ms: 200 },
     ...acquire([0, 1, 2, 3], 'now', g),
-    { op: 'page', page: 'declare' },
+    { op: 'page', page: 'declare', steps: [{ on: 'lineClear', page: 'line_clear' }] },
+    { op: 'wait', ms: 2500 },
     { op: 'act', action: 'declare' },
     { op: 'until', event: 'roleEnd', maxMs: 6000 },
-    { op: 'page', page: 'line_clear' },
   ];
   if (part === 'first') return { ...ROLES_BASE, ops: [...first, { op: 'end' }] };
   return {
     ...ROLES_BASE,
     ops: [
       ...first,
-      { op: 'page', page: 'streak' },
+      { op: 'page', page: 'streak', steps: [{ on: 'arrive', match: (e) => e.success === true, count: 2, panel: 1 }] },
       ...acquire([0, 1, 2, 3], 'roleEnd', g, { 3: 'streak_rate' }),
       { op: 'anchor', on: 'success' },
       { op: 'riseAt', row: ROLES_ROWS.A, atMs: T.rowA_Ms },
       { op: 'page', page: 'flush' },
+      { op: 'wait', ms: 2500 },
       { op: 'act', action: 'declare' },
       { op: 'until', event: 'roleEnd', maxMs: 6000 },
-      { op: 'page', page: 'chain' },
+      { op: 'page', page: 'chain', steps: [{ on: 'declare', match: (e) => e.chainCount === 3, page: 'chain3' }] },
       { op: 'anchor', on: 'roleEnd' },
       { op: 'riseAt', row: ROLES_ROWS.B, atMs: T.rowB_Ms },
       { op: 'riseAt', row: ROLES_ROWS.C, atMs: T.rowC_Ms },
@@ -534,7 +650,6 @@ export function rolesLesson(part: 'all' | 'first' = 'all'): LessonDef {
       { op: 'riseAt', row: ROLES_ROWS.G, atMs: T.rowG_Ms },
       { op: 'actAt', action: 'declare', atMs: T.declare3Ms },
       { op: 'until', event: 'roleEnd', maxMs: 6000 },
-      { op: 'page', page: 'chain3' },
       { op: 'anchor', on: 'roleEnd' },
       { op: 'riseAt', row: ROLES_ROWS.F, atMs: T.rowF_Ms },
       { op: 'wait', ms: 1000 },
@@ -575,22 +690,31 @@ export const LESSON_PINCH: LessonDef = {
     ['6♥', '3♦', '1♣', '4♠', '2♠', '5♣'],
   ],
   naturalRise: true,
-  firstNaturalRiseMs: 4000,
+  // V320-FIX-06-R1：自然上昇の説明を実際の自然上昇より前に読めるよう、最初の自然上昇を 4000→7500ms（ゲーム内時間）
+  firstNaturalRiseMs: 7500,
   ops: [
-    { op: 'page', page: 'limit' },
+    // 7段到達で2枚目（積み上がりすぎに注意）
+    { op: 'page', page: 'limit', steps: [{ on: 'rise', match: (e) => (e.heightAfter as number) >= 7, panel: 1 }] },
     { op: 'act', action: 'manualRise' },
-    { op: 'wait', ms: 300 },
+    { op: 'wait', ms: 1000 },
     { op: 'act', action: 'manualRise' },
-    { op: 'wait', ms: 300 },
+    { op: 'wait', ms: 1000 },
     { op: 'act', action: 'manualRise' },
-    { op: 'wait', ms: 300 },
-    { op: 'page', page: 'natural' },
-    { op: 'page', page: 'pinch' },
-    { op: 'page', page: 'attack_pinch' },
-    { op: 'page', page: 'avoid' },
-    { op: 'until', event: 'pinchWarn', maxMs: 8000, match: (e) => e.type === 'pinchWarn' && e.state === 'start' },
+    { op: 'wait', ms: 600 },
+    // R1：自然上昇→ピンチ開始で「ピンチ」、猶予の2で「6段以下へ戻そう」、ゲームオーバーで「ゲームオーバー」（同じ項目内で切替）
+    {
+      op: 'page',
+      page: 'natural',
+      steps: [
+        { on: 'pinchWarn', match: (e) => e.state === 'start', page: 'pinch' },
+        { on: 'pinchWarn', match: (e) => e.state === 'count' && e.value === 2, page: 'avoid' },
+        { on: 'roundEnd', page: 'miss' },
+      ],
+    },
+    { op: 'until', event: 'pinchWarn', maxMs: 12000, match: (e) => e.type === 'pinchWarn' && e.state === 'start' },
     { op: 'until', event: 'roundEnd', maxMs: 6000 },
-    { op: 'page', page: 'miss' },
+    // 対戦のピンチ（実演なしの補足）は終了後に文字だけで
+    { op: 'page', page: 'attack_pinch' },
     { op: 'end' },
   ],
 };
@@ -610,17 +734,27 @@ export const LESSON_CRACK: LessonDef = {
   startCol: 0,
   naturalRise: false,
   ops: [
-    { op: 'page', page: 'streak_crack' },
+    // V320-FIX-06-R1：ヒビ発生（1枚目）→ 予約中の成功でヒビが残る（2枚目）→ 次の打ち上げ（失敗して切れる）で3枚目。
+    // 各説明を読める間隔にするため、ヒビ後・成功後の待ちを 600→1800／2400ms
+    {
+      op: 'page',
+      page: 'streak_crack',
+      steps: [
+        { on: 'streakCut', match: (e) => e.state === 'reserved', panel: 0 },
+        { on: 'arrive', match: (e) => e.success === true, panel: 1 },
+        { on: 'launch', panel: 2 },
+      ],
+    },
     { op: 'act', action: 'launch' },
     { op: 'until', event: 'arrive', maxMs: 1000 },
     { op: 'move', col: 2 },
     { op: 'act', action: 'launch' },
     { op: 'until', event: 'streakCut', maxMs: 1000, match: (e) => e.type === 'streakCut' && e.state === 'reserved' },
-    { op: 'wait', ms: 600 },
+    { op: 'wait', ms: 1800 },
     { op: 'move', col: 1 },
     { op: 'act', action: 'launch' },
     { op: 'until', event: 'arrive', maxMs: 1000, match: (e) => e.type === 'arrive' && e.success },
-    { op: 'wait', ms: 600 },
+    { op: 'wait', ms: 2400 },
     { op: 'move', col: 3 },
     { op: 'act', action: 'launch' },
     { op: 'until', event: 'streakCut', maxMs: 1000, match: (e) => e.type === 'streakCut' && e.state === 'ended' },

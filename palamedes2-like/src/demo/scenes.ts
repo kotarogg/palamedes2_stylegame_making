@@ -345,10 +345,38 @@ export class HelpLessonScene implements Scene {
   }
 }
 
-/** 役一覧（遊び方のみ）：1役ずつ。既存の役名ロゴ・ピースを使い、成立条件・消去・基本攻撃は本体の役データから表示 */
+/** 役一覧の1ページ（実例の別：オールマーク・フラッシュは4個／6個の2ページ） */
+interface RoleVariant {
+  condition: readonly string[];
+  example: readonly string[];
+}
+
+/**
+ * 役一覧（遊び方のみ）：1役ずつ。既存の役名ロゴ・ピースを使い、成立条件・消去・基本攻撃は本体の役データから表示。
+ * V320-FIX-06-R1：4個と6個で値が異なるオールマーク・フラッシュは、同じ役の副ページ（4個→6個）に分けて両方の実例と値を表示（左右で順に送る）
+ */
 export class RoleListScene implements Scene {
   index = 0;
+  /** 副ページ（0＝4個、1＝6個。副ページの無い役は0だけ） */
+  sub = 0;
   private readonly roles = TUTORIAL_SCRIPT.role_list.roles;
+
+  /** 役 i の副ページ一覧 */
+  variants(i = this.index): readonly RoleVariant[] {
+    const r = this.roles[i] as { condition: string[]; example: string[]; variants?: RoleVariant[] };
+    return r.variants ?? [{ condition: r.condition, example: r.example }];
+  }
+
+  private variant(i = this.index, sub = this.sub): RoleVariant {
+    const vs = this.variants(i);
+    return vs[Math.min(sub, vs.length - 1)];
+  }
+
+  /** 右上のページ表示（副ページがあれば「12/16・2/2」） */
+  counter(): string {
+    const n = this.variants().length;
+    return `${this.index + 1}/${this.roles.length}${n > 1 ? `・${this.sub + 1}/${n}` : ''}`;
+  }
   private game: Game;
   private view: GameView;
 
@@ -364,7 +392,7 @@ export class RoleListScene implements Scene {
 
   /** 表示用の静止したシングル盤面（ゲームは進めない）。手役に役の実例を置き、成立光は本体の役判定で光る */
   private makeGame(): Game {
-    const ex = this.roles[this.index].example.map(pieceKind);
+    const ex = this.variant().example.map(pieceKind);
     return new Game({
       seed: 1,
       config: { ...DEFAULT_CONFIG, naturalRiseIntervalMs: null },
@@ -377,18 +405,29 @@ export class RoleListScene implements Scene {
   }
 
   /** 表示する値（本体の役判定・攻撃計算から） */
-  info(i = this.index): { logos: number[]; clear: number; attack: number } {
-    const ex = this.roles[i].example.map((c, k) => ({ id: k + 1, ...pieceKind(c) }));
+  info(i = this.index, sub = i === this.index ? this.sub : 0): { logos: number[]; clear: number; attack: number; pieces: number } {
+    const ex = this.variant(i, sub).example.map((c, k) => ({ id: k + 1, ...pieceKind(c) }));
     const r = evaluateSubset(ex);
     // V320-FIX-06：数値表の消去数・基本攻撃数（連鎖なしの通常攻撃力＝基本攻撃数）
-    return { logos: roleLogoIndices(r), clear: r.clear, attack: computeAttack(r.baseAttack, 0, 1, DEFAULT_CONFIG.chainBonusMax).power };
+    return { logos: roleLogoIndices(r), clear: r.clear, attack: computeAttack(r.baseAttack, 0, 1, DEFAULT_CONFIG.chainBonusMax).power, pieces: ex.length };
   }
 
   onNav(ev: NavEvent): void {
     const bus = this.app.bus;
     const n = this.roles.length;
     if (ev.key === 'left' || ev.key === 'right') {
-      this.index = (this.index + (ev.key === 'left' ? n - 1 : 1)) % n;
+      // 副ページを順に送り、端で隣の役へ（左は前の役の最後の副ページへ）
+      if (ev.key === 'right') {
+        if (this.sub + 1 < this.variants().length) this.sub++;
+        else {
+          this.index = (this.index + 1) % n;
+          this.sub = 0;
+        }
+      } else if (this.sub > 0) this.sub--;
+      else {
+        this.index = (this.index + n - 1) % n;
+        this.sub = this.variants().length - 1;
+      }
       bus.playSfx('ui_move');
       this.game = this.makeGame();
       this.view.reset(this.game);
@@ -415,11 +454,11 @@ export class RoleListScene implements Scene {
     drawFrame(ctx, A, f, board.x + (board.w - f.w) / 2, board.y + 48);
     drawTutorialPanel(ctx, A, {
       heading: L.categories[role.category as keyof typeof L.categories],
-      lines: [...role.condition, `${L.labels.clear}${fullDigits(v.clear)}${L.labels.lines_unit}`, `${L.labels.attack}${fullDigits(v.attack)}${L.labels.lines_unit}`],
-      pieces: role.example.map(pieceKind),
+      lines: [...this.variant().condition, `${L.labels.clear}${fullDigits(v.clear)}${L.labels.lines_unit}`, `${L.labels.attack}${fullDigits(v.attack)}${L.labels.lines_unit}`],
+      pieces: this.variant().example.map(pieceKind),
     });
     const font = A.tutorial?.font;
-    drawBitmapText(ctx, font, `${this.index + 1}/${this.roles.length}`, PANEL.heading.x + PANEL.heading.w, PANEL.heading.y + 2, { align: 'right', color: TUTORIAL_COLORS.secondary });
+    drawBitmapText(ctx, font, this.counter(), PANEL.heading.x + PANEL.heading.w, PANEL.heading.y + 2, { align: 'right', color: TUTORIAL_COLORS.secondary });
     const o = { outline: TUTORIAL_COLORS.outline };
     drawBitmapText(ctx, font, TUTORIAL_SCRIPT.help_choices.role_select, PANEL.hint.x, PANEL.hint.y, { ...o, color: TUTORIAL_COLORS.body });
     drawBitmapText(ctx, font, 'B/Esc:' + TUTORIAL_SCRIPT.help_choices.back, PANEL.hint.x, PANEL.hint.y + PANEL.hint.step, { ...o, color: TUTORIAL_COLORS.secondary });

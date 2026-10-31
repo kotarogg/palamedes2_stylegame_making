@@ -103,7 +103,8 @@ describe('4/4/6 共用教材（設計書 第6節）を本編の処理で実行',
     // 項目の切替（V320-FIX-06：直前の実演の全処理完了後）は役処理中・飛行中に起きない
     const roles = decl.map((d, i) => [d, ends[i]]);
     for (const rd of reads) for (const [a, b] of roles) expect(rd.gameTick < a || rd.gameTick >= b, `${rd.page}@${rd.gameTick}`).toBe(true);
-    expect(reads.map((x) => x.page)).toEqual(['role_ready', 'declare', 'line_clear', 'streak', 'streak_rate', 'flush', 'chain', 'chain3']);
+    // V320-FIX-06-R1：「ライン消去」は宣言の項目内で最初のライン消去と同時、「3連鎖達成」は役連鎖の項目内で3回目の宣言と同時に表示（独立項目にしない）
+    expect(reads.map((x) => x.page)).toEqual(['role_ready', 'declare', 'streak', 'streak_rate', 'flush', 'chain']);
   });
 });
 
@@ -125,6 +126,7 @@ describe('基本操作・ピンチの教材', () => {
   it('ピンチ：手動上昇で7段→自然上昇の時刻で4秒猶予→1秒後から3/2/1→ミス（本編の猶予と同じ）', () => {
     const { r, g, pages } = runAll(LESSON_PINCH);
     expect(r.problems).toEqual([]);
+    const shown = r.items.log.flatMap((x) => x.segments.map((s) => s.page));
     expect(ev(g, 'rise').map((x) => x.heightAfter)).toEqual([5, 6, 7]);
     const w = ev(g, 'pinchWarn');
     const start = w.find((x) => x.state === 'start')!;
@@ -136,15 +138,27 @@ describe('基本操作・ピンチの教材', () => {
     ]);
     expect(g.result?.outcome).toBe('gameOver');
     expect(Math.round((g.result!.tick - start.tick) * g.tickMs)).toBe(4000);
-    expect(pages).toEqual(['limit', 'natural', 'pinch', 'attack_pinch', 'avoid', 'miss']);
+    // V320-FIX-06-R1：自然上昇〜ピンチ〜ゲームオーバーは1項目で、実イベントに合わせて説明を切り替える。対戦のピンチは終了後に文字だけ
+    expect(pages).toEqual(['limit', 'natural', 'attack_pinch']);
+    expect(shown).toEqual(['limit', 'limit', 'natural', 'pinch', 'avoid', 'miss', 'attack_pinch']);
   });
 
-  it('ピンチ：猶予の3→2→1の途中に項目を切り替えない（ゲームオーバーの説明は終了後）', () => {
-    const { g, reads } = runAll(LESSON_PINCH);
-    const start = ev(g, 'pinchWarn').find((x) => x.state === 'start')!.tick;
+  it('ピンチ：猶予の3→2→1の途中に項目を切り替えない。説明はピンチ開始・猶予2・ゲームオーバーの各イベントと同じ tick に切り替わる（R1）', () => {
+    const { r, g, reads } = runAll(LESSON_PINCH);
+    const w = ev(g, 'pinchWarn');
+    const start = w.find((x) => x.state === 'start')!.tick;
+    const two = w.find((x) => x.state === 'count' && x.value === 2)!.tick;
     const end = g.result!.tick;
     for (const rd of reads) expect(rd.gameTick < start || rd.gameTick >= end, `${rd.page}@${rd.gameTick}`).toBe(true);
-    expect(reads.at(-1)).toMatchObject({ page: 'miss' });
+    const seg = r.items.log.find((x) => x.page === 'natural')!.segments;
+    expect(seg.map((s) => [s.page, s.gameTick])).toEqual([
+      ['natural', seg[0].gameTick],
+      ['pinch', start],
+      ['avoid', two],
+      ['miss', end],
+    ]);
+    // 自然上昇（7段で保留）は「自然上昇」の説明の表示中に起きる
+    expect(seg[0].gameTick).toBeLessThan(start);
   });
 
   // V320-FIX-05 で更新：成功してもヒビ（予約）は残ることを実演に含める（旧：2回成功→失敗→失敗）

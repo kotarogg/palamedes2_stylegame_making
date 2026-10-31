@@ -1634,14 +1634,16 @@ try {
     await key('ArrowDown');
     await key('Enter', 150);
     const roles = [];
-    for (let i = 0; i < 16; i++) {
-      roles.push(await ev(() => ({ i: window.__p2like.scene().index, ...window.__p2like.scene().info() })));
-      if (i === 15) await shot('HELP_roles_16');
+    // V320-FIX-06-R1：オールマーク・フラッシュは4個／6個の副ページ（16役・18ページ）
+    for (let i = 0; i < 18; i++) {
+      roles.push(await ev(() => ({ i: window.__p2like.scene().index, sub: window.__p2like.scene().sub, ...window.__p2like.scene().info() })));
+      if (i === 17) await shot('HELP_roles_16');
+      if (i === 12) await shot('HELP_roles_12_allmark_6');
       await key('ArrowRight', 60);
     }
-    check('役一覧：1役ずつ16役、役名ロゴは本体の表示名対応どおり（R01〜R16）', items === 'HelpMenuScene' && roles.map((r) => r.logos.join('+')).join() === [...Array(16).keys()].join(), JSON.stringify(roles.map((r) => [r.logos, r.clear, r.attack])));
-    const roleWant = '2/2,2/2,2/2,3/3,4/5,4/5,4/5,2/1,2/1,3/2,3/2,2/2,3/2,4/4,5/5,6/8';
-    check('V320-FIX-06 役一覧の値は新しい数値表（消去/基本攻撃）：フォーカード2/2 … フラッシュ3/2、スーパーストレート4/5、ストレートフラッシュ4/4、スーパーストレートフラッシュ6/8（16役すべて）', roles.map((x) => `${x.clear}/${x.attack}`).join() === roleWant, JSON.stringify(roles.map((x) => [x.clear, x.attack])));
+    check('役一覧：16役・18ページ（オールマーク・フラッシュは4個／6個）、役名ロゴは本体の表示名対応どおり（R01〜R16）', items === 'HelpMenuScene' && roles.map((r) => r.logos.join('+')).join() === [...Array(12).keys(), 11, 12, 12, 13, 14, 15].join(), JSON.stringify(roles.map((r) => [r.logos, r.sub, r.pieces, r.clear, r.attack])));
+    const roleWant = '2/2,2/2,2/2,3/3,4/5,4/5,4/5,2/1,2/1,3/2,3/2,2/2,3/3,3/2,4/3,4/4,5/5,6/8';
+    check('V320-FIX-06-R1 役一覧の値は数値表（消去/基本攻撃）：オールマーク4個2/2・6個3/3、フラッシュ4個3/2・6個4/3 を含む18ページすべて', roles.map((x) => `${x.clear}/${x.attack}`).join() === roleWant && roles[12].pieces === 6 && roles[14].pieces === 6, JSON.stringify(roles.map((x) => [x.clear, x.attack])));
     await key('Escape', 150);
     const backToc = await sceneName();
     await key('Escape', 150);
@@ -1792,8 +1794,10 @@ try {
         sc.__pages ??= [];
         for (let i = 0; i < 60 * 400; i++) {
           const r = sc.stage.runner;
-          if (sc.__pages.at(-1) !== r.page) sc.__pages.push(r.page);
-          if (want === 'choice' ? sc.choice !== null : r.page === want && !(want === 'm2_refresh' && r.game.phase !== 'countdown')) break;
+          // V320-FIX-06-R1：表示中の説明（クリアは項目内でクリアと同時に切り替わる）
+          const shownPage = sc.stage.items.text?.page ?? r.page;
+          if (sc.__pages.at(-1) !== shownPage) sc.__pages.push(shownPage);
+          if (want === 'choice' ? sc.choice !== null : shownPage === want && !(want === 'm2_refresh' && r.game.phase !== 'countdown')) break;
           sc.update(1000 / 60); // V320-FIX-06：自動進行（決定は使わない）
         }
         const r = sc.stage.runner;
