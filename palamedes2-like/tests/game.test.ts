@@ -311,14 +311,14 @@ describe('役宣言の処理フェーズ（確定）', () => {
     return b;
   };
 
-  it('宣言→役名・モーション→（1ライン消去→処理→段数TWEEN→残数確認）×合計翻数→攻撃→モーション戻し→終了', () => {
+  it('宣言→役名・モーション→（1ライン消去→処理→段数TWEEN→残数確認）×消去数→攻撃→モーション戻し→終了', () => {
     const g = makeGame({ boards: { 0: fiveRows() } });
-    setStock(g, 0, '1s', '2s', '3s', '4s'); // ストレート1＋フラッシュ3＝4翻 → 4ライン
+    setStock(g, 0, '1s', '2s', '3s', '4s'); // V320-FIX-06：ストレート＋フラッシュ＝消去4（複合表）→ 4ライン
     toPlay(g);
     g.step([cmd(0, 'declare')]);
     const T = g.config.timing;
     const d = evs(g.events, 'declare')[0];
-    expect(d.result.han).toBe(4);
+    expect(d.result.clear).toBe(4);
     expect(d.logos).toEqual([13]); // ストレートフラッシュは専用ロゴのみ
     stepN(g, 400);
     const seq = of(g.events, 0).filter((e) => ['declare', 'lineClear', 'attack', 'roleEnd'].includes(e.type));
@@ -349,7 +349,8 @@ describe('役宣言の処理フェーズ（確定）', () => {
     counts.forEach((n, c) => (b[c] = Array.from({ length: n }, () => '5c')));
     const g = makeGame({ boards: { 0: b } });
     toPlay(g);
-    setStock(g, 0, '1s', '1c', '1s', '1c'); // フォーカード1＋同色統一1＝2翻 → 2ライン
+    // V320-FIX-06 で更新：旧フォーカード＋同色統一（2翻）は新しい複合表で消去3になるため、消去2のフォーカード単独（色混在）へ置換
+    setStock(g, 0, '1s', '1d', '1s', '1d'); // フォーカード＝消去2 → 2ライン
     g.step([cmd(0, 'declare')]);
     stepN(g, 300);
     expect(evs(g.events, 'lineClear')).toHaveLength(2);
@@ -365,8 +366,8 @@ describe('役宣言の処理フェーズ（確定）', () => {
     expect(evs(g.events, 'lineClear')).toHaveLength(1);
     const a = evs(g.events, 'attack')[0];
     expect(a.linesCleared).toBe(1);
-    // V320-FIX-04：ストレート（数字役4ピース）+1
-    expect(a.breakdown).toMatchObject({ base: 3, numberBonus: 1, power: 4 });
+    // V320-FIX-06：ストレート＋フラッシュの基本攻撃4（消去が1ラインで止まっても減らさない）
+    expect(a.breakdown).toMatchObject({ base: 4, streakBonus: 0, chainBonus: 0, power: 4 });
     expect(evs(g.events, 'attackReceive').filter((e) => e.player === 1 && e.cause === 'receive').map((e) => e.accepted)).toEqual([4]);
   });
 
@@ -391,22 +392,24 @@ describe('役宣言の処理フェーズ（確定）', () => {
 });
 
 describe('攻撃計算・相殺・送信（確定）', () => {
-  it('基本攻撃量×連続取得の攻撃倍率→切捨て→役連鎖加算（連鎖分には倍率を掛けない）', () => {
-    expect(computeAttack(1, 100, 1).power).toBe(0);
-    expect(computeAttack(4, 100, 1)).toMatchObject({ base: 3, multiplied: 3, chainBonus: 0, power: 3 });
-    expect(computeAttack(4, 125, 1).power).toBe(3); // 3.75 → 3
-    expect(computeAttack(4, 150, 1).power).toBe(4); // 4.5 → 4
-    expect(computeAttack(6, 175, 1).power).toBe(8); // 8.75 → 8
-    expect([1, 2, 3, 4, 5, 9].map((c) => computeAttack(4, 100, c).chainBonus)).toEqual([0, 1, 2, 3, 4, 4]);
-    expect(computeAttack(1, 175, 3).power).toBe(2); // 基本0、連鎖+2はそのまま
+  // V320-FIX-06 で更新：旧「基本×攻撃倍率→切捨て→役連鎖加算」は倍率の廃止で無効。基本攻撃数＋打上連鎖加算＋役連鎖加算
+  it('基本攻撃数＋打上連鎖加算（5〜9＋1、10〜＋2）＋役連鎖加算（2連鎖＋1〜上限＋4）', () => {
+    expect(computeAttack(1, 0, 1).power).toBe(1);
+    expect(computeAttack(4, 0, 1)).toMatchObject({ base: 4, streakBonus: 0, chainBonus: 0, power: 4 });
+    expect(computeAttack(4, 4, 1).power).toBe(4);
+    expect(computeAttack(4, 5, 1).power).toBe(5);
+    expect(computeAttack(4, 10, 1).power).toBe(6);
+    expect([1, 2, 3, 4, 5, 9].map((c) => computeAttack(4, 0, c).chainBonus)).toEqual([0, 1, 2, 3, 4, 4]);
+    expect(computeAttack(8, 99, 9).power).toBe(14); // 最大 8＋2＋4
   });
 
-  it('相殺：通常攻撃力1で待機2まで。使わなかった攻撃力は送信、使用分の余剰相殺力は破棄', () => {
-    expect(resolveCounter(3, 1)).toEqual({ usedPower: 1, canceled: 1, sent: 2, discarded: 1 });
+  // V320-FIX-06 で更新：旧「攻撃力1で待機2まで・余剰破棄」は 1対1 へ変更
+  it('相殺（1対1）：通常攻撃力1で待機1。使わなかった攻撃力は送信', () => {
+    expect(resolveCounter(3, 1)).toEqual({ usedPower: 1, canceled: 1, sent: 2, discarded: 0 });
     expect(resolveCounter(3, 0)).toEqual({ usedPower: 0, canceled: 0, sent: 3, discarded: 0 });
-    expect(resolveCounter(1, 5)).toEqual({ usedPower: 1, canceled: 2, sent: 0, discarded: 0 });
-    expect(resolveCounter(2, 3)).toEqual({ usedPower: 2, canceled: 3, sent: 0, discarded: 1 });
-    expect(resolveCounter(4, 4)).toEqual({ usedPower: 2, canceled: 4, sent: 2, discarded: 0 });
+    expect(resolveCounter(1, 5)).toEqual({ usedPower: 1, canceled: 1, sent: 0, discarded: 0 });
+    expect(resolveCounter(2, 3)).toEqual({ usedPower: 2, canceled: 2, sent: 0, discarded: 0 });
+    expect(resolveCounter(4, 4)).toEqual({ usedPower: 4, canceled: 4, sent: 0, discarded: 0 });
   });
 
   it('相殺は攻撃処理フェーズで行い、役処理の途中へ割り込ませない。処理中の受信も即加算され、相殺対象（nextPending）になる', () => {
@@ -422,14 +425,15 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     expect(evs(g.events, 'attack')).toHaveLength(0);
     stepN(g, 200);
     const a = evs(g.events, 'attack')[0];
-    expect(a.counter).toEqual({ usedPower: 1, canceled: 2, sent: 3, discarded: 0 });
+    // V320-FIX-06：攻撃4（ストレートフラッシュ）・待機2 → 1対1で相殺2・送信2
+    expect(a.counter).toEqual({ usedPower: 2, canceled: 2, sent: 2, discarded: 0 });
     expect(g.players[0].incoming.nextPending).toBe(0);
-    expect(evs(g.events, 'attackReceive').filter((e) => e.player === 1).map((e) => [e.tick, e.accepted])).toEqual([[a.tick, 3]]);
+    expect(evs(g.events, 'attackReceive').filter((e) => e.player === 1).map((e) => [e.tick, e.accepted])).toEqual([[a.tick, 2]]);
     expect(evs(g.events, 'attackCancel').map((e) => e.tick)).toEqual([a.tick]);
   });
 
-  // V320-FIX-05 で更新：旧「受付時間切れは×1.0」は時間制限の撤廃で無効。待っても×1.5のまま
-  it('打上連鎖：成功で継続し、宣言時の倍率に反映（8回継続中から5個で13回＝×1.5）。V320-FIX-05：待っても切れず×1.5のまま', () => {
+  // V320-FIX-05 で更新：時間制限の撤廃。V320-FIX-06 で更新：倍率（×1.5）→ 固定加算（13連鎖＝＋2）
+  it('打上連鎖：成功で継続し、宣言時の攻撃加算に反映（8回継続中から5個で13回＝＋2）。待っても切れず＋2のまま', () => {
     const run = (waitTicks: number) => {
       const g = makeGame({ base: '1s', boards: { 0: { 2: ['2s', '3s', '4s', '5s', '6s', '1d'] }, 1: EMPTY } });
       toPlay(g);
@@ -447,12 +451,11 @@ describe('攻撃計算・相殺・送信（確定）', () => {
       return { d: evs(g.events, 'declare')[0], a: evs(g.events, 'attack')[0], g };
     };
     const fast = run(0);
-    expect(fast.d.result.han).toBe(5); // 2345♠ ハイストレートフラッシュ
-    expect(fast.d.streakPercent).toBe(150);
-    // V320-FIX-04：ハイストレート（数字役4ピース）+1 → (4+1)×1.5=7.5→7。受付は3000ms
-    expect(fast.a.breakdown).toMatchObject({ base: 4, numberBonus: 1, multiplied: 7, power: 7 });
+    expect(fast.d.result.clear).toBe(5); // 2345♠ ハイストレートフラッシュ（消去5／基本攻撃5）
+    expect(fast.d.streakBonus).toBe(2);
+    expect(fast.a.breakdown).toMatchObject({ base: 5, streakCount: 13, streakBonus: 2, chainBonus: 0, power: 7 });
     const slow = run(600);
-    expect(slow.d.streakPercent).toBe(150);
+    expect(slow.d.streakBonus).toBe(2);
     expect(slow.a.breakdown.power).toBe(7);
   });
 
@@ -464,7 +467,7 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     p.streakCount = 7;
     p.streakRemaining = 30;
     g.step([cmd(0, 'declare')]);
-    expect(evs(g.events, 'declare')[0]).toMatchObject({ streak: 7, streakPercent: 125 });
+    expect(evs(g.events, 'declare')[0]).toMatchObject({ streak: 7, streakBonus: 1 });
     stepN(g, 100); // 役処理中（30tickを超えても切れない）
     expect(p.role).not.toBeNull();
     expect([p.streakCount, p.streakRemaining]).toEqual([7, 30]); // 宣言tickから停止
@@ -475,21 +478,22 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     expect(g.streakActive(p)).toBe(false);
   });
 
-  it('計算順の例（共有ノート18）：基本3×1.5→4、3連鎖目+2で攻撃力6。待機1なら1を相殺に使い5を送る', () => {
-    const b = computeAttack(4, 150, 3);
+  // V320-FIX-06 で更新：旧例（基本3×1.5、相殺1対2の表）は計算式の変更で無効。新しい計算順と 1対1 の表へ置換
+  it('計算順の例：基本3＋打上5連鎖＋1＋役3連鎖目＋2で攻撃力6。待機1なら1を相殺し5を送る', () => {
+    const b = computeAttack(3, 5, 3);
     expect(b.power).toBe(6);
     expect(resolveCounter(b.power, 1)).toMatchObject({ usedPower: 1, sent: 5 });
-    // 共有ノート16の表（A=3）
-    expect([0, 1, 2, 3, 6, 7].map((r) => {
+    // 依頼書 第5章の例（攻撃3）：[相殺に使った攻撃力, 相殺, 待機残, 送信]
+    expect([0, 1, 2, 3, 5, 7].map((r) => {
       const c = resolveCounter(3, r);
       return [c.usedPower, c.canceled, r - c.canceled, c.sent];
     })).toEqual([
       [0, 0, 0, 3],
       [1, 1, 0, 2],
-      [1, 2, 0, 2],
-      [2, 3, 0, 1],
-      [3, 6, 0, 0],
-      [3, 6, 1, 0],
+      [2, 2, 0, 1],
+      [3, 3, 0, 0],
+      [3, 3, 2, 0],
+      [3, 3, 4, 0],
     ]);
   });
 
@@ -516,7 +520,7 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     stepN(g, 400);
     const atks = evs(g.events, 'attack');
     expect(atks.map((a) => a.breakdown.chainBonus)).toEqual([0, 1]);
-    expect(atks[1].breakdown.power).toBe(5); // (3+1)×1 + 連鎖1
+    expect(atks[1].breakdown.power).toBe(5); // V320-FIX-06：基本4（ストレートフラッシュ）＋役連鎖1
     // 受付時間切れ後は1連鎖目に戻る（相手の受攻撃は本テストの対象外：ピンチ敗北で終わらないよう受信分を空にする）
     g.players[1].incoming = createIncoming();
     stepN(g, window + 5);
@@ -537,9 +541,10 @@ describe('攻撃計算・相殺・送信（確定）', () => {
     stepN(g, 300);
     const a = evs(g.events, 'attack');
     expect(a[0].tick).toBe(a[1].tick);
+    // V320-FIX-06：攻撃4・待機1 → 1対1で相殺1・送信3（余剰なし）
     expect(a.map((x) => x.counter)).toEqual([
-      { usedPower: 1, canceled: 1, sent: 3, discarded: 1 },
-      { usedPower: 1, canceled: 1, sent: 3, discarded: 1 },
+      { usedPower: 1, canceled: 1, sent: 3, discarded: 0 },
+      { usedPower: 1, canceled: 1, sent: 3, discarded: 0 },
     ]);
     const recv = evs(g.events, 'attackReceive').filter((e) => e.cause === 'receive');
     expect(recv.map((e) => [e.player, e.accepted, e.total, e.tick === a[0].tick])).toEqual([

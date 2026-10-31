@@ -1,0 +1,11 @@
+{
+ "adjustment": "V320-FIX-06_cpu_speed",
+ "note": "V320-FIX-06 実装依頼書 第6章の確定値。MODE1・MODE2 共通。60tick/秒で tick 数を正本とする（ms は参考値）。人間側の移動速度・先行入力・パッド反復には適用しない",
+ "notes": {
+  "moveGapTicks": "移動開始間隔の最短（前回の移動開始tick→次の移動開始tick）。移動完了後に丸ごと追加しない。同方向・反転・目標再選択も対象。初回移動は待たない。初級12（200ms）／中級9（150ms）／上級7（約116.7ms）",
+  "launchAfterMoveTicks": "最終移動完了tickから打上までの最低tick。直前の打上以降に移動していなければ待たない。初級6（100ms）／中級4（約66.7ms）／上級2（約33.3ms）",
+  "concurrency": "判断停止・必須判断待ち・失念の停止・操作硬直・本間隔は絶対tickで並行に進み、全条件を満たした時点で操作する（同じ待ちを重複加算しない）。ピンチでも同じ値"
+ },
+ "moveGapTicks": { "easy": 12, "normal": 9, "hard": 7 },
+ "launchAfterMoveTicks": { "easy": 6, "normal": 4, "hard": 2 }
+}

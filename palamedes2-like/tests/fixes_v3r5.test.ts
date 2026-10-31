@@ -53,7 +53,6 @@ function assertOnScreen(v: GameView, p: PlayerId, t: number) {
   for (const e of plan.entries) {
     if (e.x < 0 || e.y < 0 || e.x + e.w > 640 || e.y + e.h > 360) throw new Error(`画面外 ${JSON.stringify(e)}`);
   }
-  if (plan.label) expect(plan.label.y).toBeGreaterThanOrEqual(0);
   return plan;
 }
 
@@ -71,7 +70,8 @@ describe('修正R5：相殺の消失演出（数量と表示の整合）', () =>
     const pendingY = TOP + pendingGroupY(stockGroupHeight(29), null, null);
     const a0 = v.stockAfterimages(0, t0);
     expect(a0).toMatchObject([{ kind: 'counter', lines: 12, frame: 0, y: pendingY + stockGroupHeight(16) }]);
-    expect(v.pendingCountLabel(0, t0)?.text).toBe('16');
+    // V320-FIX-06 で更新：アイコン横の数量数字は削除。旧表示が示していた内部数量（nextPending）で確認する
+    expect(s.nextPending).toBe(16);
 
     g.step([atk(0, 6)]); // 爆発中の追加受信（上限29：1＋16＋6＝23）
     v.syncEvents();
@@ -80,7 +80,7 @@ describe('修正R5：相殺の消失演出（数量と表示の整合）', () =>
     const a1 = v.stockAfterimages(0, g.tick);
     expect(a1).toHaveLength(1);
     expect(a1[0].y).toBe(a0[0].y); // 待機群の末尾へ配置し直さない
-    expect(v.pendingCountLabel(0, g.tick)?.text).toBe('22'); // 消失対象を含めず、受信で即更新
+    expect(s.nextPending).toBe(22); // 消失対象を含めず、受信で即更新（V320-FIX-06：数字表示は削除）
     const plan = assertOnScreen(v, 0, g.tick);
     // 有効ストック（XDでない通常アイコン）は 1＋22、消失対象（XD）は12。消失対象は前面
     const icons = plan.entries.filter((e) => e.type === 'icon');
@@ -212,7 +212,7 @@ describe('修正R5：相殺の消失演出（数量と表示の整合）', () =>
     const sv = v.stockView(0, g.tick);
     expect(a[0]).toMatchObject({ lines: 1, y: sv.pendingY + stockGroupHeight(3) });
     expect([y1, y2]).not.toContain(a[0].y);
-    expect(v.pendingCountLabel(0, g.tick)?.text).toBe('3');
+    expect(g.players[0].incoming.nextPending).toBe(3); // V320-FIX-06：数字表示は削除、内部数量で確認
   });
 
   it('ブロック終了・上詰め・追加受信の重なり：相殺の演出は待機群に追従し（位置は相殺時の相対位置）、破棄の残像は上詰めと重なるなら打切り', () => {
@@ -266,8 +266,9 @@ describe('修正R5：相殺の消失演出（数量と表示の整合）', () =>
     // v3.1.0：2Pの列は中央エリアの右側（x=352〜）、ラベルは列の中央側（1Pは右、2Pは左）
     const p2 = v.stockDrawPlan(1, g.tick);
     expect(p2.entries.every((e) => e.x >= 340)).toBe(true);
-    expect(v.pendingCountLabel(0, g.tick)).toMatchObject({ text: '6', align: 'left' });
-    expect(v.pendingCountLabel(1, g.tick)).toBeNull(); // 待機0・相殺演出なし
+    // V320-FIX-06 で更新：数量数字は 1P・2P とも描かない（内部数量は 1P 6、2P はブロック開始で待機0）
+    expect([g.players[0].incoming.nextPending, g.players[1].incoming.nextPending]).toEqual([6, 0]);
+    expect(Object.keys(v.stockDrawPlan(0, g.tick))).toEqual(['entries']);
   });
 
   it('ラウンド差し替え（新ラウンド・新試合・メニュー復帰で作り直し）で以前の消失演出をすべてクリア', () => {
@@ -298,7 +299,7 @@ describe('修正R5：相殺の消失演出（数量と表示の整合）', () =>
     const r = g.events.filter((e) => e.type === 'attackReceive').at(-1) as Extract<GameEvent, { type: 'attackReceive' }>;
     expect([r.accepted, r.overflow]).toEqual([12, 8]);
     expect(totalIncoming(g.players[0].incoming)).toBe(29);
-    expect(v.pendingCountLabel(0, g.tick)?.text).toBe('28');
+    expect(g.players[0].incoming.nextPending).toBe(28); // V320-FIX-06：数字表示は削除、内部数量で確認
     assertOnScreen(v, 0, g.tick);
   });
 });

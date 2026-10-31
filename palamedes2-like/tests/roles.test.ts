@@ -4,6 +4,9 @@ import { pushRoleStock, ROLE_STOCK_MAX } from '../src/core/stock';
 import type { Piece } from '../src/core/types';
 import { kind } from './helpers';
 
+// V320-FIX-06：旧「翻数＝消去数」を廃止し、消去数（clear）・基本攻撃数（baseAttack）は数値表（src/core/roleTable.ts）の値。
+// 旧期待値（翻数）は新しい表の値へ置換した。成立条件・最強1種・同一部分集合評価・6個全体優先の検査は維持
+
 let id = 1;
 const ps = (...codes: string[]): Piece[] => codes.map((c) => ({ id: id++, ...kind(c) }));
 
@@ -26,26 +29,26 @@ describe('役ストック', () => {
 
 describe('数字役', () => {
   it.each([
-    [['3s', '3d', '3s', '3d'], 'four_card', 1],
-    [['2s', '2d', '5s', '5d'], 'nikoniko', 1],
-    [['1s', '2d', '3s', '4d'], 'straight', 1],
-    [['3s', '4d', '5s', '6d'], 'straight', 1],
-    [['2s', '3d', '4s', '5d'], 'high_straight', 2],
-  ])('%j → %s (%i翻)', (codes, role, han) => {
+    [['3s', '3d', '3s', '3d'], 'four_card', 2, 2],
+    [['2s', '2d', '5s', '5d'], 'nikoniko', 2, 2],
+    [['1s', '2d', '3s', '4d'], 'straight', 2, 2],
+    [['3s', '4d', '5s', '6d'], 'straight', 2, 2],
+    [['2s', '3d', '4s', '5d'], 'high_straight', 3, 3],
+  ])('%j → %s (消去%i／基本攻撃%i)', (codes, role, clear, attack) => {
     const r = evaluateSubset(ps(...codes));
     expect(r.numberRole).toBe(role);
     expect(r.suitRole).toBeNull();
-    expect(r.han).toBe(han);
+    expect([r.clear, r.baseAttack]).toEqual([clear, attack]);
   });
 
   it.each([
     [['4s', '4d', '4s', '4d', '4s', '4d'], 'full_card'],
     [['1s', '1d', '1s', '6d', '6s', '6d'], 'nikoniko_niko'],
     [['1s', '2d', '3s', '4d', '5s', '6d'], 'super_straight'],
-  ])('6個役 %j → %s (3翻)', (codes, role) => {
+  ])('6個役 %j → %s (消去4／基本攻撃5)', (codes, role) => {
     const r = evaluateSubset(ps(...codes));
     expect(r.numberRole).toBe(role);
-    expect(r.han).toBe(3);
+    expect([r.clear, r.baseAttack]).toEqual([4, 5]);
   });
 
   it('役判定に1↔6の循環連番を追加しない（5612 等は不成立）', () => {
@@ -60,34 +63,34 @@ describe('数字役', () => {
 });
 
 describe('属性役', () => {
-  it('同色統一1翻（赤♦♥/黒♠♣、4個でも6個でも1翻）', () => {
-    expect(evaluateSubset(ps('1d', '3h', '5d', '6h'))).toMatchObject({ suitRole: 'same_color', color: 'red', han: 1 });
-    expect(evaluateSubset(ps('1s', '3c', '5s', '1c', '2s', '4c'))).toMatchObject({ suitRole: 'same_color', color: 'black', han: 1 });
+  it('同色統一（赤♦♥/黒♠♣）：4個＝消去2／攻撃1、6個＝消去3／攻撃2', () => {
+    expect(evaluateSubset(ps('1d', '3h', '5d', '6h'))).toMatchObject({ suitRole: 'same_color', color: 'red', clear: 2, baseAttack: 1 });
+    expect(evaluateSubset(ps('1s', '3c', '5s', '1c', '2s', '4c'))).toMatchObject({ suitRole: 'same_color', color: 'black', clear: 3, baseAttack: 2 });
   });
-  it('オールマーク2翻・フラッシュ3翻、複数成立時は最強1種のみ', () => {
-    expect(evaluateSubset(ps('1s', '3d', '5c', '6h'))).toMatchObject({ suitRole: 'all_mark', han: 2 });
-    // フラッシュは同色統一も満たすが、最強のフラッシュ1種だけ採用（4翻にならない）
-    expect(evaluateSubset(ps('1h', '3h', '5h', '6h'))).toMatchObject({ suitRole: 'flush', han: 3 });
+  it('オールマーク4個2／2・フラッシュ4個3／2、複数成立時は最強1種のみ', () => {
+    expect(evaluateSubset(ps('1s', '3d', '5c', '6h'))).toMatchObject({ suitRole: 'all_mark', clear: 2, baseAttack: 2 });
+    // フラッシュは同色統一も満たすが、最強のフラッシュ1種だけ採用（同色統一を重ねない）
+    expect(evaluateSubset(ps('1h', '3h', '5h', '6h'))).toMatchObject({ suitRole: 'flush', color: null, clear: 3, baseAttack: 2 });
   });
   it('属性役単独でも有効', () => {
-    expect(ok(evaluateStock(ps('1s', '3d', '5c', '6h'))).han).toBe(2);
+    expect(ok(evaluateStock(ps('1s', '3d', '5c', '6h'))).clear).toBe(2);
   });
 });
 
-describe('複合役（翻数加算・二重加算禁止）', () => {
+describe('複合役（複合表の値・二重加算禁止）', () => {
   it.each([
-    [['1h', '2h', '3h', '4h'], 4, [13]],
-    [['2s', '3s', '4s', '5s'], 5, [14]],
-    [['1d', '2d', '3d', '4d', '5d', '6d'], 6, [15]],
-  ])('%j → %i翻 表示R%j', (codes, han, logos) => {
+    [['1h', '2h', '3h', '4h'], 4, 4, [13]],
+    [['2s', '3s', '4s', '5s'], 5, 5, [14]],
+    [['1d', '2d', '3d', '4d', '5d', '6d'], 6, 8, [15]],
+  ])('%j → 消去%i／基本攻撃%i 表示R%j', (codes, clear, attack, logos) => {
     const r = ok(evaluateStock(ps(...codes)));
-    expect(r.han).toBe(han);
+    expect([r.clear, r.baseAttack]).toEqual([clear, attack]);
     expect(roleLogoIndices(r)).toEqual(logos);
   });
 
   it('専用ロゴのない複合は数字役→属性役の順で表示（確定）', () => {
     const r = ok(evaluateStock(ps('3s', '3c', '3s', '3c')));
-    expect(r).toMatchObject({ numberRole: 'four_card', suitRole: 'same_color', color: 'black', han: 2 });
+    expect(r).toMatchObject({ numberRole: 'four_card', suitRole: 'same_color', color: 'black', clear: 3, baseAttack: 3 });
     expect(roleLogoIndices(r)).toEqual([0, 7]);
   });
 
@@ -109,51 +112,60 @@ describe('部分集合評価', () => {
   });
 
   it('5個：最強の4個部分集合を採択', () => {
-    // 2345♠ のハイストレートフラッシュ(5翻) が含まれる
+    // 2345♠ のハイストレートフラッシュ（消去5／攻撃5）が含まれる
     const r = ok(evaluateStock(ps('2s', '3s', '6d', '4s', '5s')));
-    expect(r.han).toBe(5);
+    expect([r.clear, r.baseAttack]).toEqual([5, 5]);
     expect(r.subset.map((p) => `${p.n}${p.suit[0]}`).sort()).toEqual(['2s', '3s', '4s', '5s']);
   });
 
   it('数字役と属性役は同一部分集合で評価し、別部分集合の結果を合成しない', () => {
-    // {2h,3h,4h,5c}=ハイストレート2翻（属性ばらばら）、{2h,3h,4h,6h}=フラッシュ3翻（数字役なし）。
-    // 合成すれば5翻だが、正しくは単一部分集合の最強＝フラッシュ3翻
+    // {2h,3h,4h,5c}=ハイストレート（属性ばらばら）消去3／攻撃3、{2h,3h,4h,6h}=フラッシュ4個（数字役なし）消去3／攻撃2。
+    // 合成すればハイストレートフラッシュ（5／5）だが、正しくは単一部分集合の最強。
+    // V320-FIX-06：消去数が同じ3なので基本攻撃数で比べ、ハイストレート（攻撃3）を採択（旧仕様ではフラッシュ3翻）
     const stock = ps('2h', '3h', '4h', '5c', '6h');
     const e = evaluateStock(stock);
     const r = ok(e);
-    expect(r.han).toBe(3);
-    expect(r.suitRole).toBe('flush');
-    expect(r.numberRole).toBeNull();
-    // 合成していないことの確認：どの単一部分集合も5翻にならない
-    expect(Math.max(...fourSubsets(stock).map((s) => evaluateSubset(s).han))).toBe(3);
+    expect([r.clear, r.baseAttack]).toEqual([3, 3]);
+    expect(r.numberRole).toBe('high_straight');
+    expect(r.suitRole).toBeNull();
+    // 合成していないことの確認：どの単一部分集合も消去5にならない
+    expect(Math.max(...fourSubsets(stock).map((s) => evaluateSubset(s).clear))).toBe(3);
   });
 
-  it('6個：6個全体で成立する役を優先（確定：4個部分集合の方が翻数が高くても6個役）', () => {
-    // 全体：オールブラック(同色統一1翻)。4個部分集合 {1s,1c,1s,1c} はフォーカード＋同色2翻だが6個役を優先
+  it('6個：6個全体で成立する役を優先（確定：4個部分集合の方が強くても6個役）', () => {
+    // 全体：オールブラック（3／2）。4個部分集合 {1s,1c,1s,1c} はフォーカード＋黒統一（3／3）だが6個役を優先
     const r = ok(evaluateStock(ps('1s', '1c', '1s', '1c', '1s', '2c')));
     expect(r.size).toBe(6);
-    expect(r).toMatchObject({ suitRole: 'same_color', numberRole: null, han: 1 });
+    expect(r).toMatchObject({ suitRole: 'same_color', numberRole: null, clear: 3, baseAttack: 2 });
   });
 
   it('6個：6個役が無ければ15通りから最強', () => {
     const r = ok(evaluateStock(ps('2s', '3s', '4s', '5s', '1d', '1h')));
     expect(r.size).toBe(4);
-    expect(r.han).toBe(5);
+    expect([r.clear, r.baseAttack]).toEqual([5, 5]);
   });
 
   it('無役は no_role', () => {
     expect(evaluateStock(ps('1s', '1d', '2s', '4d')).kind).toBe('no_role');
   });
 
-  it('同点（確定）：合計翻数が同じなら数字役の翻数が高い候補を採択', () => {
-    // {1s,1s,1d,1d}=フォーカード1翻（数字1） と {1s,1s,3s,5c}=フォーブラック1翻（数字0）
+  it('V320-FIX-06：消去数が同じなら基本攻撃数が多い候補を採択', () => {
+    // {1s,1s,1d,1d}=フォーカード（2／2） と {1s,1s,3s,5c}=フォーブラック（2／1）
     const r = ok(evaluateStock(ps('1s', '1s', '1d', '1d', '3s', '5c')));
-    expect(r).toMatchObject({ numberRole: 'four_card', suitRole: null, han: 1 });
+    expect(r).toMatchObject({ numberRole: 'four_card', suitRole: null, clear: 2, baseAttack: 2 });
     expect(r.indices).toEqual([0, 1, 2, 3]);
   });
 
-  it('同点（確定）：数字役の翻数も同じなら役一覧の掲載順（R01フォーカード→R02ニコニコ）', () => {
-    // 6個全体は役なし。{1,1,1,1}=フォーカード1翻 と {1,1,2,2}=ニコニコ1翻
+  it('V320-FIX-06：消去数・基本攻撃数も同じなら数字役の従来の強さ（フォーカード 2／2 ＞ オールマーク4個 2／2）', () => {
+    const four = evaluateSubset(ps('3s', '3d', '3s', '3d'));
+    const mark = evaluateSubset(ps('1s', '3d', '5c', '6h'));
+    expect([four.clear, four.baseAttack]).toEqual([mark.clear, mark.baseAttack]);
+    expect(compareCandidates(four, mark)).toBeLessThan(0);
+    expect(compareCandidates(mark, four)).toBeGreaterThan(0);
+  });
+
+  it('同点（確定）：数字役の従来の強さも同じなら役一覧の掲載順（R01フォーカード→R02ニコニコ）', () => {
+    // 6個全体は役なし。{1,1,1,1}=フォーカード（2／2） と {1,1,2,2}=ニコニコ（2／2）
     const r = ok(evaluateStock(ps('1s', '1d', '2s', '1s', '1d', '2d')));
     expect(r.numberRole).toBe('four_card');
     expect(r.indices).toEqual([0, 1, 3, 4]);
@@ -162,7 +174,7 @@ describe('部分集合評価', () => {
   it('同点（確定）：属性役どうしは掲載順（同色統一 黒R08→赤R09→オールマーク→フラッシュ）', () => {
     const black = evaluateSubset(ps('1s', '3c', '5s', '6c'));
     const red = evaluateSubset(ps('1d', '3h', '5d', '6h'));
-    expect(black.han).toBe(red.han);
+    expect([black.clear, black.baseAttack]).toEqual([red.clear, red.baseAttack]);
     expect(compareCandidates(black, red)).toBeLessThan(0);
     expect(compareCandidates(red, black)).toBeGreaterThan(0);
   });

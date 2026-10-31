@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { App } from '../src/app';
 import { AudioBus } from '../src/audio/audioBus';
-import { computeAttack, numberRoleAttackBonus } from '../src/core/attack';
+import { computeAttack } from '../src/core/attack';
 import type { Game } from '../src/core/game';
 import { Match, SingleSession } from '../src/core/match';
 import { createSeededRng } from '../src/core/rng';
@@ -25,7 +25,6 @@ describe('台本と収録文字（tutorial_font_16：V320-FIX-04 採用版 388�
   const S = TUTORIAL_SCRIPT;
   const all: string[] = [
     ...Object.values(S.pages).flatMap((p) => [p.heading, ...p.panels.flat()]),
-    ...Object.values(S.advance_hint),
     ...S.return_hint.two_lines,
     S.return_hint.one_line,
     S.title_hint,
@@ -66,7 +65,6 @@ describe('台本と収録文字（tutorial_font_16：V320-FIX-04 採用版 388�
     }
     expect(measureBitmap(font, S.return_hint.one_line)).toBe(192);
     for (const l of S.return_hint.two_lines) expect(measureBitmap(font, l)).toBeLessThanOrEqual(PANEL.body.w);
-    for (const l of Object.values(S.advance_hint)) expect(measureBitmap(font, l)).toBeLessThanOrEqual(PANEL.body.w);
     // 教材の役名（宣言時の見出し）
     for (const n of ['フォーカード', 'フラッシュ', 'スーパーストレート']) expect(measureBitmap(font, n)).toBeLessThanOrEqual(PANEL.heading.w);
   });
@@ -95,32 +93,47 @@ describe('台本と収録文字（tutorial_font_16：V320-FIX-04 採用版 388�
       expect(p.panels.flat().join('').replaceAll('　', ''), r.id).toBe(r.text.replaceAll('　', '')); // 区切りの全角空白は行の境目で省略可（既存の正規化規則）
       for (const l of p.panels.flat()) expect(/^[、。！？　]/.test(l), `${r.id}:${l}`).toBe(false);
     }
-    expect(S.advance_hint).toEqual({ demo: '決定で実演へ', next: '決定で次へ' });
+    // V320-FIX-06 で更新：付録Bの送り案内（決定で実演へ／決定で次へ）は自動進行化で廃止（台本から削除）
+    expect('advance_hint' in S).toBe(false);
   });
 });
 
 describe('役一覧（本体の役データを共用）', () => {
-  it('16役の実例は本体の役判定でその役名ロゴ1つだけになる。消去＝合計翻数、基本攻撃＝max(合計翻数−1,0)＋数字役ボーナス（倍率1・連鎖加算なし）', () => {
+  // V320-FIX-06 で更新：消去・基本攻撃は新しい数値表（旧「消去＝合計翻数、基本攻撃＝翻数−1＋数字役ボーナス」は廃止）
+  it('16役の実例は本体の役判定でその役名ロゴ1つだけになる。消去・基本攻撃は数値表の値（連鎖なしの通常攻撃力＝基本攻撃）', () => {
     const roles = TUTORIAL_SCRIPT.role_list.roles;
     expect(roles.map((r) => r.logo)).toEqual([...Array(16).keys()]);
     for (const r of roles) {
       const res = evaluateSubset(r.example.map((c, i) => ({ id: i + 1, ...pieceKind(c) })));
       expect(roleLogoIndices(res), r.name).toEqual([r.logo]);
       expect(roleDisplayName([r.logo])).toBe(r.name);
-      // V320-FIX-04：数字役ボーナス（4ピース+1・6ピース+2）を含む新式
-      expect(computeAttack(res.han, 100, 1, 4, res.numberRole).power, r.name).toBe(Math.max(res.han - 1, 0) + numberRoleAttackBonus(res.numberRole));
+      expect(computeAttack(res.baseAttack, 0, 1, 4).power, r.name).toBe(res.baseAttack);
     }
-    const v = (name: string) => {
-      const r = roles.find((x) => x.name === name)!;
-      const h = evaluateSubset(r.example.map((c, i) => ({ id: i + 1, ...pieceKind(c) }))).han;
-      const res = evaluateSubset(r.example.map((c, i) => ({ id: i + 1, ...pieceKind(c) })));
-      return [h, computeAttack(h, 100, 1, 4, res.numberRole).power];
-    };
-    expect([v('フォーカード'), v('フラッシュ'), v('スーパーストレート')]).toEqual([
-      [1, 1],
-      [3, 2],
-      [3, 4],
-    ]);
+    const got = Object.fromEntries(
+      roles.map((r) => {
+        const res = evaluateSubset(r.example.map((c, i) => ({ id: i + 1, ...pieceKind(c) })));
+        return [r.name, `${res.clear}/${res.baseAttack}`];
+      }),
+    );
+    // 依頼書 第2章の表（役一覧の実例：オールマーク・フラッシュは4個の例）
+    expect(got).toEqual({
+      フォーカード: '2/2',
+      ニコニコ: '2/2',
+      ストレート: '2/2',
+      ハイストレート: '3/3',
+      フルカード: '4/5',
+      ニコニコニコ: '4/5',
+      スーパーストレート: '4/5',
+      フォーブラック: '2/1',
+      フォーレッド: '2/1',
+      オールブラック: '3/2',
+      オールレッド: '3/2',
+      オールマーク: '2/2',
+      フラッシュ: '3/2',
+      ストレートフラッシュ: '4/4',
+      ハイストレートフラッシュ: '5/5',
+      スーパーストレートフラッシュ: '6/8',
+    });
   });
 });
 
@@ -163,7 +176,7 @@ describe('SINGLE 専用の自動操作（設計書 第7節）', () => {
 });
 
 describe('対戦デモ（アカネ中級 対 ずん子中級、seed 選定）', () => {
-  it('対戦デモの seed（V320-FIX-05 で 60→5 に再選定）：両者の攻撃送信・攻撃段の適用・相殺が見え、60秒以内に決着（勝敗補正なし、既存CPU設定）', () => {
+  it('対戦デモの seed（V320-FIX-05 で 60→5、V320-FIX-06 で 5→6 に再選定）：両者の攻撃送信・攻撃段の適用・相殺が見え、60秒以内に決着（勝敗補正なし、既存CPU設定）', () => {
     const seed = DEMO.versusSeed;
     const m = new Match({ firstTo: 1, difficulty: 'normal', seed, mode: 'mode1' });
     const c = [new CpuController(0, 'normal', seed * 7 + 1, 'akane'), new CpuController(1, 'normal', seed * 7 + 2, 'zunko')];

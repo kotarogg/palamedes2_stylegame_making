@@ -8,10 +8,11 @@ export interface PlayerMetrics {
   declares: number;
   /** 宣言間隔（秒）の平均。宣言2回未満は null */
   declareIntervalSec: number | null;
-  hanAvg: number | null;
+  /** V320-FIX-06：予定消去数の平均（旧 hanAvg） */
+  clearAvg: number | null;
   /** 役連鎖：2連鎖以上に続いた連鎖の数・最大連鎖・途切れ理由（受付時間切れ／ラウンド終了） */
   chains: { continued: number; max: number; brokenByTimeout: number; endedByRound: number };
-  attack: { base: number; multiplied: number; streakPercentAvg: number | null; chainBonus: number; power: number; sent: number; zeroPowerDeclares: number };
+  attack: { base: number; streakBonus: number; chainBonus: number; power: number; sent: number; zeroPowerDeclares: number };
   /** 受けた側の集計 */
   incoming: { received: number; overflow: number; canceled: number; applied: number; pinchDiscarded: number; blocks: number; waves: number };
   reached7: number;
@@ -84,7 +85,7 @@ export function measureRound(g: Game, samples: { block: number; pending: number 
     return {
       declares: declares.length,
       declareIntervalSec: declares.length >= 2 ? sec(declares[declares.length - 1].tick - declares[0].tick) / (declares.length - 1) : null,
-      hanAvg: avg(declares.map((d) => d.result.han)),
+      clearAvg: avg(declares.map((d) => d.result.clear)),
       chains: {
         continued,
         max: Math.max(0, ...runs),
@@ -93,8 +94,7 @@ export function measureRound(g: Game, samples: { block: number; pending: number 
       },
       attack: {
         base: attacks.reduce((a, e) => a + e.breakdown.base, 0),
-        multiplied: attacks.reduce((a, e) => a + e.breakdown.multiplied, 0),
-        streakPercentAvg: avg(attacks.map((e) => e.breakdown.streakPercent)),
+        streakBonus: attacks.reduce((a, e) => a + e.breakdown.streakBonus, 0),
         chainBonus: attacks.reduce((a, e) => a + e.breakdown.chainBonus, 0),
         power: attacks.reduce((a, e) => a + e.breakdown.power, 0),
         sent: attacks.reduce((a, e) => a + e.counter.sent, 0),

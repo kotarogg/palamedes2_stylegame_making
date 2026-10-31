@@ -1,11 +1,12 @@
 // v3.2.0 MODE2 説明教材（指示書 第9節）：固定盤面・固定入力を通常の Mode2Game へ渡し、実イベントで説明を切り替える。
 // CPU・固定尺のページ送りは使わない。game seed＝20261027（Mode2Game へ直接渡す）、初期の場だけ 3♠ に設定。
 // 盤面は初回生成時だけ setup で与え（ピースIDは factory 経由）、途中で盤面を作り直さない。
-// V320-FIX-04：説明は読書区間（ゲーム停止）として、詰まり前・場の更新の完了後・クリア後の安定状態に置く。
-// カウントダウン（3/2/1）・場の更新の演出中は止めない。複数の説明は順に読む（即置換しない）。
+// V320-FIX-06：説明の項目は自動で始まり、その項目の実演（取得・詰まり・カウントダウン・場の更新・クリア処理）が完了し、
+// 項目開始から最低表示時間が経過したら次の項目へ進む（決定入力は使わない）。最低時間の残りを待つ間はゲームを止める。
+// カウントダウン（3/2/1）・場の更新の演出中は止めない。複数の説明は順に表示する（即置換しない）。
 import type { Command } from '../core/game';
 import { Mode2Game } from '../core/mode2';
-import { pieceKind, ReadingState, type PageKey } from './lesson';
+import { ItemClock, pieceKind, type PageKey } from './lesson';
 
 /** 初期盤面：上から下の7行、左から右の6列（S＝♠、D＝♦、C＝♣、H＝♥） */
 export const MODE2_LESSON_ROWS = ['4H 1D 2C 1S 2D 1C', '1S 6H 6S 1H 1H 5H', '3D 2D 4C 5S 4H 2C', '6C 1C 5S 3D 5D 1S', '4H 5S 4C 4H 1C 3H', '2H 6D 3C 4H 5S 5S', '2H 5C 4D 3H 2S 5H'].map((r) =>
@@ -35,12 +36,21 @@ export class Mode2LessonRunner {
   /** 更新後の説明付き取得の何番目か（0〜2） */
   private explained = 0;
   private waitingArrive = false;
-  /** 読む順番を待つ説明（頁・読み終えた後の行き先） */
-  private readonly queue: { page: PageKey; after: 'demo' | 'next' }[] = [];
-  readonly reading = new ReadingState();
+  /** 表示の順番を待つ説明（次の項目）。キューに次の項目がある＝現在の項目の実演は区切りに達した */
+  private readonly queue: PageKey[] = [];
+  /** V320-FIX-06 項目の時計と記録 */
+  readonly items = new ItemClock();
+  /** 実演完了後、最低表示時間の残りを待っている（ゲームを進めない） */
+  holding = false;
   readonly problems: string[] = [];
+  private readonly busy: () => boolean;
 
-  constructor(private readonly onPage: (p: PageKey) => void = () => undefined) {
+  constructor(
+    private readonly onPage: (p: PageKey) => void = () => undefined,
+    /** クリア処理（結果演出）が続いているか（舞台が与える。既定はなし） */
+    busy?: () => boolean,
+  ) {
+    this.busy = busy ?? (() => false);
     this.game = new Mode2Game({
       seed: MODE2_LESSON.seed,
       players: 1,
@@ -59,9 +69,9 @@ export class Mode2LessonRunner {
     // READY／GO は出さず入力受付の開始から（その間ゲームは何も起きない）
     while (!this.game.playing) this.game.step();
     this.cursor = this.game.events.length;
-    // 冒頭：選び方と、詰まった時の場の更新を先に読む（カウントダウン中には読ませない）
-    this.enqueue('m2_intro', 'next');
-    this.enqueue('m2_refresh', 'demo');
+    // 冒頭：選び方（文字だけ）→ 詰まった時の場の更新（実演）
+    this.enqueue('m2_intro');
+    this.enqueue('m2_refresh');
     this.pump();
   }
 
@@ -69,56 +79,56 @@ export class Mode2LessonRunner {
     return this.stage === 'done';
   }
 
-  /** 読書中（ゲームは止まっている） */
-  get paused(): boolean {
-    return this.reading.current !== null;
+  private enqueue(page: PageKey): void {
+    this.queue.push(page);
   }
 
-  private enqueue(page: PageKey, after: 'demo' | 'next'): void {
-    this.queue.push({ page, after });
-  }
-
-  /** 安定状態なら、待っている説明を読み始める */
+  /** 次の項目へ進める状態なら進める（現在の項目の実演が完了し、最低表示時間が経過）。最低時間の残りを待つ間は holding */
   private pump(): void {
-    if (this.reading.current || !this.queue.length || !this.stable()) return;
-    const q = this.queue.shift()!;
-    this.page = q.page;
-    this.onPage(q.page);
-    this.reading.start(q.page, q.after);
+    this.holding = false;
+    if (this.items.current) {
+      // 現在の項目の実演が続いている（次の項目がまだ要求されていない、または処理中）
+      const last = this.stage === 'clear' && !this.queue.length;
+      if (!last && !this.queue.length) return;
+      if (!this.complete()) return;
+      this.items.markDone();
+      if (!this.items.minElapsed) {
+        this.holding = true;
+        return;
+      }
+      if (last) {
+        this.items.close();
+        this.stage = 'done';
+        return;
+      }
+    }
+    const page = this.queue.shift();
+    if (!page) return;
+    this.items.begin(page);
+    this.page = page;
+    this.onPage(page);
+    if (page === 'm2_refresh') this.stage = 'first'; // 詰まりの実演はこの項目から
   }
 
-  /** 読書区間を置ける：プレイ中（カウントダウン・場の更新の演出中でない）か結果確定後で、飛行・移動・硬直がない */
-  private stable(): boolean {
+  /** 項目の実演の完了：プレイ中（カウントダウン・場の更新の演出中でない）で飛行・移動・硬直がない。クリア後はクリア処理（busy）の終了 */
+  private complete(): boolean {
     const g = this.game;
-    if (g.result) return true;
+    if (g.result) return !this.busy();
     const p = g.players[0];
     return g.phase === 'play' && !g.flights.some((f) => f.player === 0) && !g.isMoving(p) && !g.isLocked(p);
   }
 
-  /** 読み終えた：次のパネル、次の説明、または実演へ */
-  releaseReading(): void {
-    if (this.reading.release()) return;
-    if (this.stage === 'intro') this.stage = 'first';
-    if (this.stage === 'clear' && !this.queue.length) this.stage = 'done';
-    this.pump();
-  }
-
-  /** 1tick 分。読書中・読む順番待ちの説明がある間はゲームを進めない。戻り値：ゲームを進めたか */
+  /** 1tick 分（項目の時計は毎回進む）。最低時間の残りを待つ間はゲームを進めない。戻り値：ゲームを進めたか */
   tick(): boolean {
     if (this.done) return false;
+    this.items.clock++;
     this.pump();
-    if (this.paused) return false;
+    if (this.done || this.holding) return false;
     const g = this.game;
-    if (g.result) {
-      this.scan();
-      this.pump();
-      return false;
-    }
-    // 説明が順番待ち（安定状態を待つ）：操作は出さずにゲームだけ進める
-    g.step(this.queue.length ? [] : this.commands());
+    // 次の項目が順番待ち（現在の実演の処理の終わりを待つ）：操作は出さずにゲームだけ進める。決着後は表示の時間だけ進む
+    g.step(this.queue.length || g.result ? [] : this.commands());
     this.scan();
     this.settle();
-    this.pump();
     return true;
   }
 
@@ -138,9 +148,9 @@ export class Mode2LessonRunner {
       } else if (e.type === 'roundEnd') {
         if (e.outcome === 'clear' && g.remaining(g.players[0]) === 0) {
           this.stage = 'clear';
-          this.enqueue('m2_clear', 'next');
-          this.enqueue('m2_versus', 'next');
-          this.enqueue('m2_versus_refresh', 'next');
+          this.enqueue('m2_clear');
+          this.enqueue('m2_versus');
+          this.enqueue('m2_versus_refresh');
         } else {
           this.problems.push(`想定外の終了：${e.outcome}`);
           this.stage = 'done';
@@ -153,11 +163,11 @@ export class Mode2LessonRunner {
     const pages: PageKey[] = ['m2_suit', 'm2_number', 'm2_adjacent'];
     if (this.explained < pages.length) {
       this.stage = 'explain';
-      this.enqueue(pages[this.explained++], 'demo');
+      this.enqueue(pages[this.explained++]);
     } else {
       this.stage = 'rest';
-      this.enqueue('m2_rule', 'next');
-      this.enqueue('m2_difference', 'demo');
+      this.enqueue('m2_rule');
+      this.enqueue('m2_difference');
     }
   }
 
@@ -184,7 +194,7 @@ export class Mode2LessonRunner {
 
   /** 説明付き取得の到達後に次の説明へ（scan の後に呼ぶ） */
   settle(): void {
-    if (this.afterArriveExplain && !this.waitingArrive && !this.paused) {
+    if (this.afterArriveExplain && !this.waitingArrive) {
       this.afterArriveExplain = false;
       this.beginExplain();
     }

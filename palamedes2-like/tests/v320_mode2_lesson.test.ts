@@ -8,18 +8,8 @@ function run() {
   let r: Mode2LessonRunner;
   r = new Mode2LessonRunner((p) => pages.push({ page: p, tick: r?.game.tick ?? 0 }));
   let simTicks = 0;
-  let n = 0;
-  // V320-FIX-04：読書区間は呼出し側が解除（放置デモと同じく 300tick＝5000ms）
-  for (let i = 0; i < 60 * 600 && !r.done; i++) {
-    if (r.paused) {
-      if (++n >= 300) {
-        n = 0;
-        r.releaseReading();
-      }
-      continue;
-    }
-    if (r.tick()) simTicks++;
-  }
+  // V320-FIX-06 で更新：説明は自動進行（実演の全処理完了＋最低表示時間）。旧「読書区間を呼出し側が5000msで解除」は廃止
+  for (let i = 0; i < 60 * 600 && !r.done; i++) if (r.tick()) simTicks++;
   return { r, g: r.game, pages, simTicks };
 }
 
@@ -44,7 +34,7 @@ describe('MODE2 説明教材（固定盤面・固定入力・seed 20261027）', 
     expect(arr[0].type === 'arrive' && `${arr[0].col + 1}:${pieceLabel(arr[0].baseBefore)}→${pieceLabel(arr[0].piece)}`).toBe('1:3♠→4♥');
   });
 
-  it('V320-FIX-04 説明は順に読む：冒頭・場の更新（詰まりの前）→同じ記号→同じ数字→1と6→クリア条件→MODE2のルール→クリア→対戦では→対戦の場の更新。カウントダウン中に読まない', () => {
+  it('説明は順に表示（V320-FIX-06：自動進行）：冒頭・場の更新（詰まりの前）→同じ記号→同じ数字→1と6→クリア条件→MODE2のルール→クリア→対戦では→対戦の場の更新。カウントダウン中に読まない', () => {
     const { pages, g } = run();
     expect(pages.map((p) => p.page)).toEqual(['m2_intro', 'm2_refresh', 'm2_suit', 'm2_number', 'm2_adjacent', 'm2_rule', 'm2_difference', 'm2_clear', 'm2_versus', 'm2_versus_refresh']);
     const stuck = g.events.find((e) => e.type === 'stuck')!;
@@ -63,7 +53,7 @@ describe('MODE2 説明教材（固定盤面・固定入力・seed 20261027）', 
     expect(cd.slice(1).map((t, i) => t - cd[i])).toEqual([60, 60]);
     const end = g.result!.tick;
     expect(g.elapsedMs()).toBeCloseTo((end - g.playStartTick) * g.tickMs, 6);
-    // シミュレーションを進めた tick（読書区間を除く）＝ゲーム内時間：詰まり〜更新の240tickも含む
+    // シミュレーションを進めた tick（最低表示時間の待ちを除く）＝ゲーム内時間：詰まり〜更新の240tickも含む
     expect(end - g.playStartTick).toBeLessThanOrEqual(simTicks);
     const stuck = g.events.find((e) => e.type === 'stuck')!.tick;
     const refresh = g.events.find((e) => e.type === 'cardRefresh')!.tick;

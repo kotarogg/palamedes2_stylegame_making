@@ -216,11 +216,12 @@ describe('V320-FIX-04 相殺・送信の表示（第9章）', () => {
 
   it('V320-FIX-04-R1 相殺・攻撃の両方：上段「相殺 N」（y48/68）、下段「攻撃 N」（y87/107）。1Pは外側の縦帯 x0〜48 の中央（x24）', () => {
     const { v, a } = setup(3);
-    expect(a.counter).toMatchObject({ canceled: 3, sent: 2 });
+    // V320-FIX-06 で更新：攻撃4（ストレートフラッシュ）・待機3 → 1対1で相殺3・送信1（旧 1対2 は送信2）
+    expect(a.counter).toMatchObject({ canceled: 3, sent: 1 });
     const r = v.attackResult(0, a.tick)!;
     expect(r.rows.map((x) => [x.kind, x.value, x.label.y, x.digits.y, x.digits.cx])).toEqual([
       ['cancel', 3, 48, 68, 24],
-      ['attack', 2, 87, 107, 24],
+      ['attack', 1, 87, 107, 24],
     ]);
     for (const x of r.rows) {
       expect(x.label.visible.x).toBeGreaterThanOrEqual(0);
@@ -240,7 +241,7 @@ describe('V320-FIX-04 相殺・送信の表示（第9章）', () => {
     expect(s.v.attackResult(0, s.a.tick + 15)!.dot).toBeNull(); // 光点は250msまで
     const c = setup(9);
     const rc = c.v.attackResult(0, c.a.tick)!;
-    expect(c.a.counter).toMatchObject({ canceled: 8, sent: 0 });
+    expect(c.a.counter).toMatchObject({ canceled: 4, sent: 0 }); // V320-FIX-06：1対1（旧 1対2 は相殺8）
     expect(rc.rows.map((x) => x.kind)).toEqual(['cancel']);
     expect(rc.dot).toBeNull();
   });
@@ -275,9 +276,8 @@ describe('V320-FIX-04-R1 相殺・送信の表示と受ストック・連鎖HUD�
       for (const q of P) {
         const plan = v.stockDrawPlan(q, g.tick);
         for (const e of plan.entries) for (const b of boxes) expect(overlapB(b, { x: e.x, y: e.y, w: e.w, h: e.h }), `${p}→stock${q}`).toBe(false);
-        const lb = plan.label!;
-        const lbox: Box = { x: lb.align === 'left' ? lb.x - 2 : lb.x - 20, y: lb.y - 2, w: 22, h: 16 };
-        for (const b of boxes) expect(overlapB(b, lbox), `${p}→label${q}`).toBe(false);
+        // V320-FIX-06：受ストックの数量数字は削除したため、数字枠との重なり検査は不要（描画計画に数字がないこと）
+        expect(Object.keys(plan)).toEqual(['entries']);
         const hud = chainHudLayout(q);
         for (const b of boxes) {
           for (const row of [hud.roleTitle.visible, hud.roleSub.visible, hud.streakTitle.visible, hud.streakSub.visible]) expect(overlapB(b, row)).toBe(false);

@@ -1,0 +1,8 @@
+{
+ "adjustment": "V320-FIX-06_help_timing",
+ "note": "遊び方・放置デモの説明項目の最低表示時間（V320-FIX-06 実装依頼書 第7.3節の初期調整値。読みやすさの検証済み値ではない）。初期値＝max（floorMs, baseMs＋本文の文字数÷charsPerSec 秒）。文字数は句読点を数え、空白（全角空白を含む）・改行・常設操作案内を除く。tick換算は切り上げ。perPageMs に頁キーと ms を書くと、その頁だけ上書きする",
+ "floorMs": 3000,
+ "baseMs": 1000,
+ "charsPerSec": 8,
+ "perPageMs": {}
+}

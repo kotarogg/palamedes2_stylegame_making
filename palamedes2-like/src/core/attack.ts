@@ -1,45 +1,50 @@
-// 攻撃量・相殺（統合仕様 第9〜10章＋2026-10-18確定事項）。受攻撃の段階処理は incoming.ts（第3版）。
-// V320-FIX-04 第8章：採択された数字役に基本攻撃ボーナス（4ピース役+1、6ピース役+2）を1回加える。属性役のみは+0。得点には加えない。
-import type { NumberRole } from './roles';
+// 攻撃量・相殺。受攻撃の段階処理は incoming.ts（第3版）。
+// V320-FIX-06：通常攻撃力＝基本攻撃数（数値表）＋打上連鎖加算（5〜9連鎖+1、10〜99連鎖+2）＋役連鎖加算（2連鎖+1〜5連鎖以上+4）。
+// 旧仕様（翻数−1＋数字役ボーナス、打上連鎖の攻撃倍率）は廃止。最大は 8＋2＋4＝14 ライン。相殺は1対1。
 
-/** 数字役の基本攻撃ボーナス（採択された数字役1つにつき1回） */
-export const NUMBER_ROLE_ATTACK_BONUS: Record<NumberRole, number> = {
-  four_card: 1,
-  nikoniko: 1,
-  straight: 1,
-  high_straight: 1,
-  full_card: 2,
-  nikoniko_niko: 2,
-  super_straight: 2,
-};
+/** 打上連鎖の攻撃加算の段（この連鎖数以上で bonus） */
+export interface StreakBonusStep {
+  minCount: number;
+  bonus: number;
+}
 
-export const numberRoleAttackBonus = (nr: NumberRole | null): number => (nr ? NUMBER_ROLE_ATTACK_BONUS[nr] : 0);
+/** V320-FIX-06 第4.1節：0〜4連鎖＋0、5〜9連鎖＋1、10〜99連鎖＋2 */
+export const STREAK_ATTACK_BONUS: readonly StreakBonusStep[] = [
+  { minCount: 5, bonus: 1 },
+  { minCount: 10, bonus: 2 },
+];
+
+/** 打上連鎖数に対応する攻撃加算 */
+export function streakAttackBonus(count: number, table: readonly StreakBonusStep[] = STREAK_ATTACK_BONUS): number {
+  let b = 0;
+  for (const s of table) if (count >= s.minCount) b = s.bonus;
+  return b;
+}
+
+/** 役連鎖数に対応する攻撃加算（1連鎖＋0、2連鎖＋1 … 上限 chainBonusMax） */
+export const chainAttackBonus = (chainCount: number, chainBonusMax = 4): number => Math.min(Math.max(chainCount - 1, 0), chainBonusMax);
 
 export interface AttackBreakdown {
-  /** 基本攻撃量＝max(合計翻数−1, 0) */
+  /** 基本攻撃数（採択役の数値表の値） */
   base: number;
-  /** 数字役の基本攻撃ボーナス（0／1／2。倍率の前に加える） */
-  numberBonus: number;
-  /** 連続取得の攻撃倍率×100 */
-  streakPercent: number;
-  /** （基本攻撃量＋数字役ボーナス）×倍率の小数点以下切捨て */
-  multiplied: number;
-  /** 役連鎖の追加分（倍率を掛けない） */
+  /** 宣言時点の打上連鎖数（0＝連鎖なし） */
+  streakCount: number;
+  /** 打上連鎖の攻撃加算（0／1／2） */
+  streakBonus: number;
+  /** 役連鎖の攻撃加算（0〜4） */
   chainBonus: number;
-  /** 通常攻撃力（相殺前） */
+  /** 通常攻撃力（相殺前）＝base＋streakBonus＋chainBonus */
   power: number;
 }
 
 /**
- * 攻撃量（V320-FIX-04）：（基本攻撃量＋数字役ボーナス）×打上連鎖の攻撃倍率 → 切捨て → 役連鎖加算（倍率を掛けない）。
- * 消去ライン数が予定に届かなくても基本攻撃量は減らさない（呼出し側で消去数を渡さない）。
+ * 攻撃量（V320-FIX-06）。採択役・両連鎖数は宣言時点のスナップショットを渡す（処理途中で再計算しない）。
+ * 消去ライン数が予定に届かなくても基本攻撃数は減らさない（呼出し側で消去数を渡さない）。
  */
-export function computeAttack(han: number, streakPct: number, chainCount: number, chainBonusMax = 4, numberRole: NumberRole | null = null): AttackBreakdown {
-  const base = Math.max(han - 1, 0);
-  const numberBonus = numberRoleAttackBonus(numberRole);
-  const multiplied = Math.floor(((base + numberBonus) * streakPct) / 100);
-  const chainBonus = Math.min(Math.max(chainCount - 1, 0), chainBonusMax);
-  return { base, numberBonus, streakPercent: streakPct, multiplied, chainBonus, power: multiplied + chainBonus };
+export function computeAttack(baseAttack: number, streakCount: number, chainCount: number, chainBonusMax = 4, table: readonly StreakBonusStep[] = STREAK_ATTACK_BONUS): AttackBreakdown {
+  const streakBonus = streakAttackBonus(streakCount, table);
+  const chainBonus = chainAttackBonus(chainCount, chainBonusMax);
+  return { base: baseAttack, streakCount, streakBonus, chainBonus, power: baseAttack + streakBonus + chainBonus };
 }
 
 export interface CounterResult {
@@ -49,16 +54,15 @@ export interface CounterResult {
   canceled: number;
   /** 相殺に使わず相手へ送る通常攻撃力 */
   sent: number;
-  /** 使用した1ライン分の余剰相殺力（破棄。攻撃へ転用しない） */
+  /** 使用した相殺力のうち余った分（perLine＞1 の場合だけ発生。V320-FIX-06 の1対1では常に0） */
   discarded: number;
 }
 
 /**
- * 相殺（確定）：通常攻撃力1ライン分で待機攻撃を最大 perLine（2）ライン相殺。
- * 相殺に使わなかった攻撃力は送信。使用した分の余剰相殺力は破棄。
- * 例：攻撃力3・待機1 → 1を使って待機1を相殺し、2を送信（余剰1は破棄）。
+ * 相殺：通常攻撃力1で次ブロック待機分を perLine ライン相殺（V320-FIX-06：perLine＝1）。相殺に使わなかった攻撃力は送信。
+ * 例（1対1）：攻撃3・待機1 → 相殺1・送信2。攻撃3・待機5 → 相殺3・送信0・待機残2。
  */
-export function resolveCounter(power: number, waiting: number, perLine = 2): CounterResult {
+export function resolveCounter(power: number, waiting: number, perLine = 1): CounterResult {
   if (power < 0 || waiting < 0) throw new Error('negative value');
   const usedPower = Math.min(power, Math.ceil(waiting / perLine));
   const canceled = Math.min(waiting, usedPower * perLine);

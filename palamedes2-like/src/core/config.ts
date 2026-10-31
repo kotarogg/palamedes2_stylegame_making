@@ -1,6 +1,7 @@
 // 調整値の集約。ルールとして確定した値と、テスト用初期値（調整用）を区別してコメントする。
 // 確定値の出典：2026-10-18 仕様確認への回答（docs/SPEC_DECISIONS_20261018.md）。
 import { DEFAULT_INCOMING_CONFIG, type IncomingConfig } from './incoming';
+import { STREAK_ATTACK_BONUS, type StreakBonusStep } from './attack';
 
 export interface TimingConfig {
   charMoveMs: number;
@@ -47,14 +48,6 @@ export type Difficulty = 'easy' | 'normal' | 'hard';
 export const NATURAL_RISE_MS: Record<Difficulty, number> = { easy: 7000, normal: 5000, hard: 3000 };
 export const DIFFICULTY_LABEL: Record<Difficulty, string> = { easy: '初級', normal: '中級', hard: '上級' };
 
-/** 打ち上げ成功連鎖（連続取得）の攻撃倍率（v3.1.0 確定：1〜6回×1、7〜12回×1.25、13〜18回×1.5、19回以上×1.75）。得点倍率とは別表 */
-export const STREAK_ATTACK_TABLE: readonly StreakStep[] = [
-  { minCount: 1, percent: 100 },
-  { minCount: 7, percent: 125 },
-  { minCount: 13, percent: 150 },
-  { minCount: 19, percent: 175 },
-];
-
 /** 連続取得の得点倍率（確定）。MATCH画面には得点表示が無いため、現時点では保持のみ */
 export const STREAK_SCORE_TABLE: readonly StreakStep[] = [
   { minCount: 1, percent: 100 },
@@ -85,7 +78,10 @@ export interface GameConfig {
    * 数値を入れた場合だけ、成功から次の成功までの受付時間として働く（自分の成立役の処理中は停止）
    */
   streakWindowMs: number | null;
-  streakAttackTable: readonly StreakStep[];
+  /** V320-FIX-06：打上連鎖の攻撃加算（旧攻撃倍率表は廃止）。0〜4連鎖＋0、5〜9連鎖＋1、10〜99連鎖＋2 */
+  streakAttackBonus: readonly StreakBonusStep[];
+  /** V320-FIX-06：打上連鎖数の上限（99。到達後の成功は99のまま） */
+  streakMaxCount: number;
   streakScoreTable: readonly StreakStep[];
   /** 役連鎖の受付時間（V320-FIX-05：12000ms→10000ms。成立宣言ごとに更新、自分の成立役の処理中は停止。ステージクリア時の最大復帰もこの値） */
   chainWindowMs: number;
@@ -96,7 +92,7 @@ export interface GameConfig {
   moveBufferTicks: number;
   /** 役連鎖の追加攻撃の上限（確定：+4） */
   chainBonusMax: number;
-  /** 通常攻撃力1ライン分で相殺できる待機攻撃ライン数（確定：2） */
+  /** 通常攻撃力1で相殺できる待機攻撃ライン数（V320-FIX-06：2→1。1対1） */
   counterPerLine: number;
   /**
    * 要確認：ストック4個未満での宣言も「不成立」として扱う（硬直あり）か。
@@ -140,12 +136,13 @@ export const DEFAULT_CONFIG: GameConfig = {
   dangerHeight: 7,
   dangerGraceMs: 4000,
   streakWindowMs: null,
-  streakAttackTable: STREAK_ATTACK_TABLE,
+  streakAttackBonus: STREAK_ATTACK_BONUS,
+  streakMaxCount: 99,
   streakScoreTable: STREAK_SCORE_TABLE,
   chainWindowMs: 10000,
   moveBufferTicks: 2,
   chainBonusMax: 4,
-  counterPerLine: 2,
+  counterPerLine: 1,
   declareBelowMinIsFailure: true,
   releaseExecutesHeldRise: true,
 };

@@ -921,16 +921,6 @@ export class GameView {
       });
   }
 
-  /** 待機ライン数の表示（修正R5）：nextPending（消失対象を含めない）。待機ありか相殺演出中だけ。テスト・検証用に公開 */
-  pendingCountLabel(p: PlayerId, t: number): { text: string; x: number; y: number; align: 'left' | 'right' } | null {
-    const s = this.mode1!.players[p].incoming;
-    if (s.nextPending <= 0 && !this.stockAfterimages(p, t).some((a) => a.kind === 'counter')) return null;
-    const [ox] = this.pvc.stock.origin[p];
-    const sv = this.stockView(p, t);
-    // v3.1.0：列は中央エリアの左右。数字は列の中央側（1P は右、2P は左。囲いの外）で待機群の上端にそろえる（盤面枠に掛からない）
-    return p === 0 ? { text: String(s.nextPending), x: ox + 16 + FRAME_PAD + 1, y: sv.pendingY, align: 'left' } : { text: String(s.nextPending), x: ox - FRAME_PAD - 1, y: sv.pendingY, align: 'right' };
-  }
-
   /** プレイヤーのモーションシート（テスト・検証用に公開） */
   characterSheet(p: PlayerId): string {
     return CHARACTER_SHEET[this.characterOf(p)];
@@ -938,10 +928,10 @@ export class GameView {
 
   /**
    * 受攻撃ストック列の描画計画（修正R5。描画とテストで同じ計画を使う）。
-   * z：通常ストック＝ui、囲い＝ui+1、消失演出（XD顔・破棄フェード・小爆発）＝ui+2（同じ z の中は発生順＝新しいほど前面）、
-   * 待機ライン数＝ui+3。消失演出は有効なストックより前面に描き、数字は消失対象を含めない。
+   * z：通常ストック＝ui、囲い＝ui+1、消失演出（XD顔・破棄フェード・小爆発）＝ui+2（同じ z の中は発生順＝新しいほど前面）。
+   * 消失演出は有効なストックより前面に描く。V320-FIX-06：アイコン横の数量数字（旧 待機ライン数、ui+3）は 1P・2P とも削除した。
    */
-  stockDrawPlan(p: PlayerId, t: number): { entries: (StockDrawEntry & { z: number })[]; label: ReturnType<GameView['pendingCountLabel']> } {
+  stockDrawPlan(p: PlayerId, t: number): { entries: (StockDrawEntry & { z: number })[] } {
     const cfg = this.pvc.stock;
     const [ox] = cfg.origin[p];
     const sv = this.stockView(p, t);
@@ -952,7 +942,7 @@ export class GameView {
       ...e,
       z: e.type === 'frame' ? Z.ui + 1 : e.type === 'burst' || e.vanish ? Z.ui + 2 : Z.ui,
     }));
-    return { entries, label: this.pendingCountLabel(p, t) };
+    return { entries };
   }
 
   private collectAttackStock(items: DrawItem[], p: PlayerId, t: number): void {
@@ -967,8 +957,6 @@ export class GameView {
         items.push({ z: e.z, draw: (ctx) => drawNineSlice(ctx, this.assets, f, FRAME_PAD, e.x, e.y, e.w, e.h) });
       } else this.put(items, e.z, this.frame(e.size === 'large' ? 'attack_stock_cancel_burst_sheet' : 'attack_stock_cancel_burst_small_sheet', String(e.frame)), e.x, e.y);
     }
-    const label = plan.label;
-    if (label) items.push({ z: Z.ui + 3, draw: (ctx) => drawText(ctx, label.text, label.x, label.y, { align: label.align, size: 10, weight: 700, box: true }) });
   }
 
   /**

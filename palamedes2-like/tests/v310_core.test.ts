@@ -1,6 +1,7 @@
 // v3.1.0 コア：ピンチ猶予4000ms と 3/2/1 の通知、ミス帰還の降下区間1.6倍、打ち上げ成功連鎖の新倍率と連鎖切り予約
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CONFIG, STREAK_ATTACK_TABLE, streakPercent } from '../src/core/config';
+import { DEFAULT_CONFIG } from '../src/core/config';
+import { streakAttackBonus } from '../src/core/attack';
 import type { Command, Game, GameEvent } from '../src/core/game';
 import type { PlayerId } from '../src/core/types';
 import { GameView } from '../src/view/gameView';
@@ -139,10 +140,11 @@ describe('v3.1.0 ミス帰還：縦軸へ戻った後の降下区間だけ1.6倍
   });
 });
 
-describe('v3.1.0 打ち上げ成功連鎖：攻撃倍率表と連鎖切り予約', () => {
-  it('攻撃倍率：1〜6回×1、7〜12回×1.25、13〜18回×1.5、19回以上×1.75（6→7、12→13、18→19 の境界）', () => {
-    const pct = (n: number) => streakPercent(STREAK_ATTACK_TABLE, n);
-    expect([1, 6, 7, 12, 13, 18, 19, 40].map(pct)).toEqual([100, 100, 125, 125, 150, 150, 175, 175]);
+describe('v3.1.0 打ち上げ成功連鎖：攻撃加算と連鎖切り予約', () => {
+  // V320-FIX-06 で更新：旧攻撃倍率表（×1／×1.25／×1.5／×1.75）は廃止。固定加算 0〜4＋0、5〜9＋1、10〜99＋2
+  it('攻撃加算：4→5、9→10 の境界（旧攻撃倍率表は廃止）', () => {
+    expect([0, 1, 4, 5, 9, 10, 98, 99].map((n) => streakAttackBonus(n))).toEqual([0, 0, 0, 1, 1, 2, 2, 2]);
+    expect(DEFAULT_CONFIG.streakAttackBonus).toEqual([{ minCount: 5, bonus: 1 }, { minCount: 10, bonus: 2 }]);
     // シングルの得点倍率表は変更しない
     expect(DEFAULT_CONFIG.streakScoreTable.map((s) => s.minCount)).toEqual([1, 3, 5, 7]);
   });
@@ -163,7 +165,7 @@ describe('v3.1.0 打ち上げ成功連鎖：攻撃倍率表と連鎖切り予約
     p.streakRemaining = null;
     launchFrom(g, 0); // ミス
     expect(evs(g, 'streakCut', 0)).toMatchObject([{ state: 'reserved', reason: 'miss', count: 7 }]);
-    expect([p.streakCount, p.streakCutReserved, g.currentStreakPercent(p)]).toEqual([7, true, 125]);
+    expect([p.streakCount, p.streakCutReserved, g.currentStreakBonus(p)]).toEqual([7, true, 1]);
     // V320-FIX-05 で更新：旧「ミス・成功で受付時間を更新」は時間制限の撤廃で無効（受付残りは null のまま）
     expect(p.streakRemaining).toBeNull();
     launchFrom(g, 1); // 成功（1♠→2♠）
@@ -171,7 +173,7 @@ describe('v3.1.0 打ち上げ成功連鎖：攻撃倍率表と連鎖切り予約
     expect(p.streakRemaining).toBeNull();
     launchFrom(g, 2); // 再ミス（2♠ と 4♥）
     expect(evs(g, 'streakCut', 0).at(-1)).toMatchObject({ state: 'ended', reason: 'miss', count: 8 });
-    expect([p.streakCount, p.streakRemaining, p.streakCutReserved, g.currentStreakPercent(p)]).toEqual([0, 0, false, 100]);
+    expect([p.streakCount, p.streakRemaining, p.streakCutReserved, g.currentStreakBonus(p)]).toEqual([0, 0, false, 0]);
   });
 
   // V320-FIX-05：既定では時間切れはない。受付時間を明示した設定（streakWindowMs≠null）の場合の動作として残す

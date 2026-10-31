@@ -9,6 +9,9 @@ import { EMPTY, makeGame, setStock, toPlay } from './helpers';
 const clone = (): CpuConfig => {
   const c = JSON.parse(JSON.stringify(CPU_CONFIG)) as CpuConfig;
   delete c.mode1Adjust;
+  // V320-FIX-06 で更新：難易度別の操作速度（speed：移動開始間隔・打上待ち）も外し、FIX-05 までの見積り・操作列を単独で検証する。
+  // FIX-06 の操作速度は v320_fix06_cpu.test.ts
+  delete c.speed;
   return c;
 };
 
@@ -112,14 +115,18 @@ describe('v3.2.0 失念の件数', () => {
 });
 
 describe('v3.2.0 7個目による改善（手役6個）', () => {
-  /** 手役 1♥5♦1♠2♠3♠4♠（ストレートフラッシュ＝4ライン）。列0の5♠を取ると 5♦1♠2♠3♠4♠5♠ でハイストレートフラッシュ＝5ライン */
+  /**
+   * 手役 1♥5♦1♠2♠3♠4♠（ストレートフラッシュ＝消去4／攻撃4）。列0の5♠を取ると 5♦1♠2♠3♠4♠5♠ でハイストレートフラッシュ＝消去5／攻撃5。
+   * V320-FIX-06 で更新：旧盤面の列1の6♠は、取ると6個全体のスーパーストレート（消去4／攻撃5）になり「消去同じ・攻撃増」の改善に変わるため、
+   * この試験の意図（改善候補は5♠だけ）を保つよう列1を出せない6♥へ置換した。6♠の扱いは v320_fix06_cpu.test.ts で検査する
+   */
   function setup(level: 'easy' | 'normal' | 'hard', pct: number, pinch: number | null = null) {
     const cfg = clone();
     cfg.decisionStop[level].pct.kotaro = 0;
     cfg.forget[level].normal.kotaro = { pct: 0, ms: 0 };
     cfg.seventhImprove[level].normal.kotaro = pct;
     cfg.seventhImprove[level].pinch.kotaro = pct;
-    const g = makeGame({ base: '4s', boards: { 0: { 0: ['5s', '1h'], 1: ['6s', '1h'], 2: ['1h'], 3: ['3h'], 4: ['1h'], 5: ['1h'] }, 1: EMPTY } });
+    const g = makeGame({ base: '4s', boards: { 0: { 0: ['5s', '1h'], 1: ['6h', '1h'], 2: ['1h'], 3: ['3h'], 4: ['1h'], 5: ['1h'] }, 1: EMPTY } });
     toPlay(g);
     setStock(g, 0, '1h', '5d', '1s', '2s', '3s', '4s');
     g.players[0].selectedCol = 2;
@@ -131,9 +138,9 @@ describe('v3.2.0 7個目による改善（手役6個）', () => {
     const { g, cpu } = setup('hard', 100);
     play(g, cpu, 200);
     const d = g.events.find((e) => e.type === 'declare');
-    expect(d && d.type === 'declare' ? d.result.han : null).toBe(5);
-    // 6♠（列1）は 6個全体の役（スーパーストレート3ライン）が優先され改善にならないので候補外
-    expect(cpu.log.filter((l) => l.kind === 'seventhImprove')).toMatchObject([{ hit: true, pct: 100, detail: 'normal +1' }]);
+    expect(d && d.type === 'declare' ? d.result.clear : null).toBe(5);
+    // V320-FIX-06：改善量は役の強さ（消去×100＋基本攻撃）の差。4／4 → 5／5 で +101
+    expect(cpu.log.filter((l) => l.kind === 'seventhImprove')).toMatchObject([{ hit: true, pct: 100, detail: 'normal +101' }]);
     expect(cpu.stats).toMatchObject({ seventhConsidered: 1, seventhExecuted: 1, seventhImproved: 1, seventhAborted: 0 });
   });
 
@@ -145,7 +152,9 @@ describe('v3.2.0 7個目による改善（手役6個）', () => {
 
   it('改善候補が無ければ抽選せず宣言（同点で役名だけ変わる場合も追わない）', () => {
     const { g, cpu } = setup('hard', 100);
-    g.players[0].board.cols[0].shift(); // 5♠を除く：残る 6♠ は改善にならない
+    // 5♠を除き、列1を出せるが改善にならない4♦（取っても最強はストレートフラッシュ 4／4 のまま）にする
+    g.players[0].board.cols[0].shift();
+    g.players[0].board.cols[1][0] = { kind: 'piece', piece: g.factory.make(4, 'diamond') };
     expect(cpu.poll(g).map((c) => c.type)).toEqual(['declare']);
     expect(cpu.log.filter((l) => l.kind === 'seventhImprove')).toHaveLength(0);
   });

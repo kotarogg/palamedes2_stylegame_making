@@ -6,6 +6,7 @@ import { DEFAULT_CONFIG, type GameConfig } from '../core/config';
 import { Game, type Action, type Command, type GameEvent, type RiseKind } from '../core/game';
 import type { PlayerId, Suit } from '../core/types';
 import script from '../data/tutorial_script_v1.json';
+import helpTiming from '../data/help_timing_fix06.json';
 
 export type PageKey = keyof typeof script.pages;
 
@@ -23,41 +24,101 @@ export function pageText(key: PageKey): PageText {
   return script.pages[key];
 }
 
-/** V320-FIX-04 第13章：説明ページの読書時間（実時間）。この後に送り案内を出す（手動）／次へ進む（放置デモ） */
-export const READ_MS = 5000;
+/**
+ * V320-FIX-06 第7章：説明項目の最低表示時間。項目へ入った時点を経過0とし、
+ * 「その項目の実演に属する全処理の完了」かつ「最低表示時間の経過」で次の項目へ進む（決定入力は使わない）。
+ * 初期値＝max（floorMs, baseMs＋本文の文字数÷charsPerSec 秒）。設定は src/data/help_timing_fix06.json（項目別の上書き可）
+ */
+export const HELP_TIMING = helpTiming as { floorMs: number; baseMs: number; charsPerSec: number; perPageMs: Partial<Record<string, number>> };
 
-/** 読書中の説明：頁・パネル番号と、読み終えた後の行き先（実演へ／次へ） */
-export interface Reading {
-  page: PageKey;
-  panel: number;
-  prompt: 'demo' | 'next';
+/** 本文の文字数（句読点を数え、空白・全角空白・改行を除く） */
+export function countTextChars(text: string): number {
+  return [...text.replace(/[\s\u3000]/g, '')].length;
 }
 
-/** 読書区間の状態（パネルを順に読み、最後のパネルの後は promptAfter の行き先） */
-export class ReadingState {
-  current: Reading | null = null;
-  private after: 'demo' | 'next' = 'next';
-  /** 読み始めた説明の数（自動検証用：パネル単位） */
-  count = 0;
+/** 頁の最低表示時間（ms。小数を含む） */
+export function minDisplayMs(page: PageKey): number {
+  const o = HELP_TIMING.perPageMs[page];
+  if (o !== undefined) return o;
+  return Math.max(HELP_TIMING.floorMs, HELP_TIMING.baseMs + (countTextChars(pageText(page).text) / HELP_TIMING.charsPerSec) * 1000);
+}
 
-  start(page: PageKey, after: 'demo' | 'next'): void {
-    this.after = after;
-    this.current = { page, panel: 0, prompt: pageText(page).panels.length > 1 ? 'next' : after };
-    this.count++;
+/** 頁の最低表示時間（tick、切り上げ） */
+export function minDisplayTicks(page: PageKey, tickRate = 60): number {
+  return Math.ceil((minDisplayMs(page) * tickRate) / 1000 - 1e-9);
+}
+
+/** 1項目の記録（検証・報告用。tick は項目時計＝舞台の開始からの tick） */
+export interface ItemRecord {
+  page: PageKey;
+  startTick: number;
+  minTicks: number;
+  /** 実演に属する全処理が完了した tick（文字だけの項目は開始と同じ） */
+  doneTick: number | null;
+  /** 次の項目へ移った（または教材を終えた）tick */
+  endTick: number | null;
+  /** パネル（本文の分割）ごとの表示開始 tick */
+  panelTicks: number[];
+}
+
+/**
+ * 項目の時計（V320-FIX-06）：舞台の1tickごとに clock を進める（実演の停止中も進む）。
+ * パネルが複数ある頁は、最低表示時間を各パネルの文字数で按分した時刻に切り替える（切替ごとに時間を加算しない。最後のパネルは項目の終わりまで）
+ */
+export class ItemClock {
+  clock = 0;
+  current: ItemRecord | null = null;
+  readonly log: ItemRecord[] = [];
+  private offsets: number[] = [0];
+
+  constructor(readonly tickRate = 60) {}
+
+  begin(page: PageKey): void {
+    this.close();
+    const minTicks = minDisplayTicks(page, this.tickRate);
+    const panels = pageText(page).panels.map((l) => countTextChars(l.join('')));
+    const total = panels.reduce((a, b) => a + b, 0) || 1;
+    let acc = 0;
+    this.offsets = panels.map((n) => {
+      const o = Math.floor((minTicks * acc) / total);
+      acc += n;
+      return o;
+    });
+    this.current = { page, startTick: this.clock, minTicks, doneTick: null, endTick: null, panelTicks: [this.clock] };
+    this.log.push(this.current);
   }
 
-  /** 読み終えた：次のパネルへ、無ければ読書を終える。戻り値：読書が続くか */
-  release(): boolean {
+  /** 現在の項目の経過 tick */
+  get elapsed(): number {
+    return this.current ? this.clock - this.current.startTick : 0;
+  }
+
+  /** 表示中のパネル番号 */
+  get panel(): number {
     const c = this.current;
-    if (!c) return false;
-    const n = pageText(c.page).panels.length;
-    if (c.panel + 1 < n) {
-      this.current = { page: c.page, panel: c.panel + 1, prompt: c.panel + 2 < n ? 'next' : this.after };
-      this.count++;
-      return true;
+    if (!c) return 0;
+    let i = 0;
+    for (let k = 0; k < this.offsets.length; k++) if (this.elapsed >= this.offsets[k]) i = k;
+    while (c.panelTicks.length <= i) c.panelTicks.push(c.startTick + this.offsets[c.panelTicks.length]);
+    return i;
+  }
+
+  /** 実演の全処理が完了した（最初の1回だけ記録） */
+  markDone(): void {
+    if (this.current && this.current.doneTick === null) this.current.doneTick = this.clock;
+  }
+
+  get minElapsed(): boolean {
+    return !this.current || this.elapsed >= this.current.minTicks;
+  }
+
+  /** 項目を閉じる（次の項目へ・終了） */
+  close(): void {
+    if (this.current) {
+      void this.panel;
+      this.current.endTick = this.clock;
     }
     this.current = null;
-    return false;
   }
 }
 
@@ -81,8 +142,9 @@ function rowsToCols(rows: readonly (readonly string[])[]): string[][] {
 
 export type LessonOp =
   /**
-   * 説明の頁（見出し・本文）。V320-FIX-04：安定状態（飛行・移動・上詰め・役処理・上昇の途中でない）を待ってから
-   * ゲームを止めて読書区間に入る（教材の時計・飛行・猶予は進めない）。読み終える条件は呼出し側（手動＝決定、放置デモ＝時間）
+   * 説明の項目の始まり（見出し・本文）。V320-FIX-06：直前の項目の実演に属する全処理（飛行・帰還・移動・上詰め・入替・役処理・上昇・
+   * 締めの演出）が終わり、かつ直前の項目の最低表示時間が経過したら、この項目を表示して続く実演を同じ tick から始める。
+   * 実演完了後に最低時間の残りを待つ間はゲームを止め、完了画面と説明を保つ
    */
   | { op: 'page'; page: PageKey }
   /** ゲームを進めたまま待つ */
@@ -138,7 +200,8 @@ export interface LessonProblem {
 
 /**
  * 教材の実行：毎tick commands() で入力を作り、Game.step へ渡す。page 命令は onPage で通知。
- * pause 中は paused＝true（呼出し側はゲームを進めない）。行の供給は rowSource を Game へ渡す。
+ * V320-FIX-06：項目の進行は ItemClock（実演の全処理完了＋最低表示時間）。最低時間の残りを待つ間は holding＝true（ゲームを進めない）。
+ * 行の供給は rowSource を Game へ渡す。
  */
 export class LessonRunner {
   readonly game: Game;
@@ -157,14 +220,19 @@ export class LessonRunner {
   readonly log: { tick: number; op: string }[] = [];
   page: PageKey | null = null;
   done = false;
-  /** 読書区間（V320-FIX-04）。読書中はゲームを進めない */
-  readonly reading = new ReadingState();
+  /** V320-FIX-06 項目の時計と記録 */
+  readonly items = new ItemClock();
+  /** 実演完了後、最低表示時間の残りを待っている（ゲームを進めない） */
+  holding = false;
+  /** 締めの演出（結果演出など）が続いているか（舞台が与える。既定はなし） */
+  private readonly busy: () => boolean;
 
   constructor(
     readonly def: LessonDef,
     private readonly onPage: (p: PageKey) => void = () => undefined,
-    opts: { seed?: number; config?: GameConfig } = {},
+    opts: { seed?: number; config?: GameConfig; busy?: () => boolean } = {},
   ) {
+    this.busy = opts.busy ?? (() => false);
     const cfg = opts.config ?? lessonConfig(def);
     this.game = new Game({
       seed: opts.seed ?? 20261026,
@@ -188,42 +256,38 @@ export class LessonRunner {
     this.anchorTick = this.game.tick;
   }
 
-  /** 読書中（ゲームは止まっている） */
-  get paused(): boolean {
-    return this.reading.current !== null;
-  }
-
-  /** 読み終えた（呼出し側の条件を満たした）：次のパネルへ、または読書を終えて台本を進める */
-  releaseReading(): void {
-    this.reading.release();
-  }
-
-  /** 1tick 分の進行（読書中はゲームを進めない）。戻り値：このtickにゲームを進めたか */
+  /** 1tick 分の進行（項目の時計は毎回進む）。戻り値：このtickにゲームを進めたか */
   tick(): boolean {
     if (this.done) return false;
+    this.items.clock++;
     this.scanEvents();
-    if (this.paused) return false;
+    this.holding = false;
     const cmds = this.run();
-    if (this.done || this.paused) return false;
+    if (this.done || this.holding) return false;
     this.game.step(cmds);
     return true;
   }
 
-  /** 読書区間を置ける安定状態：飛行・移動・上詰め等の硬直・役処理・手動上昇の途中でない */
-  private stable(): boolean {
+  /**
+   * 項目の実演が完了した状態：飛行（打上・跳ね返り・帰還）・移動・上詰め／入替／不成立の硬直・役処理（宣言〜消去・足場移動・攻撃・戻し）・
+   * 手動上昇の途中でない。決着後は締めの演出（busy）が終わっていること。BGM・待機モーション・ボイスは条件に含めない
+   */
+  private demoComplete(): boolean {
     const g = this.game;
+    if (g.result) return !this.busy();
     const p = g.players[0];
     return !g.flights.some((f) => f.player === 0) && !g.isMoving(p) && !g.isLocked(p) && !p.role && g.tick + 1 >= p.manualRiseEndTick;
   }
 
-  /** 頁の後の行き先：次の頁（または終わり）までに実演（操作・待ち）があれば「実演へ」 */
-  private promptAfter(from: number): 'demo' | 'next' {
-    for (let i = from; i < this.def.ops.length; i++) {
-      const op = this.def.ops[i];
-      if (op.op === 'page' || op.op === 'end') return 'next';
-      if (op.op !== 'anchor') return 'demo';
+  /** 項目の区切り（page／end）：実演完了と最低表示時間を確かめる。戻り値：区切りを越えてよいか */
+  private atBoundary(): boolean {
+    if (!this.demoComplete()) return false; // 実演の処理が続いている：ゲームを進める
+    this.items.markDone();
+    if (!this.items.minElapsed) {
+      this.holding = true; // 完了画面と説明を保ち、自然上昇などを始めさせない
+      return false;
     }
-    return 'next';
+    return true;
   }
 
   private scanEvents(): void {
@@ -246,20 +310,16 @@ export class LessonRunner {
     const next = g.tick + 1; // Game.step は tick を進めてから入力を処理する
     const ready = () => !g.isLocked(p) && !g.isMoving(p) && !p.defeated && !g.result;
     for (let guard = 0; guard < 64; guard++) {
-      const op = this.def.ops[this.pc];
-      if (!op) {
-        this.done = true;
-        return [];
-      }
+      const op = this.def.ops[this.pc] ?? ({ op: 'end' } as const);
       switch (op.op) {
         case 'page':
-          // 実演の途中（飛行・3/2/1・役処理）に読書を挟まない：安定状態までゲームを進めてから読む
-          if (!g.result && !this.stable()) return [];
+          // 直前の項目の実演が完了し、最低表示時間が経過してから次の項目へ（実演の途中に停止を挟まない）
+          if (this.items.current && !this.atBoundary()) return [];
+          this.items.begin(op.page);
           this.page = op.page;
           this.onPage(op.page);
           this.pc++;
-          this.reading.start(op.page, this.promptAfter(this.pc));
-          return [];
+          continue;
         case 'wait':
           this.waitUntil ??= g.tick + g.ticks(op.ms);
           if (g.tick < this.waitUntil) return [];
@@ -335,6 +395,8 @@ export class LessonRunner {
           return [];
         }
         case 'end':
+          if (this.items.current && !this.atBoundary()) return [];
+          this.items.close();
           this.done = true;
           return [];
       }
@@ -400,8 +462,11 @@ export const LESSON_BASIC: LessonDef = {
   ],
 };
 
-/** 4/4/6 共用教材の取得・宣言の時間（設計書 第6節「時間」。教材の台本値でゲーム設定ではない） */
-export const ROLES_TIMING = { successGapMs: 1200, declare1Ms: 300, declare2Ms: 500, declare3Ms: 800, rowA_Ms: 250, rowB_Ms: 0, rowC_Ms: 300, rowD_Ms: 150, rowE_Ms: 400, rowF_Ms: 0 } as const;
+/**
+ * 4/4/6 共用教材の取得・宣言の時間（設計書 第6節「時間」。教材の台本値でゲーム設定ではない）。
+ * V320-FIX-06：3回目の宣言（スーパーストレート＝消去4）の前に補充行G（rowG_Ms）を追加し、宣言を declare3Ms（800→1050）へ
+ */
+export const ROLES_TIMING = { successGapMs: 1200, declare1Ms: 300, declare2Ms: 500, declare3Ms: 1050, rowA_Ms: 250, rowB_Ms: 0, rowC_Ms: 300, rowD_Ms: 150, rowE_Ms: 400, rowG_Ms: 650, rowF_Ms: 0 } as const;
 
 /** 4/4/6 共用教材の補充行（設計書 第6節） */
 export const ROLES_ROWS = {
@@ -411,6 +476,8 @@ export const ROLES_ROWS = {
   D: ['2♣', '6♦', '1♣', '5♦', '4♣', '2♦'],
   E: ['6♦', '3♣', '2♦', '1♣', '5♦', '4♣'],
   F: ['3♠', '1♥', '5♣', '2♦', '4♥', '6♣'],
+  /** V320-FIX-06 追加：3回目の宣言（消去4）で盤面を空にしないための補充（E と同じ並び。宣言後に列5・6へ1個ずつ残る） */
+  G: ['6♦', '3♣', '2♦', '1♣', '5♦', '4♣'],
 } as const;
 
 function acquire(cols: readonly number[], firstAnchor: 'roleEnd' | 'now', gap: number, pagesAt: Partial<Record<number, PageKey>> = {}): LessonOp[] {
@@ -464,6 +531,7 @@ export function rolesLesson(part: 'all' | 'first' = 'all'): LessonDef {
       { op: 'anchor', on: 'success' },
       { op: 'riseAt', row: ROLES_ROWS.D, atMs: T.rowD_Ms },
       { op: 'riseAt', row: ROLES_ROWS.E, atMs: T.rowE_Ms },
+      { op: 'riseAt', row: ROLES_ROWS.G, atMs: T.rowG_Ms },
       { op: 'actAt', action: 'declare', atMs: T.declare3Ms },
       { op: 'until', event: 'roleEnd', maxMs: 6000 },
       { op: 'page', page: 'chain3' },
@@ -475,11 +543,16 @@ export function rolesLesson(part: 'all' | 'first' = 'all'): LessonDef {
   };
 }
 
+/**
+ * V320-FIX-06：1回目のフォーカードが消去2（旧1翻＝1ライン）になったため、2行目に消去用の行を1行追加した（5段）。
+ * 1回目の宣言後の盤面（222233）と、2回目の取得に使う♥の行は旧教材と同じ。追加行は打ち上げずに役の消去で消える
+ */
 const ROLES_BASE: Omit<LessonDef, 'ops'> = {
   id: 'roles',
   base: '3♠',
   rows: [
     ['4♠', '4♥', '4♠', '4♥', '2♣', '5♦'],
+    ['1♦', '6♣', '2♦', '5♣', '6♦', '1♥'],
     ['6♦', '1♣', '5♦', '2♣', '3♥', '1♣'],
     ['3♥', '5♥', '2♥', '6♥', '5♦', '2♣'],
     ['1♣', '6♦', '2♣', '5♦', '2♥', '4♣'],

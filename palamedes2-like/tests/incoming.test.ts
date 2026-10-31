@@ -107,7 +107,7 @@ describe('受攻撃ブロック・攻撃波（ゲーム内）', () => {
     expect(inc(g, 0).blockReserved).toBe(0);
   });
 
-  it('相殺は nextPending のみ。blockRemaining と waveRemaining は相殺されない（攻撃力1で2ラインの既存計算）', () => {
+  it('相殺は nextPending のみ。blockRemaining と waveRemaining は相殺されない（V320-FIX-06：1対1）', () => {
     const g = makeGame({ boards: { 0: rows(4), 1: EMPTY } });
     toPlay(g);
     g.step([atk(0, 6)]);
@@ -120,7 +120,8 @@ describe('受攻撃ブロック・攻撃波（ゲーム内）', () => {
     g.step([{ player: 0, type: 'declare' }]);
     stepN(g, 400);
     const a = evs(g, 'attack', 0)[0];
-    expect(a.counter).toEqual({ usedPower: 2, canceled: 4, sent: 2, discarded: 0 }); // V320-FIX-04：ストレート+1で攻撃力4
+    // V320-FIX-06 で更新：ストレートフラッシュの基本攻撃4・待機4 → 1対1で相殺4・送信0（旧 1対2 では相殺に2を使い2を送信）
+    expect(a.counter).toEqual({ usedPower: 4, canceled: 4, sent: 0, discarded: 0 });
     expect(evs(g, 'attackCancel', 0).map((e) => e.canceled)).toEqual([4]);
     // 現ブロック・波は相殺されずに、役処理後に実適用される
     expect(s.stats.canceled).toBe(4);

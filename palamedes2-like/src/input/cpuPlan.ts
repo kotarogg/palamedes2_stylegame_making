@@ -15,6 +15,10 @@ export interface PlanTiming {
   launchMs: number;
   /** 成功取得後の上詰め硬直 */
   packMs: number;
+  /** V320-FIX-06：CPU の移動開始間隔の最短（ms。省略時は移動1歩の時間だけ） */
+  moveGapMs?: number;
+  /** V320-FIX-06：CPU の最終移動完了から打上までの最低時間（ms。移動しない取得には掛からない） */
+  launchAfterMoveMs?: number;
 }
 
 /** 目標：4＝役（4ピース役以上）を作る、6＝6ピース役（6個全体の役）を作る、any＝最短で成立可能な役 */
@@ -42,13 +46,19 @@ export function candidatesOf(cols: SimCols, base: Piece): Candidate[] {
   return out;
 }
 
-/** 1回の取得（移動＋打ち上げ＋上詰め硬直）の所要時間 */
+/**
+ * 1回の取得（移動＋打ち上げ＋上詰め硬直）の所要時間。
+ * V320-FIX-06：n歩の移動は（n−1）×max（移動1歩, 移動開始間隔）＋移動1歩＋打上待ち（移動した場合だけ）
+ */
 export function acquireMs(from: number, to: number, t: PlanTiming): number {
-  return Math.abs(to - from) * t.charMoveMs + t.launchMs + t.packMs;
+  const n = Math.abs(to - from);
+  if (n === 0) return t.launchMs + t.packMs;
+  const step = Math.max(t.charMoveMs, t.moveGapMs ?? 0);
+  return (n - 1) * step + t.charMoveMs + (t.launchAfterMoveMs ?? 0) + t.launchMs + t.packMs;
 }
 
 export function goalReached(stock: readonly Piece[], goal: Goal): boolean {
-  if (goal === 6) return stock.length === 6 && evaluateSubset([...stock], [0, 1, 2, 3, 4, 5]).han > 0;
+  if (goal === 6) return stock.length === 6 && evaluateSubset([...stock], [0, 1, 2, 3, 4, 5]).clear > 0;
   const ev = evaluateStock(stock);
   return ev.kind === 'ok';
 }

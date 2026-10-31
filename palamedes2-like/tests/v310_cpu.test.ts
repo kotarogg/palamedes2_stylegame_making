@@ -12,6 +12,9 @@ const K = (o: Record<string, unknown>) => ['kotaro', 'akane', 'zunko'].map((c) =
 const clone = (): CpuConfig => {
   const c = JSON.parse(JSON.stringify(CPU_CONFIG)) as CpuConfig;
   delete c.mode1Adjust;
+  // V320-FIX-06 で更新：難易度別の操作速度（speed：移動開始間隔・打上待ち）も外し、FIX-05 までの見積り・操作列を単独で検証する。
+  // FIX-06 の操作速度は v320_fix06_cpu.test.ts
+  delete c.speed;
   return c;
 };
 /** 判断停止を0%に（他の判断だけを見る） */

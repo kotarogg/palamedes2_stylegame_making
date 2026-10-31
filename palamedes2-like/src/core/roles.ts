@@ -1,5 +1,7 @@
-// 役判定（統合仕様 第6〜7章＋2026-10-18確定の同点採択）。翻数＝消去ライン数、攻撃量は attack.ts。
+// 役判定（統合仕様 第6〜7章）。成立条件・採択集合をここで決め、消去数・基本攻撃数は V320-FIX-06 の数値表（roleTable.ts）から引く。
+// V320-FIX-06：旧「翻数＝消去数」「翻数−1＋数字役ボーナス＝攻撃」は廃止。自動採択は 消去数 → 基本攻撃数 → 数字役の従来の強さ → 役一覧順 → 列挙順。
 import { isRed, SUITS, type Piece } from './types';
+import { LEGACY_NUMBER_STRENGTH, roleValue, type SuitKey } from './roleTable';
 
 export type NumberRole =
   | 'four_card' // フォーカード 同数字4個
@@ -12,17 +14,6 @@ export type NumberRole =
 
 export type SuitRole = 'same_color' | 'all_mark' | 'flush';
 
-export const NUMBER_ROLE_HAN: Record<NumberRole, number> = {
-  four_card: 1,
-  nikoniko: 1,
-  straight: 1,
-  high_straight: 2,
-  full_card: 3,
-  nikoniko_niko: 3,
-  super_straight: 3,
-};
-
-export const SUIT_ROLE_HAN: Record<SuitRole, number> = { same_color: 1, all_mark: 2, flush: 3 };
 
 export interface RoleResult {
   /** 採択した部分集合（4個または6個） */
@@ -34,10 +25,12 @@ export interface RoleResult {
   suitRole: SuitRole | null;
   /** 同色統一の色（表示名 R08〜R11 の分岐用） */
   color: 'red' | 'black' | null;
-  /** 数字役＋属性役（最強1種）の翻数合計。複合表示名で二重加算しない */
-  han: number;
-  /** 数字役の翻数（同点時の採択に使う） */
-  numberHan: number;
+  /** V320-FIX-06：予定消去ライン数（数値表。複合役は複合表の値。0＝不成立） */
+  clear: number;
+  /** V320-FIX-06：基本攻撃数（数値表。両連鎖加算・相殺前） */
+  baseAttack: number;
+  /** 数字役の従来の強さ（自動採択の第4順位だけに使う。数字役なしは0） */
+  numberStrength: number;
 }
 
 export type StockEvaluation =
@@ -89,17 +82,19 @@ export function evaluateSubset(subset: Piece[], indices: number[] = subset.map((
   const size = subset.length as 4 | 6;
   const nr = size === 6 ? numberRole6(subset) : numberRole4(subset);
   const sr = strongestSuitRole(subset);
-  const numberHan = nr ? NUMBER_ROLE_HAN[nr] : 0;
-  const han = numberHan + (sr ? SUIT_ROLE_HAN[sr.role] : 0);
+  const color = sr && sr.role === 'same_color' ? sr.color : null;
+  const suitKey: SuitKey | null = !sr ? null : sr.role === 'same_color' ? (color as 'red' | 'black') : sr.role;
+  const value = roleValue(size, nr, suitKey);
   return {
     subset,
     indices,
     size,
     numberRole: nr,
     suitRole: sr ? sr.role : null,
-    color: sr && sr.role === 'same_color' ? sr.color : null,
-    han,
-    numberHan,
+    color,
+    clear: value.clear,
+    baseAttack: value.attack,
+    numberStrength: nr ? LEGACY_NUMBER_STRENGTH[nr] : 0,
   };
 }
 
@@ -131,12 +126,13 @@ function suitOrder(r: RoleResult): number {
 }
 
 /**
- * 同じ選択段階の候補比較（確定）：合計翻数 → 数字役の翻数 → 役一覧の掲載順。
+ * 同じ選択段階の候補比較（V320-FIX-06 第3章）：消去数 → 基本攻撃数 → 数字役の従来の強さ → 役一覧の掲載順。
  * 負なら a を採択。完全に同じ役なら列挙順（先に見つかった部分集合）を保つ。
  */
 export function compareCandidates(a: RoleResult, b: RoleResult): number {
-  if (a.han !== b.han) return b.han - a.han;
-  if (a.numberHan !== b.numberHan) return b.numberHan - a.numberHan;
+  if (a.clear !== b.clear) return b.clear - a.clear;
+  if (a.baseAttack !== b.baseAttack) return b.baseAttack - a.baseAttack;
+  if (a.numberStrength !== b.numberStrength) return b.numberStrength - a.numberStrength;
   const na = a.numberRole ? NUMBER_ORDER.indexOf(a.numberRole) : NUMBER_ORDER.length;
   const nb = b.numberRole ? NUMBER_ORDER.indexOf(b.numberRole) : NUMBER_ORDER.length;
   if (na !== nb) return na - nb;
@@ -145,7 +141,7 @@ export function compareCandidates(a: RoleResult, b: RoleResult): number {
 
 function pickStrongest(candidates: RoleResult[]): StockEvaluation {
   let best: RoleResult | null = null;
-  for (const r of candidates) if (r.han > 0 && (!best || compareCandidates(r, best) < 0)) best = r;
+  for (const r of candidates) if (r.clear > 0 && (!best || compareCandidates(r, best) < 0)) best = r;
   return best ? { kind: 'ok', result: best } : { kind: 'no_role' };
 }
 
@@ -159,7 +155,7 @@ export function evaluateStock(stock: readonly Piece[]): StockEvaluation {
   if (stock.length < 4) return { kind: 'too_few' };
   if (stock.length === 6) {
     const whole = evaluateSubset([...stock], [0, 1, 2, 3, 4, 5]);
-    if (whole.han > 0) return { kind: 'ok', result: whole };
+    if (whole.clear > 0) return { kind: 'ok', result: whole };
   }
   const idx = stock.map((_, i) => i);
   return pickStrongest(fourSubsets(idx).map((ix) => evaluateSubset(ix.map((i) => stock[i]), ix)));
@@ -189,7 +185,7 @@ const NUMBER_LOGO: Record<NumberRole, number> = {
 
 /**
  * 表示する役名ロゴ（S7 role_index = R番号-1）の列。
- * 判定（翻数）とは分離した表示名の対応。R08〜R11・R16 は暫定名。
+ * 判定（数値表）とは分離した表示名の対応。R08〜R11・R16 は暫定名。
  * 専用ロゴがあるストレートフラッシュ系（R14〜R16）は専用ロゴだけ。それ以外の複合は数字役→属性役の順（確定）。
  */
 export function roleLogoIndices(r: RoleResult): number[] {

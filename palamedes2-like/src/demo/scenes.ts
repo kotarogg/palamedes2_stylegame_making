@@ -15,7 +15,7 @@ import { drawBitmapText, TUTORIAL_COLORS } from '../view/bitmapFont';
 import { GameView } from '../view/gameView';
 import { LESSON_BASIC, LESSON_CRACK, LESSON_M1_SINGLE, LESSON_M1_VERSUS, LESSON_PINCH, pieceKind, rolesLesson, TUTORIAL_SCRIPT } from './lesson';
 import { drawReturnHint, drawTutorialPanel, PANEL, type HintLayout } from './panel';
-import { DEMO, fullDigits, LessonStage, Mode2Stage, SingleDemoStage, VersusDemoStage, type ReadingStage, type Stage } from './stages';
+import { DEMO, fullDigits, LessonStage, Mode2Stage, SingleDemoStage, VersusDemoStage, type Stage } from './stages';
 
 /**
  * パッドの「新しい」操作だけを拾う（開始時に押していたボタン・傾きは、一度離すまで数えない）。
@@ -244,13 +244,13 @@ export class HelpMenuScene implements Scene {
     const back = () => this.app.setScene(new HelpMenuScene(this.app, this.from, this.cursor));
     if (t === 'roles') return this.app.setScene(new RoleListScene(this.app, back));
     if (t === 'text') return this.app.openHelpText(back);
-    // V320-FIX-04：手動の遊び方は説明ごとに5000ms読ませ、決定で送る（manual＝true）。
-    // MODE1 は「シングル」「対戦」（静止見本の説明）と「ピンチとゲームオーバー」（実演）。連鎖説明はヒビの独立例を追加
+    // V320-FIX-06：説明と実演は自動で始まり、実演の全処理完了＋最低表示時間で自動で進む（決定入力は使わない）。
+    // MODE1 は「シングル」「対戦」（静止見本の説明）と「ピンチとゲームオーバー」（実演）。連鎖説明はヒビの独立例を含む
     const stages: Record<Exclude<HelpTopic, 'roles' | 'text'>, ((a: App) => Stage)[]> = {
-      basic: [(a) => new LessonStage(a, LESSON_BASIC, true)],
-      mode1: [(a) => new LessonStage(a, LESSON_M1_SINGLE, true), (a) => new LessonStage(a, LESSON_M1_VERSUS, true), (a) => new LessonStage(a, LESSON_PINCH, true)],
-      streak: [(a) => new LessonStage(a, rolesLesson('all'), true), (a) => new LessonStage(a, LESSON_CRACK, true)],
-      mode2: [(a) => new Mode2Stage(a, true)],
+      basic: [(a) => new LessonStage(a, LESSON_BASIC)],
+      mode1: [(a) => new LessonStage(a, LESSON_M1_SINGLE), (a) => new LessonStage(a, LESSON_M1_VERSUS), (a) => new LessonStage(a, LESSON_PINCH)],
+      streak: [(a) => new LessonStage(a, rolesLesson('all')), (a) => new LessonStage(a, LESSON_CRACK)],
+      mode2: [(a) => new Mode2Stage(a)],
     };
     this.app.setScene(new HelpLessonScene(this.app, stages[t], back));
   }
@@ -271,12 +271,7 @@ export class HelpMenuScene implements Scene {
   }
 }
 
-/** 読書区間を持つ舞台か */
-export function readingOf(stage: Stage | null): ReadingStage | null {
-  return stage && 'gate' in stage && 'confirm' in stage ? (stage as ReadingStage) : null;
-}
-
-/** 遊び方の説明実演（手動閲覧）。B／Esc で目次へ。最後は「もう一度」「戻る」 */
+/** 遊び方の説明実演（V320-FIX-06：自動進行）。B／Esc で目次へ。最後まで再生したら「もう一度」「戻る」 */
 export class HelpLessonScene implements Scene {
   private i = 0;
   stage: Stage;
@@ -299,11 +294,8 @@ export class HelpLessonScene implements Scene {
       this.leave();
       return;
     }
-    if (this.choice === null) {
-      // 説明の送り：読書時間（5000ms）後の新しい決定だけ。早い決定は捨てる（予約しない）
-      if (ev.key === 'confirm' && !ev.repeat) readingOf(this.stage)?.confirm();
-      return;
-    }
+    // 再生中は決定・方向を使わない（進行は自動。入場の決定を持ち越して何かを起こさない）
+    if (this.choice === null) return;
     if (ev.key === 'up' || ev.key === 'down' || ev.key === 'left' || ev.key === 'right') {
       this.choice = this.choice === 0 ? 1 : 0;
       bus.playSfx('ui_move');
@@ -343,10 +335,7 @@ export class HelpLessonScene implements Scene {
     const S = TUTORIAL_SCRIPT.help_choices;
     const o = { outline: TUTORIAL_COLORS.outline };
     if (this.choice === null) {
-      // 送り案内（付録B）：読書時間の後だけ。戻る案内は消さない
-      const rs = readingOf(this.stage);
-      const prompt = rs?.gate.prompt(rs.reading);
-      if (prompt) drawBitmapText(ctx, font, prompt, PANEL.hint.x, PANEL.hint.y, { ...o, color: TUTORIAL_COLORS.heading });
+      // V320-FIX-06：「決定で実演へ」「決定で次へ」の送り案内は廃止。戻る案内だけ出す
       drawBitmapText(ctx, font, 'B/Esc:' + S.back, PANEL.hint.x, PANEL.hint.y + PANEL.hint.step, { ...o, color: TUTORIAL_COLORS.secondary });
       return;
     }
@@ -389,10 +378,11 @@ export class RoleListScene implements Scene {
   }
 
   /** 表示する値（本体の役判定・攻撃計算から） */
-  info(i = this.index): { logos: number[]; han: number; clear: number; attack: number } {
+  info(i = this.index): { logos: number[]; clear: number; attack: number } {
     const ex = this.roles[i].example.map((c, k) => ({ id: k + 1, ...pieceKind(c) }));
     const r = evaluateSubset(ex);
-    return { logos: roleLogoIndices(r), han: r.han, clear: r.han, attack: computeAttack(r.han, 100, 1, DEFAULT_CONFIG.chainBonusMax, r.numberRole).power };
+    // V320-FIX-06：数値表の消去数・基本攻撃数（連鎖なしの通常攻撃力＝基本攻撃数）
+    return { logos: roleLogoIndices(r), clear: r.clear, attack: computeAttack(r.baseAttack, 0, 1, DEFAULT_CONFIG.chainBonusMax).power };
   }
 
   onNav(ev: NavEvent): void {

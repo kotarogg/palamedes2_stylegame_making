@@ -101,18 +101,19 @@ describe('v3.1.0 受攻撃ストックの中央配置', () => {
         expect(e.y + e.h).toBeLessThanOrEqual(360);
       }
     }
-    // 列の間（1P 囲い右端 291 〜 2P 囲い左端 349）に数字を置く
+    // V320-FIX-06 で更新：アイコン横の数量数字（旧 pendingCountLabel）は 1P・2P とも削除。列の間に数字を置かない
     expect(cfg.origin[0][0] + 16 + FRAME_PAD).toBeLessThan(cfg.origin[1][0] - FRAME_PAD);
     const g = makeGame({ boards: { 0: EMPTY, 1: EMPTY } });
     const v = new GameView(g, fakeAssets());
     toPlay(g);
     g.step([atk(0, 8), atk(1, 8)]);
     v.syncEvents();
-    const a = v.pendingCountLabel(0, g.tick)!;
-    const b = v.pendingCountLabel(1, g.tick)!;
-    expect(a.align).toBe('left');
-    expect(b.align).toBe('right');
-    expect(a.x).toBeLessThan(b.x);
+    expect('pendingCountLabel' in v).toBe(false);
+    for (const p of [0, 1] as const) {
+      const plan = v.stockDrawPlan(p, g.tick);
+      expect(Object.keys(plan)).toEqual(['entries']);
+      expect(plan.entries.filter((e) => e.type === 'icon').length).toBeGreaterThan(0); // アイコンは残る
+    }
   });
 });
 

@@ -8,10 +8,10 @@
 //   9. 自然上昇・危険猶予  10. 敗北判定（同一tickの両者敗北は引分け）
 // 攻撃の解決順（第3版 第9章）：両者の役処理で攻撃力を収集→各自の相殺（その時点の nextPending）→相殺後の送信を相手へ受信（上限29）
 //   →期限到達の敗北判定→ブロック開始→段の適用→自然上昇。同tickに相手から届いた分は、そのtickの自分の相殺対象に含めない。
-import { computeAttack, resolveCounter, type AttackBreakdown, type CounterResult } from './attack';
+import { computeAttack, resolveCounter, streakAttackBonus, type AttackBreakdown, type CounterResult } from './attack';
 import { addLevelProgress, applyMultiplier, levelDef, MODE1_BALANCE, scoreMultiplier, STAGE_COUNT, stageDef, type Mode1Balance } from './balance';
 import { Board } from './board';
-import { DEFAULT_CONFIG, msToTicks, streakPercent, type GameConfig } from './config';
+import { DEFAULT_CONFIG, msToTicks, type GameConfig } from './config';
 import { cancelPending, createIncoming, receive, totalIncoming, tryEndBlock, tryStartBlock, tryStartWave, type IncomingState } from './incoming';
 import { isLaunchSuccess, PieceFactory } from './pieces';
 import { evaluateStock, roleLogoIndices, type RoleResult } from './roles';
@@ -87,7 +87,8 @@ export type GameEvent =
       consumed: Piece[];
       chainCount: number;
       streak: number;
-      streakPercent: number;
+      /** V320-FIX-06：宣言時点の打上連鎖の攻撃加算（0／1／2） */
+      streakBonus: number;
       introEndTick: number;
     }
   | { type: 'declareFail'; tick: number; player: PlayerId; reason: 'too_few' | 'no_role'; lockEnd: number }
@@ -168,7 +169,8 @@ export interface RoleProcess {
   linesPlanned: number;
   linesCleared: number;
   chainCount: number;
-  streakPercent: number;
+  /** V320-FIX-06：宣言時点の打上連鎖数（攻撃加算の計算に使うスナップショット） */
+  streakCount: number;
   /** シングル：宣言成立時の得点倍率スナップショット（1ライン100点に掛ける） */
   scoreMul: { num: number; den: number };
 }
@@ -437,9 +439,9 @@ export class Game {
     return this.config.streakWindowMs === null ? null : this.ticks(this.config.streakWindowMs);
   }
 
-  /** 現在の打上連鎖の攻撃倍率×100（連鎖が無ければ×1.0） */
-  currentStreakPercent(p: PlayerState): number {
-    return this.streakActive(p) ? streakPercent(this.config.streakAttackTable, p.streakCount) : 100;
+  /** 現在の打上連鎖の攻撃加算（V320-FIX-06。連鎖が無ければ0） */
+  currentStreakBonus(p: PlayerState): number {
+    return this.streakActive(p) ? streakAttackBonus(p.streakCount, this.config.streakAttackBonus) : 0;
   }
 
   /** 現在の得点倍率（シングル表示用。連鎖が無ければ×1） */
@@ -618,7 +620,7 @@ export class Game {
     p.roleReady = false;
     p.chainCount = p.chainRemaining > 0 ? p.chainCount + 1 : 1;
     p.chainRemaining = this.ticks(this.config.chainWindowMs); // 成立ごとに受付時間を更新（処理中は停止）
-    const pct = this.currentStreakPercent(p);
+    const streakNow = this.streakActive(p) ? p.streakCount : 0;
     const introEnd = this.tick + this.t.roleIntroMs;
     p.role = {
       result: ev.result,
@@ -626,10 +628,10 @@ export class Game {
       startTick: this.tick,
       stage: 'intro',
       stageEnd: introEnd,
-      linesPlanned: ev.result.han, // 消去ライン数＝合計翻数
+      linesPlanned: ev.result.clear, // V320-FIX-06：消去数は数値表の値（連鎖の影響を受けない）
       linesCleared: 0,
       chainCount: p.chainCount,
-      streakPercent: pct,
+      streakCount: streakNow,
       scoreMul: this.currentScoreMultiplier(p),
     };
     clearHeld(p);
@@ -641,8 +643,8 @@ export class Game {
       logos: p.role.logos,
       consumed,
       chainCount: p.chainCount,
-      streak: this.streakActive(p) ? p.streakCount : 0,
-      streakPercent: pct,
+      streak: streakNow,
+      streakBonus: streakAttackBonus(streakNow, this.config.streakAttackBonus),
       introEndTick: introEnd,
     });
   }
@@ -696,8 +698,8 @@ export class Game {
       return;
     }
     // 攻撃計算 → 相殺 → 送信（盤面が空で予定ライン数を消せなくても基本攻撃量は減らさない）。
-    // 採択役・倍率・役連鎖数は宣言時点のスナップショット（数字役ボーナスは採択された数字役から1回）
-    const breakdown = computeAttack(r.result.han, r.streakPercent, r.chainCount, this.config.chainBonusMax, r.result.numberRole);
+    // V320-FIX-06：基本攻撃数（数値表）＋打上連鎖加算＋役連鎖加算。採択役・両連鎖数は宣言時点のスナップショット
+    const breakdown = computeAttack(r.result.baseAttack, r.streakCount, r.chainCount, this.config.chainBonusMax, this.config.streakAttackBonus);
     if (this.single) {
       // シングルは送り先がない（攻撃ストック・送信なし）
       this.emit({ type: 'attack', tick: this.tick, player: p.id, breakdown, counter: { usedPower: 0, canceled: 0, sent: 0, discarded: 0 }, linesCleared: r.linesCleared });
@@ -1019,7 +1021,8 @@ export class Game {
         discarded = r.discarded;
         // 打上連鎖：成功で+1（V320-FIX-05：時間では切れない。失敗では更新・リセットしない）
         // 予約中の成功も成功数を増やす（予約・ヒビは解除しない）
-        p.streakCount = this.streakActive(p) ? p.streakCount + 1 : 1;
+        // V320-FIX-06：上限99（到達後の成功は99のまま。攻撃加算は増えない）
+        p.streakCount = this.streakActive(p) ? Math.min(p.streakCount + 1, this.config.streakMaxCount) : 1;
         p.streakRemaining = this.streakWindowTicks();
         p.board.releaseReservation(f.col, f.piece.id);
         packedIds = p.board.cols[f.col].map((s) => (s.kind === 'piece' ? s.piece.id : s.pieceId));

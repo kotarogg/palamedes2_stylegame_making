@@ -17,6 +17,7 @@ import type { Piece, PlayerId } from '../core/types';
 import { pushRoleStock } from '../core/stock';
 import rawConfig from '../data/cpu_config_v320.json';
 import mode1Fix05 from '../data/cpu_config_fix05_mode1.json';
+import speedFix06 from '../data/cpu_config_fix06_speed.json';
 import type { Controller } from './controller';
 import { acquireMs, candidatesOf, depthFor, remainingAfter, shortestPaths, simCols, type Candidate, type Goal, type PlanTiming } from './cpuPlan';
 
@@ -58,6 +59,15 @@ export interface CpuConfig {
   actionGapMs: number;
   /** V320-FIX-05：MODE1 だけの認識誤り・探索深さ・中上級の必須判断待ち（cpu_config_fix05_mode1.json）。無ければ FIX-04 の動作 */
   mode1Adjust?: Mode1Adjust;
+  /** V320-FIX-06：難易度別の操作速度（cpu_config_fix06_speed.json。MODE1・MODE2 共通）。無ければ制限なし */
+  speed?: CpuSpeed;
+}
+
+/** V320-FIX-06 CPU の操作速度（tick が正本） */
+export interface CpuSpeed {
+  adjustment: string;
+  moveGapTicks: Record<Difficulty, number>;
+  launchAfterMoveTicks: Record<Difficulty, number>;
 }
 
 /** V320-FIX-05 MODE1 の調整（cpu_config_fix05_mode1.json と同じ形） */
@@ -69,12 +79,12 @@ export interface Mode1Adjust {
   searchDepth: Record<Difficulty, Record<Situation, number | null>>;
 }
 
-export const CPU_CONFIG = { ...(rawConfig as unknown as CpuConfig), mode1Adjust: mode1Fix05 as unknown as Mode1Adjust };
+export const CPU_CONFIG: CpuConfig = { ...(rawConfig as unknown as CpuConfig), mode1Adjust: mode1Fix05 as unknown as Mode1Adjust, speed: speedFix06 as unknown as CpuSpeed };
 
 /** 1回の判断で行う抽選の記録（自動検証用） */
 export interface CpuDecisionLog {
   tick: number;
-  kind: 'mandatoryWait' | 'perception' | 'misreadLaunch' | 'decisionStop' | 'bestPick' | 'forget' | 'sixChallenge' | 'declareFour' | 'declareSix' | 'seventhImprove' | 'manualRise';
+  kind: 'mandatoryWait' | 'speedWait' | 'perception' | 'misreadLaunch' | 'decisionStop' | 'bestPick' | 'forget' | 'sixChallenge' | 'declareFour' | 'declareSix' | 'seventhImprove' | 'manualRise';
   pct: number;
   hit: boolean;
   detail?: string;
@@ -119,9 +129,15 @@ interface RoleDecision {
 interface Seventh {
   /** 挑戦を決めたときの手役（変わったら取得済み） */
   stockKey: string;
-  /** 現在の役の消去ライン数（合計翻数） */
+  /** 現在の役の強さ（roleRank：消去数×100＋基本攻撃数） */
   lines: number;
 }
+
+/**
+ * V320-FIX-06 CPU の役比較：消去数を優先し、同数なら基本攻撃数（数値表）。
+ * 7個目の改善＝この値が増える（消去が増える、または消去が同じで基本攻撃が増える）
+ */
+export const roleRank = (r: { clear: number; baseAttack: number }): number => r.clear * 100 + r.baseAttack;
 
 /** 計測用の件数（v3.2.0 第10章）。停止・失念は抽選対象・当選・実停止を分けて数える */
 export interface CpuStats {
@@ -156,8 +172,11 @@ export interface CpuStats {
   seventhImproved: number;
   seventhAborted: number;
   seventhLost: number;
-  /** 取得したが消去ライン数が増えなかった（場の変化等。宣言する） */
+  /** 取得したが役が改善しなかった（場の変化等。宣言する） */
   seventhNoGain: number;
+  /** V320-FIX-06 操作速度：移動・打上を間隔のために見送った tick 数 */
+  speedMoveWaitTicks: number;
+  speedLaunchWaitTicks: number;
 }
 
 const emptyStats = (): CpuStats => ({
@@ -188,6 +207,8 @@ const emptyStats = (): CpuStats => ({
   seventhAborted: 0,
   seventhLost: 0,
   seventhNoGain: 0,
+  speedMoveWaitTicks: 0,
+  speedLaunchWaitTicks: 0,
 });
 
 const stockKeyOf = (stock: readonly Piece[]): string => stock.map((x) => x.id).join(',');
@@ -217,6 +238,12 @@ export class CpuController implements Controller {
   private riseDeclinedKey = '';
   private stuckKey = '';
   private nextActTick = 0;
+  /** V320-FIX-06 操作速度：前回の移動開始tick（無ければ -Infinity。初回移動は待たない） */
+  private lastMoveStartTick = Number.NEGATIVE_INFINITY;
+  /** V320-FIX-06：直前の打上以降に移動したか（移動していなければ打上待ちは不要） */
+  private movedSinceLaunch = false;
+  /** V320-FIX-06 計測用：CPU の移動開始tick・打上tickと、その時点の移動完了tick */
+  readonly speedLog: { kind: 'move' | 'launch'; tick: number; moveEndTick: number; dir?: 'left' | 'right' }[] = [];
   /** 直前に読んだゲーム。別のゲーム（新ラウンド・再戦・次の相手）を受けたら状態を初期化する（B1） */
   private game: AnyGame | null = null;
   private readonly rng: Rng;
@@ -248,6 +275,8 @@ export class CpuController implements Controller {
     this.riseDeclinedKey = '';
     this.stuckKey = '';
     this.nextActTick = 0;
+    this.lastMoveStartTick = Number.NEGATIVE_INFINITY;
+    this.movedSinceLaunch = false;
     this.game = null;
   }
 
@@ -261,7 +290,27 @@ export class CpuController implements Controller {
 
   private timing(game: AnyGame): PlanTiming {
     const t = game.config.timing;
-    return { charMoveMs: t.charMoveMs, launchMs: t.launchMs, packMs: t.packMs };
+    const sp = this.cfg.speed;
+    return {
+      charMoveMs: t.charMoveMs,
+      launchMs: t.launchMs,
+      packMs: t.packMs,
+      moveGapMs: sp ? sp.moveGapTicks[this.level] * game.tickMs : 0,
+      launchAfterMoveMs: sp ? sp.launchAfterMoveTicks[this.level] * game.tickMs : 0,
+    };
+  }
+
+  /** V320-FIX-06：次の移動を開始できる最初のtick */
+  private moveReadyTick(): number {
+    const sp = this.cfg.speed;
+    return sp ? this.lastMoveStartTick + sp.moveGapTicks[this.level] : Number.NEGATIVE_INFINITY;
+  }
+
+  /** V320-FIX-06：打上できる最初のtick（直前の打上以降に移動していなければ制限なし） */
+  private launchReadyTick(p: AnyPlayer): number {
+    const sp = this.cfg.speed;
+    if (!sp || !this.movedSinceLaunch) return Number.NEGATIVE_INFINITY;
+    return p.charMoveEndTick + sp.launchAfterMoveTicks[this.level];
   }
 
   poll(game: AnyGame): Command[] {
@@ -386,7 +435,9 @@ export class CpuController implements Controller {
    */
   private pinchNeedMs(game: AnyGame, opsMs: number, steps: number): number {
     const f = this.cfg.forget[this.level].pinch[this.character];
-    const pending = Math.max(0, this.stopUntil - (game.tick + 1)) * game.tickMs;
+    // 未消化の待ち：判断停止・必須待ち・失念の停止と、V320-FIX-06 の移動開始間隔の残り（並行に進むので遅い方）
+    const now = game.tick + 1;
+    const pending = Math.max(0, Math.max(this.stopUntil, this.moveReadyTick()) - now) * game.tickMs;
     return opsMs + pending + steps * (this.expectedMandatoryMs('pinch') + this.expectedStopMs('pinch') + (f.pct / 100) * f.ms) + game.tickMs + this.cfg.pinchMarginMs[this.level];
   }
 
@@ -520,7 +571,7 @@ export class CpuController implements Controller {
       const done = this.seventh;
       this.seventh = null;
       if (ev.kind === 'ok') {
-        if (ev.result.han > done.lines) this.stats.seventhImproved++;
+        if (roleRank(ev.result) > done.lines) this.stats.seventhImproved++;
         else this.stats.seventhNoGain++;
         return { key, declare: true, goal: 'any' };
       }
@@ -530,7 +581,7 @@ export class CpuController implements Controller {
       const isSix = ev.result.size === 6;
       // 手役6個：7個目による改善の判断を先に通し、追加取得を選ばなければ宣言
       if (hand >= 6) {
-        const col = this.startSeventh(game, p, sit, tick, ev.result.han);
+        const col = this.startSeventh(game, p, sit, tick, roleRank(ev.result));
         if (col !== null) return { key, declare: false, goal: 'any', targetCol: col };
         if (!isSix) return { key, declare: true, goal: 'any' };
       }
@@ -582,8 +633,9 @@ export class CpuController implements Controller {
     const out: { col: number; gain: number; ms: number }[] = [];
     for (const c of this.perceive(game, p, sit, game.tick + 1)) {
       const ev = evaluateStock(pushRoleStock(p.roleStock, c.piece).stock);
-      if (ev.kind !== 'ok' || ev.result.han <= lines) continue;
-      out.push({ col: c.col, gain: ev.result.han - lines, ms: acquireMs(p.selectedCol, c.col, t) });
+      // V320-FIX-06：消去が増える、または消去が同じで基本攻撃が増える場合だけ改善
+      if (ev.kind !== 'ok' || roleRank(ev.result) <= lines) continue;
+      out.push({ col: c.col, gain: roleRank(ev.result) - lines, ms: acquireMs(p.selectedCol, c.col, t) });
     }
     if (out.length === 0) return out;
     if (sit === 'pinch') {
@@ -657,7 +709,17 @@ export class CpuController implements Controller {
   private execute(game: AnyGame, p: AnyPlayer, sit: Situation, tick: number): Command['type'][] {
     const plan = this.plan!;
     if (plan.col === p.selectedCol) {
+      // V320-FIX-06：最終移動完了から打上まで最低 launchAfterMoveTicks（計画は保持して待つ。再判断で待ちをやり直さない）
+      if (plan.action === 'launch' && tick < this.launchReadyTick(p)) {
+        this.stats.speedLaunchWaitTicks++;
+        return [];
+      }
       this.plan = null;
+      if (plan.action === 'launch') {
+        this.speedLog.push({ kind: 'launch', tick, moveEndTick: p.charMoveEndTick });
+        if (this.speedLog.length > 20000) this.speedLog.splice(0, this.speedLog.length - 20000);
+        this.movedSinceLaunch = false;
+      }
       if (plan.misread && plan.action === 'launch') {
         // 発射は人間と同じコマンド。成否・飛行・帰還・連鎖切断はゲーム本体が判定する
         this.stats.misreadLaunched++;
@@ -684,8 +746,17 @@ export class CpuController implements Controller {
       this.stats.forgetTicks += ticks;
       return [];
     }
+    // V320-FIX-06：移動開始間隔（前回の移動開始→次の移動開始）。同方向・反転・目標再選択とも同じ。計画は保持して待つ
+    if (tick < this.moveReadyTick()) {
+      this.stats.speedMoveWaitTicks++;
+      return [];
+    }
     plan.moved = true;
-    return [plan.col < p.selectedCol ? 'left' : 'right'];
+    const dir = plan.col < p.selectedCol ? 'left' : 'right';
+    this.lastMoveStartTick = tick;
+    this.movedSinceLaunch = true;
+    this.speedLog.push({ kind: 'move', tick, moveEndTick: tick + game.ticks(game.config.timing.charMoveMs), dir });
+    return [dir];
   }
 
   private planValid(game: AnyGame, p: AnyPlayer, plan: Plan): boolean {
@@ -748,7 +819,7 @@ export class CpuController implements Controller {
       // 役を維持できる取得（4ピース役成立・宣言を見送り）：取得後も役が成立し、その翻数が高いもの。同点は近いもの
       score = (c) => {
         const ev = evaluateStock([...p.roleStock, c.piece].slice(-6));
-        return ev.kind === 'ok' ? ev.result.han * 1e6 - acquireMs(p.selectedCol, c.col, t) : -1e9;
+        return ev.kind === 'ok' ? roleRank(ev.result) * 1e6 - acquireMs(p.selectedCol, c.col, t) : -1e9;
       };
     } else {
       const paths = shortestPaths(simCols(p.board), game.base, p.roleStock, p.selectedCol, goal, this.depthCap(goal, hand, sit), t, perceived);
@@ -828,4 +899,4 @@ export class CpuController implements Controller {
 }
 
 /** 6ピース役の判定（テスト・検証用） */
-export const isSixRole = (stock: readonly Piece[]): boolean => stock.length === 6 && evaluateSubset([...stock], [0, 1, 2, 3, 4, 5]).han > 0;
+export const isSixRole = (stock: readonly Piece[]): boolean => stock.length === 6 && evaluateSubset([...stock], [0, 1, 2, 3, 4, 5]).clear > 0;
