@@ -635,7 +635,7 @@ try {
     const lastBurst = planA.entries.filter((e) => e.type === 'burst').at(-1);
     out.a = {
       pending: g.players[0].incoming.nextPending,
-      label: planA.label?.text,
+      label: planA.label?.text ?? null, // V320-FIX-06：受ストックの数量数字は削除（常に null）
       y0: yA,
       y1: v.stockAfterimages(0, g.tick)[0]?.y,
       inScreen: inScreen(planA),
@@ -644,7 +644,7 @@ try {
     };
     for (let i = 0; i < 10; i++) sc.step();
     render('R5_a2_after_160ms');
-    out.a.after = { vanish: vanishOf(v.stockDrawPlan(0, g.tick)).length, label: v.pendingCountLabel(0, g.tick)?.text };
+    out.a.after = { vanish: vanishOf(v.stockDrawPlan(0, g.tick)).length, label: v.stockDrawPlan(0, g.tick).label?.text ?? null, pending: g.players[0].incoming.nextPending };
     // B：2P 待機10のうち3を相殺 → 爆発中にブロック開始（現ブロック7、相殺の3は即時打切り）
     set(0, { pending: 0 });
     set(1, { pending: 10, nextBlockTick: FAR });
@@ -684,8 +684,8 @@ try {
   }
   const ra = r5.out.a;
   check(
-    '修正R5：予約29・現残1・待機28→12相殺→6受信。数字は待機22（消失対象を含めない）、爆発は相殺時の位置のまま画面内、小爆発が前面に描かれている（画素照合）',
-    ra.pending === 22 && ra.label === '22' && ra.y0 === ra.y1 && ra.inScreen && ra.maxBottom <= 360 && ra.burstFront && ra.burstFront.opaque > 0 && ra.burstFront.bad === 0 && ra.after.vanish === 0 && ra.after.label === '22',
+    '修正R5（V320-FIX-06 更新）：予約29・現残1・待機28→12相殺→6受信。内部の待機22（消失対象を含めない）、数量数字は描かない、爆発は相殺時の位置のまま画面内、小爆発が前面に描かれている（画素照合）',
+    ra.pending === 22 && ra.label === null && ra.y0 === ra.y1 && ra.inScreen && ra.maxBottom <= 360 && ra.burstFront && ra.burstFront.opaque > 0 && ra.burstFront.bad === 0 && ra.after.vanish === 0 && ra.after.label === null && ra.after.pending === 22,
     JSON.stringify(ra),
   );
   const rb = r5.out.b;
@@ -975,7 +975,7 @@ try {
       pinchPx: warnPx,
       stock: plans.map((pl) => ({ n: pl.entries.length, minX: Math.min(...pl.entries.map((e) => e.x)), maxX: Math.max(...pl.entries.map((e) => e.x + e.w)), maxY: Math.max(...pl.entries.map((e) => e.y + e.h)), label: pl.label })),
       pending: [p0.incoming.nextPending, p1.incoming.nextPending],
-      mult: [g.currentStreakPercent(p0), g.currentStreakPercent(p1)],
+      mult: [g.currentStreakBonus(p0), g.currentStreakBonus(p1)], // V320-FIX-06：攻撃倍率→固定加算
     };
   });
   writeFileSync(new URL('screens/V310_hud_stock_pinch.png', OUT), Buffer.from(v310.png.split(',')[1], 'base64'));
@@ -993,14 +993,14 @@ try {
     JSON.stringify({ old: [v310.oldLabel0, v310.oldLabel1], titles: v310.titles }),
   );
   check(
-    'V320-FIX-03/04 連鎖HUD：数字 0／3／12／19／99／999 とヒビあり／なしで、変化は縦帯の中だけ（盤面・ゲージ・受攻撃ストック・画面上部へ出ない）。攻撃倍率の表示なし。倍率の計算は維持（12＝×1.25、19＝×1.75）',
-    Object.values(v310.sweep).every((x) => x.outside === 0) && Object.entries(v310.sweep).filter(([k]) => k !== '0').every(([, x]) => x.inside > 0) && v310.mult.join() === '125,175',
+    'V320-FIX-03/04 連鎖HUD：数字 0／3／12／19／99／999 とヒビあり／なしで、変化は縦帯の中だけ（盤面・ゲージ・受攻撃ストック・画面上部へ出ない）。攻撃加算の表示なし。V320-FIX-06 の攻撃加算（12・19連鎖＝＋2）',
+    Object.values(v310.sweep).every((x) => x.outside === 0) && Object.entries(v310.sweep).filter(([k]) => k !== '0').every(([, x]) => x.inside > 0) && v310.mult.join() === '2,2',
     JSON.stringify({ sweep: v310.sweep, mult: v310.mult }),
   );
   check(
-    'v3.1.0 受攻撃ストックの中央配置：1P（予約29＋待機22＋相殺12）・2P（予約10＋待機11＋相殺3）とも中央エリア x264〜376・下端360以内。数字は列の中央側',
-    v310.stock.every((s) => s.minX >= 264 && s.maxX <= 376 && s.maxY <= 360) && v310.stock[0].label?.text === '22' && v310.stock[1].label?.text === '11' && v310.stock[0].label.x < v310.stock[1].label.x,
-    JSON.stringify(v310.stock),
+    'v3.1.0 受攻撃ストックの中央配置：1P（予約29＋待機22＋相殺12）・2P（予約10＋待機11＋相殺3）とも中央エリア x264〜376・下端360以内。V320-FIX-06：数量数字は1P・2Pとも描かない（内部の待機は22・11）',
+    v310.stock.every((s) => s.minX >= 264 && s.maxX <= 376 && s.maxY <= 360 && s.label === undefined) && v310.pending.join() === '22,11',
+    JSON.stringify({ stock: v310.stock, pending: v310.pending }),
   );
   check(
     'V320-FIX-05 ピンチ警告：残り猶予に同期した「ピンチ X.X秒」を2Pの盤面上部（408,16,144,14）にだけ描画（大型3/2/1なし）',
@@ -1640,7 +1640,8 @@ try {
       await key('ArrowRight', 60);
     }
     check('役一覧：1役ずつ16役、役名ロゴは本体の表示名対応どおり（R01〜R16）', items === 'HelpMenuScene' && roles.map((r) => r.logos.join('+')).join() === [...Array(16).keys()].join(), JSON.stringify(roles.map((r) => [r.logos, r.clear, r.attack])));
-    check('役一覧の値は本体の役データ（V320-FIX-04 新式）：フォーカード消去1/基本攻撃1、フラッシュ3/2、スーパーストレート3/4、ストレートフラッシュ4/4', roles[0].clear === 1 && roles[0].attack === 1 && roles[12].clear === 3 && roles[12].attack === 2 && roles[6].clear === 3 && roles[6].attack === 4 && roles[13].attack === 4, JSON.stringify(roles.map((x) => [x.clear, x.attack])));
+    const roleWant = '2/2,2/2,2/2,3/3,4/5,4/5,4/5,2/1,2/1,3/2,3/2,2/2,3/2,4/4,5/5,6/8';
+    check('V320-FIX-06 役一覧の値は新しい数値表（消去/基本攻撃）：フォーカード2/2 … フラッシュ3/2、スーパーストレート4/5、ストレートフラッシュ4/4、スーパーストレートフラッシュ6/8（16役すべて）', roles.map((x) => `${x.clear}/${x.attack}`).join() === roleWant, JSON.stringify(roles.map((x) => [x.clear, x.attack])));
     await key('Escape', 150);
     const backToc = await sceneName();
     await key('Escape', 150);
@@ -1701,11 +1702,8 @@ try {
     await key('Enter', 200);
     const sr = await ev(() => {
       const sc = window.__p2like.scene();
-      // V320-FIX-04：読書区間（5000ms）の後に決定で送る
-      for (let i = 0; i < 60 * 240 && sc.stage.runner?.page !== 'streak_rate'; i++) {
-        sc.update(1000 / 60);
-        if (sc.stage.reading && sc.stage.gate.ms >= 5000 && sc.stage.reading.page !== 'streak_rate') sc.stage.confirm();
-      }
+      // V320-FIX-06：決定は使わず自動進行（実演の全処理完了＋最低表示時間）
+      for (let i = 0; i < 60 * 240 && sc.stage.runner?.page !== 'streak_rate'; i++) sc.update(1000 / 60);
       return { page: sc.stage.runner?.page };
     });
     await raf();
@@ -1743,10 +1741,7 @@ try {
     for (const want of ['streak', 'chain']) {
       const r = await ev((want) => {
         const sc = window.__p2like.scene();
-        for (let i = 0; i < 60 * 300 && sc.stage.focus?.kind !== want && !sc.stage.finished; i++) {
-          sc.update(1000 / 60);
-          if (sc.stage.reading && sc.stage.gate.ms >= 5000) sc.stage.confirm();
-        }
+        for (let i = 0; i < 60 * 300 && sc.stage.focus?.kind !== want && !sc.stage.finished; i++) sc.update(1000 / 60);
         const st = sc.stage;
         if (st.focus?.kind !== want) return { found: false };
         const c = document.createElement('canvas');
@@ -1799,9 +1794,7 @@ try {
           const r = sc.stage.runner;
           if (sc.__pages.at(-1) !== r.page) sc.__pages.push(r.page);
           if (want === 'choice' ? sc.choice !== null : r.page === want && !(want === 'm2_refresh' && r.game.phase !== 'countdown')) break;
-          sc.update(1000 / 60);
-          // V320-FIX-04：説明は5000ms読んだ後に決定で送る
-          if (sc.stage.reading && sc.stage.gate.ms >= 5000) sc.stage.confirm();
+          sc.update(1000 / 60); // V320-FIX-06：自動進行（決定は使わない）
         }
         const r = sc.stage.runner;
         const g = r.game;

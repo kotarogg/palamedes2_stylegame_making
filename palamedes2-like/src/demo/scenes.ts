@@ -322,10 +322,9 @@ export class HelpLessonScene implements Scene {
     if (this.choice !== null) return;
     this.stage.update(dtMs);
     if (!this.stage.finished) return;
-    if (this.i < this.makers.length - 1) {
-      this.app.bus.stopEffects();
-      this.stage = this.makers[++this.i](this.app);
-    } else this.choice = 0;
+    // V320-FIX-06：説明の移行を理由に効果音・ボイスを一律に止めない（既存の優先順位に任せる）。戻る・もう一度は従来どおり止める
+    if (this.i < this.makers.length - 1) this.stage = this.makers[++this.i](this.app);
+    else this.choice = 0;
   }
 
   render(ctx: CanvasRenderingContext2D, ms: number): void {

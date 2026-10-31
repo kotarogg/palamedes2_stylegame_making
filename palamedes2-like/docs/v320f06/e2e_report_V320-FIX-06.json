@@ -1,0 +1,49 @@
+{
+ "id": "V320-FIX-06",
+ "fontStandin": true,
+ "results": [
+  {
+   "name": "第2章 役一覧：フォーカード 2/2・フルカード 4/5・フラッシュ（4個の例）3/2・スーパーストレートフラッシュ 6/8 を本体の数値表から表示",
+   "pass": true,
+   "detail": "{\"0\":\"2/2\",\"4\":\"4/5\",\"12\":\"3/2\",\"15\":\"6/8\"}",
+   "kind": "natural-ui"
+  },
+  {
+   "name": "第2・3章 複合役：フォーカード＋オールマーク＝消去3／基本攻撃4（複合表）。成立光の位置＝宣言の採択位置、役名ロゴは数字役→属性役の2つ、代表ボイスは先頭ロゴ（R01）、実消去3ライン・基本攻撃4",
+   "pass": true,
+   "detail": "{\"result\":{\"nr\":\"four_card\",\"sr\":\"all_mark\",\"clear\":3,\"attack\":4,\"idx\":[0,1,2,3]},\"glow\":[0,1,2,3],\"logos\":[0,11],\"voice\":{\"logos\":[\"R01\",\"R12\"],\"file\":\"voice/voice_kotaro_role_01.wav\"},\"breakdown\":{\"base\":4,\"streakCount\":0,\"streakBonus\":0,\"chainBonus\":0,\"power\":4},\"lines\":3}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第8章 受ストック：1P・2Pとも数量数字なし（描画計画に数字がなく、旧数字の位置の画素は待機12と0で同一）。小アイコン・囲いは描画",
+   "pass": true,
+   "detail": "{\"keys\":[[\"entries\"],[\"entries\"]],\"diffIn\":[0,0],\"icons\":[9,9],\"frames\":[1,1]}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第8章 相殺の消失演出（XD顔・小爆発）は維持",
+   "pass": true,
+   "detail": "{\"counter\":[[\"counter\",5]],\"xd\":1,\"burst\":1}",
+   "kind": "direct-state"
+  },
+  {
+   "name": "第7章 遊び方：項目へ入った時点で説明と実演を自動開始（最初の移動は開始直後）。実演完了（移動3回＋待ち）後は最低表示時間の残りだけ待って次項目（列入れ替え）へ",
+   "pass": true,
+   "detail": "{\"log\":[{\"page\":\"basic_move\",\"start\":1,\"done\":115,\"min\":195,\"end\":196},{\"page\":\"rotate\",\"start\":196,\"done\":null,\"min\":263,\"end\":null}],\"first\":73,\"t0\":73}",
+   "kind": "natural-ui"
+  }
+ ],
+ "shots": [
+  "docs/v320f06/screens/V320F06_role_list_01_1x.png",
+  "docs/v320f06/screens/V320F06_role_list_05_1x.png",
+  "docs/v320f06/screens/V320F06_role_list_13_1x.png",
+  "docs/v320f06/screens/V320F06_role_list_16_1x.png",
+  "docs/v320f06/screens/V320F06_combo_fourcard_allmark_1x.png",
+  "docs/v320f06/screens/V320F06_stock_no_count_both_1x.png",
+  "docs/v320f06/screens/V320F06_stock_cancel_effect_1x.png",
+  "docs/v320f06/screens/V320F06_help_basic_start_1x.png",
+  "docs/v320f06/screens/V320F06_help_basic_done_1x.png",
+  "docs/v320f06/screens/V320F06_help_basic_next_1x.png"
+ ],
+ "errors": []
+}

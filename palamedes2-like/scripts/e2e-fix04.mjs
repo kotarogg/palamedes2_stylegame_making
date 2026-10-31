@@ -117,11 +117,11 @@ await ev(() => {
     const maxDiff = window.__f4.diffBox(mOff.c, mOn.c);
     // 差の出た画素が受ストック領域（列の外接＋待機数）に1つもないこと
     const plans = [0, 1].map((p) => v.stockDrawPlan(p, t + 20));
-    const regions = plans.map((pl) => {
+    // V320-FIX-06：受ストックの数量数字は削除。旧数字の位置（列の中央側20px）も領域に含めたまま検査する
+    const regions = plans.map((pl, p) => {
       const xs = pl.entries.flatMap((e) => [e.x, e.x + e.w]);
       const ys = pl.entries.flatMap((e) => [e.y, e.y + e.h]);
-      const lb = pl.label;
-      return { x0: Math.min(...xs, lb.align === 'left' ? lb.x + 20 : lb.x - 20) - 1, x1: Math.max(...xs, lb.align === 'left' ? lb.x + 20 : lb.x) + 1, y0: Math.min(...ys) - 1, y1: Math.max(...ys) + 1 };
+      return { x0: Math.min(...xs) - 1 - (p === 1 ? 21 : 0), x1: Math.max(...xs) + 1 + (p === 0 ? 21 : 0), y0: Math.min(...ys) - 1, y1: Math.max(...ys) + 1 };
     });
     const da = mOn.x.getImageData(0, 0, 640, 360).data;
     const db = mOff.x.getImageData(0, 0, 640, 360).data;
@@ -258,7 +258,7 @@ await ev(() => {
   check('第12章 CPU観戦：Esc で終了確認（ゲームは進行）→「終了する」で観戦設定へ', q.quit === 1 && q2 > q.tick && back === 'WatchSettingsScene', JSON.stringify({ q, q2, back }), 'natural-ui');
 }
 
-// ---- 5. 遊び方 MODE1 の説明（読書5000ms→決定で次へ）----
+// ---- 5. 遊び方 MODE1 の説明（V320-FIX-06：自動開始・自動進行。決定入力は使わない）----
 {
   const r = await ev(async () => {
     const app = window.__p2like.app;
@@ -268,22 +268,21 @@ await ev(() => {
     help.cursor = 4; // MODE1
     help.onNav({ key: 'confirm', source: { kind: 'keyboard' } });
     const sc = app.scene;
-    for (let i = 0; i < 200; i++) sc.update(1000 / 60);
+    sc.update(1000 / 60);
     const st = sc.stage;
-    const early = { prompt: st.gate.prompt(st.reading), page: st.reading?.page };
+    const start = { page: st.items.current?.page, min: st.items.current?.minTicks };
+    // 入場の決定の持ち越し・早押し：進行に使わない
     sc.onNav({ key: 'confirm', source: { kind: 'keyboard' }, repeat: false });
-    const afterEarly = st.reading?.page;
-    for (let i = 0; i < 120; i++) sc.update(1000 / 60);
+    for (let i = 0; i < 60; i++) sc.update(1000 / 60);
+    const afterConfirm = st.items.current?.page;
     const a = window.__f4.canvas();
     sc.render(a.x, 0);
-    const prompt = st.gate.prompt(st.reading);
-    sc.onNav({ key: 'confirm', source: { kind: 'keyboard' }, repeat: false });
-    sc.update(1000 / 60); // 次の説明の読書区間が始まる
-    const next = { page: st.reading?.page, panel: st.reading?.panel };
-    return { stage: st.constructor.name, early, afterEarly, prompt, next, png: a.c.toDataURL('image/png') };
+    for (let i = 0; i < 60 * 30 && st.items.log.length < 2; i++) sc.update(1000 / 60);
+    const [x0, x1] = st.items.log;
+    return { stage: st.constructor.name, start, afterConfirm, first: { page: x0.page, startTick: x0.startTick, doneTick: x0.doneTick, endTick: x0.endTick, minTicks: x0.minTicks }, next: x1?.page, png: a.c.toDataURL('image/png') };
   });
-  shots.push(save('V320F04_help_mode1_single_1x', r.png));
-  check('第13章 遊び方 MODE1：説明を5000ms読ませてから「決定で次へ」。早い決定は無視', r.early.page === 'm1_single' && r.early.prompt === null && r.afterEarly === 'm1_single' && r.prompt === '決定で次へ' && r.next.page === 'm1_endless', JSON.stringify({ early: r.early, prompt: r.prompt, next: r.next }), 'natural-ui');
+  shots.push(save('V320F06_help_mode1_single_auto_1x', r.png));
+  check('V320-FIX-06 第7章 遊び方 MODE1：入った時点で説明を自動開始、決定入力では送らない。文字だけの項目は最低表示時間（m1_single）で自動的に次（m1_endless）へ', r.start.page === 'm1_single' && r.afterConfirm === 'm1_single' && r.first.endTick - r.first.startTick === r.first.minTicks && r.first.doneTick === r.first.startTick && r.next === 'm1_endless', JSON.stringify({ start: r.start, first: r.first, next: r.next }), 'natural-ui');
 }
 
 // ---- 6. MODE2 結果（更新あり／ノーリセット）・7. 20面終了 ----
