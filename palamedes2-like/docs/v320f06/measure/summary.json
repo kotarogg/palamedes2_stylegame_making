@@ -25,6 +25,7 @@
   "capSec": 180,
   "note": "CPU同士の机上計測。人間の勝率・遊びやすさを示すものではない",
   "revision": "V320-FIX-06-R1",
+  "helpRevision": "V320-FIX-06-R2",
   "mode2Rerun": false,
   "pinchUnit": "プレイヤーごと：有効なピンチ猶予なし→あり＝開始、あり→両方なし＝復帰（敗北は含めない）"
  },

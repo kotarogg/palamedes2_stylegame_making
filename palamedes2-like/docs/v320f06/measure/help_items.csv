@@ -7,11 +7,11 @@ help:basic / demo:basic,5,adjacent_wrap,19,15650,15650,0,3383.33,203,19033.33,33
 help:basic / demo:basic,6,fail,44,19033.33,23533.33,4500,6500,390,25533.33,6500,2000,fail#1 > fail#2
 help:basic / demo:basic,7,rise,26,25533.33,27050,1516.67,4250,255,29783.33,4250,2733.33,rise#1
 help:streak#1 / demo:roles,1,role_ready,36,16.67,5333.33,5316.67,5500,330,5516.67,5500,183.33,role_ready#1 > role_ready#2
-help:streak#1 / demo:roles,2,declare,25,5516.67,10366.67,4850,4133.33,248,12966.67,7450,2600,declare#1 > line_clear#1
-help:streak#1 / demo:roles,3,streak,35,12966.67,16683.33,3716.67,5383.33,323,18350,5383.33,1666.67,streak#1 > streak#2
-help:streak#1 / demo:roles,4,streak_rate,27,18350,19916.67,1566.67,4383.33,263,22733.33,4383.33,2816.67,streak_rate#1
-help:streak#1 / demo:roles,5,flush,25,22733.33,27900,5166.67,4133.33,248,27900,5166.67,0,flush#1
-help:streak#1 / demo:roles,6,chain,33,27900,40133.33,12233.33,5133.33,308,40133.33,12233.33,0,chain#1 > chain3#1
+help:streak#1 / demo:roles,2,declare,25,5516.67,10366.67,4850,6883.33,413,12400,6883.33,2033.33,declare#1 > line_clear#1
+help:streak#1 / demo:roles,3,streak,35,12400,16116.67,3716.67,5383.33,323,17783.33,5383.33,1666.67,streak#1 > streak#2
+help:streak#1 / demo:roles,4,streak_rate,27,17783.33,19350,1566.67,4383.33,263,22166.67,4383.33,2816.67,streak_rate#1
+help:streak#1 / demo:roles,5,flush,25,22166.67,27333.33,5166.67,4133.33,248,27333.33,5166.67,0,flush#1
+help:streak#1 / demo:roles,6,chain,33,27333.33,39566.67,12233.33,7133.33,428,39566.67,12233.33,0,chain#1 > chain3#1
 help:streak#2,1,streak_crack,50,16.67,8083.33,8066.67,7250,435,8083.33,8066.67,0,streak_crack#1 > streak_crack#1 > streak_crack#2 > streak_crack#3
 help:mode1#1,1,m1_single,26,16.67,16.67,0,4250,255,4266.67,4250,4250,m1_single#1
 help:mode1#1,2,m1_endless,41,4266.67,4266.67,0,6133.33,368,10400,6133.33,6133.33,m1_endless#1 > m1_endless#2
@@ -21,14 +21,14 @@ help:mode1#2,1,m1_versus,36,16.67,16.67,0,5500,330,5516.67,5500,5500,m1_versus#1
 help:mode1#2,2,m1_counter,42,5516.67,5516.67,0,6250,375,11766.67,6250,6250,m1_counter#1 > m1_counter#2
 help:mode1#2,3,m1_win,40,11766.67,11766.67,0,6000,360,17766.67,6000,6000,m1_win#1 > m1_win#2
 help:mode1#3 / demo:pinch,1,limit,30,16.67,2666.67,2650,4750,285,4766.67,4750,2100,limit#1 > limit#2
-help:mode1#3 / demo:pinch,2,natural,28,4766.67,15433.33,10666.67,4500,270,18216.67,13450,2783.33,natural#1 > pinch#1 > avoid#1 > miss#1
-help:mode1#3 / demo:pinch,3,attack_pinch,26,18216.67,18216.67,0,4250,255,22466.67,4250,4250,attack_pinch#1
+help:mode1#3 / demo:pinch,2,natural,28,4766.67,15433.33,10666.67,14000,840,18766.67,14000,3333.33,natural#1 > pinch#1 > avoid#1 > miss#1
+help:mode1#3 / demo:pinch,3,attack_pinch,26,18766.67,18766.67,0,4250,255,23016.67,4250,4250,attack_pinch#1
 help:mode2,1,m2_intro,22,0,16.67,16.67,3750,225,3750,3750,3733.33,m2_intro#1
 help:mode2,2,m2_refresh,35,3750,7266.67,3516.67,5383.33,323,9133.33,5383.33,1866.67,m2_refresh#1 > m2_refresh#2
 help:mode2,3,m2_suit,22,9133.33,9666.67,533.33,3750,225,12883.33,3750,3216.67,m2_suit#1
 help:mode2,4,m2_number,16,12883.33,13483.33,600,3000,180,15883.33,3000,2400,m2_number#1
 help:mode2,5,m2_adjacent,19,15883.33,16483.33,600,3383.33,203,19266.67,3383.33,2783.33,m2_adjacent#1
 help:mode2,6,m2_rule,16,19266.67,19283.33,16.67,3000,180,22266.67,3000,2983.33,m2_rule#1
-help:mode2,7,m2_difference,21,22266.67,45933.33,23666.67,3633.33,218,48300,26033.33,2366.67,m2_difference#1 > m2_clear#1
-help:mode2,8,m2_versus,16,48300,48316.67,16.67,3000,180,51300,3000,2983.33,m2_versus#1
-help:mode2,9,m2_versus_refresh,25,51300,51316.67,16.67,4133.33,248,55433.33,4133.33,4116.67,m2_versus_refresh#1
+help:mode2,7,m2_difference,21,22266.67,45933.33,23666.67,6000,360,45933.33,23666.67,0,m2_difference#1 > m2_clear#1
+help:mode2,8,m2_versus,16,45933.33,45950,16.67,3000,180,48933.33,3000,2983.33,m2_versus#1
+help:mode2,9,m2_versus_refresh,25,48933.33,48950,16.67,4133.33,248,53066.67,4133.33,4116.67,m2_versus_refresh#1

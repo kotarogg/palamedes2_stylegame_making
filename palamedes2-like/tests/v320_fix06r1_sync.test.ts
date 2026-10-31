@@ -2,8 +2,9 @@
 import { describe, expect, it } from 'vitest';
 import { AudioBus } from '../src/audio/audioBus';
 import type { GameEvent } from '../src/core/game';
-import { LESSON_BASIC, LESSON_CRACK, LESSON_PINCH, LessonRunner, minDisplayTicks, pageText, rolesLesson, type LessonDef } from '../src/demo/lesson';
+import { HELP_TIMING, LESSON_BASIC, LESSON_CRACK, LESSON_PINCH, LessonRunner, minDisplayTicks, pageText, rolesLesson, type LessonDef } from '../src/demo/lesson';
 import { LessonStage } from '../src/demo/stages';
+import { Mode2LessonRunner } from '../src/demo/mode2Lesson';
 import { fakeAssets } from './helpers';
 
 const run = (def: LessonDef) => {
@@ -43,8 +44,9 @@ describe('実演のある頁は実イベントで説明を切り替える', () =
     expect(evTicks.some((e) => e.type === 'roleEnd' && e.gameTick === end.tick)).toBe(true);
     // 独立した「ライン消去」の項目は無い（後追いの項目を作らない）
     expect(r.items.log.map((x) => x.page)).not.toContain('line_clear');
-    // 後から切り替えた説明も、その頁の最低表示時間は表示する
-    expect(shownEnd - lc.startTick).toBeGreaterThanOrEqual(minDisplayTicks('line_clear'));
+    // V320-FIX-06-R2：最低表示時間は項目開始時に確定（宣言＋ライン消去の本文の文字数）。切替後に数え直さず、移行＝max（開始＋最低, 実演完了）
+    expect(decl.minTicks).toBe(minDisplayTicks('declare', 60, ['line_clear']));
+    expect(shownEnd).toBe(Math.max(decl.startTick + decl.minTicks, decl.doneTick!));
   });
 
   it('3連鎖：役連鎖の項目内で、3回目の宣言（役連鎖3）と同じ tick に「3連鎖達成」へ', () => {
@@ -122,5 +124,88 @@ describe('画面のパネル（役処理中の表示）', () => {
     }
     expect(beforeClear).toEqual(['消去２ライン']);
     expect(afterClear).toEqual([...pageText('line_clear').panels[0], '消去２ライン']);
+  });
+});
+
+describe('V320-FIX-06-R2 最低表示時間は項目開始から（切替で数え直さない）', () => {
+  const BOARD = [
+    ['2♠', '5♥', '4♦', '1♣', '6♠', '3♦'],
+    ['6♥', '3♣', '5♠', '2♦', '4♥', '1♠'],
+    ['3♦', '2♠', '1♥', '5♣', '2♣', '6♦'],
+  ];
+
+  it('全教材：すべての項目の移行時刻＝max（項目開始＋開始時に確定した最低表示時間, 実演の全処理完了）。最低時間は統合した本文の文字数で計算', () => {
+    for (const def of [LESSON_BASIC, rolesLesson(), LESSON_CRACK, LESSON_PINCH]) {
+      const r = run(def);
+      for (const x of r.items.log) {
+        const pages = [...new Set(x.segments.map((sg) => sg.page).filter((p) => p !== x.page))];
+        expect(x.minTicks, `${def.id}:${x.page}`).toBe(minDisplayTicks(x.page, 60, pages));
+        expect(x.endTick, `${def.id}:${x.page}`).toBe(Math.max(x.startTick + x.minTicks, x.doneTick!));
+      }
+    }
+  });
+
+  it('再現例（宣言の項目：開始331・実演完了622）：最低表示は統合した本文（宣言25字＋ライン消去22字）で開始時に413tick と確定し、移行は max（331＋413, 622）＝744（R1 の 778 から再計測分を除去）', () => {
+    const r = run(rolesLesson());
+    const d = item(r, 'declare');
+    expect([d.startTick, d.doneTick, d.minTicks]).toEqual([331, 622, 413]);
+    expect(d.endTick).toBe(744);
+    // 切替（ライン消去）以後に期限を追加していない：切替の時点で残る期限は開始時の値だけ
+    const lc = d.segments.find((sg) => sg.page === 'line_clear')!;
+    expect(d.endTick! - lc.startTick).toBeLessThan(minDisplayTicks('line_clear'));
+  });
+
+  it('統合本文を含めた最低時間を実演が超える項目は、実演完了の tick で移行（例：役連鎖・ピンチ・MODE2 以外の教材すべてを上の一般則で確認）', () => {
+    const r = run(rolesLesson());
+    const ch = item(r, 'chain');
+    expect(ch.doneTick! - ch.startTick).toBeGreaterThan(ch.minTicks);
+    expect(ch.endTick).toBe(ch.doneTick);
+  });
+
+  it('説明が遅い時点で切り替わる場合：最低時間の経過後に別の説明へ切り替わっても、完了直後に移行し時間を再計測しない', () => {
+    HELP_TIMING.perPageMs.fail = 1000; // 項目の最低時間を短くし、切替（失敗の到達・約2.5秒後）を最低時間の後にする
+    try {
+      const r = run({
+        id: 'basic',
+        base: '2♠',
+        rows: BOARD,
+        naturalRise: false,
+        ops: [
+          { op: 'page', page: 'fail', steps: [{ on: 'arrive', match: (e) => e.success === false, page: 'rise' }] },
+          { op: 'move', col: 2 },
+          { op: 'wait', ms: 2000 },
+          { op: 'act', action: 'launch' },
+          { op: 'until', event: 'arrive', maxMs: 1000 },
+          { op: 'page', page: 'success1' },
+          { op: 'end' },
+        ],
+      });
+      const x = item(r, 'fail');
+      const late = x.segments.find((sg) => sg.page === 'rise')!;
+      expect(x.minTicks).toBe(60);
+      expect(late.startTick - x.startTick).toBeGreaterThan(x.minTicks); // 切替は最低時間の後
+      expect(x.endTick).toBe(x.doneTick); // 帰還完了の直後に移行
+      expect(x.endTick! - late.startTick).toBeLessThan(minDisplayTicks('rise')); // 切替後の説明に別の期限を足していない
+    } finally {
+      delete HELP_TIMING.perPageMs.fail;
+    }
+  });
+
+  it('MODE2 説明も同じ規則（クリアの説明を統合した項目を含む）', () => {
+    const m = new Mode2LessonRunner();
+    for (let i = 0; i < 60 * 600 && !m.done; i++) m.tick();
+    expect(m.done).toBe(true);
+    for (const x of m.items.log) {
+      const pages = [...new Set(x.segments.map((sg) => sg.page).filter((p) => p !== x.page))];
+      expect(x.minTicks, x.page).toBe(minDisplayTicks(x.page, 60, pages));
+      expect(x.endTick, x.page).toBe(Math.max(x.startTick + x.minTicks, x.doneTick!));
+    }
+  });
+
+  it('実演が最低時間より早く終わる項目は、項目開始＋最低時間で移行（切替の有無に関係なく同じ期限）', () => {
+    const r = run(rolesLesson());
+    const ch = item(r, 'role_ready');
+    expect(ch.segments.length).toBe(2);
+    expect(ch.endTick).toBe(Math.max(ch.startTick + ch.minTicks, ch.doneTick!));
   });
 });

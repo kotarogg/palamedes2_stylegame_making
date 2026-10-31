@@ -253,9 +253,12 @@ it('V320-FIX-06 計測', () => {
     note: 'CPU同士の机上計測。人間の勝率・遊びやすさを示すものではない',
   };
 
-  const m1 = LEVELS.flatMap((lv) => PAIRS.flatMap((pr) => SEEDS.map((s) => mode1(lv, pr, s))));
-  writeFileSync(new URL('mode1_rounds.csv', OUT), csv(m1));
-  const m1sum = Object.fromEntries(
+  // V320-FIX-06-R2：MEASURE_HELP_ONLY=1 で説明項目の時刻だけを再生成（MODE1・MODE2 は再実行せず、既存の CSV・集計を残す）
+  const helpOnly = process.env.MEASURE_HELP_ONLY === '1';
+  const prev0 = existsSync(new URL('summary.json', OUT)) ? JSON.parse(readFileSync(new URL('summary.json', OUT), 'utf8')) : {};
+  const m1 = helpOnly ? [] : LEVELS.flatMap((lv) => PAIRS.flatMap((pr) => SEEDS.map((s) => mode1(lv, pr, s))));
+  if (!helpOnly) writeFileSync(new URL('mode1_rounds.csv', OUT), csv(m1));
+  const m1sum = helpOnly ? prev0.mode1 : Object.fromEntries(
     LEVELS.map((lv) => {
       const rows = m1.filter((r) => r.level === lv);
       const done = rows.filter((r) => r.decided);
@@ -290,7 +293,7 @@ it('V320-FIX-06 計測', () => {
   );
 
   const prev = existsSync(new URL('summary.json', OUT)) ? JSON.parse(readFileSync(new URL('summary.json', OUT), 'utf8')) : {};
-  const runM2 = process.env.MEASURE_MODE2 === '1' || !prev.mode2;
+  const runM2 = !helpOnly && (process.env.MEASURE_MODE2 === '1' || !prev.mode2);
   const m2 = runM2 ? LEVELS.flatMap((lv) => CHARS.flatMap((ch) => SEEDS.map((s) => mode2(lv, ch, s)))) : [];
   if (runM2) writeFileSync(new URL('mode2_runs.csv', OUT), csv(m2));
   const m2sum = !runM2 ? prev.mode2 : Object.fromEntries(
@@ -340,7 +343,7 @@ it('V320-FIX-06 計測', () => {
 
   writeFileSync(
     new URL('summary.json', OUT),
-    JSON.stringify({ meta: { ...meta, revision: 'V320-FIX-06-R1', mode2Rerun: runM2, pinchUnit: 'プレイヤーごと：有効なピンチ猶予なし→あり＝開始、あり→両方なし＝復帰（敗北は含めない）' }, mode1: m1sum, mode2: m2sum }, null, 1),
+    JSON.stringify({ meta: { ...meta, revision: helpOnly ? (prev0.meta?.revision ?? 'V320-FIX-06-R1') : 'V320-FIX-06-R1', helpRevision: 'V320-FIX-06-R2', mode2Rerun: runM2, pinchUnit: 'プレイヤーごと：有効なピンチ猶予なし→あり＝開始、あり→両方なし＝復帰（敗北は含めない）' }, mode1: m1sum, mode2: m2sum }, null, 1),
   );
-  console.log(JSON.stringify({ mode1: Object.fromEntries(Object.entries(m1sum).map(([k, v]) => [k, { decided: v.decided, undecided: v.undecided, pinch: v.pinchTotals, aux: v.aux }])) }, null, 1));
+  console.log(helpOnly ? `help only: ${help.length} items, ${segs.length} segments` : JSON.stringify(m1sum).slice(0, 400));
 });

@@ -130,7 +130,9 @@ export class ItemClock {
 
   begin(page: PageKey, steps: readonly TextStep[] = [], gameTick = 0): void {
     this.close();
-    const minTicks = minDisplayTicks(page, this.tickRate);
+    // V320-FIX-06-R2：最低表示時間は項目開始時に確定する。項目内で切り替える別の頁の本文も文字数に含める（途中で別の期限を追加しない）
+    const also = steps.map((st) => st.page).filter((x): x is PageKey => !!x);
+    const minTicks = minDisplayTicks(page, this.tickRate, also);
     this.steps = steps;
     this.stepIndex = 0;
     this.stepHits = 0;
@@ -207,15 +209,12 @@ export class ItemClock {
   }
 
   /**
-   * 最低表示時間の経過：項目開始から項目の頁の最低時間、かつ項目内で別の頁の説明へ切り替えた場合は
-   * 最後に切り替えた説明の表示開始からその頁の最低時間（R1：後から切り替えた説明も読めるようにする。実演の途中では止めない）
+   * 最低表示時間の経過（V320-FIX-06-R2）：項目開始から、開始時に確定した最低表示時間だけを数える。
+   * 項目内の説明の切替では数え直さない。移行時刻＝max（項目開始＋最低表示時間, 実演の全処理完了）
    */
   get minElapsed(): boolean {
     const c = this.current;
-    if (!c) return true;
-    if (this.elapsed < c.minTicks) return false;
-    const last = [...c.segments].reverse().find((s) => s.page !== c.page);
-    return !last || this.clock - last.startTick >= minDisplayTicks(last.page, this.tickRate);
+    return !c || this.elapsed >= c.minTicks;
   }
 
   /** 項目を閉じる（次の項目へ・終了） */
