@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist-measure/
 release/
 test-results/
 *.log

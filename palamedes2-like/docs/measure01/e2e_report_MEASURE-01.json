@@ -1,0 +1,104 @@
+{
+ "id": "V320-MEASURE-01",
+ "simulatedPad": true,
+ "fontStandin": true,
+ "results": [
+  {
+   "name": "計測用ビルド：記録器あり・未計測・打上硬直の初期選択B・タイトルに計測用の表記・ビルドにコミット",
+   "pass": true,
+   "detail": "{\"title\":\"コタローくんパズル（計測用テストビルド V320-MEASURE-01）\",\"measure\":true,\"state\":\"idle\",\"profile\":\"B\",\"build\":{\"mode\":\"measure\",\"commit\":\"028ddb7084527646c6f31be5b95c17441165cbbd\",\"builtAt\":\"2026-10-31T16:01:25.375Z\"}}"
+  },
+  {
+   "name": "メインメニューに「計測（テスト）」：パッドで開ける。開始前設定（打上硬直B：200＋50ms・15tick）を確認できる",
+   "pass": true,
+   "detail": "{\"name\":\"MeasureMenuScene\",\"rows\":[\"打上硬直設定:B：200＋50ms（15tick）\",\"入力表示:表示\",\"時刻表示（録画照合用）:表示\",\"計測を開始:\",\"記録を保存:\",\"記録を初期化:\",\"戻る:\"]}"
+  },
+  {
+   "name": "打上硬直設定を左右で A／B に切り替えられる（初期B）",
+   "pass": true,
+   "detail": "A→B"
+  },
+  {
+   "name": "開始した試合へ B を適用：飛行12tick・列詰め3tick（設定 200／50ms）",
+   "pass": true,
+   "detail": "{\"launch\":12,\"pack\":3,\"cfg\":[200,50],\"profile\":\"B\"}"
+  },
+  {
+   "name": "プレイ中：START の確認画面に「計測開始」（続ける／計測開始／終了する）。パッドで選んで計測開始、確認は閉じる",
+   "pass": true,
+   "detail": "{\"dlg\":{\"quit\":1,\"choices\":[\"続ける\",\"計測開始\",\"終了する\"]},\"started\":{\"state\":\"recording\",\"quit\":0,\"sid\":\"M01-20261031-160146-b412\"}}"
+  },
+  {
+   "name": "確認画面の「計測停止」で停止（記録は保持・未保存）。ラウンドをまたいで記録",
+   "pass": true,
+   "detail": "{\"dlg2\":[\"続ける\",\"計測停止\",\"終了する\"],\"stopped\":{\"state\":\"stopped\",\"count\":184,\"unsaved\":true,\"round\":2}}"
+  },
+  {
+   "name": "メニューへ戻っても記録は消えない。「記録を保存」でローカルへダウンロード（ファイル名にセッションID）、保存後も記録を保持",
+   "pass": true,
+   "detail": "{\"kept\":184,\"name\":\"kotaro_measure_M01-20261031-160146-b412.json\",\"savedState\":{\"saved\":true,\"unsaved\":false,\"count\":184}}"
+  },
+  {
+   "name": "保存ファイル：形式・形式バージョン・ビルド（mode・コミット）・セッション・設定（A／Bの ms と tick）を含み、記録の連番・時刻が単調",
+   "pass": true,
+   "detail": "{\"header\":{\"format\":\"kotaro-puzzle-measure\",\"formatVersion\":1,\"workId\":\"V320-MEASURE-01\",\"app\":{\"version\":\"3.2.0\",\"base\":\"V320-FIX-06-R2\",\"baseCommit\":\"028ddb7084527646c6f31be5b95c17441165cbbd\"},\"build\":{\"mode\":\"measure\",\"commit\":\"028ddb7084527646c6f31be5b95c17441165cbbd\",\"builtAt\":\"2026-10-31T16:01:25.375Z\"},\"session\":{\"id\":\"M01-20261031-160146-b412\",\"segments\":[{\"start\":0,\"stop\":9133.3}],\"records\":184,\"state\":\"stopped\",\"limitStopped\":false},\"timeBase\":\"t＝セッション開始からの経過ms（performance.now 基準）。k＝ラウンド内ゲームtick（60tick/秒）。s＝全記録の連番（順序の正）。f＝描画フレーム連番\",\"savedFrom\":\"menu\"},\"n\":184}"
+  },
+  {
+   "name": "ラウンド変更：roundStart が2回以上、ラウンドが変わって k が戻っても s・t で全体の順序を保持",
+   "pass": true,
+   "detail": "{\"rounds\":[1,2]}"
+  },
+  {
+   "name": "押しっぱなしを連打と誤計測しない：A の押下（padBtn）と発射コマンドの新規件数が対応、左の押しっぱなしは新規1・反復複数（rep＝1）",
+   "pass": true,
+   "detail": "{\"launchPress\":10,\"launchCmds\":9,\"leftNew\":1,\"leftRep\":5}"
+  },
+  {
+   "name": "入力の追跡：パッドのコマンドID と結果（execute／reject・理由）が対応付く",
+   "pass": true,
+   "detail": "[\"execute:\",\"lock:launch\",\"lock:pack\",\"reject:launch\",\"reject:emptyColumn\",\"reject:edge\"]"
+  },
+  {
+   "name": "ゲームへ渡さなかった入力も理由付き（確認画面中・結果表示中・開始前待機）",
+   "pass": true,
+   "detail": "[\"dialog\"]"
+  },
+  {
+   "name": "パッド：識別情報・mapping、スティックの生値（0.3→0.9→0）と方向判定（0.5 閾値で→と中立）、接続／切断を記録",
+   "pass": true,
+   "detail": "{\"info\":1,\"axis\":[0,0,0,0,0.3,0.9,0],\"dir\":[1,0],\"conn\":2}"
+  },
+  {
+   "name": "フォーカス喪失・復帰を記録（記録は破損しない）",
+   "pass": true,
+   "detail": "[\"blur\",\"focus\"]"
+  },
+  {
+   "name": "盤面・状態：ラウンド開始の全体（設定・tick換算・盤面）、状態の差分、ゲームイベント（移動・発射・到達など）",
+   "pass": true,
+   "detail": "{\"st\":49,\"snaps\":2,\"evs\":[\"launch\",\"arrive\",\"move\",\"roundEnd\"]}"
+  },
+  {
+   "name": "試合の記録：モード・キャラクター・seed・難易度・適用した設定（B）",
+   "pass": true,
+   "detail": "{\"why\":\"measureStart\",\"mode\":\"mode1\",\"kind\":\"cpu\",\"characters\":[\"kotaro\",\"akane\"],\"devices\":[{\"kind\":\"gamepad\",\"index\":0},{\"kind\":\"cpu\",\"level\":\"easy\"}],\"humans\":[0],\"difficulty\":\"normal\",\"firstTo\":2,\"seed\":3660529686,\"profile\":\"B\",\"profileReport\":{\"id\":\"B\",\"label\":\"B 250ms試験用（飛行200ms＋列詰め50ms）\",\"launchMs\":200,\"packMs\":50,\"launchTicks\":12,\"packTicks\":3,\"successLockTicks\":15,\"successLockMs\":250,\"bounceMs\":120,\"arcMs\":260,\"descendMs\":1600,\"moveBufferTicks\":2,\"failTotalMs\":2180,\"failTotalTicks\":131}}"
+  },
+  {
+   "name": "未保存の状態で初期化すると確認を表示（やめる＝保持、初期化する＝消去して未計測）",
+   "pass": true,
+   "detail": "{\"unsavedBefore\":true,\"dialog\":0,\"kept\":186,\"after\":0,\"state\":\"idle\"}"
+  },
+  {
+   "name": "通常ビルド：記録器なし（app.measure＝null）・計測の表記なし",
+   "pass": true,
+   "detail": "{\"measure\":false,\"appMeasure\":null,\"title\":\"コタローくんパズル\"}"
+  }
+ ],
+ "shots": [
+  "docs/measure01/screens/M01_measure_menu.png",
+  "docs/measure01/screens/M01_pause_dialog_start.png",
+  "docs/measure01/screens/M01_playing_overlay.png",
+  "docs/measure01/screens/M01_measure_menu_stopped.png"
+ ],
+ "errors": []
+}

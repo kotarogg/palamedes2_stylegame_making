@@ -1,0 +1,441 @@
+{
+ "format": "kotaro-puzzle-measure-analysis",
+ "version": 1,
+ "source": {
+  "session": "M01-20261031-160146-b412",
+  "records": 184,
+  "formatVersion": 1,
+  "profile": "B"
+ },
+ "notes": [
+  "判断の正誤・最善手率は採点しない（要件10）",
+  "ゲーム内時間は tick 換算。入力の間隔・押下時間は t（取得時の観測時刻。約1フレームの精度）。物理的な押下時刻ではない",
+  "非表示・フォーカス喪失の区間、計測停止〜再開の区間に掛かる間隔は除外（excluded に件数）",
+  "「役が成立していた時間」は成立（roleAvailable）から宣言までの時間で、プレイヤーが認識した時刻ではない"
+ ],
+ "excluded": {
+  "hidden": 3,
+  "segmentGap": 0
+ },
+ "hiddenIntervals": [
+  [
+   2824.3,
+   2824.5
+  ]
+ ],
+ "commands": {
+  "human": {
+   "n": 17,
+   "accepted": 8,
+   "reserved": 0,
+   "discarded": 9,
+   "rate": {
+    "accepted": 47.1,
+    "reserved": 0,
+    "discarded": 52.9
+   },
+   "byOutcome": {
+    "executed": 8,
+    "rejected": 8,
+    "dropped": 1
+   },
+   "byReason": {
+    "rejected:launch": 3,
+    "rejected:emptyColumn": 1,
+    "rejected:edge": 4,
+    "dropped:dialog": 1
+   }
+  },
+  "byAction": {
+   "launch": {
+    "n": 9,
+    "accepted": 5,
+    "reserved": 0,
+    "discarded": 4,
+    "rate": {
+     "accepted": 55.6,
+     "reserved": 0,
+     "discarded": 44.4
+    },
+    "byOutcome": {
+     "executed": 5,
+     "rejected": 4
+    },
+    "byReason": {
+     "rejected:launch": 3,
+     "rejected:emptyColumn": 1
+    }
+   },
+   "left": {
+    "n": 6,
+    "accepted": 2,
+    "reserved": 0,
+    "discarded": 4,
+    "rate": {
+     "accepted": 33.3,
+     "reserved": 0,
+     "discarded": 66.7
+    },
+    "byOutcome": {
+     "executed": 2,
+     "rejected": 4
+    },
+    "byReason": {
+     "rejected:edge": 4
+    }
+   },
+   "right": {
+    "n": 2,
+    "accepted": 1,
+    "reserved": 0,
+    "discarded": 1,
+    "rate": {
+     "accepted": 50,
+     "reserved": 0,
+     "discarded": 50
+    },
+    "byOutcome": {
+     "executed": 1,
+     "dropped": 1
+    },
+    "byReason": {
+     "dropped:dialog": 1
+    }
+   }
+  },
+  "cpu": {
+   "n": 5,
+   "accepted": 5,
+   "reserved": 0,
+   "discarded": 0,
+   "rate": {
+    "accepted": 100,
+    "reserved": 0,
+    "discarded": 0
+   },
+   "byOutcome": {
+    "executed": 5
+   },
+   "byReason": {}
+  },
+  "unattributedTrace": {}
+ },
+ "newPressIntervalMs": {
+  "n": 10,
+  "median": 133.4,
+  "mean": 305,
+  "min": 116.70000000000073,
+  "max": 916.6999999999999,
+  "p10": 131.6,
+  "p90": 826.6,
+  "hist": {
+   "100-150": 6,
+   "250-300": 2,
+   "800-850": 1,
+   "900-950": 1
+  },
+  "raw": [
+   250,
+   133.3,
+   133.3,
+   133.4,
+   133.3,
+   916.7,
+   816.6,
+   133.3,
+   116.7,
+   283.3
+  ]
+ },
+ "newPressIntervalSameActionMs": {
+  "launch": {
+   "n": 7,
+   "median": 133.3,
+   "mean": 147.6,
+   "min": 116.70000000000073,
+   "max": 250,
+   "p10": 126.7,
+   "p90": 180,
+   "hist": {
+    "100-150": 6,
+    "250-300": 1
+   },
+   "raw": [
+    250,
+    133.3,
+    133.3,
+    133.4,
+    133.3,
+    133.3,
+    116.7
+   ]
+  },
+  "left": {
+   "n": 0,
+   "median": null,
+   "mean": null,
+   "min": null,
+   "max": null,
+   "p10": null,
+   "p90": null,
+   "hist": {},
+   "raw": []
+  },
+  "right": {
+   "n": 0,
+   "median": null,
+   "mean": null,
+   "min": null,
+   "max": null,
+   "p10": null,
+   "p90": null,
+   "hist": {},
+   "raw": []
+  }
+ },
+ "repeatIntervalSameActionMs": {
+  "left": {
+   "n": 5,
+   "median": 116.6,
+   "mean": 136.7,
+   "min": 100,
+   "max": 250,
+   "p10": 100,
+   "p90": 196.7,
+   "hist": {
+    "100-125": 4,
+    "250-275": 1
+   },
+   "raw": [
+    250,
+    116.6,
+    100,
+    116.7,
+    100
+   ]
+  }
+ },
+ "holdMs": {
+  "pad": {
+   "b0": {
+    "n": 9,
+    "median": 66.7,
+    "mean": 160.9,
+    "min": 66.39999999999964,
+    "max": 899.8000000000001,
+    "p10": 66.6,
+    "p90": 245.6,
+    "hist": {
+     "50-100": 8,
+     "850-900": 1
+    },
+    "raw": [
+     82,
+     66.7,
+     66.8,
+     66.6,
+     66.7,
+     899.8,
+     66.4,
+     66.8,
+     66.7
+    ]
+   },
+   "b14": {
+    "n": 1,
+    "median": 699.8,
+    "mean": 699.8,
+    "min": 699.8,
+    "max": 699.8,
+    "p10": 699.8,
+    "p90": 699.8,
+    "hist": {
+     "650-700": 1
+    },
+    "raw": [
+     699.8
+    ]
+   },
+   "b9": {
+    "n": 1,
+    "median": 83.4,
+    "mean": 83.4,
+    "min": 83.39999999999964,
+    "max": 83.39999999999964,
+    "p10": 83.4,
+    "p90": 83.4,
+    "hist": {
+     "50-100": 1
+    },
+    "raw": [
+     83.4
+    ]
+   },
+   "b15": {
+    "n": 1,
+    "median": 83.4,
+    "mean": 83.4,
+    "min": 83.39999999999964,
+    "max": 83.39999999999964,
+    "p10": 83.4,
+    "p90": 83.4,
+    "hist": {
+     "50-100": 1
+    },
+    "raw": [
+     83.4
+    ]
+   }
+  },
+  "keyboard": {}
+ },
+ "timeByStateMs": {
+  "0": {
+   "operable": 4483.3,
+   "launch": 1000,
+   "pack": 250,
+   "moving": 250
+  }
+ },
+ "operableToNextExecuteMs": {
+  "n": 5,
+  "median": 483.3,
+  "mean": 846.7,
+  "min": 16.666666666666668,
+  "max": 2633.3333333333335,
+  "p10": 76.7,
+  "p90": 1953.3,
+  "hist": {
+   "0-50": 1,
+   "150-200": 1,
+   "450-500": 1,
+   "900-950": 1,
+   "2600-2650": 1
+  },
+  "raw": [
+   16.7,
+   933.3,
+   166.7,
+   483.3,
+   2633.3
+  ]
+ },
+ "launch": {
+  "human": {
+   "arrive": 5,
+   "success": 5,
+   "fail": 0,
+   "successRate": 100
+  },
+  "cpu": {
+   "arrive": 4,
+   "success": 4,
+   "fail": 0,
+   "successRate": 100
+  }
+ },
+ "streakCut": {
+  "reserved": 0,
+  "ended": 0,
+  "endedLength": {
+   "n": 0,
+   "median": null,
+   "mean": null,
+   "min": null,
+   "max": null,
+   "p10": null,
+   "p90": null,
+   "hist": {},
+   "raw": []
+  }
+ },
+ "declare": {
+  "count": 0,
+  "intervalMs": {
+   "n": 0,
+   "median": null,
+   "mean": null,
+   "min": null,
+   "max": null,
+   "p10": null,
+   "p90": null,
+   "hist": {},
+   "raw": []
+  },
+  "roleReadyToDeclareMs": {
+   "n": 0,
+   "median": null,
+   "mean": null,
+   "min": null,
+   "max": null,
+   "p10": null,
+   "p90": null,
+   "hist": {},
+   "raw": []
+  },
+  "fails": 0
+ },
+ "chain": {
+  "declares": 0,
+  "continued": 0,
+  "continuationRate": null
+ },
+ "pinch": {
+  "start": 0,
+  "recovered": 0,
+  "defeated": 0,
+  "endOther": 0,
+  "recoveryRate": null
+ },
+ "rounds": [
+  {
+   "m": 1,
+   "r": 1,
+   "startedMidRound": true,
+   "playStartTick": 72,
+   "endTick": 348,
+   "playMs": 2850,
+   "winner": 0,
+   "outcome": "win",
+   "humans": [
+    0
+   ]
+  },
+  {
+   "m": 1,
+   "r": 2,
+   "startedMidRound": false,
+   "playStartTick": 72,
+   "endTick": null,
+   "playMs": null,
+   "winner": null,
+   "outcome": null,
+   "humans": [
+    0
+   ]
+  }
+ ],
+ "matches": [
+  {
+   "m": 1,
+   "mode": "mode1",
+   "kind": "cpu",
+   "difficulty": "normal",
+   "characters": [
+    "kotaro",
+    "akane"
+   ],
+   "profile": "B",
+   "humans": [
+    0
+   ],
+   "finished": false,
+   "wins": [
+    1,
+    0
+   ],
+   "rounds": 2,
+   "timeMs": null
+  }
+ ]
+}

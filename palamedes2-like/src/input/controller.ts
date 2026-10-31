@@ -185,6 +185,11 @@ export class KeyboardController implements Controller {
     this.queue = [];
   }
 
+  /** V320-MEASURE-01 観測用：まだゲームへ渡していないコマンド（読むだけ。キューは変えない） */
+  get queued(): readonly Command[] {
+    return this.queue.map((q) => q.cmd);
+  }
+
   reset(): void {
     this.queue = [];
   }

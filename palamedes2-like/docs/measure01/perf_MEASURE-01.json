@@ -1,0 +1,33 @@
+{
+ "id": "V320-MEASURE-01",
+ "env": {
+  "node": "v22.22.0",
+  "platform": "linux",
+  "arch": "x64",
+  "cpus": "Intel(R) Xeon(R) Processor @ 2.10GHz x4"
+ },
+ "gameMinutes": 20,
+ "ticks": 72000,
+ "note": "ロジック（Match・CPU）＋記録器のみ。描画・音声・ブラウザは含まない。入力は乱数（人の代わり、約3.6操作/秒）",
+ "off": {
+  "ms": 181,
+  "perTickUs": 2.5,
+  "matches": 40,
+  "rounds": 41
+ },
+ "on": {
+  "ms": 1834,
+  "perTickUs": 25.5,
+  "matches": 40,
+  "rounds": 41,
+  "records": 37116,
+  "chars": 6211931,
+  "fileBytes": 6214310,
+  "exportMs": 13,
+  "heapDeltaMB": 9.1
+ },
+ "overheadPerTickUs": 23,
+ "recordsPerMinute": 1856,
+ "bytesPerMinute": 310716,
+ "limitRatio": 0.124
+}

@@ -128,11 +128,10 @@ export function drawOptionPanel(ctx: CanvasRenderingContext2D, assets: Assets, t
 }
 
 /** 確認ダイアログ（dialog_panel 288×112） */
-export function drawConfirm(ctx: CanvasRenderingContext2D, assets: Assets, title: string, choices: readonly string[], cursor: number, x = 176, y = 124, sub = ''): void {
+export function drawConfirm(ctx: CanvasRenderingContext2D, assets: Assets, title: string, choices: readonly string[], cursor: number, x = 176, y = 124, sub = '', w = 112): void {
   part(ctx, assets, 'dialog_panel', x, y);
   drawText(ctx, title, x + 144, y + 16, { align: 'center', size: 14, weight: 700, maxWidth: 264 });
   if (sub) drawText(ctx, sub, x + 144, y + 40, { align: 'center', size: 10, color: TEXT_COLORS.secondary, maxWidth: 264 });
-  const w = 112;
   choices.forEach((c, i) => {
     const cx = Math.round(x + 144 + (i - (choices.length - 1) / 2) * (w + 16));
     const sel = i === cursor;

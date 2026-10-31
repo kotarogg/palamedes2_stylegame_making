@@ -63,6 +63,11 @@ import { drawBitmapText, TUTORIAL_COLORS } from './view/bitmapFont';
 import { TUTORIAL_SCRIPT } from './demo/lesson';
 import { DEMO } from './demo/stages';
 import { DemoScene, HelpMenuScene, PadEdges } from './demo/scenes';
+import type { MeasureRecorder, CmdSource } from './measure/recorder';
+import { MeasureMenuScene } from './measure/scene';
+import { drawMeasureOverlay, type OverlayGame } from './measure/overlay';
+import { profileConfig } from './measure/profile';
+import { MEASURE_BUILD } from './measure/build';
 
 export const W = 640;
 export const H = 360;
@@ -100,6 +105,8 @@ export interface AppDeps {
   /** URLを外部ブラウザ（別タブ）で開く */
   openUrl: (url: string) => void;
   dev: boolean;
+  /** V320-MEASURE-01：計測用ビルドだけが渡す記録器（通常ビルドは無し） */
+  measure?: MeasureRecorder | null;
 }
 
 /**
@@ -142,10 +149,15 @@ export class App {
   /** 現在のフレームの時刻（requestAnimationFrame の時刻。performance.now と同じ基準） */
   nowMs = 0;
 
+  /** V320-MEASURE-01：計測用ビルドの記録器（通常ビルドは null。null の間は計測の処理を一切行わない） */
+  readonly measure: MeasureRecorder | null;
+
   constructor(readonly deps: AppDeps) {
     this.settings = deps.settings;
     this.menuInput = new MenuInput(deps.pads);
     deps.bus.setVolumes(this.settings.audio);
+    this.measure = MEASURE_BUILD ? (deps.measure ?? null) : null; // 通常ビルドでは定数で除去される
+    if (this.measure) this.measure.onNotice = (m) => this.showNotice(m, 8000);
     this.scene = new TitleScene(this);
   }
 
@@ -165,6 +177,7 @@ export class App {
   setScene(s: Scene): void {
     this.scene = s;
     this.menuInput.clear();
+    this.measure?.scene(s.constructor.name, s instanceof GameScene);
   }
 
   /** メインメニューへ（CPU対戦の1Pキャラはコタロー、相手順は先頭へ戻す） */
@@ -269,6 +282,8 @@ export class App {
       banner(msg, '#ffe0a0');
     }
     if (this.notice && ms < this.notice.until) banner(this.notice.text, '#c0ffd0');
+    // V320-MEASURE-01：計測用ビルドの常時表示（最上段の帯。盤面・手役・連鎖表示に掛けない）
+    if (MEASURE_BUILD && this.measure) drawMeasureOverlay(ctx, this.measure, this.scene instanceof GameScene ? this.scene.measureOverlay() : null);
   }
 
   // ---- 試合開始 ----
@@ -415,6 +430,8 @@ export class MenuScene implements Scene {
       { label: 'オプション', desc: '音・操作・対戦・表示・クレジット', run: () => a.setScene(new OptionsScene(a)) },
       { label: '遊び方', desc: MENU_DESC.help, run: () => a.openHelp('menu') },
     ];
+    // V320-MEASURE-01：計測用ビルドだけ「計測（テスト）」を加える（通常ビルドの項目は変えない）
+    if (MEASURE_BUILD && a.measure) root.push({ label: '計測（テスト）', desc: '計測の開始前設定（打上硬直A／B）・開始／停止・保存・初期化', run: () => a.setScene(new MeasureMenuScene(a)) });
     this.stack = [{ title: 'メインメニュー', items: root, cursor: 0 }];
     for (const label of openPath) {
       const t = this.top;
@@ -1470,7 +1487,8 @@ class HelpScene implements Scene {
 interface QuitDialog {
   player: PlayerId;
   source: 'keyboard' | { pad: number };
-  cursor: 0 | 1;
+  /** 選択肢の位置（通常は 0＝続ける／1＝終了する。計測用ビルドは 0＝続ける／1＝計測開始・停止／2＝終了する） */
+  cursor: number;
 }
 
 export class GameScene implements Scene {
@@ -1540,12 +1558,16 @@ export class GameScene implements Scene {
       this.nextAnnouncer = this.pickAnnouncer();
       return readyDurationMs(app.bus.voiceDurationMs(this.nextAnnouncer, 'ready'));
     };
+    // V320-MEASURE-01：計測用ビルドの MODE1 は開始前設定（打上硬直 A／B）を新しいゲームへ適用（プレイヤー・CPU共通。ラウンド途中で変えない）
+    const mprof = MEASURE_BUILD && app.measure && mode === 'mode1' ? app.measure.profile : null;
+    this.measureProfile = mprof;
+    const config = mprof ? profileConfig(mprof) : undefined;
     this.session =
       kind === 'single'
-        ? new SingleSession({ mode: singleMode ?? 'endless', seed, readyMsFor })
+        ? new SingleSession({ mode: singleMode ?? 'endless', seed, readyMsFor, ...(config ? { config } : {}) })
         : kind === 'watch' && watch
-          ? new Match({ firstTo: watch.firstTo, difficulty: RISE_DIFFICULTY[watch.riseMs], seed, mode, readyMsFor })
-          : new Match({ firstTo: s.firstTo, difficulty: s.difficulty, seed, mode, readyMsFor });
+          ? new Match({ firstTo: watch.firstTo, difficulty: RISE_DIFFICULTY[watch.riseMs], seed, mode, readyMsFor, ...(config ? { config } : {}) })
+          : new Match({ firstTo: s.firstTo, difficulty: s.difficulty, seed, mode, readyMsFor, ...(config ? { config } : {}) });
     // 決定入力の受付は演出側（勝者演出の開始後）で判定する
     this.session.resultMinMs = 0;
     this.bgm = kind === 'single' ? 'single' : 'versus';
@@ -1562,6 +1584,44 @@ export class GameScene implements Scene {
     });
     this.staging = new Staging(this.game, app.bus, this.stagingOpts());
     this.driver = new FixedStepDriver({ tickMs: 1000 / 60, step: (info) => this.step(info) });
+    this.measureMatchStart();
+  }
+
+  /** V320-MEASURE-01：この試合に適用した打上硬直の設定（計測用ビルドの MODE1 だけ。それ以外は null） */
+  readonly measureProfile: 'A' | 'B' | null;
+  private measureSessionSig = '';
+
+  private measureMatchStart(): void {
+    const m = this.app.measure;
+    if (!m) return;
+    const s = this.session;
+    m.matchStart({
+      mode: this.mode,
+      kind: this.kind,
+      singleMode: this.singleMode,
+      characters: this.characters,
+      devices: this.devices,
+      humans: this.humans(),
+      difficulty: s instanceof Match ? s.settings.difficulty : undefined,
+      firstTo: s instanceof Match ? s.settings.firstTo : undefined,
+      seed: this.seed,
+      profile: this.measureProfile ?? 'none',
+    });
+  }
+
+  private cmdSource(c: Controller): CmdSource {
+    return c instanceof GamepadController ? 'pad' : c instanceof KeyboardController ? 'keyboard' : c instanceof CpuController ? 'cpu' : 'other';
+  }
+
+  /** V320-MEASURE-01 確認表示用（人間のプレイヤーと使うパッド） */
+  measureOverlay(): OverlayGame {
+    return {
+      game: this.game.mode === 'mode1' ? (this.game as Game) : null,
+      humans: this.humans().map((p) => {
+        const d = this.devices[p];
+        return { player: p, pad: d.kind === 'gamepad' ? d.index : null };
+      }),
+    };
   }
 
   get game(): AnyGame {
@@ -1619,20 +1679,38 @@ export class GameScene implements Scene {
     if (this.holdMs !== null) return; // 新ラウンドの開始前待機に入った後は、同じフレームの残りのtickを進めない
     const s = this.session;
     const before = s.game;
+    // V320-MEASURE-01：計測用ビルドだけ、既存の取得結果をそのまま記録する（順番・回数は変えない）
+    const m = this.app.measure;
+    const mg = m && before.mode === 'mode1' ? (before as Game) : null;
+    if (mg) m!.beforeTick(mg);
     let cmds: Command[] = [];
     this.controllers.forEach((c) => {
       const out = c.poll(before, info);
+      if (m) for (const x of out) m.command(x, this.cmdSource(c), info, c instanceof GamepadController ? { pad: c.padIndex } : {});
       if (!this.dialogOf(c.player)) cmds.push(...out); // 確認中のプレイヤーの操作はダイアログへ
+      else if (m) for (const x of out) m.dropCommand(x, 'dialog');
     });
     cmds.push(...this.debugQueue.splice(0));
     const inResult = s instanceof Match ? s.state !== 'round' : s.state !== 'play';
-    if (inResult) cmds = [];
+    if (inResult) {
+      if (m) for (const x of cmds) m.dropCommand(x, 'result');
+      cmds = [];
+    }
     const confirm = this.confirmQueued && this.staging.acceptReady;
     this.confirmQueued = false;
     if (s instanceof Match) {
       s.step(cmds, confirm && s.state === 'roundResult');
     } else {
       s.step(cmds, confirm && s.state === 'result' && s.hasNext);
+    }
+    if (mg) m!.afterTick(mg);
+    if (m) {
+      // 試合・ラウンドの結果の状態（MODE1 CPU対戦の先取・SINGLE の結果）。変化時だけ記録
+      const sig = s instanceof Match ? `${s.state}/${s.wins.join('-')}/${s.round}` : `${s.state}`;
+      if (sig !== this.measureSessionSig) {
+        this.measureSessionSig = sig;
+        m.note('session', s instanceof Match ? { state: s.state, wins: [...s.wins], round: s.round, attempt: s.attempt } : { state: s.state });
+      }
     }
     if (s.game !== before) this.onNewRound();
     this.recordIfDone();
@@ -1742,13 +1820,13 @@ export class GameScene implements Scene {
       const act = this.keyboards[dlg.player]?.actionOf(code);
       const otherOwns = this.keyboards.some((k, i) => i !== dlg.player && k?.actionOf(code));
       if (act) {
-        if (act === 'left' || act === 'right') this.moveDialog(dlg);
+        if (act === 'left' || act === 'right') this.moveDialog(dlg, act === 'left' ? -1 : 1);
         else if (act === 'launch' && !repeat) this.decideDialog(dlg);
         return true; // 確認中の本人のプレイ操作は捨てる
       }
       if (!otherOwns) {
         if (code === 'ArrowLeft' || code === 'ArrowRight') {
-          this.moveDialog(dlg);
+          this.moveDialog(dlg, code === 'ArrowLeft' ? -1 : 1);
           return true;
         }
         if (code === 'Escape' || code === 'Backspace') {
@@ -1793,6 +1871,12 @@ export class GameScene implements Scene {
   /** v3.2.0 フォーカス喪失：移動予約・入力キューを破棄（ゲームの進行は従来どおり） */
   onVisibility(hidden: boolean): void {
     if (!hidden) return;
+    const m = this.app.measure;
+    if (m) {
+      // V320-MEASURE-01：フォーカス喪失で捨てる入力（キー入力のキュー）を理由付きで記録。予約の破棄はゲーム側の記録（理由 state）
+      m.note('focusLostClear', {});
+      for (const k of this.keyboards) for (const x of k?.queued ?? []) m.dropCommand(x, 'focusLost');
+    }
     const g = this.game as { clearInputBuffers?: () => void };
     g.clearInputBuffers?.();
     for (const k of this.keyboards) k?.clear();
@@ -1814,7 +1898,7 @@ export class GameScene implements Scene {
     const player = this.kind === 'watch' ? 0 : this.devices.findIndex((d) => d.kind === 'gamepad' && d.index === padIndex);
     const dlg = this.quit.find((q) => typeof q.source === 'object' && q.source.pad === padIndex);
     if (dlg) {
-      if (ev.key === 'left' || ev.key === 'right') this.moveDialog(dlg);
+      if (ev.key === 'left' || ev.key === 'right') this.moveDialog(dlg, ev.key === 'left' ? -1 : 1);
       else if (ev.key === 'confirm') this.decideDialog(dlg);
       else if (ev.key === 'back' || ev.key === 'start') this.closeDialog(dlg);
       return;
@@ -1838,8 +1922,16 @@ export class GameScene implements Scene {
     if (this.staging.acceptReady) this.confirmQueued = true;
   }
 
-  private moveDialog(d: QuitDialog): void {
-    d.cursor = d.cursor === 0 ? 1 : 0;
+  /** 確認の選択肢。計測用ビルドは「計測開始／停止」を加える（ポーズ／メニュー用の操作に集約し、プレイ中のボタンを転用しない） */
+  dialogChoices(): string[] {
+    const m = this.app.measure;
+    if (!m) return ['続ける', '終了する'];
+    return ['続ける', m.recording ? '計測停止' : m.state === 'stopped' ? '計測再開' : '計測開始', '終了する'];
+  }
+
+  private moveDialog(d: QuitDialog, dir: -1 | 1 = 1): void {
+    const n = this.dialogChoices().length;
+    d.cursor = (d.cursor + dir + n) % n;
     this.app.bus.playSfx('ui_move');
   }
 
@@ -1849,7 +1941,16 @@ export class GameScene implements Scene {
   }
 
   private decideDialog(d: QuitDialog): void {
-    if (d.cursor === 1) {
+    const m = this.app.measure;
+    if (m && d.cursor === 1) {
+      // V320-MEASURE-01：計測の開始・停止（ゲームは止めない。開始時点の盤面を確認用スナップショットに残す）
+      if (m.recording) m.stop();
+      else m.start({ from: 'pauseDialog', scene: 'GameScene' });
+      this.app.bus.playSfx('ui_confirm');
+      this.quit = this.quit.filter((q) => q !== d);
+      return;
+    }
+    if (d.cursor === this.dialogChoices().length - 1) {
       this.app.bus.playSfx('ui_confirm');
       // CPU観戦は中止して観戦設定へ戻る
       if (this.kind === 'watch') {
@@ -1929,6 +2030,7 @@ export class GameScene implements Scene {
         else s.restart();
         this.app.bus.playBgm(this.bgm);
         if (s.game !== before) this.onNewRound();
+        this.measureMatchStart(); // V320-MEASURE-01：再戦は新しい試合ID
         return;
       }
     }
@@ -1944,7 +2046,16 @@ export class GameScene implements Scene {
   private updateHold(dtMs: number): boolean {
     if (this.holdMs === null) return false;
     // 人の入力は読み捨てる（キーのキュー・パッドの押下状態を更新）。CPU は思考させない
-    for (const c of this.controllers) if (!(c instanceof CpuController)) c.poll(this.game);
+    const m = this.app.measure;
+    for (const c of this.controllers)
+      if (!(c instanceof CpuController)) {
+        const out = c.poll(this.game);
+        if (m)
+          for (const x of out) {
+            m.command(x, this.cmdSource(c));
+            m.dropCommand(x, 'prestart');
+          }
+      }
     if (this.holdRendered) this.holdMs -= dtMs;
     if (this.holdMs > 0) return true;
     this.holdMs = null;
@@ -2002,7 +2113,7 @@ export class GameScene implements Scene {
     if (this.kind === 'watch' && !this.finished) drawText(ctx, 'CPU観戦中', 320, 24, { align: 'center', size: 10, color: TEXT_COLORS.secondary });
     for (const q of this.quit) {
       const x = q.player === 0 ? 16 : 336;
-      drawConfirm(ctx, A, this.kind === 'watch' ? '観戦をやめて設定へ戻りますか？' : `${q.player + 1}P：メニューへ戻りますか？`, ['続ける', '終了する'], q.cursor, x, 110, 'ゲームは止まっていません');
+      drawConfirm(ctx, A, this.kind === 'watch' ? '観戦をやめて設定へ戻りますか？' : `${q.player + 1}P：メニューへ戻りますか？`, this.dialogChoices(), q.cursor, x, 110, 'ゲームは止まっていません', this.app.measure ? 84 : 112);
     }
   }
 

@@ -35,6 +35,24 @@ export type Command =
 
 export type RiseKind = 'natural' | 'manual' | 'attack';
 
+/**
+ * V320-MEASURE-01 入力処理の観測（計測用ビルドだけが設定する。通常は null）。
+ * 観測は既存の判定の結果を読むだけで、コマンドの順番・処理回数・予約の挙動を変えない（観測側の例外もゲームへ伝えない）。
+ * kind：drop＝ゲーム処理に入る前に捨てた（試合開始前・決着後・ノルマ達成後）、reject＝実行できなかった、execute＝実行した、
+ * buffer／consume／discard＝移動の先行入力（予約の受付・実行・破棄。既存 inputLog と同じ理由）、lock＝操作ロックの開始（理由と終了tick）
+ */
+export interface InputTraceEntry {
+  tick: number;
+  player: PlayerId;
+  kind: 'drop' | 'reject' | 'execute' | 'buffer' | 'consume' | 'discard' | 'lock';
+  action: string;
+  reason?: string;
+  /** 元のコマンド（予約の実行・ロックなど、コマンドに結び付かない記録では無し） */
+  cmd?: Command;
+  detail?: Record<string, unknown>;
+}
+export type InputTrace = (e: InputTraceEntry) => void;
+
 export type LockKind = 'launch' | 'pack' | 'rotate' | 'declareFail';
 
 export type RoundOutcome = 'win' | 'draw' | 'stageClear' | 'allStagesClear' | 'gameOver' | 'clear';
@@ -452,13 +470,19 @@ export class Game {
   /** 1tick進める。commands はこのtickに適用する入力 */
   step(commands: readonly Command[] = []): void {
     this.tick++;
-    if (this.result) return; // 勝敗確定後はロジックを止める（表示のみ進む）
+    if (this.result) {
+      if (this.trace) for (const c of commands) this.tr({ player: c.player, kind: 'drop', action: c.type, reason: 'roundEnded', cmd: c });
+      return; // 勝敗確定後はロジックを止める（表示のみ進む）
+    }
     this.processArrivals();
     this.processReturns();
     for (const p of this.players) this.advanceRole(p);
     this.flushSends();
     this.finalizeStageClear();
-    if (this.result || !this.playing) return;
+    if (this.result || !this.playing) {
+      if (this.trace) for (const c of commands) this.tr({ player: c.player, kind: 'drop', action: c.type, reason: this.result ? 'roundEnded' : 'notStarted', cmd: c });
+      return;
+    }
     for (const p of this.players) {
       const mine = commands.filter((c) => c.player === p.id);
       this.processInputs(p, mine);
@@ -492,10 +516,56 @@ export class Game {
   /** v3.2.0 入力の予約・消費・破棄の記録（開発時の検査用。最新500件。ゲーム結果には影響しない） */
   readonly inputLog: InputLogEntry[] = [];
 
-  private inputLogger(p: PlayerState) {
+  /** V320-MEASURE-01 入力処理の観測（計測用ビルドだけ。通常は null で何もしない） */
+  trace: InputTrace | null = null;
+
+  /** 観測の記録（観測側の例外はゲームへ伝えない） */
+  private tr(e: Omit<InputTraceEntry, 'tick'>): void {
+    const t = this.trace;
+    if (!t) return;
+    try {
+      t({ tick: this.tick, ...e });
+    } catch {
+      /* 計測の不具合でゲームを止めない */
+    }
+  }
+
+  /** 操作できない理由（観測用。判定は isLocked と同じ条件を読むだけ） */
+  lockReason(p: PlayerState): string {
+    if (p.defeated) return 'defeated';
+    if (p.role) return 'role';
+    if (this.tick < p.lockUntil) return p.lockKind ?? 'locked';
+    return 'none';
+  }
+
+  /** act が実行できない理由（観測用。act の各分岐と同じ条件を読むだけ）。実行できるなら null */
+  private actRejectReason(p: PlayerState, a: Action): string | null {
+    switch (a) {
+      case 'left':
+        return p.selectedCol === 0 ? 'edge' : null;
+      case 'right':
+        return p.selectedCol === 5 ? 'edge' : null;
+      case 'launch': {
+        const top = p.board.top(p.selectedCol);
+        return !top ? 'emptyColumn' : top.kind !== 'piece' ? 'returningColumn' : null;
+      }
+      case 'rotate': {
+        if (p.board.hasReservation(p.selectedCol)) return 'returningColumn';
+        return p.board.cols[p.selectedCol].length < 2 ? (p.board.cols[p.selectedCol].length === 0 ? 'emptyColumn' : 'singlePiece') : null;
+      }
+      case 'declare':
+        return evaluateStock(p.roleStock).kind === 'too_few' && !this.config.declareBelowMinIsFailure ? 'tooFew' : null;
+      case 'manualRise':
+        if (this.tick < p.manualRiseEndTick) return 'riseInProgress';
+        return p.board.height() + 1 > this.config.manualRiseMaxHeight ? 'riseLimit' : null;
+    }
+  }
+
+  private inputLogger(p: PlayerState, cmd?: Command) {
     return (e: Omit<InputLogEntry, 'tick' | 'player'>) => {
       this.inputLog.push({ tick: this.tick, player: p.id, ...e });
       if (this.inputLog.length > 500) this.inputLog.splice(0, this.inputLog.length - 500);
+      if (this.trace) this.tr({ player: p.id, kind: e.event, action: e.action, reason: e.reason, cmd, detail: e.reason === 'locked' ? { lock: this.lockReason(p) } : undefined });
     };
   }
 
@@ -508,7 +578,10 @@ export class Game {
   }
 
   private processInputs(p: PlayerState, cmds: readonly Command[]): void {
-    if (this.single?.clearPending) return; // ノルマ達成後は新たな操作を受け付けない
+    if (this.single?.clearPending) {
+      if (this.trace) for (const c of cmds) this.tr({ player: p.id, kind: 'drop', action: c.type, reason: 'clearPending', cmd: c });
+      return; // ノルマ達成後は新たな操作を受け付けない
+    }
     const log = this.inputLogger(p);
     // v3.2.0 r：当該tickの解除・新規方向・同時押しを、旧予約の実行より先に反映する
     const now = resolveTick(p, cmds, !this.isMoving(p), log);
@@ -521,6 +594,7 @@ export class Game {
         else if (MOVE_ACTIONS.has(a) && this.edgeBlocked(p, a)) log({ event: 'discard', action: a, reason: 'edge' });
         else {
           log({ event: 'consume', action: a });
+          if (this.trace) this.traceAct(p, a, undefined, 'buffer');
           this.act(p, a);
         }
       }
@@ -537,14 +611,27 @@ export class Game {
       if (!this.single) this.receiveAttack(p, c.lines, 'debug');
       return;
     }
-    if (c.type === 'cancelRepeat') return release(p, this.inputLogger(p));
-    if (p.defeated || this.isLocked(p)) return; // 発射中・上詰め/B入替中・不成立硬直中・役処理中は操作不可
-    if (c.type === 'manualRise') return this.manualRise(p); // 保持対象外：移動中も即時（N5：既存挙動を維持）
+    if (c.type === 'cancelRepeat') return release(p, this.inputLogger(p, c));
+    if (p.defeated || this.isLocked(p)) {
+      if (this.trace) this.tr({ player: p.id, kind: 'reject', action: c.type, reason: this.lockReason(p), cmd: c, detail: { lockUntil: p.lockUntil } });
+      return; // 発射中・上詰め/B入替中・不成立硬直中・役処理中は操作不可
+    }
+    if (c.type === 'manualRise') {
+      if (this.trace) this.traceAct(p, 'manualRise', c, 'direct');
+      return this.manualRise(p); // 保持対象外：移動中も即時（N5：既存挙動を維持）
+    }
     if (this.isMoving(p)) {
-      if (BUFFERABLE.has(c.type)) offer(p, c.type, !!c.repeat, this.tick, this.inputLogger(p));
+      if (BUFFERABLE.has(c.type)) offer(p, c.type, !!c.repeat, this.tick, this.inputLogger(p, c));
       return;
     }
+    if (this.trace) this.traceAct(p, c.type, c, 'direct');
     this.act(p, c.type);
+  }
+
+  /** 観測：act の前に、実行できるか（できない理由）を記録する。via＝direct（その場の入力）／buffer（予約の実行） */
+  private traceAct(p: PlayerState, a: Action, cmd: Command | undefined, via: 'direct' | 'buffer'): void {
+    const why = this.actRejectReason(p, a);
+    this.tr({ player: p.id, kind: why ? 'reject' : 'execute', action: a, reason: why ?? undefined, cmd, detail: { via, col: p.selectedCol } });
   }
 
   private act(p: PlayerState, a: Action): void {
@@ -574,6 +661,7 @@ export class Game {
     if (until > p.lockUntil) {
       p.lockUntil = until;
       p.lockKind = kind;
+      if (this.trace) this.tr({ player: p.id, kind: 'lock', action: kind, reason: kind, detail: { until } });
     }
   }
 

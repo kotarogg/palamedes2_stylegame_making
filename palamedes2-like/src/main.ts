@@ -12,6 +12,8 @@ import { loadAssets } from './view/assets';
 import { resolveScale, type ScaleResult } from './view/scale';
 import { drawNumericScaled, numericGlyph } from './view/text';
 import { AssetViewer } from './view/viewer';
+import { BUILD_INFO, MEASURE_BUILD } from './measure/build';
+import { MeasureRecorder } from './measure/recorder';
 
 const canvas = document.getElementById('screen') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d', { alpha: false })!;
@@ -82,11 +84,15 @@ async function boot(): Promise<void> {
   display = settings.display;
   fit();
   const bus = new AudioBus('./');
+  // V320-MEASURE-01：計測用ビルドだけ記録器を作り、既存の PadSource を包む（取得回数・値は変えない）。通常ビルドは null
+  const measure = MEASURE_BUILD ? new MeasureRecorder(BUILD_INFO) : null;
+  if (measure) document.title = `${document.title}（計測用テストビルド V320-MEASURE-01）`;
   const [assets] = await Promise.all([loadAssets('./', DEFAULT_VIEW_CONFIG.darkAlpha), bus.preload(allAudioFiles())]);
   const app = new App({
     assets,
     bus,
-    pads: browserPads,
+    pads: measure ? measure.wrapPadSource(browserPads) : browserPads,
+    measure,
     settings,
     applyDisplay: (d) => {
       display = d;
@@ -115,6 +121,7 @@ async function boot(): Promise<void> {
     firstInput = false;
   };
   window.addEventListener('keydown', (e) => {
+    measure?.key(true, e.code, e.repeat, e.timeStamp);
     onFirstInput();
     if (DEV && e.code === 'F8') {
       // 開発版だけ：人間のプレイの計測記録（第21章）をJSONで保存。製品版には無い
@@ -140,16 +147,41 @@ async function boot(): Promise<void> {
     if (app.onKey(e.code, e.repeat, e.timeStamp)) e.preventDefault();
     else if (e.code === 'Space' || e.code.startsWith('Arrow') || e.code === 'Tab') e.preventDefault();
   });
-  window.addEventListener('keyup', (e) => app.onKeyUp(e.code, e.timeStamp));
+  window.addEventListener('keyup', (e) => {
+    measure?.key(false, e.code, false, e.timeStamp);
+    app.onKeyUp(e.code, e.timeStamp);
+  });
   window.addEventListener('pointerdown', () => {
     onFirstInput();
     app.onPointer();
   });
   // 非アクティブ（タブ切替・最小化・フォーカス喪失）：放置デモは進行と音を止め、復帰でタイトルへ（本編の動作は変えない）
-  document.addEventListener('visibilitychange', () => app.onVisibility(document.hidden));
-  window.addEventListener('blur', () => app.onVisibility(true));
-  window.addEventListener('focus', () => app.onVisibility(false));
-  window.addEventListener('gamepadconnected', () => fit());
+  document.addEventListener('visibilitychange', () => {
+    measure?.visibility(document.hidden, document.hasFocus(), 'visibilitychange');
+    app.onVisibility(document.hidden);
+  });
+  window.addEventListener('blur', () => {
+    measure?.visibility(document.hidden, false, 'blur');
+    app.onVisibility(true);
+  });
+  window.addEventListener('focus', () => {
+    measure?.visibility(document.hidden, true, 'focus');
+    app.onVisibility(false);
+  });
+  window.addEventListener('gamepadconnected', (e) => {
+    measure?.padConnection(true, e.gamepad.index, e.gamepad.id, e.gamepad.mapping);
+    fit();
+  });
+  if (measure) {
+    window.addEventListener('gamepaddisconnected', (e) => measure.padConnection(false, e.gamepad.index, e.gamepad.id, e.gamepad.mapping));
+    // 未保存の記録がある間は、閉じる・再読込の前にブラウザの確認を出す（確認の文言はブラウザが決める。強制終了・クラッシュは防げない）
+    window.addEventListener('beforeunload', (e) => {
+      if (measure.recording || measure.unsaved) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+  }
 
   // 自動検証用のフック（通常の操作経路やメニューには出さない）
   (window as unknown as { __p2like: unknown }).__p2like = {
@@ -163,10 +195,12 @@ async function boot(): Promise<void> {
     // 自動検証用：遊び方・放置デモ（収録外の文字の記録）
     demo: { missingGlyphs },
     ...(DEV ? { metrics: () => app.devMetrics } : {}),
+    ...(measure ? { measure } : {}),
   };
 
   let last = performance.now();
   const frame = (now: number) => {
+    measure?.beginFrame(now - last); // 処理遅延の記録は丸める前の実間隔
     const dt = Math.min(250, now - last);
     last = now;
     // 別の画面へ移動した等で devicePixelRatio が変わったら倍率を選び直す
