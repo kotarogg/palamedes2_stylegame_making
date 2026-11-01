@@ -15,6 +15,8 @@ const clone = (): CpuConfig => {
   // V320-FIX-06 で更新：難易度別の操作速度（speed：移動開始間隔・打上待ち）も外し、FIX-05 までの見積り・操作列を単独で検証する。
   // FIX-06 の操作速度は v320_fix06_cpu.test.ts
   delete c.speed;
+  // V320-CPU-M1EASY-01 で更新：MODE1 初級だけの待ち時間（mode1Timing）も外し、共有の設定表で検証する。MODE1 初級の値は cpu_mode1_easy.test.ts
+  delete c.mode1Timing;
   return c;
 };
 /** 判断停止を0%に（他の判断だけを見る） */

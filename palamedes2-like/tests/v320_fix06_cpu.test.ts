@@ -15,6 +15,7 @@ const AFTER = { easy: 6, normal: 4, hard: 2 } as const;
 function speedOnly(level: Level): CpuConfig {
   const c = JSON.parse(JSON.stringify(CPU_CONFIG)) as CpuConfig;
   delete c.mode1Adjust;
+  delete c.mode1Timing; // V320-CPU-M1EASY-01 で更新：MODE1 初級だけの待ち時間も外す
   c.mandatoryWait = {};
   for (const ch of ['kotaro', 'akane', 'zunko'] as const) {
     c.decisionStop[level].pct[ch] = 0;

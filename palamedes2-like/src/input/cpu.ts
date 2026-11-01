@@ -18,6 +18,7 @@ import { pushRoleStock } from '../core/stock';
 import rawConfig from '../data/cpu_config_v320.json';
 import mode1Fix05 from '../data/cpu_config_fix05_mode1.json';
 import speedFix06 from '../data/cpu_config_fix06_speed.json';
+import mode1Easy from '../data/cpu_config_mode1_easy.json';
 import type { Controller } from './controller';
 import { acquireMs, candidatesOf, depthFor, remainingAfter, shortestPaths, simCols, type Candidate, type Goal, type PlanTiming } from './cpuPlan';
 
@@ -61,6 +62,15 @@ export interface CpuConfig {
   mode1Adjust?: Mode1Adjust;
   /** V320-FIX-06：難易度別の操作速度（cpu_config_fix06_speed.json。MODE1・MODE2 共通）。無ければ制限なし */
   speed?: CpuSpeed;
+  /** V320-CPU-M1EASY-01：MODE1 だけの待ち時間（cpu_config_mode1_easy.json。現在は初級のみ）。無ければ共有設定・mode1Adjust の値 */
+  mode1Timing?: Mode1Timing;
+}
+
+/** V320-CPU-M1EASY-01 MODE1 だけの待ち時間（必須判断待ち・判断停止の時間候補）。停止確率・抽選重みは共有設定のまま */
+export interface Mode1Timing {
+  adjustment: string;
+  mandatoryWait: Partial<Record<Difficulty, { normalMs: [number, number, number]; pinchMs: [number, number, number] }>>;
+  decisionStopMs: Partial<Record<Difficulty, { normalMs: [number, number, number]; pinchMs: [number, number, number] }>>;
 }
 
 /** V320-FIX-06 CPU の操作速度（tick が正本） */
@@ -79,7 +89,7 @@ export interface Mode1Adjust {
   searchDepth: Record<Difficulty, Record<Situation, number | null>>;
 }
 
-export const CPU_CONFIG: CpuConfig = { ...(rawConfig as unknown as CpuConfig), mode1Adjust: mode1Fix05 as unknown as Mode1Adjust, speed: speedFix06 as unknown as CpuSpeed };
+export const CPU_CONFIG: CpuConfig = { ...(rawConfig as unknown as CpuConfig), mode1Adjust: mode1Fix05 as unknown as Mode1Adjust, speed: speedFix06 as unknown as CpuSpeed, mode1Timing: mode1Easy as unknown as Mode1Timing };
 
 /** 1回の判断で行う抽選の記録（自動検証用） */
 export interface CpuDecisionLog {
@@ -388,7 +398,7 @@ export class CpuController implements Controller {
     this.stopUntil = at;
     this.stopKind = at > tick ? 'decision' : null;
     this.stopSit = sit;
-    const s = this.cfg.decisionStop[this.level];
+    const s = this.stopTable(game);
     this.stats.stopRolls++;
     if (!this.roll('decisionStop', s.pct[this.character], tick, sit)) return at > tick;
     const w = this.cfg.decisionStopWeights;
@@ -405,10 +415,21 @@ export class CpuController implements Controller {
     return true;
   }
 
-  /** 必須判断待ちの表：MODE1 の中級・上級は V320-FIX-05 の表、それ以外（初級・MODE2）は FIX-04 の表。無ければ待ちなし */
+  /**
+   * 必須判断待ちの表（game＝null は MODE1 の見積り用）。
+   * MODE1：V320-CPU-M1EASY-01 の表（初級）→ V320-FIX-05 の表（中級・上級）→ 共有の FIX-04 の表。MODE2：共有の FIX-04 の表。無ければ待ちなし
+   */
   private mandatoryTable(game: AnyGame | null): { normalMs: [number, number, number]; pinchMs: [number, number, number] } | undefined {
-    const m1 = game === null || game.mode === 'mode1' ? this.cfg.mode1Adjust?.mandatoryWait[this.level] : undefined;
+    const mode1 = game === null || game.mode === 'mode1';
+    const m1 = mode1 ? (this.cfg.mode1Timing?.mandatoryWait[this.level] ?? this.cfg.mode1Adjust?.mandatoryWait[this.level]) : undefined;
     return m1 ?? this.cfg.mandatoryWait?.[this.level];
+  }
+
+  /** 判断停止の表（game＝null は MODE1 の見積り用）。MODE1 は V320-CPU-M1EASY-01 の時間候補（あれば）、停止確率は共有設定のまま。MODE2 は共有設定 */
+  private stopTable(game: AnyGame | null): DecisionStop {
+    const base = this.cfg.decisionStop[this.level];
+    const m1 = game === null || game.mode === 'mode1' ? this.cfg.mode1Timing?.decisionStopMs[this.level] : undefined;
+    return m1 ? { pct: base.pct, normalMs: m1.normalMs, pinchMs: m1.pinchMs } : base;
   }
 
   /** 必須判断待ちの期待値（ms。MODE1 のピンチ見積り用）。無い難易度は0 */
@@ -420,9 +441,9 @@ export class CpuController implements Controller {
     return (ms[0] * w[0] + ms[1] * w[1] + ms[2] * w[2]) / (w[0] + w[1] + w[2]);
   }
 
-  /** 判断停止の期待値（ms）：停止確率 × 時間候補の加重平均 */
+  /** 判断停止の期待値（ms。MODE1 のピンチ見積り用）：停止確率 × 時間候補の加重平均 */
   private expectedStopMs(sit: Situation): number {
-    const s = this.cfg.decisionStop[this.level];
+    const s = this.stopTable(null);
     const w = this.cfg.decisionStopWeights;
     const ms = sit === 'pinch' ? s.pinchMs : s.normalMs;
     const mean = (ms[0] * w[0] + ms[1] * w[1] + ms[2] * w[2]) / (w[0] + w[1] + w[2]);

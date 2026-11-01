@@ -1,0 +1,14 @@
+{
+ "adjustment": "V320-CPU-M1EASY-01",
+ "note": "MODE1 の初級（easy）だけに適用する待ち時間（共有の初級設定 cpu_config_v320.json の mandatoryWait.easy・decisionStop.easy の時間候補を1.35倍）。MODE2・MODE1 中級／上級には適用しない。停止確率（キャラ別）・抽選重み（25／50／25）は共有設定のまま。PM の模擬プレイヤー（レベル1）との試合勝率がおおむね50%になる候補値",
+ "base": {
+  "mandatoryWait": { "normalMs": [300, 400, 500], "pinchMs": [150, 200, 250] },
+  "decisionStop": { "normalMs": [700, 1000, 1300], "pinchMs": [350, 500, 650] }
+ },
+ "mandatoryWait": {
+  "easy": { "normalMs": [405, 540, 675], "pinchMs": [203, 270, 338] }
+ },
+ "decisionStopMs": {
+  "easy": { "normalMs": [945, 1350, 1755], "pinchMs": [473, 675, 878] }
+ }
+}

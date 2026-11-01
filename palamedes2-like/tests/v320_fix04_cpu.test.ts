@@ -6,6 +6,12 @@ import { CPU_CONFIG, CpuController, type CpuConfig } from '../src/input/cpu';
 import { EMPTY, makeGame, toPlay } from './helpers';
 
 const clone = (): CpuConfig => JSON.parse(JSON.stringify(CPU_CONFIG));
+/** V320-CPU-M1EASY-01 で更新：MODE1 初級だけの待ち時間（mode1Timing）を外し、FIX-04 の共有表（MODE2 の初級が使う）で検証する。MODE1 初級の値は cpu_mode1_easy.test.ts */
+const fix04Only = (): CpuConfig => {
+  const c = clone();
+  delete c.mode1Timing;
+  return c;
+};
 
 function play(g: Game | Mode2Game, cpu: CpuController, ticks: number) {
   const cmds: { tick: number; type: string }[] = [];
@@ -53,7 +59,7 @@ describe('V320-FIX-04 初級の必須判断待ち', () => {
     for (let seed = 1; seed <= 12; seed++) {
       const g = makeGame({}, undefined, seed);
       toPlay(g);
-      const cpu = new CpuController(0, 'easy', seed, 'akane');
+      const cpu = new CpuController(0, 'easy', seed, 'akane', fix04Only());
       play(g, cpu, 2400);
       for (const l of cpu.log.filter((x) => x.kind === 'mandatoryWait')) {
         expect(['normal 300ms', 'normal 400ms', 'normal 500ms', 'pinch 150ms', 'pinch 200ms', 'pinch 250ms']).toContain(l.detail);
@@ -71,7 +77,7 @@ describe('V320-FIX-04 初級の必須判断待ち', () => {
   });
 
   it('順序：必須待ち→追加停止→計画実行。通常待機中のピンチ移行で、未消化の必須待ちと追加停止をそれぞれ1回だけ半分', () => {
-    const cfg = clone();
+    const cfg = fix04Only();
     cfg.decisionStop.easy.pct.kotaro = 100;
     cfg.decisionStopWeights = [0, 100, 0]; // 追加停止 1000ms＝60tick
     cfg.mandatoryWaitWeights = [0, 100, 0]; // 必須待ち 400ms＝24tick
