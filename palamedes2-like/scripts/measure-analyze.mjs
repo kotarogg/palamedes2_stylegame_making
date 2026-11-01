@@ -5,7 +5,9 @@
 //   - ゲーム内の時間（硬直・役演出・操作可能・ラウンド）＝ tick（60tick/秒）を ms に換算。ラウンドをまたぐ比較はしない
 //   - 入力の間隔・押下時間＝ t（performance.now 基準のセッション経過 ms。パッドは取得＝フレームの観測時刻で、精度は約1フレーム）
 //   - 画面非表示・フォーカス喪失の区間に掛かる間隔は「除外」へ分けて数える（プレイヤーの判断時間へ混ぜない）
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { posix, win32 } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const TICK_MS = 1000 / 60;
 const HUMAN_SRC = new Set(['pad', 'keyboard']);
@@ -409,7 +411,29 @@ function summary(a) {
   ].join('\n');
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+/**
+ * このファイルが node の起動対象か（OS に依存しない判定）。
+ * file URL を OS のパスへ戻し、起動引数のパスと比べる。Windows はドライブ文字・区切り・大小文字の違いを吸収する
+ */
+export function isEntry(metaUrl, argv1, platform = process.platform) {
+  if (!argv1) return false;
+  const win = platform === 'win32';
+  const p = win ? win32 : posix;
+  const real = (x) => {
+    try {
+      return platform === process.platform ? realpathSync(x) : x;
+    } catch {
+      return x;
+    }
+  };
+  const norm = (x) => {
+    const r = p.resolve(real(x));
+    return win ? r.toLowerCase() : r;
+  };
+  return norm(fileURLToPath(metaUrl, { windows: win })) === norm(argv1);
+}
+
+if (isEntry(import.meta.url, process.argv[1])) {
   const [, , input, output] = process.argv;
   if (!input) {
     console.error('使い方：node scripts/measure-analyze.mjs <kotaro_measure_*.json> [出力.json]');
@@ -417,6 +441,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
   const json = JSON.parse(readFileSync(input, 'utf8'));
   const a = analyze(json);
-  writeFileSync(output ?? `${input}.analysis.json`, JSON.stringify(a, null, 1));
+  const out = output ?? `${input}.analysis.json`;
+  writeFileSync(out, JSON.stringify(a, null, 1));
   console.log(summary(a));
+  console.log(`集計結果を保存：${out}`);
 }

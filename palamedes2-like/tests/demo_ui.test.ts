@@ -70,13 +70,13 @@ describe('台本と収録文字（tutorial_font_16：V320-FIX-04 採用版 388�
   });
 
   it('V320-FIX-04 付録A：40項目の見出し・本文は原文どおり（表示は改行とページ分割だけ。行頭に句読点・空白を置かない）。付録Bの送り案内', () => {
-    const order = readFileSync(new URL('docs/V320_FIX04_PROGRAMMER_ORDER_20261029.md', ROOT), 'utf8');
+    const order = readFileSync(new URL('docs/V320_FIX04_PROGRAMMER_ORDER_20261029.md', ROOT), 'utf8').replace(/\r\n/g, '\n'); // 改行形式（CRLF 取得）に依存しない
     const appendix = order.slice(order.indexOf('## 付録A'), order.indexOf('## 付録B'));
     const rows = [...appendix.matchAll(/^\|([a-z0-9_]+)\|([^|]+)\|([^|]+)\|$/gm)].map((m) => ({ id: m[1], heading: m[2], text: m[3] }));
     expect(rows).toHaveLength(40);
     expect(Object.keys(S.pages).sort()).toEqual(rows.map((r) => r.id).sort());
     // V320-FIX-05 で更新：streak・streak_crack は FIX-05 依頼書 第7章の本文（見出し・本文・パネル）を正とする
-    const o5 = readFileSync(new URL('docs/V320_FIX05_PROGRAMMER_ORDER_20261029.md', ROOT), 'utf8');
+    const o5 = readFileSync(new URL('docs/V320_FIX05_PROGRAMMER_ORDER_20261029.md', ROOT), 'utf8').replace(/\r\n/g, '\n'); // 改行形式（CRLF 取得）に依存しない
     const sec = (id: string) => o5.slice(o5.indexOf(`${id}：\n`), o5.indexOf('\n\n', o5.indexOf(`${id}：\n`)));
     for (const id of ['streak', 'streak_crack']) {
       const t = sec(id);

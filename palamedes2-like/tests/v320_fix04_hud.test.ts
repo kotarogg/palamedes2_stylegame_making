@@ -43,8 +43,10 @@ describe('V320-FIX-04 素材：見出し8枚・倍率数字シート', () => {
 
   it('説明フォントは FONT-SUPPLEMENT-01 の388字版（PNG／JSON の対のハッシュ）', () => {
     const sha = (rel: string) => createHash('sha256').update(readFileSync(new URL(rel, ROOT))).digest('hex');
+    // JSON はテキスト：Git の改行変換（Windows の CRLF 取得）だけでハッシュが変わらないよう、改行を LF に揃えてから比べる（中身の変更は検出する）
+    const shaText = (rel: string) => createHash('sha256').update(readFileSync(new URL(rel, ROOT), 'utf8').replace(/\r\n/g, '\n')).digest('hex');
     expect(sha('public/gfx/assets/tutorial_font_16.png')).toBe('42875fb3a365cd06d1abb061acf08532fa40a711e739e246845eacf45237c102');
-    expect(sha('public/gfx/data/tutorial_font_16.json')).toBe('ed5ee59fbf496ba9d09804df24005893527868f3ca61effd53774442c2fe7447');
+    expect(shaText('public/gfx/data/tutorial_font_16.json')).toBe('ed5ee59fbf496ba9d09804df24005893527868f3ca61effd53774442c2fe7447');
   });
 });
 

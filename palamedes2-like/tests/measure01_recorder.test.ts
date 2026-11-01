@@ -8,7 +8,7 @@ import { GamepadController, type PadState } from '../src/input/controller';
 import { profileConfig } from '../src/measure/profile';
 import { MeasureRecorder } from '../src/measure/recorder';
 // @ts-expect-error 集計スクリプトは .mjs（型なし）
-import { analyze, hiddenIntervals, stats } from '../scripts/measure-analyze.mjs';
+import { analyze, hiddenIntervals, isEntry, stats } from '../scripts/measure-analyze.mjs';
 
 const btn = (pressed: boolean, value = pressed ? 1 : 0) => ({ pressed, touched: pressed, value });
 function padState(pressed: number[] = [], axes = [0, 0, 0, 0]): PadState {
@@ -181,7 +181,8 @@ describe('単独ひたすら（MODE1 SINGLE endless）', () => {
     const rec = new MeasureRecorder(undefined, () => clock);
     const s = new SingleSession({ mode: 'endless', seed: 9, config: profileConfig('B') });
     const g0 = s.game as Game;
-    expect([g0.t.launchMs, g0.t.packMs]).toEqual([12, 3]);
+    // 実効設定（ms）は公開の config で、tick 換算は記録器が保存する roundStart.timingTicks で確認する（Game の非公開フィールドへは触れない）
+    expect([g0.config.timing.launchMs, g0.config.timing.packMs]).toEqual([200, 50]);
     rec.matchStart({ mode: 'mode1', kind: 'single', singleMode: 'endless', characters: ['kotaro'], devices: [], humans: [0], seed: 9, profile: 'B' });
     rec.start();
     const h = noisy(9);
@@ -197,7 +198,9 @@ describe('単独ひたすら（MODE1 SINGLE endless）', () => {
     rec.stop();
     const json = parse(rec);
     const recs = json.records as { e: string; d: Record<string, unknown> }[];
-    expect(recs.find((r) => r.e === 'roundStart')?.d.single).toMatchObject({ kind: 'endless' });
+    const rs = recs.find((r) => r.e === 'roundStart')!;
+    expect(rs.d.single).toMatchObject({ kind: 'endless' });
+    expect(rs.d.timingTicks).toMatchObject({ launchMs: 12, packMs: 3 });
     expect(recs.some((r) => r.e === 'st' && 'single' in r.d)).toBe(true);
     const an = analyze(json);
     expect(an.commands.human.n).toBeGreaterThan(50);
@@ -206,6 +209,17 @@ describe('単独ひたすら（MODE1 SINGLE endless）', () => {
 });
 
 describe('集計の部品', () => {
+  it('CLI の起動判定は OS に依存しない（Windows のパスと file URL、Linux／macOS）', () => {
+    const w = 'file:///C:/work/palamedes2-like/scripts/measure-analyze.mjs';
+    expect(isEntry(w, 'C:\\work\\palamedes2-like\\scripts\\measure-analyze.mjs', 'win32')).toBe(true);
+    expect(isEntry(w, 'c:\\Work\\palamedes2-like\\scripts\\measure-analyze.mjs', 'win32')).toBe(true);
+    expect(isEntry(w, 'C:/work/palamedes2-like/scripts/measure-analyze.mjs', 'win32')).toBe(true);
+    expect(isEntry(w, 'C:\\work\\palamedes2-like\\scripts\\e2e.mjs', 'win32')).toBe(false);
+    expect(isEntry('file:///home/u/p/scripts/measure-analyze.mjs', '/home/u/p/scripts/measure-analyze.mjs', 'linux')).toBe(true);
+    expect(isEntry('file:///home/u/p/scripts/measure-analyze.mjs', '/home/u/p/scripts/other.mjs', 'linux')).toBe(false);
+    expect(isEntry(w, undefined, 'win32')).toBe(false);
+  });
+
   it('stats：中央値・分位', () => {
     expect(stats([1, 2, 3, 4, 100])).toMatchObject({ n: 5, median: 3, min: 1, max: 100 });
     expect(stats([]).median).toBeNull();
