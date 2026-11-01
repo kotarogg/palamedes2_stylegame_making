@@ -1,5 +1,10 @@
 // V320-MEASURE-01 R2：役連鎖継続率（継続機会の定義。PM確認 2026-11-01）
 // ①受付中の自分の敗北＝未確定（主の率から除外、件数は別）②画面非表示と重なった機会＝主の率から除外 ③SINGLE のステージ間継続＝主の率から除外し別集計
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error 集計スクリプトは .mjs（型なし）
 import { analyze } from '../scripts/measure-analyze.mjs';
@@ -149,5 +154,49 @@ describe('役連鎖継続率（継続機会の定義）', () => {
     const und = Object.values(c.excluded.undetermined as Record<string, number>).reduce((x, y) => x + y, 0);
     expect(c.opportunities).toBe(decl);
     expect(c.main.success + c.main.failure + und + c.excluded.hiddenOverlap.success + c.excluded.hiddenOverlap.failure + c.excluded.stageCarry.success + c.excluded.stageCarry.failure).toBe(decl);
+  });
+});
+
+describe('F05：計測の停止中に宣言が進み、再開後に追加の宣言がない場合（報告書 0.6 の停止・再開の定義）', () => {
+  const expectResumeSuccess = (c: { main: Record<string, unknown>; continuationRate: number | null; unobservedDeclaresDuringStop: number; excluded: { undetermined: Record<string, number> }; opportunities: number }) => {
+    expect(c.main).toMatchObject({ success: 1, failure: 0, rate: 100, timeUnknownFailures: 0 });
+    expect(c.continuationRate).toBe(100);
+    expect(c.unobservedDeclaresDuringStop).toBe(1);
+    expect(c.excluded.undetermined).toEqual({});
+    expect(c.opportunities).toBe(1); // 停止中の未観測の宣言から始まる機会は数えない
+  };
+
+  it('再開後に記録終了：成功1・失敗0・100%、未観測1', () => {
+    const b = builder().roundStart().declare(100, 1).stop(200).resume(1000, 2);
+    expectResumeSuccess(chainOf(b.recs));
+  });
+
+  it('再開後に追加の宣言なしで時間切れ：成功1・失敗0・100%（時間切れは未観測の宣言の機会なので分母に入れない）、未観測1', () => {
+    const b = builder().roundStart().declare(100, 1).stop(200).resume(1000, 2).expire(1420).leave(1500);
+    expectResumeSuccess(chainOf(b.recs));
+  });
+
+  it('再開時に連鎖数が減っていた（停止中に切れて数え直した）：失敗確定（時刻不明）、数え直した宣言は未観測として別記', () => {
+    const b = builder().roundStart().declare(100, 1).declare(300, 2).declare(500, 3).stop(600).resume(2000, 1).expire(2500).leave(2600);
+    const c = chainOf(b.recs);
+    expect(c.main).toMatchObject({ success: 2, failure: 1, timeUnknownFailures: 1 });
+    expect(c.unobservedDeclaresDuringStop).toBe(1);
+    expect(c.opportunities).toBe(3);
+  });
+
+  it('正式な集計CLI：再現用の固定入力（tests/fixtures/f05_*.json）で出力JSONが期待値と一致', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'f05-'));
+    try {
+      const cli = fileURLToPath(new URL('../scripts/measure-analyze.mjs', import.meta.url));
+      for (const name of ['f05_resume_record_end', 'f05_resume_expired']) {
+        const input = fileURLToPath(new URL(`fixtures/${name}.json`, import.meta.url));
+        const out = join(dir, `${name}.out.json`);
+        const stdout = execFileSync(process.execPath, [cli, input, out], { encoding: 'utf8' });
+        expect(stdout, name).toContain('役連鎖の継続率 100%（成功 1・失敗確定 0。除外：未確定 {}');
+        expectResumeSuccess(JSON.parse(readFileSync(out, 'utf8')).chain);
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

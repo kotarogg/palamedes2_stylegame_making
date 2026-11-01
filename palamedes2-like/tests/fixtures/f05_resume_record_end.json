@@ -1,0 +1,176 @@
+{
+"header": {
+"format": "kotaro-puzzle-measure",
+"formatVersion": 1,
+"workId": "V320-MEASURE-01",
+"note": "F05 再現用の合成記録（実機の記録ではない）",
+"session": {
+"id": "F05-A-recordEnd"
+}
+},
+"records": [
+{
+"s": 0,
+"t": 0.0,
+"f": 0,
+"m": 1,
+"r": 1,
+"k": null,
+"e": "measureStart",
+"d": {
+"segment": 1
+}
+},
+{
+"s": 1,
+"t": 0.0,
+"f": 0,
+"m": 1,
+"r": 1,
+"k": null,
+"e": "matchStart",
+"d": {
+"why": "new",
+"mode": "mode1",
+"kind": "cpu",
+"humans": [
+0
+],
+"seed": 1,
+"profile": "B"
+}
+},
+{
+"s": 2,
+"t": 0.0,
+"f": 0,
+"m": 1,
+"r": 1,
+"k": 0,
+"e": "roundStart",
+"d": {
+"why": "new",
+"players": [
+{
+"id": 0,
+"chain": 0
+},
+{
+"id": 1,
+"chain": 0
+}
+],
+"playStartTick": 0
+}
+},
+{
+"s": 3,
+"t": 1666.7,
+"f": 0,
+"m": 1,
+"r": 1,
+"k": 100,
+"e": "ev",
+"d": {
+"type": "declare",
+"player": 0,
+"chainCount": 1
+}
+},
+{
+"s": 4,
+"t": 1666.7,
+"f": 0,
+"m": 1,
+"r": 1,
+"k": 100,
+"e": "st",
+"d": {
+"p": 0,
+"chain": 1,
+"chainRemaining": 600
+}
+},
+{
+"s": 5,
+"t": 3333.3,
+"f": 0,
+"m": 1,
+"r": 1,
+"k": 200,
+"e": "measureStop",
+"d": {
+"segment": 1,
+"reason": "user"
+}
+},
+{
+"s": 6,
+"t": 16666.7,
+"f": 0,
+"m": 1,
+"r": 1,
+"k": null,
+"e": "measureStart",
+"d": {
+"segment": 2
+}
+},
+{
+"s": 7,
+"t": 16666.7,
+"f": 0,
+"m": 1,
+"r": 1,
+"k": null,
+"e": "matchStart",
+"d": {
+"why": "measureStart",
+"mode": "mode1",
+"kind": "cpu",
+"humans": [
+0
+],
+"seed": 1,
+"profile": "B"
+}
+},
+{
+"s": 8,
+"t": 16666.7,
+"f": 0,
+"m": 1,
+"r": 1,
+"k": 1000,
+"e": "roundStart",
+"d": {
+"why": "measureStart",
+"players": [
+{
+"id": 0,
+"chain": 2
+},
+{
+"id": 1,
+"chain": 0
+}
+],
+"playStartTick": 0
+}
+},
+{
+"s": 9,
+"t": 16666.7,
+"f": 0,
+"m": 1,
+"r": 1,
+"k": 1000,
+"e": "st",
+"d": {
+"p": 0,
+"chain": 2,
+"chainRemaining": 420
+}
+}
+]
+}

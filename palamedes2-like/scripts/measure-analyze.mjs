@@ -128,8 +128,21 @@ export function chainOpportunities(recs, isHuman, hidden) {
         if (o.m !== r.m) continue;
         const pl = (r.d.players ?? []).find((x) => x.id === o.p);
         if (o.r === r.r) {
-          // 計測の再開（同じラウンドの全体を記録し直した）：停止中に切れていたら失敗確定（時刻不明）、宣言が進んでいたら次の declare で判定
-          if (pl && pl.chain === 0) close(key, o, 'failure', 'expiredDuringStop', r.t, { timeUnknown: true });
+          // 計測の再開（同じラウンドの全体を記録し直した）。再開時の連鎖数 c で、観測済みの宣言（連鎖数 n）の機会をその場で確定する：
+          //   c＝0：停止中に受付が切れた → 失敗確定（時刻不明）
+          //   c＞n：停止中に宣言が進んだ → 成功（時刻不明）。停止中の宣言（c−n 件）は未観測として別記し、機会として数えない
+          //   0＜c＜n：停止中に切れ、数え直した宣言が c 件ある → 失敗確定（時刻不明）。数え直した c 件は未観測として別記
+          //   c＝n：受付が続いている（停止中に切れて同じ数まで数え直した場合と記録上区別できない。報告書の限界に記載）→ 判定を続ける
+          if (!pl) continue;
+          const c = pl.chain ?? 0;
+          if (c === 0) close(key, o, 'failure', 'expiredDuringStop', r.t, { timeUnknown: true });
+          else if (c > o.n) {
+            unobservedDuringStop += c - o.n;
+            close(key, o, 'success', 'declaredDuringStop', r.t, { timeUnknown: true });
+          } else if (c < o.n) {
+            unobservedDuringStop += c;
+            close(key, o, 'failure', 'expiredDuringStop', r.t, { timeUnknown: true });
+          }
           continue;
         }
         if (pl && pl.chain > 0 && pl.chain === o.n && o.pendingEnd?.d.outcome === 'stageClear') {
