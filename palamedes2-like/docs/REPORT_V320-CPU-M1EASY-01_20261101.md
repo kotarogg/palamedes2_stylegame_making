@@ -31,7 +31,7 @@
 |---|---|---|
 | `src/data/cpu_config_mode1_easy.json`（新規） | MODE1 だけの待ち時間の表（`mandatoryWait.easy`・`decisionStopMs.easy`）。変更前の値も `base` に記録 | 共有の初級設定 `cpu_config_v320.json` は MODE2 の初級も使います。直接変えると MODE2 へ波及するため、MODE1 専用の設定として分けました |
 | `src/input/cpu.ts` | 下の3点を変更 | 必須判断待ち・判断停止・所要時間見積りの3か所が、同じ MODE1 の有効値を使うようにするため |
-| `tests/cpu_mode1_easy.test.ts`（新規、18件） | 指定値・変更前後の一致・半減処理の検査 | 提出条件 3・4 の確認のため |
+| `tests/cpu_mode1_easy.test.ts`（新規、16件） | 指定値・変更前後の一致・半減処理の検査 | 提出条件 3・4 の確認のため |
 | 既存のテスト4ファイル | 旧仕様（共有表）を単独で検証している箇所は、新しい MODE1 初級の設定を外して検証 | FIX-05（`mode1Adjust`）・FIX-06（`speed`）のときと同じ方針です。下の注を参照 |
 
 `src/input/cpu.ts` の変更点：
