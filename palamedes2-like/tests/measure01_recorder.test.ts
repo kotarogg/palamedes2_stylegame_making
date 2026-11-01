@@ -162,6 +162,13 @@ describe('保存形式・順序・ラウンドの連続・途中開始', () => {
     expect(an.excluded.hidden).toBeGreaterThan(0);
     expect(an.rounds.length).toBeGreaterThanOrEqual(2);
     expect(an.launch.human.arrive).toBeGreaterThan(0);
+    // 役連鎖の継続機会：人間の成立宣言がすべて、成功・失敗確定・未確定・除外のどれか1つに分類される
+    const c = an.chain;
+    const und = Object.values(c.excluded.undetermined as Record<string, number>).reduce((x: number, y: number) => x + y, 0);
+    const humanDecl = recs.filter((r) => r.e === 'ev' && r.d.type === 'declare' && r.d.player === 0).length;
+    expect(humanDecl).toBeGreaterThan(0);
+    expect(c.opportunities).toBe(humanDecl);
+    expect(c.main.success + c.main.failure + und + c.excluded.hiddenOverlap.success + c.excluded.hiddenOverlap.failure + c.excluded.stageCarry.success + c.excluded.stageCarry.failure).toBe(humanDecl);
     const lock = an.timeByStateMs['0'];
     expect(lock.operable).toBeGreaterThan(0);
     expect(lock.launch).toBeGreaterThan(0);

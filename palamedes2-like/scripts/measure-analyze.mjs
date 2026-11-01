@@ -65,6 +65,126 @@ export function hiddenIntervals(recs) {
   return out;
 }
 
+/**
+ * 役連鎖の継続機会（V320-MEASURE-01 R2：PM確認済みの定義）。
+ * 人間のプレイヤーの成立宣言1件＝継続機会1件。判定：
+ *   成功＝同じプレイヤーの次の成立宣言が連鎖数 n＋1
+ *   失敗確定＝次の成立より前に st.chain が 0（受付時間切れ）。補助として次の成立が連鎖数1でも失敗
+ *   未確定＝受付中にラウンド終了（自分の敗北・相手の敗北・引き分け・SINGLEの終了）・計測停止のまま終了・記録の終端
+ * 主の率＝成功÷（成功＋失敗確定）。次は主の率から除外し、別に数える：
+ *   未確定（理由別）、画面非表示／フォーカス喪失と重なった機会、SINGLE のステージをまたいだ機会（ステージ間継続）
+ * 計測の停止中に受付が切れた場合は失敗確定（時刻不明）として主の率に入れ、時間の指標には使わない。
+ * 停止中に宣言があった場合（再開時の連鎖数が n より大きい）は成功とし、停止中の宣言そのものは数えない（観測していないため）。
+ */
+export function chainOpportunities(recs, isHuman, hidden) {
+  const overlapsHidden = (a, b) => hidden.some(([h0, h1]) => a <= h1 && b >= h0);
+  const opps = [];
+  const open = new Map(); // `${m}/${p}` -> 機会
+  let unobservedDuringStop = 0;
+  const close = (key, o, outcome, reason, t, extra = {}) => {
+    o.outcome = outcome;
+    o.reason = reason;
+    o.endT = t;
+    o.hidden = overlapsHidden(o.t, t);
+    Object.assign(o, extra);
+    opps.push(o);
+    open.delete(key);
+  };
+  const censorReason = (end, p) => {
+    if (!end) return 'roundChange';
+    const { outcome, winner } = end.d;
+    if (outcome === 'win') return winner === p ? 'opponentDefeat' : 'ownDefeat';
+    if (outcome === 'draw') return 'draw';
+    if (outcome === 'gameOver') return 'ownDefeat';
+    return 'singleEnd'; // stageClear（次面へ引き継がなかった）・allStagesClear・clear
+  };
+  for (const r of recs) {
+    if (r.e === 'ev' && r.d.type === 'declare' && isHuman(r.m, r.d.player)) {
+      const key = `${r.m}/${r.d.player}`;
+      const o = open.get(key);
+      if (o) {
+        const n = r.d.chainCount;
+        if (n === o.n + 1) close(key, o, 'success', null, r.t, { nextK: r.k, nextR: r.r });
+        else if (n > o.n + 1) {
+          unobservedDuringStop += n - o.n - 1;
+          close(key, o, 'success', 'declaredDuringStop', r.t, { timeUnknown: true });
+        } else close(key, o, 'failure', 'restartedAt1', r.t, { timeUnknown: true });
+      }
+      open.set(key, { m: r.m, r: r.r, p: r.d.player, n: r.d.chainCount, k: r.k, t: r.t, stageCarry: false, gap: false, pendingEnd: null });
+      continue;
+    }
+    if (r.e === 'st' && r.d.p !== undefined && 'chain' in r.d) {
+      const key = `${r.m}/${r.d.p}`;
+      const o = open.get(key);
+      if (o && o.r === r.r && r.d.chain === 0) close(key, o, 'failure', 'expired', r.t, { timeUnknown: o.gap, failK: r.k });
+      continue;
+    }
+    if (r.e === 'ev' && r.d.type === 'roundEnd') {
+      for (const o of open.values()) if (o.m === r.m && o.r === r.r) o.pendingEnd = r;
+      continue;
+    }
+    if (r.e === 'roundStart') {
+      for (const [key, o] of [...open]) {
+        if (o.m !== r.m) continue;
+        const pl = (r.d.players ?? []).find((x) => x.id === o.p);
+        if (o.r === r.r) {
+          // 計測の再開（同じラウンドの全体を記録し直した）：停止中に切れていたら失敗確定（時刻不明）、宣言が進んでいたら次の declare で判定
+          if (pl && pl.chain === 0) close(key, o, 'failure', 'expiredDuringStop', r.t, { timeUnknown: true });
+          continue;
+        }
+        if (pl && pl.chain > 0 && pl.chain === o.n && o.pendingEnd?.d.outcome === 'stageClear') {
+          // SINGLE の次面へ連鎖数を引継ぎ（受付は最大へ戻る）：ステージ間継続として続けて判定する
+          o.stageCarry = true;
+          o.r = r.r;
+          o.pendingEnd = null;
+        } else close(key, o, 'undetermined', censorReason(o.pendingEnd, o.p), r.t);
+      }
+      continue;
+    }
+    if (r.e === 'measureStop') {
+      for (const o of open.values()) o.gap = true;
+      continue;
+    }
+    if (r.e === 'matchLeave' || (r.e === 'matchStart' && r.d.why !== 'measureStart')) {
+      for (const [key, o] of [...open]) close(key, o, 'undetermined', o.pendingEnd ? censorReason(o.pendingEnd, o.p) : o.gap ? 'measureStopped' : 'matchLeft', r.t);
+    }
+  }
+  const lastT = recs.length ? recs[recs.length - 1].t : 0;
+  for (const [key, o] of [...open]) close(key, o, 'undetermined', o.pendingEnd ? censorReason(o.pendingEnd, o.p) : o.gap ? 'measureStopped' : 'recordEnd', lastT);
+
+  const tally = (list) => {
+    const success = list.filter((o) => o.outcome === 'success').length;
+    const failure = list.filter((o) => o.outcome === 'failure').length;
+    return { success, failure, rate: success + failure ? Math.round((success / (success + failure)) * 1000) / 10 : null };
+  };
+  const main = opps.filter((o) => o.outcome !== 'undetermined' && !o.stageCarry && !o.hidden);
+  const byLength = {};
+  for (const o of main) (byLength[`${o.n}→${o.n + 1}`] ??= []).push(o);
+  const undetermined = {};
+  for (const o of opps) if (o.outcome === 'undetermined') inc(undetermined, o.reason);
+  // 成功した主の機会：役処理の完了（roleEnd）から次の成立まで
+  const roleEndToNext = [];
+  for (const o of main) {
+    if (o.outcome !== 'success' || o.timeUnknown) continue;
+    const re = recs.find((x) => x.e === 'ev' && x.d.type === 'roleEnd' && x.m === o.m && x.d.player === o.p && x.r === o.r && x.k >= o.k && x.k <= o.nextK);
+    if (re) roleEndToNext.push((o.nextK - re.k) * TICK_MS);
+  }
+  return {
+    definition: '主の率＝成功÷（成功＋失敗確定）。未確定（理由別）・非表示と重なった機会・SINGLEのステージ間継続は主の率から除外し別集計',
+    opportunities: opps.length,
+    main: { ...tally(main), timeUnknownFailures: main.filter((o) => o.outcome === 'failure' && o.timeUnknown).length },
+    byLength: Object.fromEntries(Object.entries(byLength).sort((a, b) => parseInt(a[0]) - parseInt(b[0])).map(([k, v]) => [k, tally(v)])),
+    excluded: {
+      undetermined,
+      hiddenOverlap: { ...tally(opps.filter((o) => o.outcome !== 'undetermined' && !o.stageCarry && o.hidden)), undetermined: opps.filter((o) => o.outcome === 'undetermined' && o.hidden).length },
+      stageCarry: { ...tally(opps.filter((o) => o.outcome !== 'undetermined' && o.stageCarry)), undetermined: opps.filter((o) => o.outcome === 'undetermined' && o.stageCarry).length },
+    },
+    unobservedDeclaresDuringStop: unobservedDuringStop,
+    roleEndToNextDeclareMs: dist(roleEndToNext, 250),
+    raw: opps.map((o) => ({ m: o.m, r: o.r, p: o.p, n: o.n, k: o.k, outcome: o.outcome, reason: o.reason, hidden: o.hidden, stageCarry: o.stageCarry, timeUnknown: !!o.timeUnknown })),
+  };
+}
+
 export function analyze(json) {
   const recs = json.records;
   const hidden = hiddenIntervals(recs);
@@ -320,7 +440,7 @@ export function analyze(json) {
   const declares = humanEv('declare');
   const declareIntervals = [];
   const readyToDeclare = [];
-  const chainNext = { declares: 0, continued: 0 };
+  const chainLegacy = { declares: 0, continued: 0 }; // 旧定義（全宣言を分母）。比較用に残す
   const byPR = (list) => {
     const g = {};
     for (const r of list) (g[`${r.m}/${r.r}/${r.d.player}`] ??= []).push(r);
@@ -330,8 +450,8 @@ export function analyze(json) {
   const ready = byPR(humanEv('roleAvailable'));
   for (const [key, list] of Object.entries(decl)) {
     for (let i = 0; i < list.length; i++) {
-      chainNext.declares++;
-      if (i + 1 < list.length && list[i + 1].d.chainCount === list[i].d.chainCount + 1) chainNext.continued++;
+      chainLegacy.declares++;
+      if (i + 1 < list.length && list[i + 1].d.chainCount === list[i].d.chainCount + 1) chainLegacy.continued++;
       if (i > 0 && okSpan(list[i - 1].t, list[i].t)) declareIntervals.push((list[i].k - list[i - 1].k) * TICK_MS);
     }
     // 成立（roleAvailable）→ 次の宣言
@@ -340,6 +460,7 @@ export function analyze(json) {
       if (next && okSpan(ra.t, next.t)) readyToDeclare.push((next.k - ra.k) * TICK_MS);
     }
   }
+  const chainA = chainOpportunities(recs, isHuman, hidden);
   const pinch = { start: 0, recovered: 0, defeated: 0, endOther: 0 };
   for (const [key, list] of Object.entries(byPR(humanEv('pinchWarn')))) {
     for (const r of list) {
@@ -369,7 +490,7 @@ export function analyze(json) {
 
   return {
     format: 'kotaro-puzzle-measure-analysis',
-    version: 1,
+    version: 2, // 2：役連鎖継続率を継続機会の定義へ（旧定義は chain.legacy）
     source: { session: json.header?.session?.id ?? null, records: recs.length, formatVersion: json.header?.formatVersion ?? null, profile: json.header?.settings?.selectedProfile ?? null },
     notes: [
       '判断の正誤・最善手率は採点しない（要件10）',
@@ -389,7 +510,11 @@ export function analyze(json) {
     launch: { human: launchStats(humanEv('arrive')), cpu: launchStats(cpuEv('arrive')) },
     streakCut: { reserved: cuts.filter((r) => r.d.state === 'reserved').length, ended: ended.length, endedLength: dist(ended.map((r) => r.d.count), 1) },
     declare: { count: declares.length, intervalMs: dist(declareIntervals, 500), roleReadyToDeclareMs: dist(readyToDeclare, 250), fails: humanEv('declareFail').length },
-    chain: { ...chainNext, continuationRate: chainNext.declares ? Math.round((chainNext.continued / chainNext.declares) * 1000) / 10 : null },
+    chain: {
+      ...chainA,
+      continuationRate: chainA.main.rate,
+      legacy: { ...chainLegacy, rate: chainLegacy.declares ? Math.round((chainLegacy.continued / chainLegacy.declares) * 1000) / 10 : null, note: '旧定義（全宣言を分母、ラウンドで区切る）。比較用' },
+    },
     pinch: { ...pinch, recoveryRate: pinch.recovered + pinch.defeated ? Math.round((pinch.recovered / (pinch.recovered + pinch.defeated)) * 1000) / 10 : null },
     rounds,
     matches,
@@ -405,7 +530,7 @@ function summary(a) {
     `新規押下の間隔 中央値 ${a.newPressIntervalMs.median}ms（${a.newPressIntervalMs.n}件）／操作可能→次の実行 中央値 ${a.operableToNextExecuteMs.median}ms（${a.operableToNextExecuteMs.n}件）`,
     `打ち上げ成功率 人間 ${a.launch.human.successRate}%（${a.launch.human.arrive}）／CPU ${a.launch.cpu.successRate}%（${a.launch.cpu.arrive}）`,
     `連鎖切れ ${a.streakCut.ended}回（長さ中央値 ${a.streakCut.endedLength.median}）／宣言 ${a.declare.count}回・間隔中央値 ${a.declare.intervalMs.median}ms・成立→宣言 中央値 ${a.declare.roleReadyToDeclareMs.median}ms`,
-    `役連鎖の継続率 ${a.chain.continuationRate}%／ピンチ ${a.pinch.start}回・回復率 ${a.pinch.recoveryRate}%`,
+    `役連鎖の継続率 ${a.chain.continuationRate}%（成功 ${a.chain.main.success}・失敗確定 ${a.chain.main.failure}。除外：未確定 ${JSON.stringify(a.chain.excluded.undetermined)}・非表示 ${a.chain.excluded.hiddenOverlap.success + a.chain.excluded.hiddenOverlap.failure}・ステージ間 ${a.chain.excluded.stageCarry.success + a.chain.excluded.stageCarry.failure}）／ピンチ ${a.pinch.start}回・回復率 ${a.pinch.recoveryRate}%`,
     `ラウンド ${a.rounds.length}／試合 ${a.matches.length}。除外：非表示 ${a.excluded.hidden}・停止区間 ${a.excluded.segmentGap}`,
     `状態別の時間（ms）：${JSON.stringify(a.timeByStateMs)}`,
   ].join('\n');

@@ -1,6 +1,6 @@
 {
  "format": "kotaro-puzzle-measure-analysis",
- "version": 1,
+ "version": 2,
  "source": {
   "session": "M01-20261101-015655-eb70",
   "records": 167,
@@ -374,9 +374,50 @@
   "fails": 0
  },
  "chain": {
-  "declares": 0,
-  "continued": 0,
-  "continuationRate": null
+  "definition": "主の率＝成功÷（成功＋失敗確定）。未確定（理由別）・非表示と重なった機会・SINGLEのステージ間継続は主の率から除外し別集計",
+  "opportunities": 0,
+  "main": {
+   "success": 0,
+   "failure": 0,
+   "rate": null,
+   "timeUnknownFailures": 0
+  },
+  "byLength": {},
+  "excluded": {
+   "undetermined": {},
+   "hiddenOverlap": {
+    "success": 0,
+    "failure": 0,
+    "rate": null,
+    "undetermined": 0
+   },
+   "stageCarry": {
+    "success": 0,
+    "failure": 0,
+    "rate": null,
+    "undetermined": 0
+   }
+  },
+  "unobservedDeclaresDuringStop": 0,
+  "roleEndToNextDeclareMs": {
+   "n": 0,
+   "median": null,
+   "mean": null,
+   "min": null,
+   "max": null,
+   "p10": null,
+   "p90": null,
+   "hist": {},
+   "raw": []
+  },
+  "raw": [],
+  "continuationRate": null,
+  "legacy": {
+   "declares": 0,
+   "continued": 0,
+   "rate": null,
+   "note": "旧定義（全宣言を分母、ラウンドで区切る）。比較用"
+  }
  },
  "pinch": {
   "start": 0,
