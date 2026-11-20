@@ -1,0 +1,235 @@
+{
+ "root": "/tmp/claude-0/-home-user-palamedes2-stylegame-making/2b6abd4e-7fcf-58ad-8259-78b499d3afaa/scratchpad/unz/kotaro_puzzle_v3.2.0-rc.1_web_1c57b85/site",
+ "pass": 38,
+ "total": 38,
+ "results": [
+  {
+   "group": "PC",
+   "name": "起動・ビルド情報（build-info.json）",
+   "pass": true,
+   "detail": "{\"name\":\"コタローくんパズル\",\"version\":\"3.2.0\",\"release\":\"v3.2.0-rc.1\",\"commit\":\"1c57b850140c4095a56fd06c399fa0d0779b7bd4\",\"builtAt\":\"2026-11-20T16:07:59.857Z\"}"
+  },
+  {
+   "group": "PC",
+   "name": "スマホ用の操作画面を出さない（pointer: fine）",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "PC",
+   "name": "自動検証用フック（__p2like）が公開版に無い",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "PC",
+   "name": "採用フォントの読込",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "PC",
+   "name": "キーボード：タイトル→メインメニュー（画面が変化）",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "PC",
+   "name": "キーボード：MODE1 シングル開始・移動・打上げ（画面が変化）",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "PC",
+   "name": "コンソールエラー・ページエラーなし",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "PC",
+   "name": "HTTP 4xx/5xx なし",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ横",
+   "name": "タッチ端末で操作画面を自動表示（?touch なし）",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ横",
+   "name": "横スクロールが出ない",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ横",
+   "name": "ゲーム画面が画面内に収まる",
+   "pass": true,
+   "detail": "{\"ok\":true,\"r\":[136,54,494,278],\"vw\":750,\"vh\":342}"
+  },
+  {
+   "group": "スマホ横",
+   "name": "タイトルに「タップしてはじめる」・版表示 v3.2.0-rc.1",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ横",
+   "name": "操作設定パネル：版表示（v3.2.0-rc.1・コミット）",
+   "pass": true,
+   "detail": "v3.2.0-rc.1 · 1c57b85"
+  },
+  {
+   "group": "スマホ横",
+   "name": "メインメニューをボタンで表示",
+   "pass": true,
+   "detail": "MODE1,MODE2,CPU観戦,オプション,遊び方"
+  },
+  {
+   "group": "スマホ横",
+   "name": "MODE1：同一端末の2P対戦を表示しない",
+   "pass": true,
+   "detail": "シングル,CPU対戦"
+  },
+  {
+   "group": "スマホ横",
+   "name": "MODE2：同一端末の2P対戦を表示しない",
+   "pass": true,
+   "detail": "シングル,CPU対戦"
+  },
+  {
+   "group": "スマホ横",
+   "name": "MODE1 シングル開始：操作ボタン（↑せり上げ・◀・▶・打上げ・列入替・役宣言）",
+   "pass": true,
+   "detail": "true ↑ せり上げ,◀,▶,打上げ,列入替,役宣言"
+  },
+  {
+   "group": "スマホ横",
+   "name": "タッチ：押下中はボタンを強調表示・移動・打上げ・列入替（画面が変化）",
+   "pass": true,
+   "detail": "held=true"
+  },
+  {
+   "group": "スマホ横",
+   "name": "中断：再開案内を表示し、ゲームが止まる（画面が静止）",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ横",
+   "name": "タップで再開（案内が消え、進行再開）",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ横",
+   "name": "「終了」で終了確認を表示（ゲーム外の操作に切替）",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ横",
+   "name": "コンソールエラー・ページエラーなし",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ横",
+   "name": "HTTP 4xx/5xx なし",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホMODE2",
+   "name": "操作方法「フリック移動」を端末に保存",
+   "pass": true,
+   "detail": "flick"
+  },
+  {
+   "group": "スマホMODE2",
+   "name": "再読込後もフリック移動を維持",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホMODE2",
+   "name": "MODE2：右は打上げのみ・左はフリック面（せり上げなし）",
+   "pass": true,
+   "detail": "打上げ / 左右に操作"
+  },
+  {
+   "group": "スマホMODE2",
+   "name": "フリック：右へなぞると右移動として認識・離すと解除・画面が変化",
+   "pass": true,
+   "detail": "right cleared=true"
+  },
+  {
+   "group": "スマホMODE2",
+   "name": "コンソールエラー・ページエラーなし",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ切替",
+   "name": "MODE1 フリック方式：左はフリック面（↑せり上げ表示）・右は打上げ／列入替／役宣言",
+   "pass": true,
+   "detail": "↑ せり上げ / 打上げ,列入替,役宣言"
+  },
+  {
+   "group": "スマホ切替",
+   "name": "MODE1 フリック：上へなぞるとせり上げとして認識・画面が変化",
+   "pass": true,
+   "detail": "manualRise"
+  },
+  {
+   "group": "スマホ切替",
+   "name": "ボタン移動へ戻す切替・端末に保存・表示「操作：ボタン」",
+   "pass": true,
+   "detail": "buttons"
+  },
+  {
+   "group": "スマホ切替",
+   "name": "ボタン方式に戻ると左右ボタン・せり上げボタンを表示（フリック面なし）",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ切替",
+   "name": "ゲーム中は操作設定ボタンを出さない",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ切替",
+   "name": "コンソールエラー・ページエラーなし",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ縦",
+   "name": "縦向き：操作画面を表示・横スクロールなし",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "スマホ縦",
+   "name": "コンソールエラー・ページエラーなし",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "PC ?touch=1",
+   "name": "PC で ?touch=1 を付けるとスマホ用画面を確認できる",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "group": "PC ?touch=1",
+   "name": "コンソールエラー・ページエラーなし",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

@@ -1,0 +1,117 @@
+PASS  起動（画像49・JSON5・フォント・音声読込）→タイトル  (866ms)
+PASS  明示読込一覧の49PNG＋v3.1.0追加9PNG＋遊び方UI3PNG＋V320-FIX-04追加9PNG（v320_fix04_assets.json）だけを取得（旧版・見本・previews・source を読まない）、JSON9件  (png=70 json=additional_assets_v310.json,credits_text.json,font_styles.json,game_loading_list.json,graphics_manifest_v3.json,screen_layout_v2.json,tutorial_assets.json,tutorial_font_16.json,v320
+PASS  音声：SE39＋ボイス75（ピンチ3本を含む。計114）を HTTP200 で取得  (wav200=117)
+PASS  ［納品］BGM 3曲を HTTP200 で取得（必須117本）  (bgm200=3 wav200=117)
+PASS  旧音（sfx_piece_success／role_success／chain／旧 sfx_field_rise）を取得しない
+PASS  ［納品］採用フォント NotoSansJP-VF.ttf を取得し、読込完了後に描画（代替フォントへ退避しない）  ({"fontPresent":true,"ttf":[200,"/gfx/fonts/NotoSansJP-VF.ttf"],"font":{"loaded":true,"check":true}})
+PASS  マニフェスト graphics-v3  (graphics-v3-delivery-r1-20261021)
+PASS  DPR1・1280×720：収まる最大＝実画素2倍（描画バッファ1280、CSS 1280px）  ({"css":"1280px","buf":1280,"mode":"fit"})
+FAIL  拡大時にドットを滲ませない(image-rendering)  (crisp-edges)
+PASS  タイトル：title_logo を原寸で描画（画素一致）  ({"opaque":39100,"bad":0})
+PASS  R1・S01：パッドAだけで音声有効化を試み running、タイトル→メインメニュー。その入力はメニューへ渡らない（MODE1を開かない）  (before={"ctx":false,"attempted":false} after={"ctx":"running","attempted":true,"scene":"MenuScene","depth":1,"cursor":0})
+PASS  修正R6・タイトルはメニュー曲（自動再生を強制せず、有効化後にデコード完了を待って開始）。タイトル→メニューで再始動しない  ({"wait":{"ok":true,"waitedMs":131,"diag":{"decoded":117,"pendingDecode":0,"missing":[],"ctxState":"running","ctxTime":0.612,"nodes":[{"id":"menu","start":0.601,"end":63.381,"duration":62.78,"stoppedAt":null,"loop
+PASS  メインメニュー（MODE1／MODE2／CPU観戦／オプション／遊び方）：両脇の menu_kotaro・menu_akane を原寸・原点どおりに描画（画素一致）  ([{"opaque":6879,"bad":0},{"opaque":9800,"bad":0}])
+PASS  v3.1.0 CPU対戦：メニューからキャラクター選択へ（初期カーソル＝コタロー、2Pカーソルなし）  ({"scene":"CpuCharacterSelectScene","ch":"kotaro"})
+PASS  パッドだけで MODE1 CPU対戦を開始：1Pコタロー対アカネ、READY／GO の担当はアカネ（同じ話者）・実ノードで再生開始  ({"padStart":{"chars":["kotaro","akane"],"ann":"akane"},"readyNode":{"id":"akane_ready","kind":"voice","start":2.7921995464852607,"duration":0.5098185941043084,"loop":false,"stoppedAt":null},"goNode":{"id":"akane_go","kind":"voice","star
+PASS  対戦BGM（versus）を要求
+PASS  受攻撃ストック：処理中ブロック（上）と nextPending（下）を混ぜず表示。予約高さ維持  ({"v":{"blockLines":6,"pendingLines":12,"blockY":148,"pendingY":186,"reservedPx":32},"evs":[["blockStart",211,7],["waveStart",211,3],["attackRow",211,6]]})
+PASS  役宣言：代表役（先頭ロゴ）と代表ボイス（役名、または20%で代替の攻撃ボイス。両方は鳴らさない）を同時開始。役宣言SEは連鎖段階 se_role_declare_0N（代表ボイスと同時なので −2dB）、旧成立音・連鎖音を鳴らさない  ({"decl":{"tick":235,"logos":[15],"chain":1},"roleShow":{"logo":15,"since":235},"altKind":"role","re
+PASS  Esc：終了確認ダイアログ（dialog_panel）、確認中もゲームは進行（一時停止なし）  (dialog=1 tick 262→292)
+PASS  「続ける」でダイアログを閉じる
+PASS  v3.1.0 勝敗演出：敗者ボイス→（640ms）落下開始で se_character_fall→（700ms＋200ms）勝者演出の開始で勝利SE・勝者ボイス・クラッカーSEが同時（人が勝ったCPU対戦は敗北SEなし、勝利SEは1回）  ({"order":[0,617,1517,1517,1517],"plan1":{"kind":"versus","winner":0,"loser":1,"startTick":308,"fallStartTick":346,"fallEndTick":388,"winnerTi
+PASS  接着音 sfx_attack_row：実適用1ラインにつき1回（実ノード）  (rows=1 log=1 nodes=1)
+PASS  修正R2：上昇音 se_field_rise は攻撃の実適用1段につき1回（自然・手動上昇を含めた要求数が一致、二重要求なし）  (rows=1 expected=1 requested=1)
+PASS  クラッカーは1回だけ（勝者＝1P・左側へ向けて左右反転）
+PASS  勝者演出の開始後に決定入力を受付
+PASS  B1：CPU対戦の第2ラウンドでも CPU が開始直後から操作（初級の必須待ち＋追加停止の最大1.8秒＋0.2秒以内）  ({"round":2,"wins":[1,0],"firstCpuCmd":118})
+PASS  CPU対戦で勝利：次の相手へ／同じ相手と再戦／キャラ選択へ／メニューへ  ({"state":"matchResult","choices":["次の相手へ","同じ相手と再戦","キャラ選択へ","メニューへ"]})
+PASS  「次の相手へ」：相手が東北ずん子に進み、勝利数0から。READY担当は相手（ずん子）  ({"chars":["kotaro","zunko"],"wins":[0,0],"opp":"zunko","ann":"zunko"})
+PASS  キャラ別モーションシート：コタローS1・ずん子S13  (S1,S13)
+PASS  CPU対戦で敗北：同じ相手に再挑戦／キャラ選択へ／メニューへ  (同じ相手に再挑戦,キャラ選択へ,メニューへ)
+PASS  再挑戦：同じ相手（ずん子）のまま、勝利数0から。前の結果の声・SEを持ち越さない  ({"re":{"chars":["kotaro","zunko"],"wins":[0,0],"opp":"zunko"},"leftovers":[]})
+PASS  メインメニューへ戻ると CPU の相手順はアカネへ戻る（保存しない）  (akane)
+PASS  MODE1 › 2P対戦 → キャラクター選択
+PASS  同じフレームの入力は 1P→2P の順：1Pはアカネを飛ばしてずん子、2Pはずん子を飛ばしてコタロー（カーソル重複なし）  (2,0)
+PASS  決定済みカーソルは固定、戻るは自分の決定だけ取消。決定ボイス（select）は決定時に1回  ({"cs2":{"c":[2,0],"l":[true,false]},"cs3":[false,false],"voices":["zunko_select","zunko_select","kotaro_select"]})
+PASS  修正R3：両者決定でただちに 2P対戦開始（固定待機なし。1P ずん子・2P コタロー）。READY担当は両者のどちらか  ({"scene":"GameScene","chars":["zunko","kotaro"],"ann":"kotaro"})
+PASS  R2：1P終了確認中も 2P（←・,）の移動と発射は 2P へ届き、1P の確認カーソルは動かない  ({"q0":{"dlg":[[0,0]],"sel2":2,"n":0},"q1":{"dlg":[[0,0]],"sel2":1,"launch2":true}})
+PASS  2P対戦の終了：同じキャラで再戦／キャラ選択へ／メニューへ  (同じキャラで再戦,キャラ選択へ,メニューへ)
+PASS  「キャラ選択へ」→ 両者未決定の戻るで前のメニュー（MODE1）へ  ({"back":"CharacterSelectScene","back2":{"scene":"MenuScene","title":"MODE1"}})
+PASS  修正R3・R6：ほぼ同時の確定でもコタロー・アカネの確定ボイスが各1回、途中停止せず終端まで再生（AudioContext時刻で判定。READYと重なっても止まらない、試合開始は待たない）  ({"selScene":{"scene":"GameScene","chars":["kotaro","akane"]},"wait":{"ok":true,"waitedMs":1867,"diag":{"decoded":117,"pendingDecode":0,"missing":[],"ctxS
+PASS  修正R3：メニュー復帰で声を持ち越さない  ([])
+PASS  修正R5（V320-FIX-06 更新）：予約29・現残1・待機28→12相殺→6受信。内部の待機22（消失対象を含めない）、数量数字は描かない、爆発は相殺時の位置のまま画面内、小爆発が前面に描かれている（画素照合）  ({"pending":22,"label":null,"y0":314,"y1":314,"inScreen":true,"maxBottom":356,"burstFront":{"opaque":16,"bad":0},"af
+PASS  修正R5：2Pの爆発中にブロック開始 → 相殺した3の表示を即時打切り、有効な7だけで現ブロック（囲いあり）。数量は減らし直さず、演出は復活しない  ({"vanishBefore":6,"vanishAfter":0,"blockStart":7,"icons":2,"frames":1,"xd":0,"inScreen":true,"blockIcon":{"opaque":200,"bad":0},"canceled":3,"revived":0})
+PASS  v3.1.0 修正R1：開始前待機中は READY・GO とも描かない（最初・新ラウンド・再戦。画素照合、全位相）。待機後に既存の READY→GO へ進む  ({"s0":{"frames":59,"drawn":[],"readyAfter":true,"tickMax":0},"s1":{"frames":60,"drawn":[],"readyAfter":true,"tickMax":0},"s2":{"frames":61,"drawn":[],"readyAfter":true,"tickMax":0},"round":1})
+PASS  v3.1.0 開始前待機：表示後1000msはゲームを進めない（tick 0・READY前）。待機中の発射を解除後へ持ち越さない  ({"h0":{"holding":true,"tick":0},"h1":{"holding":true,"tick":0},"voiceDuringHold":0,"released":1012,"after":{"launches":0,"tick":90},"readyAfter":true})
+PASS  v3.1.0 ヒビ：数字セルの(2,0)へ重ね、数字の不透明部でマスク（全数字×3種×A/B/C で数字外0px・数字内に残る）。17px 縮小・複数桁でも外へ出ない  ({"cases":90,"outside":0,"invisible":[],"outside17":0,"inside17":56})
+PASS  V320-FIX-04 連鎖HUD：旧位置（上部の打上連鎖見出し画像）へ描かない。見出しPNG（役・連鎖・打上・連鎖）を左右の縦帯の表の位置（1P x2／2P x594、y129・166・256・276）へ原寸で描画（画素一致）  ({"old":[{"opaque":1244,"bad":1244},{"opaque":1244,"bad":1244}],"titles":[[{"id":"label_role_main","x":2,"y":129,"opaque":1044,"bad":0},
+PASS  V320-FIX-03/04 連鎖HUD：数字 0／3／12／19／99／999 とヒビあり／なしで、変化は縦帯の中だけ（盤面・ゲージ・受攻撃ストック・画面上部へ出ない）。攻撃加算の表示なし。V320-FIX-06 の攻撃加算（12・19連鎖＝＋2）  ({"sweep":{"0":{"outside":0,"inside":2207},"3":{"outside":0,"inside":1423},"12":{"outside":0,"inside":2730},"19":
+PASS  v3.1.0 受攻撃ストックの中央配置：1P（予約29＋待機22＋相殺12）・2P（予約10＋待機11＋相殺3）とも中央エリア x264〜376・下端360以内。V320-FIX-06：数量数字は1P・2Pとも描かない（内部の待機は22・11）  ({"stock":[{"n":8,"minX":269,"maxX":291,"maxY":322},{"n":8,"minX":349,"maxX":371,"maxY":226}],"pending":[22,11]})
+PASS  V320-FIX-05 ピンチ警告：残り猶予に同期した「ピンチ X.X秒」を2Pの盤面上部（408,16,144,14）にだけ描画（大型3/2/1なし）  ({"pinch":{"text":"ピンチ 2.3秒","cx":480,"y":17,"area":{"x":408,"y":16,"w":144,"h":14}},"px":{"inside":69,"outside":0}})
+PASS  v3.2.0 対戦の最終結果：勝敗演出中は中央「対戦結果」を出さない（HUD見出しなし）。演出後の結果パネルに「対戦結果」（原寸・画素一致）と再戦・戻る  ({"bannerDuring":["null","null","null","null","null","null","null","accept"],"heads":{"state":"matchResult","match":{"opaque":5947,"bad":0},"choices":["同じキャラで再戦","キ�
+PASS  v3.1.0 CPU対戦キャラ選択：キャンセルで「メニューに戻りますか？」（初期「戻らない」、背後は動かない）→ 戻らないで位置維持 → アカネで開始、相手はコタロー・READY担当も相手、CPU設定のキャラも一致  ({"d0":{"dialog":0,"ch":"akane"},"d1":{"scene":"CpuCharacterSelectScene","dialog":null,"ch":"akane"},"st":{"chars
+PASS  パッド2台だけでキャラ選択→2P対戦（1P ずん子・2P コタロー）  (zunko,kotaro)
+PASS  R2：パッド2台：1P確認中も 2P のパッドで移動・発射、1P の確認は動かない  ({"pq0":{"dlg":[[0,0]],"sel":2,"n":0},"pq1":{"dlg":[[0,0]],"sel":1,"launch":true}})
+PASS  パッドだけで終了確認「終了する」→メニュー
+PASS  シングル：READY担当はコタロー、BGM single  (single,ready,kotaro_ready,go,kotaro_go)
+PASS  打ち上げ成功SE：連続取得1→2で se_launch_success_01→02。旧成功音なし  (piece_launch,launch_success_1,piece_launch,launch_success_2)
+PASS  v3.2.0 r GAME OVER：採用版 S9 の show_game_over A/B/C（切出し［0／160／320,192,160,64］）を結果パネルへ原寸描画（表示中の位相と画素一致）  ({"A":{"rect":[0,192,160,64],"opaque":7136,"bad":3982},"B":{"rect":[160,192,160,64],"opaque":7136,"bad":0},"C":{"rect":[320,192,160,64],"opaque":7136,"bad":3982}})
+PASS  ゲームオーバー：結果パネル（再挑戦／メニューへ）、クラッカーなし  ({"outcome":"gameOver","cracker":null,"choices":["再挑戦","メニューへ"]})
+PASS  R3：ステージクリアで sfx_stage_clear が途中停止せず終端まで再生。シングル成功はクラッカーあり  ({"outcome":"stageClear","plan":{"kind":"stageClear","winner":0,"loser":null,"startTick":131,"fallStartTick":131,"fallEndTick":131,"winnerTick":131,"crackerTick":131,"crackerToward":0,"acceptTick":191},"wait":{"ok":true,"waitedMs":1309,"diag":{"decoded":117,"pen
+PASS  R3：最終面クリア＋全消し同時で sfx_all_stages_clear・sfx_all_clear とも終端まで再生  ({"outcome":"allStagesClear","wait":{"ok":true,"waitedMs":2368,"diag":{"decoded":117,"pendingDecode":0,"missing":[],"ctxState":"running","ctxTime":91.91,"nodes":[{"id":"all_clear","start":89.731,"end":90.451,"duration":0.72,"stoppedAt":null,"loop":false},{"id":"all_stages_clear","start
+PASS  MODE2 シングル：42個から開始  ({"mode":"mode2","remaining":42,"n":1})
+PASS  V320-FIX-04 MODE2 シングル：場の更新0回のクリアで「ノーリセットクリア」を付記し、総合ベストとノーリセット専用ベストを tick で記録（達成回数は加算しない）  ({"outcome":"clear","refresh":0,"label":{"text":"ノーリセットクリア！","x":160,"y":240},"ticks":45,"best":{"bestMs":750,"bestTicks":45,"rule":"mode2_V320-FIX-04"},"n
+PASS  MODE2 シングル：盤面を空にしてクリア
+PASS  MODE2 CPU対戦：CPUが打ち上げて残数が減る  ({"mode":"mode2","r":[42,31]})
+PASS  MODE2：両者（シングルは本人）が出せないと 3・2・1 のカウントダウン  ([3])
+PASS  MODE2 に MODE1 専用の処理・音（役・攻撃・相殺・危険・段階2以上の成功音）が混入しない
+PASS  オプション：音／操作／対戦／表示／クレジット／遊び方／デモ再生／設定初期化／戻る
+PASS  音量変更（BGM 100→90）が設定に保存される  (90)
+PASS  声の再生中は BGM を −4dB 減衰し、終了後に戻す（ゲイン値の検査）  ({"during":0.6309573650360107,"after":1})
+PASS  表示設定：「収まる最大」と固定倍率。収まらない倍率は無効（選択不可）と表示  (画面表示倍率:収まる最大:false | ×3・×4（現在無効）:選択不可:true | 全画面:オフ:false | 出せるピースの表示:オン:false | 戻る:undefined:false)
+PASS  クレジット画面へ
+PASS  クレジット：左右でページ切替、URLを選んで決定で外部ブラウザ（window.open）、ページ位置を維持  ({"urls":["https://x.com/Vno_kotaro"],"page":1,"scene":"CreditsScene"})
+PASS  遊び方：メインメニューの既存入口から目次へ
+PASS  設定初期化の確認ダイアログ
+PASS  タイトルの無操作20秒で暗転（600ms＋黒300ms）して放置デモ（マウス移動ではリセットしない）。最初は説明（基本操作）  ({"leaving":{"scene":"TitleScene","leaving":433.3000000000029},"idle":{"scene":"DemoScene","by":"idle","ch":"basic"}})
+PASS  デモ中：保持入力（リピート）では終了せず、新しい決定入力で暗転→タイトル。その入力でメニューへ進まない  ({"afterRepeat":false,"ending":{"ending":true,"phase":"fadeOut"},"scene":"TitleScene"})
+PASS  タイトル：有効なキー入力で無操作時間をリセット  (50.10000000000582)
+PASS  オプション「デモ再生」：最初の説明から。開始の決定・押したままのボタン・小さな傾きでは終了しない  ({"opt":{"scene":"DemoScene","by":"option","ch":"basic","ending":false},"drift":false})
+PASS  パッドの新しいボタン押下で終了（暗転へ）
+PASS  マウスクリックで終了してタイトルへ
+PASS  非アクティブ中は進行・音を止め、復帰でタイトルへ（本編は変更なし）  ({"tick":186,"after":186,"logs":0,"bgm":null})
+PASS  放置デモの章順：基本操作→4/4/6→ピンチ→SINGLE→対戦→タイトル（完走後はタイトルで20秒を再計測）  (basic,roles,pinch,single,versus → TitleScene)
+PASS  4/4/6 教材（ブラウザ）：連続取得14回・役連鎖3回が実処理で成立  ({"ch":"roles","phase":"fadeOut","maxStreak":14,"chains":[1,2,3],"gen":2})
+PASS  修正R1：対戦デモの決着後、中央の「対戦結果」を描かない。左右の敗北／勝利は描き、敗者の落下・勝者ボイス・クラッカーは鳴る（V320-FIX-05：seed 5 で勝者は seed に依存）  ({"winner":0,"banner":null,"match":{"opaque":5947,"bad":5946},"loseSide":{"opaque":7084,"bad":0},"winSide":{"opaque":6419,"bad":0},"log":["akane_lose","charact
+PASS  暗転中も戻る案内を残し、形式の位置を保つ（シングル右下2行／対戦中央1行）。案内以外は黒  ({"singleBlack":{"hint":6148,"outside":0},"versusHint":15600,"versusBlack":{"hint":6148,"outside":0}})
+PASS  説明・案内の文字はすべて共通ビットマップフォント（V320-FIX-04 採用版388字）に収録（代替描画なし）  (未収録：)
+PASS  役一覧：16役・18ページ（オールマーク・フラッシュは4個／6個）、役名ロゴは本体の表示名対応どおり（R01〜R16）  ([[[0],0,4,2,2],[[1],0,4,2,2],[[2],0,4,2,2],[[3],0,4,3,3],[[4],0,6,4,5],[[5],0,6,4,5],[[6],0,6,4,5],[[7],0,4,2,1],[[8],0,4,2,1],[[9],0,6,3,2],[[10],0,6,3,2],[[11],0,4,2,2],[[11],1,6,3,3],[[12],0,4,3,2],[[12],1,6,4,3],[[13],0,4,4,4],[[14],0
+PASS  V320-FIX-06-R1 役一覧の値は数値表（消去/基本攻撃）：オールマーク4個2/2・6個3/3、フラッシュ4個3/2・6個4/3 を含む18ページすべて  ([[2,2],[2,2],[2,2],[3,3],[4,5],[4,5],[4,5],[2,1],[2,1],[3,2],[3,2],[2,2],[3,3],[3,2],[4,3],[4,4],[5,5],[6,8]])
+PASS  遊び方：戻るで目次→呼出元（メインメニュー／オプション）へ。放置デモのタイトル復帰と混同しない  (HelpMenuScene,MenuScene,HelpMenuScene,OptionsScene)
+PASS  v3.2.0 メインメニュー最上位の戻る（Esc）でタイトルへ。無操作デモ待機は0から。戻る入力でメニューへ再進入しない  ({"t1":{"scene":"TitleScene","idle":283.3000000000029},"t2":"TitleScene"})
+PASS  v3.2.0 遊び方目次の順「操作一覧→基本操作→連鎖説明→役一覧→MODE1→MODE2」と各行き先  (["HelpScene:","HelpLessonScene:LessonStage","HelpLessonScene:LessonStage","RoleListScene:","HelpLessonScene:LessonStage","HelpLessonScene:Mode2Stage"])
+PASS  v3.2.0 r 連鎖説明：「打上連鎖で／攻撃力アップ」を本文領域内に原寸表示（右端・外枠へはみ出さない）  ({"sr":{"page":"streak_rate"},"srBody":{"inside":1583,"outside":0}})
+PASS  V320-FIX-04 教材の注目枠：打上連鎖は［0,256,48,62］、役連鎖は［0,129,48,96］（見出し画像の装飾範囲と数字の外接＋1px）の内側に描き、本文・戻る案内（x≧384）へ掛からない  ({"streak":{"found":true,"bbox":[0,256,48,62],"strip":{"x":0,"y":129,"w":48,"h":188}},"chain":{"found":true,"bbox":[0,129,48,96],"strip":{"x":0,"y":129,"w":48,"h"
+PASS  V320-FIX-04 MODE2冒頭：付録A「6列の一番上から、場に出せるピースを選ぼう！」を本文領域内に原寸表示（例／戻る案内 y266・y310 と重ならない）  ({"m2Lines":"m2_intro","m2Body":{"inside":1155,"outside":0}})
+PASS  V320-FIX-04 MODE2説明：通常の Mode2Game で完走。場の更新の説明は詰まりの前に読み（カウントダウン中は止めない）→場の更新1回→同じ記号→同じ数字→1と6→クリア条件→MODE2のルール→クリア→対戦→対戦の場の更新→「もう一度／戻る」  ({"a":{"page":"m2_refresh","pages":["m2_intro","m2_refresh"],"tick":103
+PASS  v3.2.0 説明パネルの不要な内線を描かない（外枠は維持）：横線 y164 が面の色  (違う画素 0/168)
+PASS  v3.2.0 r MODE2説明・目次の文字：すべて採用フォントに収録（代替描画なし）  (未収録：)
+PASS  v3.2.0 補助表示：既定ON、人間（1P）の出せる最上段を囲む。本編SINGLEの情報枠の線は維持  ({"on":true,"hud":[0],"targets":3,"singleRule":168})
+PASS  V320-FIX-04 SINGLE：得点倍率（得点・倍率見出しPNGと倍率数字）は合成領域［24,64,48,56］の中だけに描く（旧領域［24,94,120,34］・左端の外へ出ない）  ({"inArea":1566,"outArea":0,"mul":"5/2"})
+PASS  v3.2.0 r 役名 role_15（r2）：切出し［480,576／640／704,160,64］のまま、宣言時の表示が A・B・C の各位相と画素一致  ({"frames":{"A":[480,576,160,64],"B":[480,640,160,64],"C":[480,704,160,64]},"seen":{"A":17,"B":7,"C":11},"logo":15})
+PASS  音声の有効化前でもデモは進行し、未解除の無音（locked）と素材欠落（missing）を区別して記録  ({"unlocked":false,"ch":"basic","tick":447,"locked":5,"missing":0,"total":5})
+PASS  BGM：すべてループ再生（複数周）  ([["menu",true],["versus",true],["menu",true],["versus",true],["menu",true],["single",true],["menu",true],["single",true],["menu",true],["single",true],["menu",true],["single",true],["menu",true],["versus",true],["single",true],["menu",true],["single",true],["menu",true],["single",true],["menu",true],["single",true],["menu",true],["single",true]
+PASS  B6 DPR 1：収まる最大＝実画素2倍（バッファ1280・CSS 1280px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替  ({"fit":{"n":2,"mode":"fit","bufW":1280,"cssW":1280,"dpr":1,"setting":0},"fixed":[[1,"fixed",1,1],[2,"fixed",2,2],[3,"fit",2,0],[4,"fit",2,0]]})
+PASS  B6 DPR 1.25：収まる最大＝実画素2倍（バッファ1280・CSS 1024px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替  ({"fit":{"n":2,"mode":"fit","bufW":1280,"cssW":1024,"dpr":1.25,"setting":0},"fixed":[[1,"fixed",1,1],[2,"fixed",2,2],[3,"fit",2,0],[4,"fit",2,0]]})
+PASS  B6 DPR 1.5：収まる最大＝実画素3倍（バッファ1920・CSS 1280px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替  ({"fit":{"n":3,"mode":"fit","bufW":1920,"cssW":1280,"dpr":1.5,"setting":0},"fixed":[[1,"fixed",1,1],[2,"fixed",2,2],[3,"fixed",3,3],[4,"fit",3,0]]})
+PASS  B6 DPR 2：収まる最大＝実画素4倍（バッファ2560・CSS 1280px）。固定1〜4倍は収まるものだけ実画素で採用、収まらない倍率は「収まる最大」へ明示切替  ({"fit":{"n":4,"mode":"fit","bufW":2560,"cssW":1280,"dpr":2,"setting":0},"fixed":[[1,"fixed",1,1],[2,"fixed",2,2],[3,"fixed",3,3],[4,"fixed",4,4]]})
+PASS  ウィンドウ縮小で固定3倍が収まらなくなると「収まる最大」（2倍）へ切替え、設定も0へ（スクロールなし）  ({"big":{"n":3,"mode":"fixed","bufW":1920,"cssW":1920,"dpr":1,"setting":3},"shrunk":{"n":2,"mode":"fit","bufW":1280,"cssW":1280,"dpr":1,"setting":0}})
+PASS  DPR変更（1→2）を検知して実画素倍率を選び直す（収まる最大＝4倍・CSS 1280px）  ({"n":4,"mode":"fit","bufW":2560,"cssW":1280,"dpr":2,"setting":0})
+PASS  1倍も収まらない時だけ緊急縮小（通知あり）  ({"n":1,"mode":"emergency","bufW":640,"cssW":500,"dpr":1,"setting":0})
+PASS  全画面の切替（ヘッドレスでの要求・解除と倍率再計算。実機の全画面表示は未検証）  ({"on":true,"off":true,"mode":"fit"})
+PASS  描画ループ稼働  (fps≒61)
+PASS  ［納品］音声：必須117本すべてデコード成功・欠落なし  ({"missing":[],"decoded":117,"state":"running"})
+PASS  v3.1.0 ピンチボイス3本：実デコード・再生ノード作成・実尺どおり。READY 中は鳴らさない（状態確認。聴感は未確認）  ({"out":[{"c":"kotaro","played":true,"dur":1.53,"durMs":1530},{"c":"akane","played":true,"dur":1.306893,"durMs":1306.8934240362812},{"c":"zunko","played":true,"dur":1.170204,"durMs":1170.204081632653}],"busy":false,"missing":[]})
+PASS  旧成功音・旧成立音・連鎖音は一度も要求されない（新旧SEの二重発音なし）
+FAIL  コンソールエラー/警告なし  (error: Failed to load resource: the server responded with a status of 404 (Not Found) | error: Failed to load resource: the server responded with a status of 404 (Not Found))
+PASS  ネットワーク失敗・4xx/5xxなし
