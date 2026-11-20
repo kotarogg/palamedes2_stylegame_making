@@ -279,8 +279,8 @@
   {
    "path": "gfx/fonts/NotoSansJP-VF.ttf",
    "size": 9590732,
-   "sha256": null,
-   "note": "採用フォント原本（共有ドライブ id 1q4pf3F1sfFPhjTlfR3rvP3-sFDsmTrCh）のファイルサイズ。作業環境で取得できないためSHA-256は未記載"
+   "sha256": "f4b373b226668ee33a6e54b02823dcd2d1209f17159f777421ae8c2275160369",
+   "note": "v3.2.0-rc.1：PM 提供のスマホ版ソース一式の SOURCE_SHA256SUMS.txt（c91e4e3 時点）と、取得した原本の SHA-256 が一致した値"
   },
   {
    "path": "assets/audio/sfx/se_character_fall.wav",
@@ -855,20 +855,20 @@
   {
    "path": "assets/audio/bgm/bgm_menu.wav",
    "size": 12053804,
-   "sha256": null,
-   "note": "BGM原本（共有ドライブ）のファイルサイズ。SHA-256は作業環境で取得できないため未記載"
+   "sha256": "3bb4da4fa2eb4c33e14602e68a18b12982ee124532cff7e3320c56e3b96a0601",
+   "note": "v3.2.0-rc.1：PM 提供のスマホ版ソース一式の SOURCE_SHA256SUMS.txt（c91e4e3 時点）と、取得した原本の SHA-256 が一致した値"
   },
   {
    "path": "assets/audio/bgm/bgm_puzzle_single.wav",
    "size": 16588844,
-   "sha256": null,
-   "note": "BGM原本（共有ドライブ）のファイルサイズ。SHA-256は作業環境で取得できないため未記載"
+   "sha256": "e45f0f70dc06775f84984cc95bd05bb5584fd800a02b3933eb818b46f73c4acf",
+   "note": "v3.2.0-rc.1：PM 提供のスマホ版ソース一式の SOURCE_SHA256SUMS.txt（c91e4e3 時点）と、取得した原本の SHA-256 が一致した値"
   },
   {
    "path": "assets/audio/bgm/bgm_puzzle_versus.wav",
    "size": 16750124,
-   "sha256": null,
-   "note": "BGM原本（共有ドライブ）のファイルサイズ。SHA-256は作業環境で取得できないため未記載"
+   "sha256": "012b8a9a442ffc10d7bd7658253bb9e8978f652277ac4c1991f380b98f86edcc",
+   "note": "v3.2.0-rc.1：PM 提供のスマホ版ソース一式の SOURCE_SHA256SUMS.txt（c91e4e3 時点）と、取得した原本の SHA-256 が一致した値"
   },
   {
    "path": "gfx/data/additional_assets_v310.json",

@@ -12,12 +12,15 @@ import { loadAssets } from './view/assets';
 import { resolveScale, type ScaleResult } from './view/scale';
 import { drawNumericScaled, numericGlyph } from './view/text';
 import { AssetViewer } from './view/viewer';
-import { BUILD_INFO, MEASURE_BUILD } from './measure/build';
+import { BUILD_INFO, MEASURE_BUILD, RELEASE_BUILD } from './measure/build';
+import { MobileShell, mobileEnabled } from './mobile/shell';
 import { MeasureRecorder } from './measure/recorder';
 
 const canvas = document.getElementById('screen') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d', { alpha: false })!;
 const DEV = import.meta.env.DEV;
+/** スマホ版UI（coarse pointer の端末、または ?touch=1）。PC 版の表示・入力はそのまま */
+const mobile = mobileEnabled() ? new MobileShell(canvas) : null;
 
 let display: AppSettings['display'] = { scale: 0, fullscreen: false };
 let current: ScaleResult = resolveScale(0, W, H, 1);
@@ -30,7 +33,19 @@ let onSwitchedToFit: () => void = () => undefined;
 function fit(): void {
   const dpr = window.devicePixelRatio || 1;
   lastDpr = dpr;
-  const r = resolveScale(display.scale, window.innerWidth, window.innerHeight, dpr);
+  // スマホ版：操作パネルを除いたステージ領域へ比率を保って収める（表示倍率の設定は使わない）
+  const bounds = mobile?.stage.getBoundingClientRect();
+  const r = resolveScale(mobile ? 0 : display.scale, bounds?.width ?? window.innerWidth, bounds?.height ?? window.innerHeight, dpr);
+  if (bounds) {
+    const k = Math.min(bounds.width / W, bounds.height / H);
+    r.cssW = W * k;
+    r.cssH = H * k;
+    r.n = Math.max(1, Math.min(4, Math.ceil(k * dpr)));
+    r.bufferW = W * r.n;
+    r.bufferH = H * r.n;
+    r.mode = 'fit';
+    r.switchedToFit = false;
+  }
   if (canvas.width !== r.bufferW || canvas.height !== r.bufferH) {
     canvas.width = r.bufferW;
     canvas.height = r.bufferH;
@@ -104,7 +119,10 @@ async function boot(): Promise<void> {
       window.open(url, '_blank', 'noopener,noreferrer');
     },
     dev: DEV,
+    mobile: !!mobile,
   });
+  mobile?.connect(app);
+  fit();
   notify = (msg) => app.showNotice(msg, 6000);
   onSwitchedToFit = () => {
     app.settings.display.scale = 0;
@@ -121,6 +139,7 @@ async function boot(): Promise<void> {
     firstInput = false;
   };
   window.addEventListener('keydown', (e) => {
+    if (mobile?.paused) return;
     measure?.key(true, e.code, e.repeat, e.timeStamp);
     onFirstInput();
     if (DEV && e.code === 'F8') {
@@ -151,18 +170,23 @@ async function boot(): Promise<void> {
     measure?.key(false, e.code, false, e.timeStamp);
     app.onKeyUp(e.code, e.timeStamp);
   });
-  window.addEventListener('pointerdown', () => {
+  window.addEventListener('pointerdown', (e) => {
+    if (mobile?.paused) return;
     onFirstInput();
-    app.onPointer();
+    // スマホ版：操作ボタン・メニューのタップは各ボタンが処理する（画面のタップだけを従来の入力へ）
+    if (!mobile || e.target === canvas) app.onPointer();
   });
   // 非アクティブ（タブ切替・最小化・フォーカス喪失）：放置デモは進行と音を止め、復帰でタイトルへ（本編の動作は変えない）
+  // スマホ版：非表示・フォーカス喪失でゲームを中断し、明示的なタップで再開（復帰は MobileShell の再開ボタン）
   document.addEventListener('visibilitychange', () => {
     measure?.visibility(document.hidden, document.hasFocus(), 'visibilitychange');
-    app.onVisibility(document.hidden);
+    if (mobile && document.hidden) mobile.interrupt();
+    else app.onVisibility(document.hidden);
   });
   window.addEventListener('blur', () => {
     measure?.visibility(document.hidden, false, 'blur');
-    app.onVisibility(true);
+    if (mobile) mobile.interrupt();
+    else app.onVisibility(true);
   });
   window.addEventListener('focus', () => {
     measure?.visibility(document.hidden, true, 'focus');
@@ -183,8 +207,8 @@ async function boot(): Promise<void> {
     });
   }
 
-  // 自動検証用のフック（通常の操作経路やメニューには出さない）
-  (window as unknown as { __p2like: unknown }).__p2like = {
+  // 自動検証用のフック（通常の操作経路やメニューには出さない）。公開用ビルド（--mode release）には含めない
+  if (!RELEASE_BUILD) (window as unknown as { __p2like: unknown }).__p2like = {
     app,
     bus,
     scene: () => app.scene,
@@ -199,9 +223,13 @@ async function boot(): Promise<void> {
   };
 
   let last = performance.now();
+  /** スマホ版：中断・設定中は止めたゲーム時刻（中断した時間をまとめて進めない） */
+  let gameClock = last;
+  if (mobile) new ResizeObserver(fit).observe(mobile.stage);
   const frame = (now: number) => {
     measure?.beginFrame(now - last); // 処理遅延の記録は丸める前の実間隔
-    const dt = Math.min(250, now - last);
+    const dt = mobile?.paused ? 0 : Math.min(250, now - last);
+    gameClock += dt;
     last = now;
     // 別の画面へ移動した等で devicePixelRatio が変わったら倍率を選び直す
     if ((window.devicePixelRatio || 1) !== lastDpr) fit();
@@ -209,7 +237,11 @@ async function boot(): Promise<void> {
     ctx.setTransform(current.n, 0, 0, current.n, 0, 0);
     ctx.imageSmoothingEnabled = false;
     if (viewer && viewerOn) viewer.render(ctx, now);
-    else app.frame(dt, now, ctx);
+    else if (!mobile?.paused) {
+      mobile?.sync();
+      app.frame(dt, mobile ? gameClock : now, ctx);
+      mobile?.sync();
+    }
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);

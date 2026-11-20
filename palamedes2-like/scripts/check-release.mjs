@@ -1,6 +1,7 @@
 // プレイ版フォルダの納品検査（ブラウザ不要）。必須素材（第3版の画像49＋v3.1.0追加9・JSON6・フォント・音声117）の実在・サイズ・SHA-256・WAVヘッダ、
 // index.html が参照するビルド済みJSの実在、使われない旧ハッシュJSが残っていないこと、起動ファイルの同梱を確認する。
-// 使い方: node scripts/check-release.mjs <プレイ版フォルダ> [--allow-missing-bgm]
+// 使い方: node scripts/check-release.mjs <プレイ版フォルダ> [--allow-missing-bgm] [--web]
+//   --web は公開用Web版（Cloudflare Pages 等の静的配信。v3.2.0-rc.1〜）：起動ファイルの代わりに、開発用ファイル・自動検証フック・計測機能・ソースマップが無いことを確認する。
 //   --allow-missing-bgm は開発用のフォールバック検査（BGM 3本と採用フォントの未配置だけを許容）。納品合格の判定には使わない。
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -8,6 +9,7 @@ import { join } from 'node:path';
 
 const dir = process.argv[2];
 const allowMissingBgm = process.argv.includes('--allow-missing-bgm');
+const web = process.argv.includes('--web');
 if (!dir) {
   console.error('usage: node scripts/check-release.mjs <dir> [--allow-missing-bgm]');
   process.exit(2);
@@ -74,11 +76,24 @@ check(
   entry.length === 1 && refs.every((r) => existsSync(join(dir, r))) && jsFiles.length === new Set(refs).size && jsFiles.every((f) => refs.includes(f)),
   `参照=${[...new Set(refs)].join(',')} 実在=${jsFiles.join(',')}`,
 );
-const launch = ['start-windows.bat', 'serve.mjs', 'README_PLAY.md', 'start-mac-linux.sh'];
-check('起動ファイル（start-windows.bat・serve.mjs・README_PLAY.md・start-mac-linux.sh）を同梱', launch.every((f) => existsSync(join(dir, f)) && statSync(join(dir, f)).size > 0), launch.filter((f) => !existsSync(join(dir, f))).join(','));
-const bat = existsSync(join(dir, 'start-windows.bat')) ? readFileSync(join(dir, 'start-windows.bat')) : Buffer.alloc(0);
-check('start-windows.bat は ASCII・CRLF（Windows の cmd で文字化けしない）', bat.length > 0 && [...bat].every((b) => b < 128) && !/[^\r]\n/.test(bat.toString('latin1')));
+if (web) {
+  // 公開用Web版：開発用ファイル（README・ソースマップ・起動ファイル等）を含めない。ライセンス文（OFL.txt・帰属表記）は残す
+  const all = walk('.').map((p) => p.replace(/^\.\//, ''));
+  const devFiles = all.filter((p) => /(^|\/)(README[^/]*\.md|.*\.map|start-windows\.bat|start-mac-linux\.sh|serve\.mjs|package(-lock)?\.json|\.env.*)$/.test(p));
+  check('［Web公開］開発用ファイル（README・ソースマップ・起動ファイル・package・env）を含めない', devFiles.length === 0, devFiles.join(', '));
+  check('［Web公開］フォントのライセンス文（gfx/fonts/OFL.txt・tutorial_font_attribution.txt）を同梱', ['gfx/fonts/OFL.txt', 'gfx/fonts/tutorial_font_attribution.txt'].every((f) => existsSync(join(dir, f))));
+  const js = jsFiles.map((f) => readFileSync(join(dir, f), 'utf8')).join('\n');
+  const leaks = ['__p2like', 'kotaro-puzzle-measure', '計測（テスト）', 'sourceMappingURL'].filter((k) => js.includes(k));
+  check('［Web公開］自動検証用フック・計測用ビルドの機能・ソースマップ参照を含めない', leaks.length === 0, leaks.join(', '));
+  const css = [...html.matchAll(/href="\.?\/?(assets\/[\w-]+\.css)"/g)].map((m) => m[1]);
+  check('［Web公開］index.html が参照する CSS が実在し、スマホ表示の viewport（viewport-fit=cover）を指定', css.length >= 1 && css.every((r) => existsSync(join(dir, r))) && /viewport-fit=cover/.test(html), css.join(','));
+} else {
+  const launch = ['start-windows.bat', 'serve.mjs', 'README_PLAY.md', 'start-mac-linux.sh'];
+  check('起動ファイル（start-windows.bat・serve.mjs・README_PLAY.md・start-mac-linux.sh）を同梱', launch.every((f) => existsSync(join(dir, f)) && statSync(join(dir, f)).size > 0), launch.filter((f) => !existsSync(join(dir, f))).join(','));
+  const bat = existsSync(join(dir, 'start-windows.bat')) ? readFileSync(join(dir, 'start-windows.bat')) : Buffer.alloc(0);
+  check('start-windows.bat は ASCII・CRLF（Windows の cmd で文字化けしない）', bat.length > 0 && [...bat].every((b) => b < 128) && !/[^\r]\n/.test(bat.toString('latin1')));
+}
 
 const failed = results.filter((r) => !r.pass);
-console.log(`\n[${allowMissingBgm ? 'フォールバック検査（納品合格ではない）' : '納品検査'}] ${results.length - failed.length}/${results.length} PASS`);
+console.log(`\n[${allowMissingBgm ? 'フォールバック検査（納品合格ではない）' : web ? '納品検査（公開用Web版）' : '納品検査'}] ${results.length - failed.length}/${results.length} PASS`);
 process.exit(failed.length ? 1 : 0);

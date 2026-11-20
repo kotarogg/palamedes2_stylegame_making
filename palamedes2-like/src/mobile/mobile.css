@@ -1,0 +1,63 @@
+body.mobile { display:block; background:#101426; color:#f8f2dc; font-family:system-ui,sans-serif; }
+.mobile * { box-sizing:border-box; }
+.mobile [hidden] { display:none !important; }
+.mobile #mobile-shell {
+ --toolbar:40px; --side-pad:8px;
+ height:100dvh; width:100%; padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+ display:grid; grid-template-rows:var(--toolbar) minmax(0,1fr);
+ grid-template-columns:minmax(136px,1fr) minmax(0,calc((100dvh - var(--toolbar) - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 16 / 9)) minmax(120px,1fr); gap:8px;
+}
+#mobile-toolbar {grid-column:1/-1;display:flex;gap:8px;align-items:center;padding:0 8px;font-size:12px;min-width:0;}
+#mobile-toolbar .mobile-hint {flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+#mobile-toolbar button {min-height:36px;font-size:12px;padding:4px 12px;flex-shrink:0;}
+#mobile-stage {grid-column:2;grid-row:2;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;position:relative;}
+.mobile button {color:#fff2cf;background:#243859;border:2px solid #6e92ae;border-radius:14px;font:600 15px system-ui;min-height:52px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;}
+.mobile button:active,.mobile button.held {background:#426b8c;border-color:#ffe8a0;}
+.mobile button:focus-visible {outline:3px solid #ffde80;outline-offset:3px;}
+#mobile-left,#mobile-right {display:flex;flex-direction:column;justify-content:center;min-height:0;min-width:0;padding:4px var(--side-pad);}
+#mobile-left {grid-row:2;grid-column:1;gap:28px;}
+#mobile-right {grid-row:2;grid-column:3;gap:clamp(20px,7dvh,40px);}
+.mobile-move-pair,.mobile-nav-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:100%;}
+.mobile-move-pair button {height:76px;min-width:0;font-size:26px;}
+.mobile-nav-grid {row-gap:20px;} .mobile-nav-grid button {min-width:0;}
+#mobile-left button[data-action=manualRise] {align-self:center;width:min(100%,120px);min-height:52px;font-size:14px;}
+#mobile-right button {width:100%;max-width:190px;align-self:center;}
+#mobile-right button[data-action=launch] {height:80px;background:#794658;border-color:#ffc989;font-size:21px;}
+#mobile-right button[data-action=declare] {background:#4d477b;}
+#mobile-right button[data-action=rotate],#mobile-right button[data-action=declare] {height:56px;}
+.mobile-flick-pad {height:clamp(156px,55dvh,242px);width:100%;max-width:240px;align-self:center;border:2px solid #6e92ae;border-radius:22px;background:radial-gradient(ellipse at center,#294160,#19253e);display:flex;flex-direction:column;align-items:center;justify-content:space-around;gap:14px;padding:16px 4px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;text-align:center;}
+.mobile-flick-pad strong {font-size:26px;white-space:nowrap;}
+.flick-up {font-size:13px;color:#c7d6ef;} .flick-help {font-size:11px;white-space:pre-line;line-height:1.7;color:#c7d6ef;}
+.mobile-flick-pad.held {border-color:#ffe8a0;}
+.mobile-flick-pad[data-direction=left] {background:linear-gradient(90deg,#536d87,#19253e);}
+.mobile-flick-pad[data-direction=right] {background:linear-gradient(270deg,#536d87,#19253e);}
+.mobile-flick-pad[data-direction=manualRise] {background:linear-gradient(180deg,#536d87,#19253e);}
+#mobile-menu {position:absolute;inset:auto 12px 12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-height:75%;overflow:auto;background:#111a2cf5;border-radius:14px;padding:10px;}
+#mobile-menu:empty {display:none;} #mobile-menu button {min-width:110px;flex:1;}
+#mobile-resume,#mobile-settings {position:fixed;inset:0;background:#0a1025ed;z-index:5;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:16px;overflow:auto;}
+#mobile-resume {z-index:6;} #mobile-resume button {padding:16px 40px;}
+.mobile-settings-card {width:min(600px,100%);max-height:100%;overflow:auto;text-align:left;background:#17243b;border:1px solid #66809c;border-radius:20px;padding:20px;}
+.mobile-settings-card h2 {margin:0 0 16px;font-size:20px;}
+.mobile-settings-card p {font-size:14px;line-height:1.65;}
+.mobile-mode-choices {display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.mobile-mode-choices button[aria-pressed=true] {border-color:#ffdc90;background:#526682;box-shadow:inset 0 -4px #ffdc90;}
+.mobile-settings-card small {display:block;margin-top:12px;color:#afc1d9;font-size:11px;}
+.mobile-save-status {color:#bce6bd;min-height:1.5em;} .mobile-settings-card > button {width:100%;}
+@media (orientation:portrait) {
+ .mobile #mobile-shell {grid-template:44px minmax(0,1fr) 236px / minmax(0,1fr) minmax(0,1fr);gap:8px;}
+ #mobile-stage {grid-column:1/-1;grid-row:2;}
+ #mobile-left {grid-column:1;grid-row:3;gap:20px;}
+ #mobile-right {grid-column:2;grid-row:3;gap:18px;}
+ #mobile-right button[data-action=launch] {height:70px;min-height:70px;}
+ #mobile-right button[data-action=rotate],#mobile-right button[data-action=declare] {height:54px;}
+ .mobile-flick-pad {height:210px;}
+ #mobile-menu {max-height:95%;inset:8px;align-content:center;}
+ #mobile-toolbar .mobile-hint {font-size:10px;}
+}
+@media (max-height:350px) and (orientation:landscape) {
+ .mobile #mobile-shell {--toolbar:36px;--side-pad:6px;grid-template-columns:minmax(128px,1fr) minmax(0,calc((100dvh - 44px) * 16 / 9)) minmax(112px,1fr);}
+ #mobile-right {gap:18px;}
+ #mobile-right button[data-action=launch] {height:66px;min-height:66px;}
+ #mobile-right button[data-action=rotate],#mobile-right button[data-action=declare] {height:50px;min-height:50px;}
+ .mobile-move-pair button {height:66px;}
+}

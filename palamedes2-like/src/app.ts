@@ -1,3 +1,4 @@
+import { TouchController } from './mobile/touchController';
 // 画面遷移と入力の統合（第3版 第15・16章）：起動→タイトル→メインメニュー→（MODE1／MODE2 × シングル／CPU対戦／2P対戦、オプション、遊び方）
 // →（2P対戦はキャラクター選択）→試合→結果→次の相手／再戦／キャラ選択／メニュー。
 // 一時停止は無い。プレイ中の Esc／START は「試合を終了してメニューへ戻る」確認で、確認中もゲームは進む（そのプレイヤーの入力だけがダイアログへ）。
@@ -94,6 +95,8 @@ export interface Scene {
 
 export interface AppDeps {
   assets: Assets;
+  /** スマホ版UI（タッチ操作。src/mobile）で起動したか */
+  mobile?: boolean;
   bus: AudioBus;
   pads: PadSource;
   settings: AppSettings;
@@ -130,6 +133,8 @@ export class App {
   records: Records = loadRecords();
   scene: Scene;
   readonly menuInput: MenuInput;
+  /** スマホ版UIのタッチ入力（1P）。シーン変更で保持入力を解除 */
+  readonly touch = new TouchController();
   settingsSaved = true;
   /** CPU対戦の1Pのキャラ（キャラクター選択で決定。メニューへ戻るとコタローへ戻す。保存しない） */
   cpuPlayer: Character = 'kotaro';
@@ -175,6 +180,7 @@ export class App {
   }
 
   setScene(s: Scene): void {
+    this.touch.reset();
     this.scene = s;
     this.menuInput.clear();
     this.measure?.scene(s.constructor.name, s instanceof GameScene);
@@ -432,6 +438,10 @@ export class MenuScene implements Scene {
     ];
     // V320-MEASURE-01：計測用ビルドだけ「計測（テスト）」を加える（通常ビルドの項目は変えない）
     if (MEASURE_BUILD && a.measure) root.push({ label: '計測（テスト）', desc: '計測の開始前設定（打上硬直A／B）・開始／停止・保存・初期化', run: () => a.setScene(new MeasureMenuScene(a)) });
+    // スマホ版：同一端末の2P対戦の入口は除外（画面と指の領域が不足するため）
+    if (app.deps.mobile) {
+      for (const item of root) if (item.children) item.children = item.children.filter((child) => child.label !== '2P対戦');
+    }
     this.stack = [{ title: 'メインメニュー', items: root, cursor: 0 }];
     for (const label of openPath) {
       const t = this.top;
@@ -442,6 +452,19 @@ export class MenuScene implements Scene {
       this.stack.push({ title: `${t.title === 'メインメニュー' ? '' : `${t.title} › `}${label}`, items: t.items[i].children!, cursor: 0 });
     }
     app.bus.playBgm('menu');
+  }
+
+  /** スマホ版：現在の階層の項目を直接タップで選ぶ（決定と同じ処理） */
+  mobileItems(): { label: string; activate: () => void }[] {
+    return this.top.items
+      .filter((i) => !this.app.deps.mobile || i.label !== '2P対戦')
+      .map((item) => ({
+        label: item.label,
+        activate: () => {
+          this.top.cursor = this.top.items.indexOf(item);
+          this.onNav({ key: 'confirm', source: { kind: 'keyboard' }, repeat: false });
+        },
+      }));
   }
 
   private get top() {
@@ -1550,9 +1573,9 @@ export class GameScene implements Scene {
             { kind: 'cpu', level: watch.rightLevel },
           ]
         : kind === 'cpu'
-          ? [s.devices[0], { kind: 'cpu', level: s.npcLevel }]
+          ? [app.deps.mobile ? { kind: 'keyboard' } : s.devices[0], { kind: 'cpu', level: s.npcLevel }]
           : kind === 'single'
-            ? [s.devices[0]]
+            ? [app.deps.mobile ? { kind: 'keyboard' } : s.devices[0]]
             : [s.devices[0], s.devices[1]];
     const readyMsFor = () => {
       this.nextAnnouncer = this.pickAnnouncer();
@@ -1646,7 +1669,8 @@ export class GameScene implements Scene {
 
   private buildControllers(): void {
     const s = this.app.settings;
-    this.controllers = [];
+    // スマホ版：1P はタッチ（CPU観戦はタッチ入力なし）
+    this.controllers = this.app.deps.mobile && this.kind !== 'watch' ? [this.app.touch] : [];
     this.keyboards = [null, null];
     this.pads = [null, null];
     this.devices.forEach((d, i) => {

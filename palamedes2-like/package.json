@@ -11,6 +11,8 @@
     "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "build": "tsc --noEmit && vite build",
     "build:measure": "tsc --noEmit && vite build --mode measure",
+    "build:release": "tsc --noEmit && vite build --mode release",
+    "package:release": "node scripts/package-release.mjs",
     "measure:analyze": "node scripts/measure-analyze.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
     "serve:dist": "node scripts/serve.mjs dist 8080",

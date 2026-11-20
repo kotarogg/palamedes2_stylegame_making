@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
 
 // V320-MEASURE-01：--mode measure で計測用テストビルド（出力 dist-measure/）。通常ビルドは従来どおり dist/
@@ -13,17 +14,20 @@ const commit = (() => {
 // base './' で dist をどの階層に置いても相対パスで動かす
 // 第3版：共有ドライブのコネクタは1回に送れる量に限りがあるため、配布JSを圧縮し、ソースのフォルダ単位で分割する。
 // keepNames でクラス名・関数名を保持（エラー表示・自動検証で画面名を読むため）
+// v3.2.0-rc.1：--mode release で公開用ビルド（出力 dist-release/）。版の表示名は .env.release の VITE_RELEASE_LABEL
 export default defineConfig(({ mode }) => ({
   base: './',
   esbuild: { keepNames: true },
   define: {
     // 単体テスト（mode＝test）でも計測の接続を検査できるよう true。記録器を渡さない限り動作は通常と同じ
     __MEASURE_BUILD__: JSON.stringify(mode === 'measure' || mode === 'test'),
+    __RELEASE_BUILD__: JSON.stringify(mode === 'release'),
+    __RELEASE_LABEL__: JSON.stringify(loadEnv(mode, process.cwd(), 'VITE_RELEASE_').VITE_RELEASE_LABEL ?? ''),
     __BUILD_COMMIT__: JSON.stringify(commit),
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
   build: {
-    outDir: mode === 'measure' ? 'dist-measure' : 'dist',
+    outDir: mode === 'measure' ? 'dist-measure' : mode === 'release' ? 'dist-release' : 'dist',
     assetsInlineLimit: 0,
     sourcemap: false,
     minify: 'esbuild',
