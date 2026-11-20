@@ -17,14 +17,19 @@ if (!existsSync('dist-release/index.html')) throw new Error('dist-release があ
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const label = /VITE_RELEASE_LABEL=(.+)/.exec(readFileSync('.env.release', 'utf8'))?.[1].trim();
 if (!label) throw new Error('.env.release に VITE_RELEASE_LABEL がありません');
-const commit = execSync('git rev-parse HEAD').toString().trim();
-const dirty = execSync('git status --porcelain -- src index.html vite.config.ts package.json .env.release').toString().trim();
-if (dirty) throw new Error(`コミットしていない変更があります（ビルド識別子と中身がずれるため中止）：\n${dirty}`);
-// ビルドに埋め込まれたコミットと一致すること（古いビルドの梱包を防ぐ）
+// ビルドに埋め込まれたコミット＝納品物の識別子。HEAD がその後に進んでいても、製品に関わるファイルが同一なら梱包を許可する
+// （報告書・検証スクリプトだけの追加コミットでは作り直さない）。古いビルドや未コミット変更を含むビルドの梱包は防ぐ
+const PRODUCT = ['src', 'public', 'index.html', 'vite.config.ts', 'tsconfig.json', 'package.json', 'package-lock.json', '.env.release'];
 const builtJs = readdirSync('dist-release/assets').filter((f) => f.startsWith('index-') && f.endsWith('.js'));
 const embedded = builtJs.map((f) => readFileSync(join('dist-release/assets', f), 'utf8')).join('');
-if (!embedded.includes(commit)) throw new Error(`dist-release のビルドが HEAD（${commit}）と一致しません。npm run build:release をやり直してください`);
+const commit = /commit:"([0-9a-f]{40})"/.exec(embedded)?.[1];
+if (!commit) throw new Error('dist-release にビルド時のコミットが埋め込まれていません');
+const dirty = execFileSync('git', ['status', '--porcelain', '--', ...PRODUCT]).toString().trim();
+if (dirty) throw new Error(`製品に関わるファイルにコミットしていない変更があります（ビルド識別子と中身がずれるため中止）：\n${dirty}`);
+const changed = execFileSync('git', ['diff', '--name-only', commit, 'HEAD', '--', ...PRODUCT]).toString().trim();
+if (changed) throw new Error(`dist-release のビルド（${commit.slice(0, 7)}）以降に製品ファイルが変わっています。npm run build:release をやり直してください：\n${changed}`);
 if (!embedded.includes(label)) throw new Error(`dist-release に版の表示名（${label}）がありません`);
+const head = execSync('git rev-parse HEAD').toString().trim();
 
 const name = `kotaro_puzzle_${label}_web_${commit.slice(0, 7)}`;
 const root = join(out, name);
@@ -40,7 +45,7 @@ for (const p of ['assets/audio/bgm/README.md', 'gfx/fonts/README.md']) {
     removed.push(p);
   }
 }
-const builtAt = /"(\d{4}-\d\d-\d\dT[\d:.]+Z)"/.exec(embedded)?.[1] ?? null;
+const builtAt = statSync('dist-release/index.html').mtime.toISOString();
 writeFileSync(join(site, 'build-info.json'), `${JSON.stringify({ name: 'コタローくんパズル', version: pkg.version, release: label, commit, builtAt }, null, 1)}\n`);
 
 // 納品検査（公開用Web版）
@@ -58,7 +63,7 @@ writeFileSync(
 【版】
 バージョン：${pkg.version}（リリース候補 ${label}）
 コミット：${commit}
-ビルド：${builtAt ?? '不明'}
+ビルド日時：${builtAt}（UTC）
 内容：site/ 内 ${files.length} ファイル（${(bytes / 1e6).toFixed(1)}MB）。ビルド済み。公開担当側で Node.js・npm による再ビルドは不要です。
 
 【公開方法（Cloudflare Pages 等の静的配信）】
@@ -81,4 +86,4 @@ PC でスマホ用画面を確認する場合は URL の末尾に ?touch=1 を�
 const zip = `${root}.zip`;
 rmSync(zip, { force: true });
 execFileSync('zip', ['-q', '-r', '-X', `${name}.zip`, name], { cwd: out });
-console.log(JSON.stringify({ zip, files: files.length, bytes, commit, label, removed }));
+console.log(JSON.stringify({ zip, files: files.length, bytes, commit, head, label, removed }));

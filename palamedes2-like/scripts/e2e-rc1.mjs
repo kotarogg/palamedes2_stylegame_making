@@ -34,11 +34,13 @@ async function open(group, opts, query = '') {
   const errors = [];
   const bad = [];
   page.on('pageerror', (e) => errors.push(String(e)));
-  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+  // ブラウザが自動で要求する /favicon.ico の404（ゲームは参照しない。基準 a70b851・旧スマホ版でも同じ）は別記録
+  const favicon = [];
+  page.on('console', (m) => m.type() === 'error' && (m.location().url.endsWith('/favicon.ico') ? favicon.push(m.text()) : errors.push(m.text())));
   page.on('response', (r) => r.status() >= 400 && bad.push(`${r.status()} ${r.url()}`));
   await page.goto(URL0 + query, { waitUntil: 'load' });
   await wait(2500);
-  return { ctx, page, errors, bad, group };
+  return { ctx, page, errors, bad, group, favicon };
 }
 const canvasHash = (page) => page.evaluate(() => document.querySelector('canvas').toDataURL()).then((s) => createHash('sha1').update(s).digest('hex'));
 const shot = (page, name) => page.screenshot({ path: new URL(`${name}.png`, OUT).pathname });
@@ -48,13 +50,24 @@ const tapMenu = async (page, label) => {
   await page.locator('#mobile-menu button', { hasText: new RegExp(`^${label}$`) }).first().click();
   await wait(400);
 };
-// ボタンはポインター押下中だけ有効（タッチ操作の再現）
+// 実際のタッチ入力（CDP Input.dispatchTouchEvent）。ブラウザがタッチからポインターイベントを生成する
+const cdpOf = new WeakMap();
+const touch = async (page, type, x, y, id = 1) => {
+  if (!cdpOf.has(page)) cdpOf.set(page, await page.context().newCDPSession(page));
+  await cdpOf.get(page).send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id }] });
+};
+const center = async (page, sel) => {
+  const b = await page.locator(sel).first().boundingBox();
+  return [b.x + b.width / 2, b.y + b.height / 2];
+};
 const press = async (page, sel, ms = 120) => {
-  const box = await page.locator(sel).first().boundingBox();
-  await page.locator(sel).first().dispatchEvent('pointerdown', { pointerId: 7, button: 0, isPrimary: true, pointerType: 'touch', clientX: box.x + box.width / 2, clientY: box.y + box.height / 2 });
+  const [x, y] = await center(page, sel);
+  await touch(page, 'touchStart', x, y);
   await wait(ms);
-  await page.locator(sel).first().dispatchEvent('pointerup', { pointerId: 7, button: 0, pointerType: 'touch' });
+  const held = await page.locator(sel).first().evaluate((e) => e.classList.contains('held'));
+  await touch(page, 'touchEnd');
   await wait(80);
+  return held;
 };
 
 // ───── PC ─────
@@ -142,7 +155,7 @@ const phoneL = { ...devices['iPhone 13 landscape'], userAgent: devices['Pixel 7'
   const btns = await page.$$eval('#mobile-left button, #mobile-right button', (b) => b.map((x) => x.textContent));
   check('スマホ横', 'MODE1 シングル開始：操作ボタン（↑せり上げ・◀・▶・打上げ・列入替・役宣言）', playing === 'true' && ['↑ せり上げ', '◀', '▶', '打上げ', '列入替', '役宣言'].every((x) => btns.includes(x)), `${playing} ${btns.join(',')}`);
   const g0 = await canvasHash(page);
-  await press(page, '[data-action="right"]', 150);
+  const heldR = await press(page, '[data-action="right"]', 150);
   await press(page, '[data-action="launch"]');
   await press(page, '[data-action="left"]', 150);
   await press(page, '[data-action="rotate"]');
@@ -150,7 +163,7 @@ const phoneL = { ...devices['iPhone 13 landscape'], userAgent: devices['Pixel 7'
   await wait(600);
   const g1 = await canvasHash(page);
   await shot(page, 'sp_l_04_mode1_game');
-  check('スマホ横', 'タッチ：移動・打上げ・列入替（画面が変化）', g0 !== g1);
+  check('スマホ横', 'タッチ：押下中はボタンを強調表示・移動・打上げ・列入替（画面が変化）', heldR && g0 !== g1, `held=${heldR}`);
   // 中断（アプリ切替・通知などでフォーカスを失う）→タップで再開
   await page.evaluate(() => window.dispatchEvent(new Event('blur')));
   await wait(300);
@@ -197,19 +210,73 @@ const phoneL = { ...devices['iPhone 13 landscape'], userAgent: devices['Pixel 7'
   const box = await pad.boundingBox();
   const cx = box.x + box.width / 2;
   const cy = box.y + box.height / 2;
-  await pad.dispatchEvent('pointerdown', { pointerId: 9, button: 0, pointerType: 'touch', clientX: cx, clientY: cy });
+  await touch(page, 'touchStart', cx, cy);
   for (let i = 1; i <= 6; i++) {
-    await pad.dispatchEvent('pointermove', { pointerId: 9, pointerType: 'touch', clientX: cx + i * 6, clientY: cy });
+    await touch(page, 'touchMove', cx + i * 6, cy);
     await wait(30);
   }
   const dir = await pad.getAttribute('data-direction');
   await wait(300);
-  await pad.dispatchEvent('pointerup', { pointerId: 9, pointerType: 'touch' });
+  await touch(page, 'touchEnd');
+  await wait(100);
+  const cleared = (await pad.getAttribute('data-direction')) === null;
   await press(page, '[data-action="launch"]');
   await wait(600);
   await shot(page, 'sp_m2_01_flick_game');
-  check('スマホMODE2', 'フリック：右へなぞると右移動として認識・画面が変化', dir === 'right' && (await canvasHash(page)) !== g0, dir);
+  check('スマホMODE2', 'フリック：右へなぞると右移動として認識・離すと解除・画面が変化', dir === 'right' && cleared && (await canvasHash(page)) !== g0, `${dir} cleared=${cleared}`);
   check('スマホMODE2', 'コンソールエラー・ページエラーなし', s.errors.length === 0, s.errors.join(' / '));
+  await s.ctx.close();
+}
+
+// ───── スマホ：MODE1 フリック（上なぞりでせり上げ）→ ボタン方式へ戻す ─────
+{
+  const s = await open('スマホ切替', phoneL);
+  const { page } = s;
+  await page.click('.mobile-settings-open');
+  await page.click('#mobile-settings button[data-mode="flick"]');
+  await page.click('#mobile-settings button:has-text("設定を閉じる")');
+  await tapMenu(page, 'タップしてはじめる');
+  await wait(500);
+  await tapMenu(page, 'MODE1');
+  await tapMenu(page, 'シングル');
+  await tapMenu(page, 'ひたすら');
+  await wait(1800);
+  const pad = await page.$('.mobile-flick-pad');
+  const up = pad ? await pad.$eval('.flick-up', (e) => e.textContent) : '';
+  const right = await page.$$eval('#mobile-right button', (b) => b.map((x) => x.textContent));
+  check('スマホ切替', 'MODE1 フリック方式：左はフリック面（↑せり上げ表示）・右は打上げ／列入替／役宣言', !!pad && up.includes('せり上げ') && right.join(',') === '打上げ,列入替,役宣言' && !(await page.$('[data-action="left"]')), `${up} / ${right.join(',')}`);
+  const box = await pad.boundingBox();
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+  const g0 = await canvasHash(page);
+  await touch(page, 'touchStart', cx, cy);
+  for (let i = 1; i <= 6; i++) {
+    await touch(page, 'touchMove', cx, cy - i * 6);
+    await wait(30);
+  }
+  const dir = await pad.getAttribute('data-direction');
+  await touch(page, 'touchEnd');
+  await wait(500);
+  check('スマホ切替', 'MODE1 フリック：上へなぞるとせり上げとして認識・画面が変化', dir === 'manualRise' && (await canvasHash(page)) !== g0, dir);
+  await page.click('#mobile-toolbar button:has-text("終了")');
+  await wait(400);
+  await page.reload({ waitUntil: 'load' });
+  await wait(2000);
+  await page.click('.mobile-settings-open');
+  await page.click('#mobile-settings button[data-mode="buttons"]');
+  const saved = await page.evaluate(() => localStorage.getItem('kotaro_mobile_controls_v1'));
+  await page.click('#mobile-settings button:has-text("設定を閉じる")');
+  check('スマホ切替', 'ボタン移動へ戻す切替・端末に保存・表示「操作：ボタン」', /buttons/.test(saved ?? '') && (await page.textContent('.mobile-settings-open')).includes('ボタン'), saved);
+  await tapMenu(page, 'タップしてはじめる');
+  await wait(500);
+  await tapMenu(page, 'MODE1');
+  await tapMenu(page, 'シングル');
+  await tapMenu(page, 'ひたすら');
+  await wait(1800);
+  check('スマホ切替', 'ボタン方式に戻ると左右ボタン・せり上げボタンを表示（フリック面なし）', !(await page.$('.mobile-flick-pad')) && !!(await page.$('[data-action="left"]')) && !!(await page.$('[data-action="manualRise"]')));
+  const settingsHidden = await page.isHidden('.mobile-settings-open');
+  check('スマホ切替', 'ゲーム中は操作設定ボタンを出さない', settingsHidden);
+  check('スマホ切替', 'コンソールエラー・ページエラーなし', s.errors.length === 0, s.errors.join(' / '));
   await s.ctx.close();
 }
 
