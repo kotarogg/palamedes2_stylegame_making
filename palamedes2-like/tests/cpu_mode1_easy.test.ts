@@ -1,4 +1,5 @@
-// V320-CPU-M1EASY-01：MODE1 初級（easy）だけの待ち時間（必須判断待ち・判断停止の時間候補を1.35倍）。
+// V320-CPU-M1EASY-01／02：MODE1 初級（easy）だけの待ち時間（必須判断待ち・判断停止の時間候補）。
+// V320-CPU-M1EASY-02 で更新：待ち時間は M1EASY-01 の0.90倍（四捨五入）の確定値（ランダム打上げ・R1 は cpu_mode1_easy_random.test.ts）。
 // - 実際の待ち処理（decisionStop）と所要時間見積り（expectedMandatoryMs・expectedStopMs）で指定値になること
 // - MODE2・MODE1 中級／上級は、同じ seed・入力で変更前（MODE1 初級の設定なし）と挙動・乱数消費が一致すること
 import { describe, expect, it } from 'vitest';
@@ -34,8 +35,8 @@ function fakeGame(mode: 'mode1' | 'mode2'): AnyGame {
   return m.game;
 }
 
-describe('MODE1 初級の待ち時間（V320-CPU-M1EASY-01）', () => {
-  const NEW = { mandatory: { normal: [405, 540, 675], pinch: [203, 270, 338] }, stop: { normal: [945, 1350, 1755], pinch: [473, 675, 878] } };
+describe('MODE1 初級の待ち時間（V320-CPU-M1EASY-02）', () => {
+  const NEW = { mandatory: { normal: [365, 486, 608], pinch: [183, 243, 304] }, stop: { normal: [851, 1215, 1580], pinch: [426, 608, 790] } };
   const OLD = { mandatory: { normal: [300, 400, 500], pinch: [150, 200, 250] }, stop: { normal: [700, 1000, 1300], pinch: [350, 500, 650] } };
 
   it('設定：MODE1 初級の表は指定値。共有の初級設定（MODE2 が使う）と停止確率・抽選重みは変更なし', () => {
@@ -93,18 +94,18 @@ describe('MODE1 初級の待ち時間（V320-CPU-M1EASY-01）', () => {
         expect(priv(c).expectedStopMs(sit)).toBeCloseTo(pct * w(NEW.stop[sit]), 9);
       }
     }
-    // 例：あかね・ピンチ＝0.5 ×（473×0.25＋675×0.5＋878×0.25）＝337.625ms、必須待ち＝270.25ms
+    // 例：あかね・ピンチ＝0.5 ×（426×0.25＋608×0.5＋790×0.25）＝304ms、必須待ち＝243.25ms（合計 547.25ms＝FIX01 の判断待ち）
     const a = new CpuController(1, 'easy', 1, 'akane');
-    expect(priv(a).expectedStopMs('pinch')).toBeCloseTo(337.625, 9);
-    expect(priv(a).expectedMandatoryMs('pinch')).toBeCloseTo(270.25, 9);
+    expect(priv(a).expectedStopMs('pinch')).toBeCloseTo(304, 9);
+    expect(priv(a).expectedMandatoryMs('pinch')).toBeCloseTo(243.25, 9);
   });
 });
 
 describe('MODE1 初級の実プレイでの待ち（既定の設定。MODE1 のゲーム）', () => {
   it('必須判断待ち・判断停止はすべて指定値の候補から選ばれ、tick 合計は既存の換算（game.ticks）の和。候補の選択比はおおむね 25／50／25', () => {
-    const mand = new Set(['normal 405ms', 'normal 540ms', 'normal 675ms', 'pinch 203ms', 'pinch 270ms', 'pinch 338ms']);
-    const stop = new Set(['normal 945ms', 'normal 1350ms', 'normal 1755ms', 'pinch 473ms', 'pinch 675ms', 'pinch 878ms']);
-    const idx: Record<string, number> = { '405': 0, '540': 1, '675': 2, '203': 0, '270': 1, '338': 2 };
+    const mand = new Set(['normal 365ms', 'normal 486ms', 'normal 608ms', 'pinch 183ms', 'pinch 243ms', 'pinch 304ms']);
+    const stop = new Set(['normal 851ms', 'normal 1215ms', 'normal 1580ms', 'pinch 426ms', 'pinch 608ms', 'pinch 790ms']);
+    const idx: Record<string, number> = { '365': 0, '486': 1, '608': 2, '183': 0, '243': 1, '304': 2 };
     const share = [0, 0, 0];
     for (let seed = 1; seed <= 12; seed++) {
       for (const ch of ['kotaro', 'akane', 'zunko'] as Character[]) {
@@ -131,7 +132,7 @@ describe('MODE1 初級の実プレイでの待ち（既定の設定。MODE1 の�
     expect(share[1] / n).toBeLessThan(0.6);
   });
 
-  it('順序とピンチ移行の半減（既存の処理）：必須待ち540ms＝32tick→判断停止1350ms＝81tick。10tick後にピンチへ移ると残り22→11・81→41（各1回）', () => {
+  it('順序とピンチ移行の半減（既存の処理）：必須待ち486ms＝29tick→判断停止1215ms＝73tick。10tick後にピンチへ移ると残り19→10・73→37（各1回、既存の四捨五入）', () => {
     const cfg = JSON.parse(JSON.stringify(CPU_CONFIG)) as CpuConfig;
     cfg.decisionStop.easy.pct.kotaro = 100; // 停止確率は共有設定から（MODE1 初級でも同じ）
     cfg.decisionStopWeights = [0, 100, 0];
@@ -141,14 +142,14 @@ describe('MODE1 初級の実プレイでの待ち（既定の設定。MODE1 の�
     const cpu = new CpuController(0, 'easy', 1, 'kotaro', cfg);
     expect(cpu.poll(g)).toEqual([]);
     const start = g.tick + 1;
-    expect([cpu.stats.mandatoryTicks, cpu.stats.stopTicks]).toEqual([g.ticks(540), g.ticks(1350)]);
-    expect([g.ticks(540), g.ticks(1350)]).toEqual([32, 81]);
+    expect([cpu.stats.mandatoryTicks, cpu.stats.stopTicks]).toEqual([g.ticks(486), g.ticks(1215)]);
+    expect([g.ticks(486), g.ticks(1215)]).toEqual([29, 73]);
     expect(cpu.log.slice(0, 2).map((l) => l.kind)).toEqual(['mandatoryWait', 'decisionStop']);
     for (let i = 0; i < 10; i++) g.step(cpu.poll(g));
     g.players[0].incoming.pinchRemaining = 240;
     expect(cpu.poll(g)).toEqual([]);
     expect([cpu.stats.mandatoryHalved, cpu.stats.stopHalved]).toEqual([1, 1]);
-    expect([cpu.stats.mandatoryTicks, cpu.stats.stopTicks]).toEqual([32 - 11, 81 - 40]);
+    expect([cpu.stats.mandatoryTicks, cpu.stats.stopTicks]).toEqual([29 - 9, 73 - 36]);
     let first = -1;
     for (let i = 0; i < 120 && first < 0; i++) {
       g.players[0].incoming.pinchRemaining = 240;
@@ -156,7 +157,7 @@ describe('MODE1 初級の実プレイでの待ち（既定の設定。MODE1 の�
       if (out.length) first = g.tick + 1;
       g.step(out);
     }
-    expect(first - start).toBe(10 + 11 + 41);
+    expect(first - start).toBe(10 + 10 + 37);
     expect(cpu.log.filter((l) => l.kind === 'mandatoryWait')).toHaveLength(1);
   });
 });
@@ -204,11 +205,11 @@ describe('変更前後の一致（MODE2・MODE1 中級／上級は同じ seed・
     const after = runCpuMatch('mode1', 'easy', 3, CPU_CONFIG, 60 * 20);
     const before = runCpuMatch('mode1', 'easy', 3, BEFORE, 60 * 20);
     expect(after.state).not.toBe(before.state);
-    // 最初の判断（必須待ち）の抽選は同じ乱数で行われ、時間だけが1.35倍
+    // 最初の判断（必須待ち）の抽選は同じ乱数で行われ、時間だけが共有表の約1.215倍（1.35×0.90、四捨五入）
     const first = (l: string) => (JSON.parse(l) as { kind: string; detail?: string }[]).find((x) => x.kind === 'mandatoryWait')!.detail;
     const a = first(after.logs[0])!;
     const b = first(before.logs[0])!;
-    expect(`${a} / ${b}`).toMatch(/^normal (405|540|675)ms \/ normal (300|400|500)ms$/);
-    expect([...a.matchAll(/\d+/g)].map(Number)[0]).toBe({ 300: 405, 400: 540, 500: 675 }[[...b.matchAll(/\d+/g)].map(Number)[0] as 300 | 400 | 500]);
+    expect(`${a} / ${b}`).toMatch(/^normal (365|486|608)ms \/ normal (300|400|500)ms$/);
+    expect([...a.matchAll(/\d+/g)].map(Number)[0]).toBe({ 300: 365, 400: 486, 500: 608 }[[...b.matchAll(/\d+/g)].map(Number)[0] as 300 | 400 | 500]);
   });
 });

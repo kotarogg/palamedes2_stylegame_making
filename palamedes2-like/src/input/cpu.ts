@@ -62,15 +62,20 @@ export interface CpuConfig {
   mode1Adjust?: Mode1Adjust;
   /** V320-FIX-06：難易度別の操作速度（cpu_config_fix06_speed.json。MODE1・MODE2 共通）。無ければ制限なし */
   speed?: CpuSpeed;
-  /** V320-CPU-M1EASY-01：MODE1 だけの待ち時間（cpu_config_mode1_easy.json。現在は初級のみ）。無ければ共有設定・mode1Adjust の値 */
+  /** V320-CPU-M1EASY-01／02：MODE1 だけの待ち時間・ランダム打上げ・R1列入替（cpu_config_mode1_easy.json。現在は初級のみ）。無ければ共有設定・mode1Adjust の値と従来の打開 */
   mode1Timing?: Mode1Timing;
 }
 
-/** V320-CPU-M1EASY-01 MODE1 だけの待ち時間（必須判断待ち・判断停止の時間候補）。停止確率・抽選重みは共有設定のまま */
+/** V320-CPU-M1EASY-01／02 MODE1 だけの調整。停止確率・抽選重みは共有設定のまま */
 export interface Mode1Timing {
   adjustment: string;
+  /** 必須判断待ち・判断停止の時間候補（ms） */
   mandatoryWait: Partial<Record<Difficulty, { normalMs: [number, number, number]; pinchMs: [number, number, number] }>>;
   decisionStopMs: Partial<Record<Difficulty, { normalMs: [number, number, number]; pinchMs: [number, number, number] }>>;
+  /** V320-CPU-M1EASY-02：新規取得判断でのランダム打上げの確率（%）。無い難易度は0（専用乱数も使わない） */
+  randomLaunchPct?: Partial<Record<Difficulty, number>>;
+  /** V320-CPU-M1EASY-02：R1列入替の同一エピソードの上限回数（適合2段目まで）。無い難易度は0（従来の打開） */
+  rotateLimit?: Partial<Record<Difficulty, number>>;
 }
 
 /** V320-FIX-06 CPU の操作速度（tick が正本） */
@@ -94,7 +99,7 @@ export const CPU_CONFIG: CpuConfig = { ...(rawConfig as unknown as CpuConfig), m
 /** 1回の判断で行う抽選の記録（自動検証用） */
 export interface CpuDecisionLog {
   tick: number;
-  kind: 'mandatoryWait' | 'speedWait' | 'perception' | 'misreadLaunch' | 'decisionStop' | 'bestPick' | 'forget' | 'sixChallenge' | 'declareFour' | 'declareSix' | 'seventhImprove' | 'manualRise';
+  kind: 'mandatoryWait' | 'speedWait' | 'perception' | 'misreadLaunch' | 'decisionStop' | 'bestPick' | 'forget' | 'sixChallenge' | 'declareFour' | 'declareSix' | 'seventhImprove' | 'manualRise' | 'randomLaunch' | 'r1Rotate' | 'r1PinchCancel';
   pct: number;
   hit: boolean;
   detail?: string;
@@ -114,6 +119,11 @@ interface Plan {
   pieceId?: number;
   /** V320-FIX-05：誤認した候補（実際には場に合わない）を選んだ計画。発射前の成否再判定で取り消さない */
   misread?: boolean;
+  /** V320-CPU-M1EASY-02：ランダム打上げで選んだ計画。場が変わっても成否で取り消さず、物理的に発射できる間は保持する */
+  random?: boolean;
+  /** V320-CPU-M1EASY-02：R1列入替の計画（depth＝場に合う段。0始まり） */
+  r1?: boolean;
+  depth?: number;
 }
 
 /** V320-FIX-05 MODE1 の取得候補の認識（1判断につき1回の抽選結果） */
@@ -187,6 +197,20 @@ export interface CpuStats {
   /** V320-FIX-06 操作速度：移動・打上を間隔のために見送った tick 数 */
   speedMoveWaitTicks: number;
   speedLaunchWaitTicks: number;
+  /**
+   * V320-CPU-M1EASY-02 ランダム打上げ：抽選機会・当選（hit）・発射命令・選択時に場へ適合していた数（診断のみ。選択には使わない）・
+   * 失念停止後の保持・物理的に発射できなくなった取消。実発射・到達・成否はゲームのイベントと randomLaunchLog で突き合わせる
+   */
+  randomOpportunities: number;
+  randomHits: number;
+  randomLaunchCommands: number;
+  randomChoiceFit: number;
+  randomForgot: number;
+  randomInvalid: number;
+  /** V320-CPU-M1EASY-02 R1列入替：入替命令・既訪問盤面への循環（禁止しているので通常0）・最新の猶予で間に合わず取り消した計画（QA-01） */
+  r1Rotations: number;
+  r1Cycles: number;
+  r1PinchCancels: number;
 }
 
 const emptyStats = (): CpuStats => ({
@@ -219,6 +243,15 @@ const emptyStats = (): CpuStats => ({
   seventhNoGain: 0,
   speedMoveWaitTicks: 0,
   speedLaunchWaitTicks: 0,
+  randomOpportunities: 0,
+  randomHits: 0,
+  randomLaunchCommands: 0,
+  randomChoiceFit: 0,
+  randomForgot: 0,
+  randomInvalid: 0,
+  r1Rotations: 0,
+  r1Cycles: 0,
+  r1PinchCancels: 0,
 });
 
 const stockKeyOf = (stock: readonly Piece[]): string => stock.map((x) => x.id).join(',');
@@ -257,6 +290,16 @@ export class CpuController implements Controller {
   /** 直前に読んだゲーム。別のゲーム（新ラウンド・再戦・次の相手）を受けたら状態を初期化する（B1） */
   private game: AnyGame | null = null;
   private readonly rng: Rng;
+  /** V320-CPU-M1EASY-02：ランダム打上げ専用の乱数（既存の乱数列を消費しない。ラウンド間でリセットしない） */
+  private readonly randomRng: Rng;
+  /** ランダム打上げの抽選機会（場のID｜各列の最上段ID（発射不能は「-」）｜手役ID）。同じ機会では引き直さない */
+  private randomKey = '';
+  /** R1 のエピソード（場のID｜各列のピース集合｜手役ID）・回数・既訪問盤面 */
+  private r1Episode = '';
+  private r1Count = 0;
+  private r1Seen = new Set<string>();
+  /** V320-CPU-M1EASY-02 検証用：ランダム打上げの発射命令（tick・ピースID・列）。実発射・到達・成否はゲームのイベントと照合する */
+  readonly randomLaunchLog: { tick: number; pieceId: number; col: number }[] = [];
   readonly log: CpuDecisionLog[] = [];
   readonly stats: CpuStats = emptyStats();
 
@@ -268,6 +311,7 @@ export class CpuController implements Controller {
     private readonly cfg: CpuConfig = CPU_CONFIG,
   ) {
     this.rng = createSeededRng((seed * 7919 + player * 104729) >>> 0);
+    this.randomRng = createSeededRng((Math.imul(seed, 2654435761) + Math.imul(player + 1, 1013904223)) >>> 0);
   }
 
   /** 前ラウンドの状態・計画を新ゲームへ持ち越さない（B1） */
@@ -288,6 +332,11 @@ export class CpuController implements Controller {
     this.lastMoveStartTick = Number.NEGATIVE_INFINITY;
     this.movedSinceLaunch = false;
     this.game = null;
+    // V320-CPU-M1EASY-02：抽選機会・R1 の履歴はラウンドごとに初期化（専用乱数の系列は続ける）
+    this.randomKey = '';
+    this.r1Episode = '';
+    this.r1Count = 0;
+    this.r1Seen = new Set();
   }
 
   private roll(kind: CpuDecisionLog['kind'], pct: number, tick: number, detail?: string): boolean {
@@ -369,6 +418,7 @@ export class CpuController implements Controller {
     if (out.some((a) => a !== 'left' && a !== 'right')) {
       this.stopRolled = false;
       this.noForgetNext = false;
+      this.randomKey = ''; // 非移動操作を出したら次の抽選機会へ
     }
     if (out.length && this.cfg.actionGapMs > 0) this.nextActTick = tick + game.ticks(this.cfg.actionGapMs);
     return out.map((type) => ({ player: this.player, type }) as Command);
@@ -475,6 +525,19 @@ export class CpuController implements Controller {
   }
 
   private thinkMode1(game: Game, p: PlayerState, tick: number): Command['type'][] {
+    // V320-CPU-M1EASY-02：選んだランダム打上げは、物理的に発射できる間は宣言判断・停止を挟まず移動・発射を続ける（場が変わっても成否で取り消さない）
+    if (this.plan?.random) {
+      if (!this.planValid(game, p, this.plan)) {
+        this.stats.randomInvalid++;
+        this.plan = null;
+        this.noForgetNext = true;
+      } else return this.execute(game, p, this.situation(game, p), tick);
+    }
+    // QA-01：R1 の入替計画は、移動の途中・到着時・入替の直前に最新の猶予で再評価し、間に合わなければ取り消して通常判断へ戻る
+    if (this.plan?.r1 && this.r1Legal(game, p, this.plan) && !this.r1InTime(game, p, this.plan.col, this.plan.depth!)) {
+      this.stats.r1PinchCancels++;
+      this.log.push({ tick, kind: 'r1PinchCancel', pct: 100, hit: true, detail: `col${this.plan.col + 1} from col${p.selectedCol + 1}` });
+    }
     const sit = this.situation(game, p);
     // 成立役の宣言／追加取得の判断：手元（役ストック）か通常／ピンチが変わったときだけ判断・抽選する。
     // 6ピース役へ挑戦中は経路の有効性を毎回確かめ、無くなったら（場・盤面・残り猶予の変化）判断し直す
@@ -710,12 +773,14 @@ export class CpuController implements Controller {
     const target = this.role?.targetCol;
     if (!this.plan) {
       // 判断停止は thinkMode1 で判断の機会につき1回済ませている（停止後は最新の状態で判断する）
+      // 手動上昇（成立役の宣言と、既に選んだ取得目標＝6ピース役への挑戦・7個目の取得先を優先。見送ったら次の取得・盤面変化まで再抽選しない）
+      if (target === undefined && goal !== 6 && this.riseDecision(game, p, tick)) return ['manualRise'];
+      // V320-CPU-M1EASY-02：新規取得判断（7個目を含む）でランダム打上げ。外れ・候補なしは従来の取得判断
+      const random = this.rollRandomLaunch(game, p, tick);
+      if (random) this.plan = random;
       // 7個目による改善：取得先は改善候補の順位で決まっている（最適候補率の抽選はしない）
-      if (target !== undefined) this.plan = this.launchPlan(game, p, target, this.noForgetNext);
+      else if (target !== undefined) this.plan = this.launchPlan(game, p, target, this.noForgetNext);
       else {
-        // 手動上昇（成立役の宣言と、既に選んだ取得目標＝6ピース役への挑戦を優先。見送ったら次の取得・盤面変化まで再抽選しない）
-        const rise = goal !== 6 && this.riseDecision(game, p, tick);
-        if (rise) return ['manualRise'];
         const plan = this.choose(game, p, sit, goal, tick);
         if (!plan) return this.recover(game, p); // 停止の抽選は済ませたまま（候補が出るまで毎回は抽選しない）
         plan.forgetRolled = this.noForgetNext;
@@ -726,8 +791,40 @@ export class CpuController implements Controller {
     return this.execute(game, p, sit, tick);
   }
 
-  /** 移動・打ち上げ。移動計画につき1回だけ失念を抽選し、移動開始後の最初の判断時点で適用する */
+  /** 移動・打ち上げ・入替（executeStep）と、V320-CPU-M1EASY-02 のランダム打上げ・R1 の記録 */
   private execute(game: AnyGame, p: AnyPlayer, sit: Situation, tick: number): Command['type'][] {
+    const plan = this.plan;
+    const out = this.executeStep(game, p, sit, tick);
+    if (plan?.random) {
+      // 失念で止まっても選んだ列を保持する（失念は同じ移動機会で再抽選しない）
+      if (!this.plan && out.length === 0 && this.stopKind === 'forget') {
+        this.stats.randomForgot++;
+        plan.forget = null;
+        plan.forgetRolled = true;
+        this.plan = plan;
+      }
+      if (out.includes('launch')) {
+        this.stats.randomLaunchCommands++;
+        const top = p.board.top(p.selectedCol);
+        if (top && top.kind === 'piece') this.randomLaunchLog.push({ tick, pieceId: top.piece.id, col: p.selectedCol });
+      }
+    }
+    if (out.includes('rotate') && game.mode === 'mode1' && this.rotateLimit(game) > 0) {
+      // R1：入替の前後の盤面を既訪問として記録（同じエピソードで元へ戻る入替をしない）
+      this.r1EpisodeOf(game as Game, p as PlayerState);
+      this.r1Seen.add(this.boardKey(p));
+      const next = p.board.cols.map((c, i) => (i === p.selectedCol ? c.slice(1).concat(c.slice(0, 1)) : c)).map((c) => c.map((s) => (s.kind === 'piece' ? s.piece.id : `r${s.pieceId}`)).join('.')).join('/');
+      if (this.r1Seen.has(next)) this.stats.r1Cycles++;
+      this.r1Seen.add(next);
+      this.r1Count++;
+      this.stats.r1Rotations++;
+      this.log.push({ tick, kind: 'r1Rotate', pct: 100, hit: true, detail: `col${p.selectedCol + 1}` });
+    }
+    return out;
+  }
+
+  /** 移動・打ち上げ。移動計画につき1回だけ失念を抽選し、移動開始後の最初の判断時点で適用する */
+  private executeStep(game: AnyGame, p: AnyPlayer, sit: Situation, tick: number): Command['type'][] {
     const plan = this.plan!;
     if (plan.col === p.selectedCol) {
       // V320-FIX-06：最終移動完了から打上まで最低 launchAfterMoveTicks（計画は保持して待つ。再判断で待ちをやり直さない）
@@ -781,6 +878,10 @@ export class CpuController implements Controller {
   }
 
   private planValid(game: AnyGame, p: AnyPlayer, plan: Plan): boolean {
+    // V320-CPU-M1EASY-02：ランダム打上げは物理的に発射できる間は有効（成否では取り消さない）
+    if (plan.random) return p.board.top(plan.col)?.kind === 'piece';
+    // R1：合法性（場・予約・対象2段目の適合・通常取得候補の不在）と、最新の猶予での所要時間（QA-01）
+    if (plan.r1) return this.r1Legal(game as Game, p as PlayerState, plan) && this.r1InTime(game as Game, p as PlayerState, plan.col, plan.depth!);
     const top = p.board.top(plan.col);
     if (!top || top.kind !== 'piece') return false;
     if (plan.action === 'rotate') return p.board.cols[plan.col].length >= 2;
@@ -864,8 +965,123 @@ export class CpuController implements Controller {
     return out;
   }
 
-  /** 候補が無いとき：既存の合法な打開操作（2段目が当たる列のB入替 → 3段以上の列のB入替 → 手動上昇）。無ければ盤面の変化を待つ */
+  /** 候補が無いとき：R1 が有効なら R1 列入替、それ以外は既存の打開 */
   private recover(game: Game, p: PlayerState): Command['type'][] {
+    return this.rotateLimit(game) > 0 ? this.recoverR1(game, p) : this.recoverDefault(game, p);
+  }
+
+  // ---- V320-CPU-M1EASY-02：ランダム打上げ・R1 列入替（MODE1 で設定のある難易度だけ。現在は初級） ----
+
+  private randomLaunchPct(game: AnyGame): number {
+    return game.mode === 'mode1' ? (this.cfg.mode1Timing?.randomLaunchPct?.[this.level] ?? 0) : 0;
+  }
+
+  private rotateLimit(game: AnyGame): number {
+    return game.mode === 'mode1' ? (this.cfg.mode1Timing?.rotateLimit?.[this.level] ?? 0) : 0;
+  }
+
+  /**
+   * ランダム打上げの抽選（新規取得判断ごとに1回）。発射可能な最上段のある列（空列・最上段が帰還予約の列は除く）から一様に選ぶ。
+   * 適合・役・距離・猶予で選別しない。候補なしは抽選しない。0%は専用乱数を消費しない。同じ機会（場・各列最上段・手役）では引き直さない
+   */
+  private rollRandomLaunch(game: Game, p: PlayerState, tick: number): Plan | null {
+    const pct = this.randomLaunchPct(game);
+    const cols = p.board.cols.flatMap((c, i) => (c[0]?.kind === 'piece' ? [i] : []));
+    if (!cols.length) return null;
+    const key = `${game.base.id}|${p.board.cols.map((c) => (c[0]?.kind === 'piece' ? c[0].piece.id : '-')).join(',')}|${p.roleStock.map((x) => x.id).join(',')}`;
+    if (this.randomKey === key) return null;
+    this.randomKey = key;
+    this.stats.randomOpportunities++;
+    if (!pct) return null;
+    const hit = this.randomRng.next() * 100 < pct;
+    if (!hit) {
+      this.log.push({ tick, kind: 'randomLaunch', pct, hit: false });
+      return null;
+    }
+    this.stats.randomHits++;
+    const col = cols[randomInt(this.randomRng, cols.length)];
+    const top = p.board.top(col);
+    if (top?.kind !== 'piece') return null;
+    // 診断のみ（選択には使わない）
+    if (isLaunchSuccess(top.piece, game.base)) this.stats.randomChoiceFit++;
+    this.log.push({ tick, kind: 'randomLaunch', pct, hit: true, detail: `col${col + 1}` });
+    return { col, action: 'launch', forgetRolled: this.noForgetNext, forget: null, moved: false, baseId: game.base.id, pieceId: top.piece.id, random: true };
+  }
+
+  /** R1 のエピソード（場のID・各列のピース集合（順序によらず、帰還予約を区別）・手役ID）。変わったら回数・既訪問を初期化 */
+  private r1EpisodeOf(game: Game, p: PlayerState): void {
+    const content = p.board.cols.map((c) => c.map((s) => (s.kind === 'piece' ? String(s.piece.id) : `r${s.pieceId}`)).sort().join('.')).join('/');
+    const token = `${game.base.id}|${content}|${p.roleStock.map((x) => x.id).join(',')}`;
+    if (this.r1Episode !== token) {
+      this.r1Episode = token;
+      this.r1Count = 0;
+      this.r1Seen = new Set();
+    }
+  }
+
+  /** R1 計画の合法性：場が同じ・列に予約なし・2段以上・対象段が場に適合・通常取得候補（最上段の適合）が無い */
+  private r1Legal(game: Game, p: PlayerState, plan: Plan): boolean {
+    const col = p.board.cols[plan.col];
+    const d = plan.depth!;
+    const s = col[d];
+    return game.base.id === plan.baseId && !p.board.hasReservation(plan.col) && col.length > 1 && s?.kind === 'piece' && isLaunchSuccess(s.piece, game.base) && !p.board.cols.some((c) => c[0]?.kind === 'piece' && isLaunchSuccess(c[0].piece, game.base));
+  }
+
+  /**
+   * R1 の所要時間（候補の選定・移動の途中・到着時・入替の直前で同じ計算。QA-01）。
+   * opsMs＝現在列から対象列への移動＋入替（depth回）＋取得（打上・列詰め）。判断待ちは含めない。
+   * ピンチ：pinchNeedMs(opsMs,1)（未消化の待ち・再判断1回の判断待ち・失念期待・1tick・安全余裕）＋追加の再判断（depth−1回）が残り猶予未満なら間に合う
+   */
+  private r1OpsMs(game: Game, p: PlayerState, col: number, depth: number): number {
+    return acquireMs(p.selectedCol, col, this.timing(game)) + depth * game.config.timing.rotateMs;
+  }
+
+  private r1InTime(game: Game, p: PlayerState, col: number, depth: number): boolean {
+    if (this.situation(game, p) !== 'pinch') return true;
+    const rest = this.pinchMs(game, p)!;
+    const rejudge = this.expectedMandatoryMs('pinch') + this.expectedStopMs('pinch');
+    return this.pinchNeedMs(game, this.r1OpsMs(game, p, col, depth), 1) + (depth - 1) * rejudge < rest;
+  }
+
+  /**
+   * R1 列入替：ランダム打上げを使わず通常取得候補が無いときだけ。場に適合する2段目があり、2段以上で予約の無い列。
+   * 選択順位は 移動＋入替＋再判断＋取得 の予想時間、同値は近い列、さらに同値は列番号順。同一エピソード最大1回、既訪問盤面へ戻らない。
+   * 適合入替なしなら従来どおり合法な手動上昇、できなければ待機
+   */
+  private recoverR1(game: Game, p: PlayerState): Command['type'][] {
+    const limit = this.rotateLimit(game);
+    this.r1EpisodeOf(game, p);
+    const sit = this.situation(game, p);
+    const rejudge = this.expectedMandatoryMs(sit) + this.expectedStopMs(sit);
+    const choices: { col: number; depth: number; ms: number }[] = [];
+    if (this.r1Count < limit)
+      for (let col = 0; col < 6; col++) {
+        const c = p.board.cols[col];
+        if (p.board.hasReservation(col)) continue;
+        for (let k = 1; k <= limit - this.r1Count && k < c.length; k++) {
+          const s = c[k];
+          if (s.kind !== 'piece' || !isLaunchSuccess(s.piece, game.base)) continue;
+          const ms = this.r1OpsMs(game, p, col, k) + k * rejudge; // 選択順位用（判断待ち込み）
+          if (!this.r1InTime(game, p, col, k)) continue;
+          const next = c.slice(1).concat(c.slice(0, 1));
+          const signature = p.board.cols.map((x, i) => (col === i ? next : x).map((v) => (v.kind === 'piece' ? v.piece.id : `r${v.pieceId}`)).join('.')).join('/');
+          if (this.r1Seen.has(signature)) continue;
+          choices.push({ col, depth: k, ms });
+          break;
+        }
+      }
+    choices.sort((a, b) => a.ms - b.ms || a.depth - b.depth || Math.abs(a.col - p.selectedCol) - Math.abs(b.col - p.selectedCol) || a.col - b.col);
+    if (choices.length) {
+      const { col, depth } = choices[0];
+      this.plan = { col, depth, r1: true, action: 'rotate', forgetRolled: true, forget: null, moved: false, baseId: game.base.id };
+      return this.execute(game, p, sit, game.tick + 1);
+    }
+    if (p.board.height() + 1 <= game.config.manualRiseMaxHeight && game.tick >= p.manualRiseEndTick) return ['manualRise'];
+    return [];
+  }
+
+  /** 候補が無いとき：既存の合法な打開操作（2段目が当たる列のB入替 → 3段以上の列のB入替 → 手動上昇）。無ければ盤面の変化を待つ */
+  private recoverDefault(game: Game, p: PlayerState): Command['type'][] {
     const key = `${this.boardKey(p)}|${game.base.id}`;
     const cols = [0, 1, 2, 3, 4, 5].filter((c) => {
       const top = p.board.top(c);
